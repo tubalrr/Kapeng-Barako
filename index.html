@@ -34,6 +34,7 @@ Error generating stack: `+o.message+`
   var KB_CMS=typeof KB.getCms==="function"?KB.getCms():{};
   var KB_SETTINGS=typeof KB.getSettings==="function"?KB.getSettings():{};
   var KB_SHIPPING=typeof KB.getShippingRule==="function"?KB.getShippingRule():{enabled:true,minPacks:2,fulfillment:"all"};
+  var KB_GALLERY=typeof KB.getGallery==="function"?KB.getGallery():[];
 function bu(){
   let[cart,setCart]=he.useState(()=>{
     try{return JSON.parse(localStorage.getItem("kb_cart")||"[]")}catch(e){return[]}
@@ -120,6 +121,7 @@ function bu(){
         S("div",{className:"hidden md:flex items-center gap-8 text-[13.5px] font-medium",children:[
           p("a",{href:"#products",className:"opacity-70 hover:opacity-100 transition",children:"Products"}),
           p("a",{href:"#about",className:"opacity-70 hover:opacity-100 transition",children:"About"}),
+          p("a",{href:"#gallery",className:"opacity-70 hover:opacity-100 transition",children:"Gallery"}),
           p("a",{href:"#delivery-payment",className:"opacity-70 hover:opacity-100 transition",children:"Delivery & Payment"}),
           p("a",{href:"pages/contact.html",className:"opacity-70 hover:opacity-100 transition",children:"Contact"})
         ]}),
@@ -286,6 +288,29 @@ p("div",{className:"rounded-[18px] bg-[#2B1B12] text-white p-5",children:[p("div
 p("div",{className:"rounded-[18px] bg-white border border-[#2B1B12]/10 p-5",children:[p("div",{className:"text-[10px] uppercase opacity-45",children:"Brewing"}),p("div",{className:"mt-2 serif text-[20px] font-semibold",children:"Choose your grind"}),p("div",{className:"mt-1 text-[12px] opacity-55",children:"Whole Bean • Coarse • Medium • Fine"})]}),
 p("div",{className:"rounded-[18px] bg-[#F1E6D3] p-5",children:[p("div",{className:"text-[10px] uppercase opacity-45",children:"Bundle"}),p("div",{className:"mt-2 serif text-[20px] font-semibold",children:"Frequently Bought Together"}),p("div",{className:"mt-1 text-[12px] opacity-60",children:"Every coffee suggests a matching add-on."})]})]})
 ]}),
+    S("section",{id:"gallery",className:"kb-gallery-section mx-auto max-w-[1280px] px-6 md:px-10 py-12 md:py-16",children:[
+      S("div",{className:"flex flex-wrap items-end justify-between gap-5",children:[
+        S("div",{children:[
+          p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-semibold opacity-50",children:"Gallery"}),
+          p("h2",{className:"serif mt-2 text-[36px] md:text-[52px] tracking-[-0.03em] leading-[.95] font-[600]",children:"From bean to brew."}),
+          p("p",{className:"mt-3 max-w-[620px] text-[15px] leading-[1.7] opacity-70",children:"A visual look at coffee, craft, farm origins, and the everyday ritual behind Kapeng Barako."})
+        ]})
+      ]}),
+      S("div",{className:"kb-gallery-grid mt-8",children:KB_GALLERY.slice(0,6).map((g,i)=>
+        S("figure",{className:"kb-gallery-card",children:[
+          p("img",{src:g.image,alt:(g.title||"Coffee gallery")+" — temporary placeholder",loading:"lazy"}),
+          S("figcaption",{children:[
+            p("span",{children:"Placeholder • "+String(i+1).padStart(2,"0")}),
+            p("strong",{children:g.title}),
+            p("small",{children:g.caption})
+          ]})
+        ]},g.id)
+      )}),
+      p("div",{className:"kb-gallery-note",children:[
+        p("strong",{children:"Developer note"}),
+        p("span",{children:"These 6 gallery images are temporary local placeholders. Replace the files in /images or update the gallery paths in Admin → Gallery with the buyer’s actual high-resolution photos before final delivery."})
+      ]})
+    ]}),
     S("section",{id:"about",className:"mx-auto max-w-[1280px] px-6 md:px-10 pb-10 grid md:grid-cols-2 gap-5",children:[
       S("div",{className:"rounded-[28px] bg-[#F1E6D3] border border-[#2B1B12]/10 p-8 md:p-10",children:[
         p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-medium opacity-60",children:"About"}),
