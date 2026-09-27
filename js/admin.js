@@ -60,6 +60,7 @@
     customer: {
       name: o.customer?.name || "",
       phone: o.customer?.phone || "",
+      email: o.customer?.email || "",
       address: o.customer?.address || ""
     },
     payment: o.customer?.payment || o.payment || "Cash on Delivery",
@@ -223,7 +224,7 @@
       return;
     }
     root.innerHTML = '<table><thead><tr><th>Order</th><th>Customer</th><th>Payment</th><th>Fulfillment</th><th>Status</th><th>Total</th><th>Created</th><th>Actions</th></tr></thead><tbody>'+
-      list.map(o=>'<tr><td><button class="table-action" data-open-order="'+safe(o.id)+'">'+safe(o.id)+'</button></td><td>'+safe(o.customer.name||"—")+'<br><span class="panel-note">'+safe(o.customer.phone||"")+'</span></td><td><span class="tag payment">'+safe(o.payment)+'</span></td><td><span class="tag courier">'+safe(o.fulfillment)+'</span></td><td><span class="status-badge '+statusClass(o.status)+'">'+safe(o.status)+'</span></td><td>'+money(o.total)+'</td><td>'+dateTime(o.createdAt)+'</td><td><button class="table-action" data-edit-order="'+safe(o.id)+'">Edit</button><button class="table-action" data-waybill="'+safe(o.id)+'">Waybill</button><button class="table-action" data-notify-order="'+safe(o.id)+'">Notify</button></td></tr>').join("")+
+      list.map(o=>'<tr><td><button class="table-action" data-open-order="'+safe(o.id)+'">'+safe(o.id)+'</button></td><td>'+safe(o.customer.name||"—")+'<br><span class="panel-note">'+safe(o.customer.phone||"")+(o.customer.email?" · "+safe(o.customer.email):"")+'</span></td><td><span class="tag payment">'+safe(o.payment)+'</span></td><td><span class="tag courier">'+safe(o.fulfillment)+'</span></td><td><span class="status-badge '+statusClass(o.status)+'">'+safe(o.status)+'</span></td><td>'+money(o.total)+'</td><td>'+dateTime(o.createdAt)+'</td><td><button class="table-action" data-edit-order="'+safe(o.id)+'">Edit</button><button class="table-action" data-waybill="'+safe(o.id)+'">Waybill</button><button class="table-action" data-notify-order="'+safe(o.id)+'">Notify</button></td></tr>').join("")+
       '</tbody></table>';
   }
 
@@ -270,6 +271,7 @@
     $("#order-modal-title").textContent = o ? "Edit " + o.id : "New order";
     $("#order-name").value = o?.customer.name || "";
     $("#order-phone").value = o?.customer.phone || "";
+    $("#order-email").value = o?.customer.email || "";
     $("#order-address").value = o?.customer.address || "";
     $("#order-payment").value = o?.payment || "GCash";
     $("#order-fulfillment").value = o?.fulfillment || "Lalamove";
@@ -293,7 +295,7 @@
     const payload = {
       id:id || uid("KB"),
       createdAt:id ? (orders.find(o=>o.id===id)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
-      customer:{name:$("#order-name").value.trim(),phone:$("#order-phone").value.trim(),address:$("#order-address").value.trim()},
+      customer:{name:$("#order-name").value.trim(),phone:$("#order-phone").value.trim(),email:$("#order-email").value.trim(),address:$("#order-address").value.trim()},
       payment:$("#order-payment").value,
       fulfillment:$("#order-fulfillment").value,
       status:$("#order-status").value,
@@ -343,7 +345,7 @@
       window.location.href = "sms:"+encodeURIComponent(o.customer.phone)+"?body="+encodeURIComponent(msg);
       log("Dispatch notification prepared","order",id,"SMS");
     } else if (choice.toUpperCase()==="EMAIL") {
-      window.location.href = "mailto:?subject="+encodeURIComponent("Kapeng Barako — "+o.id)+"&body="+encodeURIComponent(msg);
+      if(o.customer.email){ window.location.href = "mailto:"+encodeURIComponent(o.customer.email)+"?subject="+encodeURIComponent("Kapeng Barako — "+o.id)+"&body="+encodeURIComponent(msg); log("Dispatch notification prepared","order",id,"Email"); } else { toast("Add the customer email before sending an email notification."); }
       log("Dispatch notification prepared","order",id,"Email");
     } else toast("The order must contain a customer phone number for SMS.");
   }
@@ -537,7 +539,7 @@
     const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   }
-  function exportOrders(){downloadCsv("kapeng-barako-orders.csv",[["Order ID","Created","Customer","Phone","Address","Payment","Fulfillment","Status","Total","COGS","Shipping Subsidy","Affiliate Commission"],...orders.map(o=>[o.id,o.createdAt,o.customer.name,o.customer.phone,o.customer.address,o.payment,o.fulfillment,o.status,o.total,o.cogs,o.shippingSubsidy,o.affiliateCommission])]);}
+  function exportOrders(){downloadCsv("kapeng-barako-orders.csv",[["Order ID","Created","Customer","Phone","Email","Address","Payment","Fulfillment","Status","Total","COGS","Shipping Subsidy","Affiliate Commission"],...orders.map(o=>[o.id,o.createdAt,o.customer.name,o.customer.phone,o.customer.email,o.customer.address,o.payment,o.fulfillment,o.status,o.total,o.cogs,o.shippingSubsidy,o.affiliateCommission])]);}
   function exportFinancials(){downloadCsv("kapeng-barako-financials.csv",[["Order ID","Payment","Revenue","COGS","Shipping Subsidy","Affiliate Commission","Tracked Net"],...orders.map(o=>[o.id,o.payment,o.total,o.cogs,o.shippingSubsidy,o.affiliateCommission,o.total-o.cogs-o.shippingSubsidy-o.affiliateCommission])]);}
   function exportAudit(){downloadCsv("kapeng-barako-audit.csv",[["Time","Action","Entity","ID","Details"],...read(KEY.audit,[]).map(x=>[x.at,x.action,x.entity,x.entityId,x.details])]);}
   function exportCms(){const blob=new Blob([JSON.stringify(cms,null,2)],{type:"application/json;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="kapeng-barako-cms.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
