@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact Kapeng Barako. Send us a message about orders, coffee, and inquiries.">
+  <title>Contact — Kapeng Barako</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="../index.html" aria-label="Kapeng Barako home">
+        <span class="brand-mark">KB</span>
+        <span>Kapeng Barako</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="../index.html">Home</a>
+        <a href="../index.html#products">Products</a>
+        <a href="../index.html#about">About</a>
+        <a class="active" href="./contact.html">Contact</a>
+      </nav>
+
+      <a class="nav-button" href="../index.html#products">Shop Now</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="contact-hero">
+      <div class="container contact-grid">
+        <div class="contact-copy">
+          <span class="eyebrow">Get in touch</span>
+          <h1>Let's have<br><em>coffee.</em></h1>
+          <p>
+            Have a question about our coffee, your order, or delivery?
+            Send us a message and we'll get back to you.
+          </p>
+
+          <div class="contact-details">
+            <div class="detail-card">
+              <span class="detail-icon">📍</span>
+              <div>
+                <strong>Location</strong>
+                <span>Quezon City, Philippines</span>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <span class="detail-icon">✉️</span>
+              <div>
+                <strong>Email</strong>
+                <span>hello@kapengbarako.qc</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-heading">
+            <span class="eyebrow">Contact form</span>
+            <h2>Send us a message</h2>
+          </div>
+
+          <form action="https://formsubmit.co/ILAGAY_MO_TOTOONG_EMAIL_MO_DITO" method="POST">
+            <input type="hidden" name="_subject" value="New message from Kapeng Barako">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_next" value="https://tubalrr.github.io/Kapeng-Barako/pages/contact.html">
+
+            <label for="name">Name</label>
+            <input id="name" type="text" name="name" placeholder="Your name" autocomplete="name" required>
+
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="How can we help?" rows="6" required></textarea>
+
+            <button type="submit" class="submit-button">Send Message <span>→</span></button>
+          </form>
+
+          <p class="form-note">
+            Replace <code>ILAGAY_MO_TOTOONG_EMAIL_MO_DITO</code> with the real receiving email before using the form.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-wrap">
+      <div class="footer-brand">
+        <span class="brand-mark">KB</span>
+        <span>Kapeng Barako</span>
+      </div>
+      <span>© 2026 • Kapeng Barako</span>
+    </div>
+  </footer>
+</body>
+</html>
