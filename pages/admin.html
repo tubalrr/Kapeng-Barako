@@ -26,9 +26,11 @@
       <nav class="side-nav" aria-label="Admin navigation">
         <button class="nav-item active" type="button" data-section="overview"><span>⌂</span>Overview</button>
         <button class="nav-item" type="button" data-section="orders"><span>▦</span>Orders / OMS</button>
+        <button class="nav-item" type="button" data-section="products"><span>◈</span>Products</button>
         <button class="nav-item" type="button" data-section="inventory"><span>◫</span>Inventory & Batches</button>
         <button class="nav-item" type="button" data-section="financials"><span>₱</span>Financials</button>
         <button class="nav-item" type="button" data-section="promos"><span>◇</span>Pricing & Promos</button>
+        <button class="nav-item" type="button" data-section="settings"><span>⚙</span>Store Settings</button>
         <button class="nav-item" type="button" data-section="cms"><span>✎</span>Content & CMS</button>
         <button class="nav-item" type="button" data-section="support"><span>?</span>Support Tickets</button>
         <button class="nav-item" type="button" data-section="audit"><span>◷</span>Audit Log</button>
@@ -123,6 +125,14 @@
           <div class="panel-note">Drag a card between status columns to perform a manual status override. Each override is logged.</div>
         </section>
 
+        <section class="admin-section" id="section-products" data-section-panel="products" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Catalog Control</span><h2>Products</h2><p>Manage the products displayed on the storefront. Saved catalog data is shared through the site storage adapter.</p></div>
+            <button class="btn primary" type="button" data-action="open-product">+ Add product</button>
+          </div>
+          <div class="panel"><div id="products-table" class="table-wrap"></div></div>
+        </section>
+
         <section class="admin-section" id="section-inventory" data-section-panel="inventory" hidden>
           <div class="section-tools">
             <div><span class="eyebrow">Batch & Inventory Control Hub</span><h2>Inventory & batches</h2><p>Track green beans, roast batches, shelf life, packaging, thresholds, and coverage.</p></div>
@@ -190,6 +200,35 @@
           <div class="panel"><div class="panel-head"><div><span class="eyebrow">Voucher engine</span><h3>Promo rules</h3></div></div><div id="promos-table" class="table-wrap"></div></div>
         </section>
 
+        <section class="admin-section" id="section-settings" data-section-panel="settings" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Store Controls</span><h2>Store Settings</h2><p>Control checkout payment methods, fulfillment methods, and customer-facing store rules.</p></div>
+            <button class="btn primary" type="button" data-action="save-settings">Save settings</button>
+          </div>
+          <div class="split-grid">
+            <div class="panel">
+              <div class="panel-head"><div><span class="eyebrow">Checkout</span><h3>Payment methods</h3></div></div>
+              <label class="check-card"><input type="checkbox" class="setting-payment" value="GCash"><span><strong>GCash</strong><small>Show GCash in checkout</small></span></label>
+              <label class="check-card"><input type="checkbox" class="setting-payment" value="Maya"><span><strong>Maya</strong><small>Show Maya in checkout</small></span></label>
+              <label class="check-card"><input type="checkbox" class="setting-payment" value="Cash on Delivery (COD)"><span><strong>Cash on Delivery (COD)</strong><small>Show COD in checkout</small></span></label>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div><span class="eyebrow">Fulfillment</span><h3>Delivery options</h3></div></div>
+              <label class="check-card"><input type="checkbox" class="setting-fulfillment" value="Lalamove"><span><strong>Lalamove</strong><small>Local courier option</small></span></label>
+              <label class="check-card"><input type="checkbox" class="setting-fulfillment" value="J&T"><span><strong>J&T</strong><small>Parcel shipping option</small></span></label>
+              <label class="check-card"><input type="checkbox" class="setting-fulfillment" value="LBC"><span><strong>LBC</strong><small>Parcel shipping option</small></span></label>
+              <label class="check-card"><input type="checkbox" class="setting-fulfillment" value="QC Meetup"><span><strong>Meetup — Quezon City</strong><small>Local meetup option</small></span></label>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><span class="eyebrow">Storefront</span><h3>Display rules</h3></div></div>
+            <div class="form-grid">
+              <label>Shipping fee note<textarea id="settings-shipping-note" class="textarea" rows="3"></textarea></label>
+              <label>Order confirmation note<textarea id="settings-order-note" class="textarea" rows="3"></textarea></label>
+            </div>
+          </div>
+        </section>
+
         <section class="admin-section" id="section-cms" data-section-panel="cms" hidden>
           <div class="section-tools">
             <div><span class="eyebrow">Content & Customer Support CMS</span><h2>Content editor</h2><p>Edit the story, FAQ, and delivery policy. Save to the configured content store.</p></div>
@@ -244,6 +283,22 @@
       </div>
       <label>Order items (one line per item: Name × Qty)<textarea class="textarea" id="order-items" rows="5" placeholder="Barako Strong × 1"></textarea></label>
       <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save order</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="product-dialog" class="modal">
+    <form method="dialog" id="product-form" class="modal-card">
+      <button type="button" class="modal-close" data-close-dialog>×</button>
+      <div><span class="eyebrow">Catalog item</span><h2>Product</h2></div>
+      <input type="hidden" id="product-edit-id">
+      <div class="form-grid">
+        <label>Name<input class="input" id="product-name" required></label>
+        <label>Price<input class="input" id="product-price" type="number" min="0" step="0.01" required></label>
+        <label>Weight / pack size<input class="input" id="product-weight" placeholder="250g" required></label>
+        <label>Visual emoji<input class="input" id="product-emoji" placeholder="☕️"></label>
+        <label class="full">Description<input class="input" id="product-note" required></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save product</button></div>
     </form>
   </dialog>
 
