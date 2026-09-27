@@ -300,6 +300,8 @@
         <label>Weight / pack size<input class="input" id="product-weight" placeholder="250g" required></label>
         <label>Visual emoji<input class="input" id="product-emoji" placeholder="☕️"></label>
         <label class="full">Description<input class="input" id="product-note" required></label>
+        <label class="full">Variants JSON<textarea class="textarea" id="product-variants" rows="4" placeholder='[{"weight":"250g","price":189}]'></textarea></label>
+        <label class="full">Grinds — one per line<textarea class="textarea" id="product-grinds" rows="3" placeholder="Whole Bean&#10;Coarse&#10;Medium&#10;Fine"></textarea></label>
       </div>
       <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save product</button></div>
     </form>
