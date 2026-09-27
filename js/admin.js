@@ -462,7 +462,7 @@
     const root=$("#gallery-editor");
     if(!root) return;
     root.innerHTML=gallery.map((g,i)=>'<div class="gallery-admin-row">'+
-      '<div class="gallery-admin-preview"><img src="'+safe(g.image||"")+'" alt="" loading="lazy"><span>0'+(i+1)+'</span></div>'+
+      '<div class="gallery-admin-preview"><img src="'+safe((g.image||"").startsWith("images/")?"../"+g.image:g.image||"")+'" alt="" loading="lazy"><span>0'+(i+1)+'</span></div>'+
       '<div class="form-grid gallery-admin-fields">'+
         '<label>Local image path<input class="input gallery-image" value="'+safe(g.image||"")+'" placeholder="images/gallery-01.jpg"></label>'+
         '<label>Title<input class="input gallery-title" value="'+safe(g.title||"")+'" placeholder="Gallery title"></label>'+
