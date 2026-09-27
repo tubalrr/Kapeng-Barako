@@ -278,6 +278,7 @@
     $("#order-cogs").value = o?.cogs || 0;
     $("#order-shipping").value = o?.shippingSubsidy || 0;
     $("#order-affiliate").value = o?.affiliateCommission || 0;
+    $("#order-total").value = o?.total || 0;
     $("#order-items").value = o?.items?.map(i => (i.name || "Item")+" × "+Number(i.qty||1)).join("\n") || o?.itemNote || "";
     if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open","");
   }
@@ -301,7 +302,7 @@
       affiliateCommission:Number($("#order-affiliate").value||0),
       items:lines,
       itemNote:lines.length ? "" : $("#order-items").value.trim(),
-      total: id ? (orders.find(o=>o.id===id)?.total || 0) : 0
+      total:Number($("#order-total").value||0)
     };
     const existingIndex = orders.findIndex(o=>o.id===id);
     if (existingIndex >= 0) {
