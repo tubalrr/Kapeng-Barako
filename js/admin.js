@@ -93,10 +93,12 @@
     {id:4,name:"Barako Drip Pack",origin:"Batangas",roast:"Dark Roast",price:165,weight:"10 pcs",note:"Simple coffee for the office",emoji:"✨",bg:"bg-[#F5EEE4]",stock:24,fresh:"Packed fresh",flavor:"Strong • Aromatic • Clean",brew:"Drip / Mug",story:"Convenient single-serve Barako for busy mornings.",variants:[{weight:"10 pcs",price:165},{weight:"20 pcs",price:299}],grinds:["Medium"],addon:"Barako Strong"}
   ];
   const DEFAULT_SETTINGS = {
-    paymentMethods:["GCash","Maya","Cash on Delivery (COD)"],
+    paymentMethods:["GCash","Cash on Delivery (COD)","Bank Transfer"],
     fulfillmentMethods:["Lalamove","J&T","LBC","QC Meetup"],
     shippingNote:"Courier fee is based on the selected courier and delivery distance/location. Final fee is confirmed before fulfillment.",
     orderNote:"We confirm the final delivery details before fulfillment.",
+    gcashInstructions:"ILAG — add the buyer’s GCash name/number or QR instructions in Store Settings.",
+    bankTransferInstructions:"ILAG — add the buyer’s bank name, account name/number, and transfer instructions in Store Settings.",
     email:"ILAG",phone:"ILAG",location:"ILAG",
     facebook:"ILAG",instagram:"ILAG",tiktok:"ILAG",tagline:"Gawa sa Batangas"
   };
@@ -374,8 +376,11 @@
       createdAt:id ? (orders.find(o=>o.id===id)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
       customer:{name:$("#order-name").value.trim(),phone:$("#order-phone").value.trim(),email:$("#order-email").value.trim(),address:$("#order-address").value.trim()},
       payment:$("#order-payment").value,
+      paymentReference:orders.find(o=>o.id===id)?.paymentReference||"",
+      paymentProofName:orders.find(o=>o.id===id)?.paymentProofName||"",
       fulfillment:$("#order-fulfillment").value,
       status:$("#order-status").value,
+      statusUpdatedAt:new Date().toISOString(),
       cogs:Number($("#order-cogs").value||0),
       shippingSubsidy:Number($("#order-shipping").value||0),
       affiliateCommission:Number($("#order-affiliate").value||0),
@@ -476,6 +481,8 @@
     $$(" .setting-fulfillment").forEach(x=>x.checked=settings.fulfillmentMethods.includes(x.value));
     $("#settings-shipping-note").value=settings.shippingNote||"";
     $("#settings-order-note").value=settings.orderNote||"";
+    $("#settings-gcash-instructions").value=settings.gcashInstructions||"";
+    $("#settings-bank-instructions").value=settings.bankTransferInstructions||"";
     $("#settings-email").value=settings.email||"ILAG";
     $("#settings-phone").value=settings.phone||"ILAG";
     $("#settings-location").value=settings.location||"ILAG";
@@ -493,6 +500,8 @@
       fulfillmentMethods:fulfillments.length?fulfillments:DEFAULT_SETTINGS.fulfillmentMethods,
       shippingNote:$("#settings-shipping-note").value.trim(),
       orderNote:$("#settings-order-note").value.trim(),
+      gcashInstructions:$("#settings-gcash-instructions").value.trim()||"ILAG",
+      bankTransferInstructions:$("#settings-bank-instructions").value.trim()||"ILAG",
       email:$("#settings-email").value.trim()||"ILAG",
       phone:$("#settings-phone").value.trim()||"ILAG",
       location:$("#settings-location").value.trim()||"ILAG",
@@ -664,7 +673,7 @@
     $("#fin-cogs").textContent=money(cogs);
     $("#fin-shipping").textContent=money(shipping);
     $("#fin-profit").textContent=money(revenue-cogs-shipping-affiliate);
-    const byPay={GCash:0,Maya:0,"Cash on Delivery":0};
+    const byPay={GCash:0,"Cash on Delivery (COD)":0,"Bank Transfer":0,Maya:0};
     orders.forEach(o=>{byPay[o.payment]=(byPay[o.payment]||0)+o.total;});
     $("#payment-ledger").innerHTML=Object.entries(byPay).map(([k,v])=>'<div class="ledger-row"><span>'+safe(k)+'<br><small>'+orders.filter(o=>o.payment===k).length+' order(s)</small></span><strong>'+money(v)+'</strong></div>').join("");
     $("#profit-breakdown").innerHTML=[
