@@ -108,3 +108,29 @@ Before selling or deploying the website:
 4. Confirm payment, delivery, and shipping rules with the client.
 5. Test desktop and mobile layouts.
 6. Replace any remaining placeholder copy before final delivery.
+
+
+## Admin Dashboard
+
+Open `pages/admin.html` for the operations console covering:
+- Advanced Order Management: Kanban/table views for Pending, Verified Payment, Processing/Roasting, Ready to Ship, Dispatched, Delivered, and Cancelled.
+- Payment and fulfillment tagging for GCash, Maya, COD, Lalamove, J&T, LBC, and QC Meetup.
+- Printable waybills, dispatch notification links, manual status overrides, and audit logs.
+- Green-bean and packaging inventory with roast/expiry dates, batch/SKU tracking, low-stock thresholds, and stock-coverage forecasting.
+- Financial ledger by payment channel, COGS, shipping subsidy, affiliate commission, CSV export, and print-to-PDF reporting.
+- Voucher rules, customer segments, and the "Free shipping when you buy 2 packs or more" control.
+- Story, delivery-policy, FAQ editing, and order-linked support tickets.
+
+The dashboard intentionally starts with empty operational records rather than fake/demo data. Its default browser-local adapter is suitable for a single browser during client setup; a production multi-user OMS/CMS should connect the adapter to authenticated server-side storage, payment records, inventory, and messaging services.
+
+### Customer information
+
+The storefront checkout collects:
+- Name
+- Phone
+- Optional email
+- Delivery address
+- Payment method
+- Fulfillment method
+
+Use the client's real values. No sample email or phone number is preloaded.
