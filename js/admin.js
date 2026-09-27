@@ -18,6 +18,7 @@
     promos: "kb_promos",
     products: "kb_products",
     settings: "kb_settings",
+    gallery: "kb_gallery",
     cms: "kb_cms",
     tickets: "kb_tickets",
     audit: "kb_admin_audit",
@@ -113,6 +114,15 @@
   let promos = read(KEY.promos, []);
   let products = (read(KEY.products, null) || DEFAULT_PRODUCTS).map(normalizeProduct);
   let settings = {...DEFAULT_SETTINGS,...(read(KEY.settings,{})||{})};
+  const DEFAULT_GALLERY = [
+    {id:1,image:"images/gallery-01.svg",title:"Roasted Liberica Beans",caption:"Close-up coffee bean study"},
+    {id:2,image:"images/gallery-02.svg",title:"Coffee Farm Origins",caption:"Green farm and coffee cherries"},
+    {id:3,image:"images/gallery-03.svg",title:"Steaming Barako Cup",caption:"A warm traditional coffee moment"},
+    {id:4,image:"images/gallery-04.svg",title:"Green Beans Drying",caption:"Raw coffee beans under the sun"},
+    {id:5,image:"images/gallery-05.svg",title:"Small-Batch Roasting",caption:"Artisanal roasting and packaging"},
+    {id:6,image:"images/gallery-06.svg",title:"Rustic Coffee Life",caption:"Local farming and coffee atmosphere"}
+  ];
+  let gallery = read(KEY.gallery, null) || DEFAULT_GALLERY.map(x=>({...x}));
   let cms = read(KEY.cms, null);
   let tickets = read(KEY.tickets, []);
   let invFilter = "";
@@ -128,6 +138,7 @@
   const savePromos = () => write(KEY.promos, promos);
   const saveProducts = () => write(KEY.products, products);
   const saveSettings = () => write(KEY.settings, settings);
+  const saveGallery = () => write(KEY.gallery, gallery);
   const saveTickets = () => write(KEY.tickets, tickets);
   const saveCms = () => write(KEY.cms, cms);
 
@@ -146,6 +157,7 @@
     if (section === "inventory") renderInventory();
     if (section === "financials") renderFinancials();
     if (section === "products") renderProducts();
+    if (section === "gallery") renderGallery();
     if (section === "promos") renderPromos();
     if (section === "settings") renderSettings();
     if (section === "cms") renderCms();
@@ -444,6 +456,44 @@
     toast("Store settings saved");
   }
 
+  function renderGallery(){
+    gallery = read(KEY.gallery, gallery) || DEFAULT_GALLERY;
+    if(!Array.isArray(gallery) || gallery.length !== 6) gallery = DEFAULT_GALLERY.map(x=>({...x}));
+    const root=$("#gallery-editor");
+    if(!root) return;
+    root.innerHTML=gallery.map((g,i)=>'<div class="gallery-admin-row">'+
+      '<div class="gallery-admin-preview"><img src="'+safe(g.image||"")+'" alt="" loading="lazy"><span>0'+(i+1)+'</span></div>'+
+      '<div class="form-grid gallery-admin-fields">'+
+        '<label>Local image path<input class="input gallery-image" value="'+safe(g.image||"")+'" placeholder="images/gallery-01.jpg"></label>'+
+        '<label>Title<input class="input gallery-title" value="'+safe(g.title||"")+'" placeholder="Gallery title"></label>'+
+        '<label class="full">Caption<input class="input gallery-caption" value="'+safe(g.caption||"")+'" placeholder="Short caption"></label>'+
+      '</div>'+
+    '</div>').join("");
+  }
+
+  function saveGalleryFromEditor(){
+    const rows=$(".gallery-admin-row");
+    if(rows.length!==6){toast("Gallery must contain exactly 6 slots.");return;}
+    gallery=rows.map((row,i)=>({
+      id:i+1,
+      image:$(".gallery-image",row)?.value.trim()||DEFAULT_GALLERY[i].image,
+      title:$(".gallery-title",row)?.value.trim()||DEFAULT_GALLERY[i].title,
+      caption:$(".gallery-caption",row)?.value.trim()||DEFAULT_GALLERY[i].caption
+    }));
+    saveGallery();
+    log("Gallery updated","gallery","site","Six local gallery slots updated");
+    toast("Gallery saved");
+    renderGallery();
+  }
+
+  function resetGallery(){
+    gallery=DEFAULT_GALLERY.map(x=>({...x}));
+    saveGallery();
+    log("Gallery reset","gallery","site","Restored six local placeholders");
+    toast("Gallery placeholders restored");
+    renderGallery();
+  }
+
   function renderInventory() {
     inventory = read(KEY.inventory, []);
     const total = inventory.reduce((s,i)=>s+Number(i.stock||0),0);
@@ -675,6 +725,10 @@
     const notif=e.target.closest("[data-notify-order]");
     if(notif) notifyOrder(notif.dataset.notifyOrder);
 
+    const galleryAction=e.target.closest("[data-action]")?.dataset.action;
+    if(galleryAction==="save-gallery") saveGalleryFromEditor();
+    if(galleryAction==="gallery-reset") resetGallery();
+
     const pr=e.target.closest("[data-edit-product]");
     if(pr) openProduct(pr.dataset.editProduct);
     const pnew=e.target.closest("[data-delete-product]");
@@ -740,7 +794,7 @@
   $("#ticket-form")?.addEventListener("submit",saveTicketFromForm);
 
   window.addEventListener("storage", e => {
-    if([KEY.orders,KEY.lastOrder,KEY.inventory,KEY.promos,KEY.products,KEY.settings,KEY.cms,KEY.tickets,KEY.audit,KEY.shipping].includes(e.key)){
+    if([KEY.orders,KEY.lastOrder,KEY.inventory,KEY.promos,KEY.products,KEY.settings,KEY.gallery,KEY.cms,KEY.tickets,KEY.audit,KEY.shipping].includes(e.key)){
       refresh();
       $("#sync-status").textContent="Updated from another tab";
     }
