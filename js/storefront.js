@@ -18,6 +18,14 @@
   };
 
   const DEFAULT_SHIPPING = {enabled:true,minPacks:2,fulfillment:"all"};
+  const DEFAULT_GALLERY = [
+    {id:1,image:"images/gallery-01.svg",title:"Roasted Liberica Beans",caption:"Close-up coffee bean study"},
+    {id:2,image:"images/gallery-02.svg",title:"Coffee Farm Origins",caption:"Green farm and coffee cherries"},
+    {id:3,image:"images/gallery-03.svg",title:"Steaming Barako Cup",caption:"A warm traditional coffee moment"},
+    {id:4,image:"images/gallery-04.svg",title:"Green Beans Drying",caption:"Raw coffee beans under the sun"},
+    {id:5,image:"images/gallery-05.svg",title:"Small-Batch Roasting",caption:"Artisanal roasting and packaging"},
+    {id:6,image:"images/gallery-06.svg",title:"Rustic Coffee Life",caption:"Local farming and coffee atmosphere"}
+  ];
 
   const DEFAULT_CMS = {
     story:"Mula sa piling Liberica beans ng Batangas, bawat batch ng Kapeng Barako ay ako mismo ang nagroroast, binabantayan ang init, oras, at kulay hanggang lumabas ang tamang tapang at aroma. Hindi tulad ng commercial coffee na mass-produced para sa consistent volume, ang aming roast ay small-batch at hands-on, kaya bawat tasa ay may mas malalim na character, mas mabangong aroma, at tunay na lutong Barako.",
@@ -55,10 +63,19 @@
 
   const getCms = () => ({...DEFAULT_CMS,...(read("kb_cms",{})||{}),faqs:Array.isArray(read("kb_cms",{}).faqs) ? read("kb_cms",{}).faqs : []});
   const getShippingRule = () => ({...DEFAULT_SHIPPING,...(read("kb_shipping",DEFAULT_SHIPPING)||read("kb_shipping_rule",DEFAULT_SHIPPING))});
+  const getGallery = () => {
+    const stored = read("kb_gallery", null);
+    return Array.isArray(stored) && stored.length === 6 ? stored.map((x,i)=>({
+      id:i+1,
+      image:String(x.image||DEFAULT_GALLERY[i].image),
+      title:String(x.title||DEFAULT_GALLERY[i].title),
+      caption:String(x.caption||DEFAULT_GALLERY[i].caption)
+    })) : DEFAULT_GALLERY;
+  };
 
   window.KBStore = {
-    DEFAULT_PRODUCTS, DEFAULT_SETTINGS, DEFAULT_CMS, DEFAULT_SHIPPING,
-    read, getProducts, getSettings, getCms, getShippingRule
+    DEFAULT_PRODUCTS, DEFAULT_SETTINGS, DEFAULT_CMS, DEFAULT_SHIPPING, DEFAULT_GALLERY,
+    read, getProducts, getSettings, getCms, getShippingRule, getGallery
   };
 
   const watchKeys = new Set(["kb_products","kb_settings","kb_cms","kb_shipping","kb_shipping_rule"]);
