@@ -194,15 +194,35 @@
       ref.hidden=true;proof.hidden=true;
     }
   }
+  function brandAsset(name,type){
+    const key=String(name||"").toLowerCase();
+    const map={
+      "facebook":"facebook",
+      "instagram":"instagram",
+      "tiktok":"tiktok",
+      "gcash":"gcash",
+      "lalamove":"lalamove",
+      "j&t":"jtexpress",
+      "lbc":"lbcexpress"
+    };
+    const slug=map[key];
+    return slug?'https://cdn.simpleicons.org/'+slug:'';
+  }
+  function brandTag(name,type){
+    const label=name==="QC Meetup"?"Meetup — Quezon City":name;
+    const src=brandAsset(name,type);
+    return '<span class="tag brand-tag">'+(src?'<img class="brand-icon" src="'+src+'" alt="" loading="lazy">':'<span class="brand-fallback" aria-hidden="true">•</span>')+'<span>'+esc(label)+'</span></span>';
+  }
+
   function renderPayments(){
     const list=Array.isArray(settings.paymentMethods)&&settings.paymentMethods.length?settings.paymentMethods:fallbackSettings.paymentMethods;
-    $("#payment-list").innerHTML=list.map(x=>'<span class="tag">'+esc(x)+'</span>').join("");
+    $("#payment-list").innerHTML=list.map(x=>brandTag(x,"payment")).join("");
     $("#checkout-payment").innerHTML=list.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");
     renderPaymentHelp();
   }
   function renderFulfillment(){
     const list=Array.isArray(settings.fulfillmentMethods)&&settings.fulfillmentMethods.length?settings.fulfillmentMethods:fallbackSettings.fulfillmentMethods;
-    $("#fulfillment-list").innerHTML=list.map(x=>'<span class="tag">'+esc(x==="QC Meetup"?"Meetup — Quezon City":x)+'</span>').join("");
+    $("#fulfillment-list").innerHTML=list.map(x=>brandTag(x,"fulfillment")).join("");
     $("#checkout-fulfillment").innerHTML=list.map(x=>'<option value="'+esc(x)+'">'+esc(x==="QC Meetup"?"Meetup — Quezon City":x)+'</option>').join("");
   }
   function linkOrDisabled(el,url,label){
