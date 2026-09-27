@@ -78,7 +78,7 @@
     read, getProducts, getSettings, getCms, getShippingRule, getGallery
   };
 
-  const watchKeys = new Set(["kb_products","kb_settings","kb_cms","kb_shipping","kb_shipping_rule"]);
+  const watchKeys = new Set(["kb_products","kb_settings","kb_cms","kb_gallery","kb_shipping","kb_shipping_rule"]);
   window.addEventListener("storage", e => {
     if (watchKeys.has(e.key) && document.visibilityState === "visible") window.location.reload();
   });
