@@ -309,25 +309,15 @@ p("div",{className:"rounded-[18px] bg-[#F1E6D3] p-5",children:[p("div",{classNam
         ]}),
         S("div",{className:"grid md:grid-cols-3 gap-px bg-[#2B1B12]/10",children:[
           S("div",{className:"bg-[#FFFCF6] p-7 md:p-8",children:[
-            p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-semibold opacity-50",children:"Payment Methods"}),
-            p("h3",{className:"serif mt-2 text-[24px] font-[600]",children:"Pay your way"}),
-            S("div",{className:"mt-5 grid gap-3",children:[
-              p("div",{className:"flex items-center gap-3 rounded-[16px] bg-white border border-[#2B1B12]/10 px-4 py-3",children:[p("span",{className:"w-8 h-8 rounded-full bg-[#F1E6D3] grid place-items-center text-[12px] font-bold",children:"₱"}),p("span",{className:"text-[14px] font-medium",children:"GCash"})]}),
-              p("div",{className:"flex items-center gap-3 rounded-[16px] bg-white border border-[#2B1B12]/10 px-4 py-3",children:[p("span",{className:"w-8 h-8 rounded-full bg-[#F1E6D3] grid place-items-center text-[12px] font-bold",children:"₱"}),p("span",{className:"text-[14px] font-medium",children:"Maya"})]}),
-              p("div",{className:"flex items-center gap-3 rounded-[16px] bg-white border border-[#2B1B12]/10 px-4 py-3",children:[p("span",{className:"w-8 h-8 rounded-full bg-[#2B1B12] text-white grid place-items-center text-[11px] font-bold",children:"COD"}),p("span",{className:"text-[14px] font-medium",children:"Cash on Delivery"})]})
-            ]})
-          ]}),
-          S("div",{className:"bg-[#FFFCF6] p-7 md:p-8",children:[
             p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-semibold opacity-50",children:"Courier & Fulfillment"}),
             p("h3",{className:"serif mt-2 text-[24px] font-[600]",children:"Choose your delivery"}),
-            S("div",{className:"mt-5 grid grid-cols-2 gap-3",children:[
-              p("div",{className:"rounded-[16px] border border-[#2B1B12]/10 bg-white px-4 py-4 text-center",children:[p("div",{className:"text-[15px] font-semibold",children:"Lalamove"}),p("div",{className:"mt-1 text-[11px] opacity-55",children:"Local delivery"})]}),
-              p("div",{className:"rounded-[16px] border border-[#2B1B12]/10 bg-white px-4 py-4 text-center",children:[p("div",{className:"text-[15px] font-semibold",children:"J&T"}),p("div",{className:"mt-1 text-[11px] opacity-55",children:"Parcel shipping"})]}),
-              p("div",{className:"rounded-[16px] border border-[#2B1B12]/10 bg-white px-4 py-4 text-center",children:[p("div",{className:"text-[15px] font-semibold",children:"LBC"}),p("div",{className:"mt-1 text-[11px] opacity-55",children:"Parcel shipping"})]}),
-              p("div",{className:"rounded-[16px] border border-[#2B1B12]/10 bg-white px-4 py-4 text-center",children:[p("div",{className:"text-[15px] font-semibold",children:"QC Meetup"}),p("div",{className:"mt-1 text-[11px] opacity-55",children:"Quezon City"})]})
-            ]})
-          ]}),
-          S("div",{className:"bg-[#2B1B12] text-[#FFFCF6] p-7 md:p-8 flex flex-col justify-between",children:[
+            S("div",{className:"mt-5 grid grid-cols-2 gap-3",children:KB_SETTINGS.fulfillmentMethods.map(method=>
+              p("div",{className:"rounded-[16px] border border-[#2B1B12]/10 bg-white px-4 py-4 text-center",children:[
+                p("div",{className:"text-[15px] font-semibold",children:method==="QC Meetup"?"Meetup — Quezon City":method}),
+                p("div",{className:"mt-1 text-[11px] opacity-55",children:method==="QC Meetup"?"Quezon City":"Delivery option"})
+              ]})
+            )})
+          ]}),          S("div",{className:"bg-[#2B1B12] text-[#FFFCF6] p-7 md:p-8 flex flex-col justify-between",children:[
             S("div",{children:[
               p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-semibold text-white/55",children:"Shipping Rates & Promo"}),
               p("h3",{className:"serif mt-2 text-[26px] font-[600]",children:"Simple shipping rules."}),
