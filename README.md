@@ -58,6 +58,15 @@ with the buyer’s final high-resolution images in `/images`, then update the si
 
 The six current visuals are temporary local SVG placeholders; they are not intended as the buyer’s final photography.
 
+### Track Order
+The storefront includes a **Track Order** modal that looks up an order by Order Number and renders the current fulfillment progress from `kb_orders` / `kb_last_order`. Admin status changes update the tracked status. On GitHub Pages, this is browser-local tracking; cross-device real-time tracking requires an authenticated backend.
+
+### Checkout payments
+Default payment options are **GCash**, **Cash on Delivery (COD)**, and **Bank Transfer**. Admin → Store Settings controls which methods appear and can hold the buyer’s GCash/bank instructions. GCash and Bank Transfer expose payment reference and proof fields. In the current static build, the selected proof file is not sent to a server; only its filename is saved with the local order record. A real payment/backend integration should handle secure proof storage and payment verification before live use.
+
+### Stock urgency
+Products at or below 5 units show an urgency badge such as **“⚡ Only 3 stocks left!”**. The badge reads from the product stock value managed in Admin → Products.
+
 ### How to Brew video
 The storefront uses `images/brew-placeholder.svg` as a local poster. Replace the video placeholder markup in `index.html` with the buyer’s final local video or approved embed code.
 
