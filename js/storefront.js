@@ -248,9 +248,6 @@
     linkOrDisabled($("#social-fb"),settings.facebook,"Facebook");
     linkOrDisabled($("#social-ig"),settings.instagram,"Instagram");
     linkOrDisabled($("#social-tiktok"),settings.tiktok,"TikTok");
-    linkOrDisabled($("#sidebar-fb"),settings.facebook,"Facebook");
-    linkOrDisabled($("#sidebar-ig"),settings.instagram,"Instagram");
-    linkOrDisabled($("#sidebar-tiktok"),settings.tiktok,"TikTok");
   }
 
   function renderProducts(){
@@ -343,10 +340,8 @@
     $("#checkout-backdrop").onclick=()=>hideLayer("#checkout-layer");
     $("#checkout-button").onclick=()=>{if(!cart.length){toast("Add a product first.");return}hideLayer("#cart-layer");showLayer("#checkout-layer");$("#checkout-form").hidden=false;$("#order-success").hidden=true;syncUi();renderPaymentHelp()};
     $("#success-close").onclick=()=>hideLayer("#checkout-layer");
-    const openTrack=()=>{showLayer("#track-layer");$("#track-order-id").focus();};
-    $("#open-track").onclick=openTrack;
-    $("#hero-track").onclick=openTrack;
-    $("[data-sidebar-track]").forEach(x=>x.onclick=openTrack);
+    $("#open-track").onclick=()=>{showLayer("#track-layer");$("#track-order-id").focus();};
+    $("#hero-track").onclick=()=>{showLayer("#track-layer");$("#track-order-id").focus();};
     $("#mobile-track").onclick=()=>{showLayer("#track-layer");$("#mobile-nav").style.display="none";$("#menu-button").setAttribute("aria-expanded","false");$("#track-order-id").focus();};
     $("#close-track").onclick=()=>hideLayer("#track-layer");
     $("#track-backdrop").onclick=()=>hideLayer("#track-layer");
@@ -388,23 +383,8 @@
     });
   }
 
-  function initSidebar(){
-    const links=$("[data-side-nav]");
-    const sections=links.map(a=>document.querySelector(a.getAttribute("href"))).filter(Boolean);
-    if(!links.length||!sections.length)return;
-    const activate=id=>{
-      links.forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+id));
-    };
-    const observer=new IntersectionObserver(entries=>{
-      const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);
-      if(visible[0]?.target?.id)activate(visible[0].target.id);
-    },{rootMargin:"-35% 0px -55% 0px",threshold:[0,.15,.35,.6]});
-    sections.forEach(section=>observer.observe(section));
-    links.forEach(link=>link.addEventListener("click",()=>activate(link.getAttribute("href").slice(1))));
-  }
-
   function init(){
-    renderContent();renderHero();renderProducts();syncUi();bind();initSidebar();
+    renderContent();renderHero();renderProducts();syncUi();bind();
     window.addEventListener("storage",e=>{
       if(["kb_products","kb_settings","kb_cms","kb_gallery","kb_shipping_rule"].includes(e.key))window.location.reload();
       if(e.key==="kb_orders"||e.key==="kb_last_order")refreshTrackedOrder();
