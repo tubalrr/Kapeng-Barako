@@ -193,3 +193,7 @@ tbody tr:hover{background:#FFFCF7}
   .modal-card{padding:19px}
   .toast{left:12px;right:12px;bottom:12px;text-align:center}
 }
+.check-card{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#FAF7F2;margin-top:8px}
+.check-card input{width:17px;height:17px;accent-color:var(--brown)}
+.check-card strong{display:block;font-size:12px}
+.check-card small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
