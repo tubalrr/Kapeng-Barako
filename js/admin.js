@@ -97,9 +97,8 @@
     fulfillmentMethods:["Lalamove","J&T","LBC","QC Meetup"],
     shippingNote:"Courier fee is based on the selected courier and delivery distance/location. Final fee is confirmed before fulfillment.",
     orderNote:"We confirm the final delivery details before fulfillment.",
-    email:"ILAG",
-    phone:"ILAG",
-    location:"ILAG"
+    email:"ILAG",phone:"ILAG",location:"ILAG",
+    facebook:"ILAG",instagram:"ILAG",tiktok:"ILAG",tagline:"Gawa sa Batangas"
   };
 
   const normalizeProduct = p => ({
@@ -131,7 +130,30 @@
 
   const defaultStory = "Mula sa piling Liberica beans ng Batangas, bawat batch ng Kapeng Barako ay ako mismo ang nagroroast, binabantayan ang init, oras, at kulay hanggang lumabas ang tamang tapang at aroma. Hindi tulad ng commercial coffee na mass-produced para sa consistent volume, ang aming roast ay small-batch at hands-on, kaya bawat tasa ay may mas malalim na character, mas mabangong aroma, at tunay na lutong Barako.";
   const defaultDelivery = "Payment: GCash, Maya, Cash on Delivery (COD). Fulfillment: Lalamove, J&T, LBC, or meetup within Quezon City. Shipping fee is based on the selected courier and delivery distance/location. Free shipping when you buy 2 packs or more.";
-  if (!cms) cms = {story:defaultStory, delivery:defaultDelivery, faqs:[]};
+  const defaultCms = {
+    heroEyebrow:"Freshly roasted • Quezon City",
+    heroTitle:"Bold coffee.\nMade for\neveryday.",
+    heroDescription:"Personal na roasted, small-batch, at may tunay na character ng Barako.",
+    story:defaultStory,
+    delivery:defaultDelivery,
+    benefits:[
+      {title:"Matapang / Pure",desc:"Puro at walang halong iba",icon:"☕"},
+      {title:"Gawang Batangas",desc:"Galing sa mga piling sakahan ng Batangas",icon:"⌂"},
+      {title:"Fresh Roast",desc:"Personal na nire-roast sa maliliit na batch",icon:"✦"}
+    ],
+    brewSteps:[
+      {title:"Pakulo",desc:"Pakuluan ang malinis na tubig hanggang umabot sa tamang init."},
+      {title:"Lagay kape",desc:"Ilagay ang tamang dami ng Barako coffee ayon sa gusto mong tapang."},
+      {title:"Salain",desc:"Hayaang lumabas ang aroma at salain bago ihain nang mainit."}
+    ],
+    faqs:[
+      {q:"Matapang ba masyado?",a:"May bold na Barako character, pero puwedeng i-adjust ang dami ng kape at tubig ayon sa panlasa."},
+      {q:"Ilang araw shelf life / May expiration ba?",a:"Ang actual shelf life at expiration date ay dapat sundin ayon sa packaging at batch label. Ilagay ang tunay na expiry details bago magbenta."},
+      {q:"Pwede ba sa may acid?",a:"Iba-iba ang tolerance ng bawat tao. Kung may acid reflux o sensitibong tiyan, mas ligtas na tanungin ang iyong healthcare professional kung angkop sa iyo ang kape."}
+    ]
+  };
+  if (!cms) cms = defaultCms;
+  else cms = {...defaultCms,...cms,benefits:Array.isArray(cms.benefits)&&cms.benefits.length===3?cms.benefits:defaultCms.benefits,brewSteps:Array.isArray(cms.brewSteps)&&cms.brewSteps.length===3?cms.brewSteps:defaultCms.brewSteps,faqs:Array.isArray(cms.faqs)?cms.faqs:defaultCms.faqs};
 
   const saveOrders = () => write(KEY.orders, orders);
   const saveInventory = () => write(KEY.inventory, inventory);
@@ -438,21 +460,37 @@
 
   function renderSettings(){
     settings={...DEFAULT_SETTINGS,...(read(KEY.settings,settings)||{})};
-    $(".setting-payment").forEach(x=>x.checked=settings.paymentMethods.includes(x.value));
-    $(".setting-fulfillment").forEach(x=>x.checked=settings.fulfillmentMethods.includes(x.value));
+    $$(" .setting-payment").forEach(x=>x.checked=settings.paymentMethods.includes(x.value));
+    $$(" .setting-fulfillment").forEach(x=>x.checked=settings.fulfillmentMethods.includes(x.value));
     $("#settings-shipping-note").value=settings.shippingNote||"";
     $("#settings-order-note").value=settings.orderNote||"";
     $("#settings-email").value=settings.email||"ILAG";
     $("#settings-phone").value=settings.phone||"ILAG";
     $("#settings-location").value=settings.location||"ILAG";
+    $("#settings-facebook").value=settings.facebook||"ILAG";
+    $("#settings-instagram").value=settings.instagram||"ILAG";
+    $("#settings-tiktok").value=settings.tiktok||"ILAG";
+    $("#settings-tagline").value=settings.tagline||"Gawa sa Batangas";
   }
 
   function saveSettingsFromForm(){
-    const payments=$(".setting-payment:checked").map(x=>x.value);
-    const fulfillments=$(".setting-fulfillment:checked").map(x=>x.value);
-    settings={...settings,paymentMethods:payments.length?payments:DEFAULT_SETTINGS.paymentMethods,fulfillmentMethods:fulfillments.length?fulfillments:DEFAULT_SETTINGS.fulfillmentMethods,shippingNote:$("#settings-shipping-note").value.trim(),orderNote:$("#settings-order-note").value.trim(),email:$("#settings-email").value.trim()||"ILAG",phone:$("#settings-phone").value.trim()||"ILAG",location:$("#settings-location").value.trim()||"ILAG"};
+    const payments=$$(".setting-payment:checked").map(x=>x.value);
+    const fulfillments=$$(".setting-fulfillment:checked").map(x=>x.value);
+    settings={...settings,
+      paymentMethods:payments.length?payments:DEFAULT_SETTINGS.paymentMethods,
+      fulfillmentMethods:fulfillments.length?fulfillments:DEFAULT_SETTINGS.fulfillmentMethods,
+      shippingNote:$("#settings-shipping-note").value.trim(),
+      orderNote:$("#settings-order-note").value.trim(),
+      email:$("#settings-email").value.trim()||"ILAG",
+      phone:$("#settings-phone").value.trim()||"ILAG",
+      location:$("#settings-location").value.trim()||"ILAG",
+      facebook:$("#settings-facebook").value.trim()||"ILAG",
+      instagram:$("#settings-instagram").value.trim()||"ILAG",
+      tiktok:$("#settings-tiktok").value.trim()||"ILAG",
+      tagline:$("#settings-tagline").value.trim()||"Gawa sa Batangas"
+    };
     saveSettings();
-    log("Store settings updated","settings","store","payment and fulfillment options plus contact details");
+    log("Store settings updated","settings","store","payment, fulfillment, contact, and social settings");
     toast("Store settings saved");
   }
 
@@ -615,20 +653,37 @@
   }
 
   function renderCms(){
-    cms=read(KEY.cms,{story:defaultStory,delivery:defaultDelivery,faqs:[]});
+    cms={...defaultCms,...(read(KEY.cms,defaultCms)||{})};
+    $("#cms-hero-eyebrow").value=cms.heroEyebrow||defaultCms.heroEyebrow;
+    $("#cms-hero-title").value=cms.heroTitle||defaultCms.heroTitle;
+    $("#cms-hero-description").value=cms.heroDescription||defaultCms.heroDescription;
     $("#cms-story").value=cms.story||"";
     $("#cms-delivery").value=cms.delivery||"";
-    const root=$("#faq-editor");
-    const faqs=Array.isArray(cms.faqs)?cms.faqs:[];
-    root.innerHTML=faqs.length ? faqs.map((f,i)=>'<div class="faq-item"><input class="input faq-q" data-i="'+i+'" value="'+safe(f.q||"")+'" placeholder="Question"><textarea class="textarea faq-a" data-i="'+i+'" rows="3" placeholder="Answer">'+safe(f.a||"")+'</textarea><button type="button" class="table-action" data-delete-faq="'+i+'">Delete</button></div>').join("") : '<div class="empty">No FAQ items yet. Add the client’s real questions and answers.</div>';
+    const benefits=Array.isArray(cms.benefits)&&cms.benefits.length===3?cms.benefits:defaultCms.benefits;
+    $("#benefit-editor").innerHTML=benefits.map((b,i)=>'<div class="faq-item"><input class="input benefit-title" value="'+safe(b.title||"")+'" placeholder="Headline"><input class="input benefit-desc" value="'+safe(b.desc||"")+'" placeholder="Description"><input class="input benefit-icon" value="'+safe(b.icon||"✦")+'" placeholder="Icon"></div>').join("");
+    const steps=Array.isArray(cms.brewSteps)&&cms.brewSteps.length===3?cms.brewSteps:defaultCms.brewSteps;
+    $("#brew-editor").innerHTML=steps.map((s,i)=>'<div class="faq-item"><input class="input brew-title" value="'+safe(s.title||"")+'" placeholder="Step title"><textarea class="textarea brew-desc" rows="2" placeholder="Step description">'+safe(s.desc||"")+'</textarea></div>').join("");
+    const root=$("#faq-editor"), faqs=Array.isArray(cms.faqs)?cms.faqs:[];
+    root.innerHTML=faqs.length ? faqs.map((f,i)=>'<div class="faq-item"><input class="input faq-q" value="'+safe(f.q||"")+'" placeholder="Question"><textarea class="textarea faq-a" rows="3" placeholder="Answer">'+safe(f.a||"")+'</textarea><button type="button" class="table-action" data-delete-faq="'+i+'">Delete</button></div>').join("") : '<div class="empty">No FAQ items yet. Add the client’s real questions and answers.</div>';
   }
+
   function saveCmsFromEditor(){
-    const faqs=$$(".faq-item").map(row=>({
-      q:$(".faq-q",row)?.value.trim()||"",
-      a:$(".faq-a",row)?.value.trim()||""
-    })).filter(f=>f.q||f.a);
-    cms={story:$("#cms-story").value.trim(),delivery:$("#cms-delivery").value.trim(),faqs};
-    saveCms();log("CMS content saved","cms","site","Story, delivery policy, and FAQ content saved");
+    const faqRows=$$(".faq-item").filter(row=>$(".faq-q",row));
+    const faqs=faqRows.map(row=>({q:$(".faq-q",row)?.value.trim()||"",a:$(".faq-a",row)?.value.trim()||""})).filter(f=>f.q||f.a);
+    const benefits=$$(".benefit-title").map((el,i)=>({title:el.value.trim(),desc:$$(".benefit-desc")[i]?.value.trim()||"",icon:$$(".benefit-icon")[i]?.value.trim()||"✦"})).slice(0,3);
+    const brewSteps=$$(".brew-title").map((el,i)=>({title:el.value.trim(),desc:$$(".brew-desc")[i]?.value.trim()||""})).slice(0,3);
+    cms={...cms,
+      heroEyebrow:$("#cms-hero-eyebrow").value.trim(),
+      heroTitle:$("#cms-hero-title").value.trim(),
+      heroDescription:$("#cms-hero-description").value.trim(),
+      story:$("#cms-story").value.trim(),
+      delivery:$("#cms-delivery").value.trim(),
+      benefits:benefits.length===3?benefits:defaultCms.benefits,
+      brewSteps:brewSteps.length===3?brewSteps:defaultCms.brewSteps,
+      faqs
+    };
+    saveCms();
+    log("CMS content saved","cms","site","Hero, story, benefits, brew steps, delivery policy, and FAQ content saved");
     toast("Content saved");
   }
   function addFaq(){cms.faqs=cms.faqs||[];cms.faqs.push({q:"",a:""});write(KEY.cms,cms);renderCms();}
