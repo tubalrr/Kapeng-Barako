@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Kapeng Barako Admin Dashboard">
+  <title>Kapeng Barako — Admin Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-block">
+        <a class="brand" href="../index.html" aria-label="Kapeng Barako storefront">
+          <img src="../images/favicon.svg" alt="" class="brand-mark">
+          <span>
+            <strong>Kapeng Barako</strong>
+            <small>Admin Console</small>
+          </span>
+        </a>
+        <button class="icon-btn mobile-only" type="button" data-action="close-menu" aria-label="Close menu">×</button>
+      </div>
+
+      <nav class="side-nav" aria-label="Admin navigation">
+        <button class="nav-item active" type="button" data-section="overview"><span>⌂</span>Overview</button>
+        <button class="nav-item" type="button" data-section="orders"><span>▦</span>Orders / OMS</button>
+        <button class="nav-item" type="button" data-section="inventory"><span>◫</span>Inventory & Batches</button>
+        <button class="nav-item" type="button" data-section="financials"><span>₱</span>Financials</button>
+        <button class="nav-item" type="button" data-section="promos"><span>◇</span>Pricing & Promos</button>
+        <button class="nav-item" type="button" data-section="cms"><span>✎</span>Content & CMS</button>
+        <button class="nav-item" type="button" data-section="support"><span>?</span>Support Tickets</button>
+        <button class="nav-item" type="button" data-section="audit"><span>◷</span>Audit Log</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <div>
+            <strong>Store data</strong>
+            <small id="sync-status">Local data sync</small>
+          </div>
+        </div>
+        <a class="store-link" href="../index.html">← Back to storefront</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-only" type="button" data-action="open-menu" aria-label="Open menu">☰</button>
+          <div>
+            <span class="eyebrow">Kapeng Barako</span>
+            <h1 id="page-heading">Overview</h1>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="btn secondary" type="button" data-action="refresh">↻ Refresh</button>
+          <button class="btn primary" type="button" data-action="open-order">+ New Order</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <section class="admin-section active" id="section-overview" data-section-panel="overview">
+          <div class="hero-grid">
+            <div class="hero-card">
+              <div>
+                <span class="eyebrow">Operations control</span>
+                <h2>Run orders, roasting, inventory, and customer care from one place.</h2>
+                <p>No sample records are preloaded. Metrics below are calculated from actual stored orders and inventory entries.</p>
+              </div>
+              <div class="hero-actions">
+                <button class="btn primary" type="button" data-section-jump="orders">Open Orders</button>
+                <button class="btn ghost" type="button" data-section-jump="inventory">Manage Inventory</button>
+              </div>
+            </div>
+            <div class="status-card">
+              <div class="status-row"><span>Order records</span><strong id="metric-orders">0</strong></div>
+              <div class="status-row"><span>Low-stock items</span><strong id="metric-low-stock">0</strong></div>
+              <div class="status-row"><span>Open tickets</span><strong id="metric-tickets">0</strong></div>
+              <div class="status-row"><span>Revenue</span><strong id="metric-revenue">₱0</strong></div>
+            </div>
+          </div>
+
+          <div class="metric-grid">
+            <article class="metric-card"><span>Pending</span><strong id="metric-pending">0</strong><small>Orders awaiting verification</small></article>
+            <article class="metric-card"><span>Processing / Roasting</span><strong id="metric-processing">0</strong><small>Orders in production</small></article>
+            <article class="metric-card"><span>Ready to Ship</span><strong id="metric-ready">0</strong><small>Awaiting dispatch</small></article>
+            <article class="metric-card"><span>Delivered</span><strong id="metric-delivered">0</strong><small>Completed orders</small></article>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div><span class="eyebrow">Fulfillment queue</span><h3>Orders needing attention</h3></div>
+              <button class="text-btn" type="button" data-section-jump="orders">View all →</button>
+            </div>
+            <div id="overview-queue" class="mini-table"></div>
+          </div>
+        </section>
+
+        <section class="admin-section" id="section-orders" data-section-panel="orders" hidden>
+          <div class="section-tools">
+            <div>
+              <span class="eyebrow">Advanced Order Management System</span>
+              <h2>Orders / OMS</h2>
+              <p>Kanban or table view, status overrides, payment and courier tags, dispatch tools, and order history.</p>
+            </div>
+            <div class="tool-row">
+              <button class="seg-btn active" type="button" data-order-view="kanban">Kanban</button>
+              <button class="seg-btn" type="button" data-order-view="table">Table</button>
+              <button class="btn secondary" type="button" data-action="export-orders">Export CSV</button>
+            </div>
+          </div>
+          <div class="filters">
+            <input id="order-search" class="input" type="search" placeholder="Search order ID, customer, phone…">
+            <select id="order-payment-filter" class="input"><option value="">All payments</option><option>GCash</option><option>Maya</option><option>Cash on Delivery</option></select>
+            <select id="order-courier-filter" class="input"><option value="">All fulfillment</option><option>Lalamove</option><option>J&T</option><option>LBC</option><option>QC Meetup</option></select>
+            <select id="order-status-filter" class="input"><option value="">All statuses</option></select>
+          </div>
+          <div id="orders-kanban" class="kanban"></div>
+          <div id="orders-table" class="table-wrap" hidden></div>
+          <div class="panel-note">Drag a card between status columns to perform a manual status override. Each override is logged.</div>
+        </section>
+
+        <section class="admin-section" id="section-inventory" data-section-panel="inventory" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Batch & Inventory Control Hub</span><h2>Inventory & batches</h2><p>Track green beans, roast batches, shelf life, packaging, thresholds, and coverage.</p></div>
+            <button class="btn primary" type="button" data-action="open-inventory">+ Add inventory item</button>
+          </div>
+          <div class="metric-grid compact">
+            <article class="metric-card"><span>Total stock units</span><strong id="inv-total">0</strong><small>Across all inventory records</small></article>
+            <article class="metric-card"><span>Green bean stock</span><strong id="inv-green">0</strong><small>Units recorded as beans</small></article>
+            <article class="metric-card"><span>Packaging stock</span><strong id="inv-pack">0</strong><small>Units recorded as packaging</small></article>
+            <article class="metric-card"><span>At / below threshold</span><strong id="inv-alerts">0</strong><small>Restock attention needed</small></article>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><span class="eyebrow">Stock control</span><h3>Inventory ledger</h3></div><div class="tool-row"><button class="seg-btn active" data-inv-filter="" type="button">All</button><button class="seg-btn" data-inv-filter="beans" type="button">Green beans</button><button class="seg-btn" data-inv-filter="packaging" type="button">Packaging</button></div></div>
+            <div id="inventory-table" class="table-wrap"></div>
+          </div>
+        </section>
+
+        <section class="admin-section" id="section-financials" data-section-panel="financials" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Financials & Sales Analytics</span><h2>Financial control</h2><p>Channel revenue, COGS, shipping subsidies, affiliate commissions, profit, and reports.</p></div>
+            <div class="tool-row"><button class="btn secondary" type="button" data-action="export-financials">Export CSV</button><button class="btn primary" type="button" data-action="print-report">Print / PDF</button></div>
+          </div>
+          <div class="metric-grid">
+            <article class="metric-card"><span>Revenue</span><strong id="fin-revenue">₱0</strong><small>From stored orders</small></article>
+            <article class="metric-card"><span>COGS</span><strong id="fin-cogs">₱0</strong><small>Entered against orders</small></article>
+            <article class="metric-card"><span>Shipping subsidy</span><strong id="fin-shipping">₱0</strong><small>Entered against orders</small></article>
+            <article class="metric-card"><span>Net after tracked costs</span><strong id="fin-profit">₱0</strong><small>Revenue minus tracked costs</small></article>
+          </div>
+          <div class="split-grid">
+            <div class="panel"><div class="panel-head"><div><span class="eyebrow">Revenue by channel</span><h3>Payment ledger</h3></div></div><div id="payment-ledger" class="ledger-list"></div></div>
+            <div class="panel"><div class="panel-head"><div><span class="eyebrow">Margin</span><h3>Profitability</h3></div></div><div id="profit-breakdown" class="ledger-list"></div></div>
+          </div>
+          <div class="panel"><div class="panel-head"><div><span class="eyebrow">Accounting</span><h3>Order cost ledger</h3></div></div><div id="finance-table" class="table-wrap"></div></div>
+        </section>
+
+        <section class="admin-section" id="section-promos" data-section-panel="promos" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Dynamic Pricing & Promo Engine</span><h2>Pricing & promos</h2><p>Configure discount tiers, voucher codes, free-shipping rules, and customer segments.</p></div>
+            <button class="btn primary" type="button" data-action="open-promo">+ New promo rule</button>
+          </div>
+          <div class="split-grid">
+            <div class="panel">
+              <div class="panel-head"><div><span class="eyebrow">Automation</span><h3>Shipping rule</h3></div><label class="switch"><input type="checkbox" id="free-ship-toggle"><span></span></label></div>
+              <div class="callout">
+                <strong>Free shipping when you buy 2 packs or more</strong>
+                <span>Toggle the storefront rule and adjust the minimum pack count below.</span>
+              </div>
+              <div class="form-grid compact-form">
+                <label>Minimum packs<input id="free-ship-min" class="input" type="number" min="1" step="1" value="2"></label>
+                <label>Eligible fulfillment
+                  <select id="free-ship-fulfillment" class="input"><option value="all">All eligible delivery methods</option><option>Lalamove</option><option>J&T</option><option>LBC</option></select>
+                </label>
+              </div>
+              <button class="btn primary" type="button" data-action="save-free-ship">Save rule</button>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div><span class="eyebrow">Customer segmentation</span><h3>Loyalty targeting</h3></div></div>
+              <div class="segment-grid">
+                <button class="segment-card" type="button" data-segment="all"><strong>All customers</strong><span>All recorded customers</span></button>
+                <button class="segment-card" type="button" data-segment="repeat"><strong>Repeat buyers</strong><span>2+ completed orders</span></button>
+                <button class="segment-card" type="button" data-segment="pending"><strong>Needs follow-up</strong><span>Orders still pending</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="panel"><div class="panel-head"><div><span class="eyebrow">Voucher engine</span><h3>Promo rules</h3></div></div><div id="promos-table" class="table-wrap"></div></div>
+        </section>
+
+        <section class="admin-section" id="section-cms" data-section-panel="cms" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Content & Customer Support CMS</span><h2>Content editor</h2><p>Edit the story, FAQ, and delivery policy. Save to the configured content store.</p></div>
+            <div class="tool-row"><button class="btn secondary" type="button" data-action="cms-export">Export JSON</button><button class="btn primary" type="button" data-action="cms-save">Save content</button></div>
+          </div>
+          <div class="panel cms-panel">
+            <label>Storytelling section<textarea id="cms-story" class="textarea" rows="8"></textarea></label>
+            <label>Delivery policy<textarea id="cms-delivery" class="textarea" rows="8"></textarea></label>
+            <div class="panel-subhead"><span>FAQ items</span><button class="text-btn" type="button" data-action="add-faq">+ Add FAQ</button></div>
+            <div id="faq-editor" class="faq-editor"></div>
+          </div>
+          <div class="panel-note">The default storage adapter is browser-local. Cross-device, multi-admin publishing requires connecting the adapter to your authenticated backend.</div>
+        </section>
+
+        <section class="admin-section" id="section-support" data-section-panel="support" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Customer Support</span><h2>Tickets</h2><p>Link inquiries to order IDs and keep resolution history in one place.</p></div>
+            <button class="btn primary" type="button" data-action="open-ticket">+ New ticket</button>
+          </div>
+          <div class="filters">
+            <input id="ticket-search" class="input" type="search" placeholder="Search ticket, order ID, customer…">
+            <select id="ticket-status-filter" class="input"><option value="">All ticket statuses</option><option>Open</option><option>In progress</option><option>Resolved</option><option>Closed</option></select>
+          </div>
+          <div class="panel"><div id="tickets-table" class="table-wrap"></div></div>
+        </section>
+
+        <section class="admin-section" id="section-audit" data-section-panel="audit" hidden>
+          <div class="section-tools"><div><span class="eyebrow">Controls</span><h2>Audit log</h2><p>Manual status changes, inventory edits, promo changes, and other admin actions.</p></div><button class="btn secondary" type="button" data-action="export-audit">Export CSV</button></div>
+          <div class="panel"><div id="audit-table" class="table-wrap"></div></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="order-dialog" class="modal">
+    <form method="dialog" id="order-form" class="modal-card">
+      <button type="button" class="modal-close" data-close-dialog>×</button>
+      <div><span class="eyebrow">Order record</span><h2 id="order-modal-title">New order</h2></div>
+      <input type="hidden" id="order-edit-id">
+      <div class="form-grid">
+        <label>Customer name<input class="input" id="order-name" required></label>
+        <label>Phone<input class="input" id="order-phone" required></label>
+        <label class="full">Delivery address<textarea class="textarea" id="order-address" rows="3" required></textarea></label>
+        <label>Payment<select class="input" id="order-payment"><option>GCash</option><option>Maya</option><option>Cash on Delivery</option></select></label>
+        <label>Fulfillment<select class="input" id="order-fulfillment"><option>Lalamove</option><option>J&T</option><option>LBC</option><option>QC Meetup</option></select></label>
+        <label>Status<select class="input" id="order-status"></select></label>
+        <label>COGS<input class="input" id="order-cogs" type="number" min="0" step="0.01" value="0"></label>
+        <label>Shipping subsidy<input class="input" id="order-shipping" type="number" min="0" step="0.01" value="0"></label>
+        <label>Affiliate commission<input class="input" id="order-affiliate" type="number" min="0" step="0.01" value="0"></label>
+      </div>
+      <label>Order items (one line per item: Name × Qty)<textarea class="textarea" id="order-items" rows="5" placeholder="Barako Strong × 1"></textarea></label>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save order</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="inventory-dialog" class="modal">
+    <form method="dialog" id="inventory-form" class="modal-card">
+      <button type="button" class="modal-close" data-close-dialog>×</button>
+      <div><span class="eyebrow">Inventory record</span><h2 id="inventory-modal-title">Add inventory item</h2></div>
+      <input type="hidden" id="inv-edit-id">
+      <div class="form-grid">
+        <label>Item name<input class="input" id="inv-name" required></label>
+        <label>Category<select class="input" id="inv-category"><option value="beans">Green beans</option><option value="packaging">Packaging</option></select></label>
+        <label>SKU / batch number<input class="input" id="inv-sku"></label>
+        <label>Unit<input class="input" id="inv-unit" placeholder="kg / pcs / packs"></label>
+        <label>Current stock<input class="input" id="inv-stock" type="number" min="0" step="0.01" value="0"></label>
+        <label>Low-stock threshold<input class="input" id="inv-threshold" type="number" min="0" step="0.01" value="0"></label>
+        <label>Daily usage forecast<input class="input" id="inv-usage" type="number" min="0" step="0.01" value="0"></label>
+        <label>Roast date<input class="input" id="inv-roast" type="date"></label>
+        <label>Expiry date<input class="input" id="inv-expiry" type="date"></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save item</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="promo-dialog" class="modal">
+    <form method="dialog" id="promo-form" class="modal-card">
+      <button type="button" class="modal-close" data-close-dialog>×</button>
+      <div><span class="eyebrow">Promo rule</span><h2>Configure voucher</h2></div>
+      <input type="hidden" id="promo-edit-id">
+      <div class="form-grid">
+        <label>Rule name<input class="input" id="promo-name" required></label>
+        <label>Voucher code<input class="input" id="promo-code" placeholder="CLIENT-CODE"></label>
+        <label>Discount type<select class="input" id="promo-type"><option value="percent">Percentage</option><option value="flat">Fixed amount</option><option value="free-shipping">Free shipping</option></select></label>
+        <label>Discount value<input class="input" id="promo-value" type="number" min="0" step="0.01" value="0"></label>
+        <label>Minimum packs<input class="input" id="promo-min-packs" type="number" min="0" step="1" value="0"></label>
+        <label>Audience<select class="input" id="promo-audience"><option value="all">All customers</option><option value="repeat">Repeat buyers</option><option value="pending">Needs follow-up</option></select></label>
+      </div>
+      <label class="checkbox-line"><input type="checkbox" id="promo-active" checked> Active</label>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save promo</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="ticket-dialog" class="modal">
+    <form method="dialog" class="modal-card" id="ticket-form">
+      <button type="button" class="modal-close" data-close-dialog>×</button>
+      <div><span class="eyebrow">Customer inquiry</span><h2>New ticket</h2></div>
+      <div class="form-grid">
+        <label>Customer name<input class="input" id="ticket-name"></label>
+        <label>Order ID<input class="input" id="ticket-order"></label>
+        <label>Contact<input class="input" id="ticket-contact"></label>
+        <label>Status<select class="input" id="ticket-status"><option>Open</option><option>In progress</option><option>Resolved</option><option>Closed</option></select></label>
+        <label class="full">Inquiry<textarea class="textarea" id="ticket-message" rows="5" required></textarea></label>
+        <label class="full">Resolution notes<textarea class="textarea" id="ticket-notes" rows="4"></textarea></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save ticket</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="../js/admin.js" defer></script>
+</body>
+</html>
