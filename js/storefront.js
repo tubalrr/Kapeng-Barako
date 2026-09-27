@@ -111,11 +111,12 @@
     return n<0?0:n;
   };
   function renderTrackResult(order){
-    const root=$("#track-result");
+    const root=$("#track-result"), mapWrap=$("#track-map-wrap"), map=$("#track-map"), mapLink=$("#track-map-link");
     if(!root)return;
     if(!order){
       root.hidden=false;
       root.innerHTML='<div class="track-empty"><strong>Order not found.</strong><br>Check the Order Number and try again.</div>';
+      if(mapWrap)mapWrap.hidden=true;
       return;
     }
     root.hidden=false;
@@ -129,9 +130,22 @@
     }).join("");
     const updated=new Date(order.statusUpdatedAt||order.createdAt||Date.now()).toLocaleString("en-PH",{year:"numeric",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
     const customer=order.customer?.name?'<br><strong>Customer:</strong> '+esc(order.customer.name):"";
+    const address=String(order.customer?.address||order.address||"").trim();
     root.innerHTML='<div class="track-result-head"><div><div class="track-result-id">#'+esc(order.id)+'</div><div class="track-result-meta">Updated '+esc(updated)+'</div></div><span class="track-status-chip '+(cancelled?"cancelled":"")+'">'+esc(order.status)+'</span></div>'+
       (cancelled?'<div class="track-empty" style="margin-top:13px"><strong>This order is cancelled.</strong><br>Please contact the store if you need help with the order record.</div>':
-      '<div class="track-courier"><strong>Fulfillment:</strong> '+esc(order.fulfillment||"Pending assignment")+customer+'</div><div class="track-timeline">'+timeline+'</div>');
+      '<div class="track-courier"><strong>Fulfillment:</strong> '+esc(order.fulfillment||"Pending assignment")+customer+(address?'<br><strong>Delivery:</strong> '+esc(address):'')+'</div><div class="track-timeline">'+timeline+'</div>');
+    if(mapWrap){
+      if(address && !cancelled){
+        const q=encodeURIComponent(address);
+        const mapUrl="https://www.google.com/maps/search/?api=1&query="+q;
+        mapWrap.hidden=false;
+        if(map)map.src="https://www.google.com/maps?q="+q+"&output=embed";
+        if(mapLink){mapLink.href=mapUrl;mapLink.textContent="Open in Google Maps ↗";}
+      }else{
+        mapWrap.hidden=true;
+        if(map)map.removeAttribute("src");
+      }
+    }
   }
   function refreshTrackedOrder(){
     if(!trackedOrderId||$("#track-layer")?.hidden)return;
