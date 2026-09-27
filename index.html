@@ -31,6 +31,8 @@ function bu(){
   let[cartOpen,setCartOpen]=he.useState(false);
   let[checkoutOpen,setCheckoutOpen]=he.useState(false);
   let[selected,setSelected]=he.useState(null);
+  let[productChoices,setProductChoices]=he.useState({});
+  let[previewId,setPreviewId]=he.useState(null);
   let[notice,setNotice]=he.useState("");
   let count=cart.reduce((a,v)=>a+v.qty,0);
   let total=cart.reduce((a,v)=>a+(v.price*v.qty),0);
@@ -54,6 +56,10 @@ function bu(){
   const plus=(id)=>persist(cart.map(x=>x.id===id?{...x,qty:x.qty+1}:x));
   const minus=(id)=>persist(cart.flatMap(x=>x.id===id?(x.qty>1?[{...x,qty:x.qty-1}]:[]):[x]));
   const clear=()=>persist([]);
+  const choice=v=>{const q=productChoices[v.id]||{};return {variant:v.variants.find(x=>x.weight===q.weight)||v.variants[0],grind:q.grind||v.grinds[Math.min(2,v.grinds.length-1)]};};
+  const setChoice=(id,k,val)=>setProductChoices(x=>({...x,[id]:{...(x[id]||{}),[k]:val}}));
+  const addCurrent=v=>{const q=choice(v);add({...v,price:q.variant.price,weight:q.variant.weight,grind:q.grind});};
+  const openProduct=v=>{const q=choice(v);setSelected({...v,activeVariant:q.variant,activeGrind:q.grind});};
 
   const submitOrder=(e)=>{
     e.preventDefault();
@@ -170,32 +176,30 @@ function bu(){
       ]})
     ]}),
     S("section",{id:"products",className:"mx-auto max-w-[1280px] px-6 md:px-10 py-14 md:py-20",children:[
-      S("div",{className:"flex flex-wrap items-end justify-between gap-6",children:[
-        S("div",{children:[
-          p("h2",{className:"serif text-[36px] md:text-[48px] tracking-[-0.03em] leading-[0.95] font-[600]",children:"Our Coffee Selection"}),
-          p("p",{className:"mt-3 max-w-[560px] text-[15px] leading-[1.6] opacity-70",children:"Choose a coffee, add it to your cart, and review your order before checkout."})
-        ]}),
-        p("button",{onClick:()=>setCartOpen(true),className:"h-11 px-6 rounded-full border border-[#2B1B12]/15 bg-white text-[13px] font-medium flex items-center gap-2 hover:bg-[#2B1B12] hover:text-white transition",children:["Cart",p("span",{className:"font-semibold",children:count})]})
-      ]}),
-      p("div",{className:"mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5",children:
-        ju.map((v)=>
-          S("div",{className:"group rounded-[24px] border border-[#2B1B12]/10 bg-white p-5 hover:shadow-[0_18px_40px_-18px_rgba(43,27,18,0.25)] hover:-translate-y-1 transition-all duration-300",children:[
-            S("button",{type:"button",onClick:()=>setSelected(v),className:"w-full aspect-[1.2/1] rounded-[18px] "+v.bg+" border border-[#2B1B12]/[0.06] grid place-items-center relative overflow-hidden",children:[
-              p("div",{className:"text-[56px] group-hover:scale-110 transition duration-500",children:v.emoji}),
-              p("div",{className:"absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-[#2B1B12] text-white text-[11px]",children:["₱",v.price]})
-            ]}),
-            S("div",{className:"mt-5",children:[
-              S("div",{className:"flex items-start justify-between gap-2",children:[
-                p("h3",{className:"serif text-[20px] leading-[1.1] font-[600]",children:v.name}),
-                p("span",{className:"text-[11px] px-2 py-1 rounded-full bg-[#2B1B12]/[0.06] border border-[#2B1B12]/10",children:v.weight})
-              ]}),
-              p("div",{className:"mt-2 text-[13px] leading-[1.5] opacity-60",children:v.note}),
-              p("button",{type:"button",onClick:()=>add(v),className:"mt-5 w-full h-10 rounded-full text-[13px] font-medium bg-[#2B1B12] text-white hover:bg-black transition",children:["Add to Cart — ₱",v.price]})
-            ]})
-          ]},v.id)
-        )
-      })
-    ]}),
+S("div",{className:"flex flex-wrap items-end justify-between gap-6",children:[
+S("div",{children:[p("div",{className:"text-[11px] uppercase tracking-[0.16em] font-semibold opacity-50",children:"Small-Batch Collection"}),p("h2",{className:"serif mt-2 text-[36px] md:text-[52px] leading-[.95] font-[600]",children:"Our Coffee Selection"}),p("p",{className:"mt-3 max-w-[650px] text-[15px] leading-[1.65] opacity-70",children:"Choose your roast, weight, grind, and brewing style. Fresh small-batch coffee, ready for your next cup."})]}),
+p("button",{onClick:()=>setCartOpen(true),className:"h-11 px-5 rounded-full bg-[#2B1B12] text-white text-[13px] font-medium",children:["Cart ",count]})]}),
+S("div",{className:"mt-7 flex flex-wrap gap-2",children:["All Coffee","Dark Roast","Medium Roast","Batangas","Cavite"].map((x,i)=>p("span",{className:"px-3.5 py-2 rounded-full "+(i===0?"bg-[#2B1B12] text-white":"bg-white border border-[#2B1B12]/10")+" text-[12px]",children:x}))}),
+S("div",{className:"mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5",children:ju.map(v=>{const q=choice(v),low=v.stock<=9,prev=previewId===v.id;return S("article",{className:"group rounded-[26px] border border-[#2B1B12]/10 bg-white overflow-hidden hover:-translate-y-1 hover:shadow-[0_22px_55px_-25px_rgba(43,27,18,0.32)] transition-all",children:[
+S("div",{className:"relative p-4 pb-0",children:[S("button",{type:"button",onClick:()=>openProduct(v),className:"w-full aspect-square rounded-[20px] "+v.bg+" grid place-items-center relative overflow-hidden",children:[
+p("div",{style:{transform:prev?"rotateY(180deg) scale(1.08)":"scale(1)",transition:"transform .55s"},children:prev?"🫘":v.emoji}),
+p("span",{className:"absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 text-[10px] font-semibold",children:v.roast}),
+p("span",{className:"absolute top-3 right-3 px-2.5 py-1 rounded-full bg-[#2B1B12] text-white text-[10px] font-semibold",children:v.origin}),
+p("span",{className:"absolute bottom-3 left-3 px-2.5 py-1 rounded-full bg-white/90 text-[10px] font-semibold",children:low?"Low Stock":"Freshly Roasted"}),
+p("span",{className:"absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-[#2B1B12] text-white text-[10px] font-semibold",children:["₱",q.variant.price]})]}),p("button",{type:"button",onClick:()=>setPreviewId(prev?null:v.id),className:"absolute right-7 top-7 w-9 h-9 rounded-full bg-white border border-black/10 text-[11px] font-bold",children:prev?"↶":"360°"})]}),
+S("div",{className:"p-5",children:[
+S("div",{className:"flex justify-between gap-3",children:[S("div",{children:[p("h3",{className:"serif text-[21px] font-[600]",children:v.name}),p("div",{className:"mt-1 text-[11px] opacity-50",children:[v.fresh," • ",v.stock," packs"]})]}),p("button",{onClick:()=>openProduct(v),className:"text-[11px] underline opacity-55",children:"Details"})]}),
+p("div",{className:"mt-2 text-[12.5px] opacity-60",children:v.flavor}),
+S("div",{className:"mt-4 grid grid-cols-2 gap-2",children:[
+S("label",{children:[p("div",{className:"text-[9px] uppercase opacity-45",children:"Weight"}),p("select",{value:q.variant.weight,onChange:e=>setChoice(v.id,"weight",e.target.value),className:"mt-1 w-full h-9 rounded-xl border border-black/10 bg-[#FFFCF6] px-2 text-[11px]",children:v.variants.map(x=>p("option",{value:x.weight,children:x.weight}))})]}),
+S("label",{children:[p("div",{className:"text-[9px] uppercase opacity-45",children:"Grind"}),p("select",{value:q.grind,onChange:e=>setChoice(v.id,"grind",e.target.value),className:"mt-1 w-full h-9 rounded-xl border border-black/10 bg-[#FFFCF6] px-2 text-[11px]",children:v.grinds.map(x=>p("option",{value:x,children:x}))})]})]}),
+p("div",{className:"mt-3 rounded-[13px] bg-[#F1E6D3] px-3 py-2 text-[11px]",children:"Free shipping when you buy 2 packs or more."}),
+p("button",{onClick:()=>addCurrent(v),className:"mt-4 w-full h-10 rounded-full bg-[#2B1B12] text-white text-[12px] font-semibold",children:["Add to Cart • ₱",q.variant.price]})]})]},v.id)})}),
+S("div",{className:"mt-7 grid md:grid-cols-3 gap-3",children:[
+p("div",{className:"rounded-[18px] bg-[#2B1B12] text-white p-5",children:[p("div",{className:"text-[10px] uppercase opacity-50",children:"Freshness"}),p("div",{className:"mt-2 serif text-[20px] font-semibold",children:"Small-batch roasted"}),p("div",{className:"mt-1 text-[12px] opacity-60",children:"Freshness and stock are shown per product."})]}),
+p("div",{className:"rounded-[18px] bg-white border border-[#2B1B12]/10 p-5",children:[p("div",{className:"text-[10px] uppercase opacity-45",children:"Brewing"}),p("div",{className:"mt-2 serif text-[20px] font-semibold",children:"Choose your grind"}),p("div",{className:"mt-1 text-[12px] opacity-55",children:"Whole Bean • Coarse • Medium • Fine"})]}),
+p("div",{className:"rounded-[18px] bg-[#F1E6D3] p-5",children:[p("div",{className:"text-[10px] uppercase opacity-45",children:"Bundle"}),p("div",{className:"mt-2 serif text-[20px] font-semibold",children:"Frequently Bought Together"}),p("div",{className:"mt-1 text-[12px] opacity-60",children:"Every coffee suggests a matching add-on."})]})]})
+]}),
     S("section",{id:"about",className:"mx-auto max-w-[1280px] px-6 md:px-10 pb-10 grid md:grid-cols-2 gap-5",children:[
       S("div",{className:"rounded-[28px] bg-[#F1E6D3] border border-[#2B1B12]/10 p-8 md:p-10",children:[
         p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-medium opacity-60",children:"About"}),
@@ -308,18 +312,22 @@ function bu(){
             ]})
       ]})
     ]}),
-    selected&&S("div",{className:"fixed inset-0 z-[115] grid place-items-center p-5",children:[
-      p("button",{onClick:()=>setSelected(null),className:"absolute inset-0 bg-black/40 w-full h-full",children:""}),
-      S("div",{className:"relative w-full max-w-[520px] rounded-[28px] bg-[#FFFCF6] border border-black/10 p-6 md:p-8 shadow-[0_20px_80px_-20px_rgba(0,0,0,0.45)]",children:[
-        S("div",{className:"rounded-[20px] "+selected.bg+" aspect-[4/3] grid place-items-center text-[80px]",children:selected.emoji}),
-        p("h3",{className:"serif mt-6 text-[30px] font-[600]",children:selected.name}),
-        p("p",{className:"mt-2 text-[14px] opacity-60",children:selected.note}),
-        S("div",{className:"mt-6 flex items-center justify-between",children:[
-          p("div",{className:"text-[22px] font-semibold",children:["₱",selected.price]}),
-          p("button",{onClick:()=>{add(selected);setSelected(null)},className:"h-11 px-6 rounded-full bg-[#2B1B12] text-white text-[13px] font-medium",children:"Add to Cart"})
-        ]})
-      ]})
-    ]}),
+    selected&&S("div",{className:"fixed inset-0 z-[115] flex items-center justify-center p-4",children:[
+p("button",{onClick:()=>setSelected(null),className:"absolute inset-0 bg-black/50 backdrop-blur-sm",children:""}),
+S("div",{className:"relative w-full max-w-[900px] max-h-[92vh] overflow-y-auto rounded-[30px] bg-[#FFFCF6] shadow-[0_30px_100px_-25px_rgba(0,0,0,.55)]",children:[
+S("div",{className:"grid md:grid-cols-2",children:[
+S("div",{className:"p-6",children:[S("div",{className:"aspect-square rounded-[24px] "+selected.bg+" grid place-items-center text-[110px] relative",children:[selected.emoji,p("span",{className:"absolute top-4 left-4 px-3 py-1.5 rounded-full bg-white/90 text-[10px] font-semibold",children:selected.roast})]})]}),
+S("div",{className:"p-6 md:p-8",children:[
+S("div",{className:"flex justify-between gap-3",children:[S("div",{children:[p("div",{className:"text-[10px] uppercase tracking-[.15em] opacity-45",children:"Fresh Small Batch"}),p("h3",{className:"serif mt-2 text-[34px] font-[600]",children:selected.name}),p("p",{className:"mt-2 text-[13px] opacity-60",children:selected.story})]}),p("button",{onClick:()=>setSelected(null),className:"w-10 h-10 rounded-full border border-black/10",children:"×"})]}),
+S("div",{className:"mt-5 grid grid-cols-2 gap-3",children:[p("div",{className:"rounded-[16px] bg-[#F1E6D3] p-4",children:[p("div",{className:"text-[9px] uppercase opacity-45",children:"Flavor Notes"}),p("div",{className:"mt-2 text-[13px] font-medium",children:selected.flavor})]}),p("div",{className:"rounded-[16px] bg-white border border-black/10 p-4",children:[p("div",{className:"text-[9px] uppercase opacity-45",children:"Recommended Brew"}),p("div",{className:"mt-2 text-[13px] font-medium",children:selected.brew})]})]}),
+p("div",{className:"mt-4 rounded-[16px] border border-black/10 bg-white p-4 text-[12px]",children:[selected.stock<=9?"Low Stock — only a few packs remain.":"In Stock — Freshly Roasted Small Batch",p("div",{className:"mt-1 opacity-50",children:[selected.stock," packs available"]})]}),
+p("div",{className:"mt-5 text-[10px] uppercase tracking-[.12em] opacity-45",children:"Weight / Price"}),
+S("div",{className:"mt-2 flex flex-wrap gap-2",children:selected.variants.map(x=>p("button",{onClick:()=>setSelected({...selected,activeVariant:x}),className:"px-4 py-2.5 rounded-full border "+(selected.activeVariant&&selected.activeVariant.weight===x.weight?"bg-[#2B1B12] text-white":"bg-white border-black/10")+" text-[11px]",children:[x.weight," • ₱",x.price]}))}),
+p("div",{className:"mt-4 text-[10px] uppercase tracking-[.12em] opacity-45",children:"Grind Size"}),
+S("div",{className:"mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2",children:selected.grinds.map(g=>p("button",{onClick:()=>setSelected({...selected,activeGrind:g}),className:"px-3 py-2.5 rounded-xl border "+(selected.activeGrind===g?"bg-[#F1E6D3] border-[#2B1B12]/20":"bg-white border-black/10")+" text-[11px]",title:g==="Coarse"?"French Press":g==="Medium"?"Drip / Machine":g==="Fine"?"Espresso":"Best for fresh grinding",children:g}))}),
+p("div",{className:"mt-4 rounded-[16px] bg-[#2B1B12] text-white p-4 text-[12px]",children:["Frequently Bought Together: ",selected.addon]}),
+S("div",{className:"mt-5 flex items-center gap-3",children:[p("div",{className:"serif text-[28px] font-semibold",children:["₱",selected.activeVariant?selected.activeVariant.price:selected.price]}),p("button",{onClick:()=>{add({...selected,price:selected.activeVariant?selected.activeVariant.price:selected.price,weight:selected.activeVariant?selected.activeVariant.weight:selected.weight,grind:selected.activeGrind||selected.grinds[0]});setSelected(null)},className:"flex-1 h-12 rounded-full bg-[#2B1B12] text-white text-[13px] font-semibold",children:"Add Selected Pack to Cart"})]})
+]})]})]})]}),
     checkoutOpen&&S("div",{className:"fixed inset-0 z-[120] grid place-items-center p-5",children:[
       p("button",{onClick:()=>setCheckoutOpen(false),className:"absolute inset-0 bg-black/40 w-full h-full",children:""}),
       S("form",{onSubmit:submitOrder,className:"relative w-full max-w-[560px] rounded-[28px] bg-[#FFFCF6] border border-black/10 p-6 md:p-8 shadow-[0_20px_80px_-20px_rgba(0,0,0,0.45)]",children:[
