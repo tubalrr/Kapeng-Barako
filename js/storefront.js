@@ -56,6 +56,9 @@
   }));
   const cms={...fallbackCms,...(typeof window.KBStore?.getCms==="function"?window.KBStore.getCms():read("kb_cms",{}))};
   const settings={...fallbackSettings,...(typeof window.KBStore?.getSettings==="function"?window.KBStore.getSettings():read("kb_settings",{}))};
+  settings.paymentMethods=Array.isArray(settings.paymentMethods)&&settings.paymentMethods.length?[...settings.paymentMethods]:[...fallbackSettings.paymentMethods];
+  settings.paymentMethods=[...new Set(settings.paymentMethods.map(x=>x==="Cash on Delivery"?"Cash on Delivery (COD)":x))];
+  ["GCash","Cash on Delivery (COD)","Bank Transfer"].forEach(method=>{if(!settings.paymentMethods.includes(method))settings.paymentMethods.push(method);});
   const shipping={enabled:true,minPacks:2,...read("kb_shipping_rule",{})};
   let trackedOrderId="";
   const TRACK_STEPS=[
