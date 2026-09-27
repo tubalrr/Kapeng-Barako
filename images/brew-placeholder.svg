@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+<defs>
+  <linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2B1B12"/><stop offset="1" stop-color="#8A5A35"/></linearGradient>
+  <radialGradient id="c"><stop stop-color="#B56D3C"/><stop offset=".78" stop-color="#4A2819"/><stop offset="1" stop-color="#20110B"/></radialGradient>
+</defs>
+<rect width="1200" height="800" fill="url(#b)"/>
+<ellipse cx="600" cy="650" rx="330" ry="60" fill="#160D09" opacity=".45"/>
+<path d="M390 390 Q390 325 455 305 H745 Q810 325 810 390 V565 Q798 640 700 655 H500 Q402 638 390 565Z" fill="#F1E5D8"/>
+<path d="M805 385 Q980 350 985 480 Q972 555 820 540" fill="none" stroke="#F1E5D8" stroke-width="40"/>
+<ellipse cx="600" cy="322" rx="210" ry="50" fill="#26130B"/>
+<ellipse cx="600" cy="323" rx="180" ry="34" fill="url(#c)"/>
+<path d="M530 270 C480 210 575 195 545 125 M625 275 C590 220 685 190 655 130" fill="none" stroke="#F5EBDD" stroke-width="16" stroke-linecap="round" opacity=".8"/>
+<path d="M955 225 L1070 365" stroke="#E3B079" stroke-width="22" stroke-linecap="round"/>
+<path d="M930 215 Q1040 215 1075 350" fill="none" stroke="#B87A4B" stroke-width="8" opacity=".85"/>
+<text x="60" y="82" fill="#FFF6E8" font-family="Georgia,serif" font-size="48">Traditional Barako Brew</text>
+<text x="60" y="124" fill="#E8C8A4" font-family="Arial,sans-serif" font-size="20" letter-spacing="4">LOCAL VIDEO PLACEHOLDER</text>
+</svg>
