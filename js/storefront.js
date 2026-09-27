@@ -2,12 +2,11 @@
   "use strict";
 
   const DEFAULT_PRODUCTS = [
-    {id:1,name:"Barako Strong",price:189,weight:"250g",note:"Bold, smoky roast",emoji:"☕️",bg:"bg-[#F6E8D5]",variants:[{weight:"250g",price:189}],grinds:["Whole Bean","Coarse","Medium","Fine"]},
-    {id:2,name:"QC Blend",price:245,weight:"500g",note:"Chocolate and brown sugar",emoji:"🤎",bg:"bg-[#EDE3D3]",variants:[{weight:"500g",price:245}],grinds:["Whole Bean","Coarse","Medium","Fine"]},
-    {id:3,name:"Cold Brew Kit",price:320,weight:"Set",note:"Easy to prepare at home",emoji:"🧊",bg:"bg-[#E8DDD0]",variants:[{weight:"Set",price:320}],grinds:["Whole Bean","Coarse","Medium","Fine"]},
-    {id:4,name:"Barako Drip Pack",price:165,weight:"10 pcs",note:"Simple coffee for the office",emoji:"✨",bg:"bg-[#F5EEE4]",variants:[{weight:"10 pcs",price:165}],grinds:["Whole Bean","Coarse","Medium","Fine"]}
+    {id:1,name:"Barako Strong",origin:"Batangas",roast:"Dark Roast",price:189,weight:"250g",note:"Bold, smoky roast",emoji:"☕️",bg:"bg-[#F6E8D5]",stock:18,fresh:"Roasted this week",flavor:"Bold • Smoky • Low Acid",brew:"French Press / Espresso",story:"A full-bodied Liberica roast with the unmistakable character of Batangas Barako.",variants:[{weight:"250g",price:189},{weight:"500g",price:349},{weight:"1kg",price:649}],grinds:["Whole Bean","Coarse","Medium","Fine"],addon:"Barako Drip Pack"},
+    {id:2,name:"QC Blend",origin:"Cavite",roast:"Medium-Dark",price:245,weight:"500g",note:"Chocolate and brown sugar",emoji:"🤎",bg:"bg-[#EDE3D3]",stock:9,fresh:"Small-batch fresh",flavor:"Chocolate • Brown Sugar • Smooth",brew:"Drip / Pour Over",story:"A balanced local blend with rich sweetness and a smooth finish.",variants:[{weight:"250g",price:139},{weight:"500g",price:245},{weight:"1kg",price:459}],grinds:["Whole Bean","Coarse","Medium","Fine"],addon:"Cold Brew Kit"},
+    {id:3,name:"Cold Brew Kit",origin:"Batangas",roast:"Medium Roast",price:320,weight:"Set",note:"Easy to prepare at home",emoji:"🧊",bg:"bg-[#E8DDD0]",stock:6,fresh:"Limited batch",flavor:"Smooth • Cocoa • Refreshing",brew:"Cold Brew",story:"An easy cold-brew setup paired with locally roasted beans.",variants:[{weight:"1 Set",price:320},{weight:"2 Sets",price:599}],grinds:["Coarse","Medium"],addon:"QC Blend"},
+    {id:4,name:"Barako Drip Pack",origin:"Batangas",roast:"Dark Roast",price:165,weight:"10 pcs",note:"Simple coffee for the office",emoji:"✨",bg:"bg-[#F5EEE4]",stock:24,fresh:"Packed fresh",flavor:"Strong • Aromatic • Clean",brew:"Drip / Mug",story:"Convenient single-serve Barako for busy mornings.",variants:[{weight:"10 pcs",price:165},{weight:"20 pcs",price:299}],grinds:["Medium"],addon:"Barako Strong"}
   ];
-
   const DEFAULT_SETTINGS = {
     paymentMethods:["GCash","Maya","Cash on Delivery (COD)"],
     fulfillmentMethods:["Lalamove","J&T","LBC","QC Meetup"],
@@ -21,7 +20,7 @@
   const DEFAULT_SHIPPING = {enabled:true,minPacks:2,fulfillment:"all"};
 
   const DEFAULT_CMS = {
-    story:"Mula sa piling Liberica beans ng Batangas, bawat batch ng Kapeng Barako ay ako mismo ang nagroroast, binabantayan ang init, oras, at kulay hanggang lumabas ang tamang tapang at aroma. Hindi tulad ng commercial coffee na mass-produced para sa consistent volume, ang aming roast ay small-batch at hands-on, kaya bawat tasa ay may mas malalim na character, mas mababang aroma, at tunay na lutong Barako.",
+    story:"Mula sa piling Liberica beans ng Batangas, bawat batch ng Kapeng Barako ay ako mismo ang nagroroast, binabantayan ang init, oras, at kulay hanggang lumabas ang tamang tapang at aroma. Hindi tulad ng commercial coffee na mass-produced para sa consistent volume, ang aming roast ay small-batch at hands-on, kaya bawat tasa ay may mas malalim na character, mas mabangong aroma, at tunay na lutong Barako.",
     delivery:"Payment: GCash, Maya, Cash on Delivery (COD). Fulfillment: Lalamove, J&T, LBC, or meetup within Quezon City. Shipping fee is based on the selected courier and delivery distance/location. Free shipping when you buy 2 packs or more.",
     faqs:[]
   };
