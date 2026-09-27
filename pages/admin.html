@@ -27,6 +27,7 @@
         <button class="nav-item active" type="button" data-section="overview"><span>⌂</span>Overview</button>
         <button class="nav-item" type="button" data-section="orders"><span>▦</span>Orders / OMS</button>
         <button class="nav-item" type="button" data-section="products"><span>◈</span>Products</button>
+        <button class="nav-item" type="button" data-section="gallery"><span>▧</span>Gallery</button>
         <button class="nav-item" type="button" data-section="inventory"><span>◫</span>Inventory & Batches</button>
         <button class="nav-item" type="button" data-section="financials"><span>₱</span>Financials</button>
         <button class="nav-item" type="button" data-section="promos"><span>◇</span>Pricing & Promos</button>
@@ -123,6 +124,18 @@
           <div id="orders-kanban" class="kanban"></div>
           <div id="orders-table" class="table-wrap" hidden></div>
           <div class="panel-note">Drag a card between status columns to perform a manual status override. Each override is logged.</div>
+        </section>
+
+        <section class="admin-section" id="section-gallery" data-section-panel="gallery" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Visual Content</span><h2>Gallery</h2><p>Exactly 6 gallery slots. Keep image files inside <code>/images</code> and replace the paths with the buyer’s real high-resolution photos before delivery.</p></div>
+            <div class="tool-row"><button class="btn secondary" type="button" data-action="gallery-reset">Reset placeholders</button><button class="btn primary" type="button" data-action="save-gallery">Save gallery</button></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><span class="eyebrow">Local assets</span><h3>Six image slots</h3></div><span class="panel-note">No external image URLs are used.</span></div>
+            <div id="gallery-editor" class="gallery-editor"></div>
+          </div>
+          <div class="panel-note">Developer note: these are temporary local placeholders. Replace the six files in <code>/images</code> or change each local path above. The storefront reads the saved gallery configuration automatically.</div>
         </section>
 
         <section class="admin-section" id="section-products" data-section-panel="products" hidden>
