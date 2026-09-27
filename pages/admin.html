@@ -26,6 +26,7 @@
       <nav class="side-nav" aria-label="Admin navigation">
         <button class="nav-item active" type="button" data-section="overview"><span>⌂</span>Overview</button>
         <button class="nav-item" type="button" data-section="orders"><span>▦</span>Orders / OMS</button>
+        <button class="nav-item" type="button" data-section="customers"><span>♙</span>Customers</button>
         <button class="nav-item" type="button" data-section="products"><span>◈</span>Products</button>
         <button class="nav-item" type="button" data-section="gallery"><span>▧</span>Gallery</button>
         <button class="nav-item" type="button" data-section="inventory"><span>◫</span>Inventory & Batches</button>
@@ -33,6 +34,7 @@
         <button class="nav-item" type="button" data-section="promos"><span>◇</span>Pricing & Promos</button>
         <button class="nav-item" type="button" data-section="settings"><span>⚙</span>Store Settings</button>
         <button class="nav-item" type="button" data-section="cms"><span>✎</span>Content & CMS</button>
+        <button class="nav-item" type="button" data-section="regional-shipping"><span>⌁</span>Shipping Fees</button>
         <button class="nav-item" type="button" data-section="support"><span>?</span>Support Tickets</button>
         <button class="nav-item" type="button" data-section="audit"><span>◷</span>Audit Log</button>
       </nav>
@@ -87,6 +89,13 @@
           </div>
 
           <div class="metric-grid">
+            <article class="metric-card"><span>Today Sales</span><strong id="metric-today-sales">₱0</strong><small>Revenue from today's orders</small></article>
+            <article class="metric-card"><span>This Week</span><strong id="metric-week-sales">₱0</strong><small>Revenue from this week</small></article>
+            <article class="metric-card"><span>Customers</span><strong id="metric-customers">0</strong><small>Unique recorded buyers</small></article>
+            <article class="metric-card"><span>Low Stock</span><strong id="metric-low-stock-top">0</strong><small>Items at or below threshold</small></article>
+          </div>
+
+          <div class="metric-grid">
             <article class="metric-card"><span>Pending</span><strong id="metric-pending">0</strong><small>Orders awaiting verification</small></article>
             <article class="metric-card"><span>Processing / Roasting</span><strong id="metric-processing">0</strong><small>Orders in production</small></article>
             <article class="metric-card"><span>Ready to Ship</span><strong id="metric-ready">0</strong><small>Awaiting dispatch</small></article>
@@ -136,6 +145,21 @@
             <div id="gallery-editor" class="gallery-editor"></div>
           </div>
           <div class="panel-note">Developer note: these are temporary local placeholders. Replace the six files in <code>/images</code> or change each local path above. The storefront reads the saved gallery configuration automatically.</div>
+        </section>
+
+        <section class="admin-section" id="section-customers" data-section-panel="customers" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Customer Directory</span><h2>Customers</h2><p>Search real buyers from stored orders, including order frequency, total spend, phone, email, and delivery location.</p></div>
+            <div class="tool-row"><button class="btn secondary" type="button" data-action="export-customers">Export CSV</button></div>
+          </div>
+          <div class="metric-grid compact">
+            <article class="metric-card"><span>Unique customers</span><strong id="cust-total">0</strong><small>Distinct recorded buyers</small></article>
+            <article class="metric-card"><span>Repeat buyers</span><strong id="cust-repeat">0</strong><small>2+ recorded orders</small></article>
+            <article class="metric-card"><span>Top location</span><strong id="cust-top-location">—</strong><small>Most common delivery area</small></article>
+            <article class="metric-card"><span>Customer revenue</span><strong id="cust-revenue">₱0</strong><small>Total recorded order value</small></article>
+          </div>
+          <div class="filters"><input id="customer-search" class="input" type="search" placeholder="Search name, phone, email, address…"></div>
+          <div class="panel"><div id="customers-table" class="table-wrap"></div></div>
         </section>
 
         <section class="admin-section" id="section-products" data-section-panel="products" hidden>
@@ -246,6 +270,23 @@
               <label>TikTok URL<input id="settings-tiktok" class="input" type="url" placeholder="ILAG"></label>
               <label>Footer tagline<input id="settings-tagline" class="input" type="text" placeholder="Gawa sa Batangas"></label>
             </div>
+          </div>
+        </section>
+
+        <section class="admin-section" id="section-regional-shipping" data-section-panel="regional-shipping" hidden>
+          <div class="section-tools">
+            <div><span class="eyebrow">Shipping Configuration</span><h2>Regional Shipping Fees</h2><p>Set local, Metro Manila, and provincial delivery rates. These rules are stored in the same storefront adapter.</p></div>
+            <button class="btn primary" type="button" data-action="save-regional-shipping">Save shipping rules</button>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><span class="eyebrow">Delivery zones</span><h3>Fee rules</h3></div></div>
+            <div class="shipping-rule-grid">
+              <label><strong>Batangas / Local</strong><span>Local flat rate</span><input id="ship-batangas" class="input" type="number" min="0" step="1"></label>
+              <label><strong>Metro Manila</strong><span>Standard flat rate</span><input id="ship-manila" class="input" type="number" min="0" step="1"></label>
+              <label><strong>Other Provinces</strong><span>Standard provincial rate</span><input id="ship-province" class="input" type="number" min="0" step="1"></label>
+              <label><strong>Free Shipping Minimum</strong><span>Order value threshold</span><input id="ship-free-min" class="input" type="number" min="0" step="1"></label>
+            </div>
+            <div class="callout"><strong>Batangas local option</strong><span>Set ₱0 if you want local Batangas delivery to be free. These settings are configuration data; connect them to a server-side checkout before production use.</span></div>
           </div>
         </section>
 
