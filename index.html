@@ -13,6 +13,19 @@
     @media (max-width:767px){.kb-benefit-card{min-height:auto}.kb-benefits-grid{gap:14px}}
   </style>
   <script src="js/storefront.js"></script>
+
+  <style>
+    .kb-footer{background:radial-gradient(circle at 78% 18%,rgba(198,134,66,.16),transparent 28%),linear-gradient(135deg,#160E09 0%,#24150E 52%,#120B07 100%);color:#FFFCF6;border-top:1px solid rgba(242,208,164,.16)}
+    .kb-footer-main{position:relative;overflow:hidden}
+    .kb-footer-main:after{content:"";position:absolute;right:-90px;bottom:-120px;width:360px;height:260px;border:1px solid rgba(242,208,164,.10);border-radius:50%;transform:rotate(-12deg);pointer-events:none}
+    .kb-footer-mark{background:linear-gradient(145deg,#3A2418,#1B100A);border:1px solid rgba(242,208,164,.22);box-shadow:0 12px 30px -18px rgba(0,0,0,.7)}
+    .kb-footer-link{transition:color .2s ease,transform .2s ease;display:inline-block}
+    .kb-footer-link:hover{color:#F2D0A4;transform:translateX(3px)}
+    .kb-social{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(242,208,164,.25);color:#FFFCF6;transition:all .25s ease}
+    .kb-social:hover{background:#F2D0A4;color:#2B1B12;transform:translateY(-3px);box-shadow:0 12px 28px -15px rgba(242,208,164,.8)}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:767px){.kb-footer-main{padding-top:42px;padding-bottom:42px}}
+  </style>
 </head>
 <body>
   <div id="root"></div>
@@ -462,16 +475,63 @@ S("div",{className:"mt-5 flex items-center gap-3",children:[p("div",{className:"
         p("button",{type:"submit",className:"mt-4 w-full h-11 rounded-full bg-[#2B1B12] text-white text-[13px] font-medium hover:bg-black transition",children:"Place Order"})
       ]})
     ]}),
-    S("footer",{className:"mx-auto max-w-[1280px] px-6 md:px-10 py-10 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-[#2B1B12]/10 mt-2",children:[
-      S("div",{className:"flex items-center gap-3 text-[13px]",children:[
-        p("span",{className:"w-7 h-7 rounded-full bg-[#2B1B12] text-white grid place-items-center text-[11px]",children:"KB"}),
-        p("span",{className:"serif font-semibold",children:"Kapeng Barako"}),
-        p("span",{className:"opacity-40 hidden md:inline",children:"•"}),
-        p("span",{className:"opacity-60",children:"Coffee store"})
+    S("footer",{className:"kb-footer mt-2",children:[
+      S("div",{className:"kb-footer-main mx-auto max-w-[1280px] px-6 md:px-10 py-12 md:py-14",children:[
+        S("div",{className:"grid md:grid-cols-[1.35fr_.8fr_.8fr_1fr] gap-10 md:gap-8",children:[
+          S("div",{children:[
+            S("div",{className:"flex items-center gap-3",children:[
+              p("div",{className:"kb-footer-mark w-12 h-12 rounded-[16px] grid place-items-center text-[#F2D0A4] text-[15px] font-bold",children:"KB"}),
+              S("div",{children:[
+                p("div",{className:"serif text-[27px] leading-none font-[600] tracking-[-0.02em]",children:"Kapeng Barako"}),
+                p("div",{className:"mt-2 text-[10px] uppercase tracking-[0.22em] text-[#F2D0A4] font-semibold",children:"Gawa sa Batangas"})
+              ]})
+            ]}),
+            p("p",{className:"mt-6 max-w-[360px] text-[13.5px] leading-[1.75] text-white/65",children:"Tunay na Kapeng Pilipino. Mula sa mga piling sakahan ng Batangas, para sa mga tunay na mahilig sa kape."}),
+            p("p",{className:"mt-5 text-[12px] italic text-white/45",children:"Kapeng may pinagmulan, tradisyon at tunay na tapang."})
+          ]}),
+          S("div",{children:[
+            p("div",{className:"text-[11px] uppercase tracking-[0.16em] text-[#F2D0A4] font-semibold",children:"Quick Links"}),
+            S("div",{className:"mt-5 grid gap-3 text-[13px] text-white/65",children:[
+              p("a",{href:"#home",className:"kb-footer-link",children:"Home"}),
+              p("a",{href:"#products",className:"kb-footer-link",children:"Products"}),
+              p("a",{href:"#how-to-brew",className:"kb-footer-link",children:"How to Brew"}),
+              p("a",{href:"#about",className:"kb-footer-link",children:"About Us"}),
+              p("a",{href:"#contact",className:"kb-footer-link",children:"Contact"})
+            ]})
+          ]}),
+          S("div",{children:[
+            p("div",{className:"text-[11px] uppercase tracking-[0.16em] text-[#F2D0A4] font-semibold",children:"Help"}),
+            S("div",{className:"mt-5 grid gap-3 text-[13px] text-white/65",children:[
+              p("a",{href:"#delivery-payment",className:"kb-footer-link",children:"Shipping & Delivery"}),
+              p("a",{href:"#delivery-payment",className:"kb-footer-link",children:"Payment Methods"}),
+              p("a",{href:"#contact",className:"kb-footer-link",children:"Returns & Refunds"}),
+              p("a",{href:"#contact",className:"kb-footer-link",children:"FAQs"})
+            ]})
+          ]}),
+          S("div",{children:[
+            p("div",{className:"text-[11px] uppercase tracking-[0.16em] text-[#F2D0A4] font-semibold",children:"Follow Us"}),
+            p("p",{className:"mt-5 max-w-[260px] text-[13px] leading-[1.7] text-white/60",children:"Sundan kami para sa latest updates, promos at kapeng kwentuhan!"}),
+            S("div",{className:"mt-5 flex gap-3",children:[
+              p("a",{href:"https://www.facebook.com/",target:"_blank",rel:"noopener noreferrer",ariaLabel:"Facebook",className:"kb-social",children:[p("span",{className:"text-[16px] font-bold",children:"f"}),p("span",{className:"sr-only",children:"Facebook"})]}),
+              p("a",{href:"https://www.instagram.com/",target:"_blank",rel:"noopener noreferrer",ariaLabel:"Instagram",className:"kb-social",children:[p("span",{className:"text-[15px] font-bold",children:"◎"}),p("span",{className:"sr-only",children:"Instagram"})]}),
+              p("a",{href:"https://www.tiktok.com/",target:"_blank",rel:"noopener noreferrer",ariaLabel:"TikTok",className:"kb-social",children:[p("span",{className:"text-[15px] font-bold",children:"♪"}),p("span",{className:"sr-only",children:"TikTok"})]})
+            ]}),
+            p("div",{className:"mt-4 text-[10px] text-white/35",children:"Palitan ang social URLs kapag available ang official brand pages."})
+          ]})
+        ]})
       ]}),
-      p("div",{className:"text-[11px] tracking-[0.08em] uppercase opacity-50",children:"© 2026 • Kapeng Barako"})
-    ]})
-  ]});
+      S("div",{className:"border-t border-white/10",children:[
+        S("div",{className:"mx-auto max-w-[1280px] px-6 md:px-10 py-5 flex flex-col sm:flex-row items-center justify-between gap-3",children:[
+          p("div",{className:"text-[11px] tracking-[0.08em] uppercase text-white/45",children:"© 2026 Kapeng Barako"}),
+          S("div",{className:"flex items-center gap-3 text-[11px] text-[#F2D0A4]",children:[
+            p("span",{className:"w-2 h-2 rounded-full bg-[#F2D0A4]"}),
+            p("span",{children:"Gawa sa Batangas"}),
+            p("span",{className:"text-white/25",children:"•"}),
+            p("span",{className:"text-white/45",children:"Local coffee, crafted with care."})
+          ]})
+        ]})
+      ]})
+    ]});
 }
 
 Wc.createRoot(document.getElementById("root")).render(p(Bc.default.StrictMode,{children:p(bu,{})}));
