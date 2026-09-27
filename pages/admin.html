@@ -126,7 +126,7 @@
           </div>
           <div class="filters">
             <input id="order-search" class="input" type="search" placeholder="Search order ID, customer, phone…">
-            <select id="order-payment-filter" class="input"><option value="">All payments</option><option>GCash</option><option>Maya</option><option>Cash on Delivery</option></select>
+            <select id="order-payment-filter" class="input"><option value="">All payments</option><option>GCash</option><option>Cash on Delivery (COD)</option><option>Bank Transfer</option><option>Maya</option></select>
             <select id="order-courier-filter" class="input"><option value="">All fulfillment</option><option>Lalamove</option><option>J&T</option><option>LBC</option><option>QC Meetup</option></select>
             <select id="order-status-filter" class="input"><option value="">All statuses</option></select>
           </div>
@@ -246,8 +246,9 @@
             <div class="panel">
               <div class="panel-head"><div><span class="eyebrow">Checkout</span><h3>Payment methods</h3></div></div>
               <label class="check-card"><input type="checkbox" class="setting-payment" value="GCash"><span><strong>GCash</strong><small>Show GCash in checkout</small></span></label>
-              <label class="check-card"><input type="checkbox" class="setting-payment" value="Maya"><span><strong>Maya</strong><small>Show Maya in checkout</small></span></label>
               <label class="check-card"><input type="checkbox" class="setting-payment" value="Cash on Delivery (COD)"><span><strong>Cash on Delivery (COD)</strong><small>Show COD in checkout</small></span></label>
+              <label class="check-card"><input type="checkbox" class="setting-payment" value="Bank Transfer"><span><strong>Bank Transfer</strong><small>Show bank transfer in checkout</small></span></label>
+              <label class="check-card"><input type="checkbox" class="setting-payment" value="Maya"><span><strong>Maya</strong><small>Optional additional payment method</small></span></label>
             </div>
             <div class="panel">
               <div class="panel-head"><div><span class="eyebrow">Fulfillment</span><h3>Delivery options</h3></div></div>
@@ -262,6 +263,8 @@
             <div class="form-grid">
               <label>Shipping fee note<textarea id="settings-shipping-note" class="textarea" rows="3"></textarea></label>
               <label>Order confirmation note<textarea id="settings-order-note" class="textarea" rows="3"></textarea></label>
+              <label>GCash instructions<textarea id="settings-gcash-instructions" class="textarea" rows="3" placeholder="GCash name / number / QR instructions"></textarea></label>
+              <label>Bank transfer instructions<textarea id="settings-bank-instructions" class="textarea" rows="3" placeholder="Bank name / account name / account number / transfer steps"></textarea></label>
               <label>Business email<input id="settings-email" class="input" type="email" placeholder="ILAG"></label>
               <label>Business phone<input id="settings-phone" class="input" type="text" placeholder="ILAG"></label>
               <label>Business location<input id="settings-location" class="input" type="text" placeholder="ILAG"></label>
@@ -351,6 +354,7 @@
         <label>COGS<input class="input" id="order-cogs" type="number" min="0" step="0.01" value="0"></label>
         <label>Shipping subsidy<input class="input" id="order-shipping" type="number" min="0" step="0.01" value="0"></label>
         <label>Affiliate commission<input class="input" id="order-affiliate" type="number" min="0" step="0.01" value="0"></label>
+         
         <label>Order total<input class="input" id="order-total" type="number" min="0" step="0.01" value="0"></label>
       </div>
       <label>Order items (one line per item: Name × Qty)<textarea class="textarea" id="order-items" rows="5" placeholder="Barako Strong × 1"></textarea></label>
