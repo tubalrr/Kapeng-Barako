@@ -176,12 +176,14 @@
     if (window.innerWidth < 900) document.body.classList.remove("menu-open");
     if (section === "overview") renderOverview();
     if (section === "orders") renderOrders();
+    if (section === "customers") renderCustomers();
     if (section === "inventory") renderInventory();
     if (section === "financials") renderFinancials();
     if (section === "products") renderProducts();
     if (section === "gallery") renderGallery();
     if (section === "promos") renderPromos();
     if (section === "settings") renderSettings();
+    if (section === "regional-shipping") renderRegionalShipping();
     if (section === "cms") renderCms();
     if (section === "support") renderTickets();
     if (section === "audit") renderAudit();
@@ -216,12 +218,22 @@
     inventory = read(KEY.inventory, []);
     tickets = read(KEY.tickets, []);
     const revenue = orders.reduce((s,o) => s + o.total, 0);
+    const now = new Date();
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const startWeek = startToday - ((now.getDay() + 6) % 7) * 86400000;
+    const todaySales = orders.filter(o => new Date(o.createdAt || 0).getTime() >= startToday).reduce((s,o) => s + Number(o.total || 0), 0);
+    const weekSales = orders.filter(o => new Date(o.createdAt || 0).getTime() >= startWeek).reduce((s,o) => s + Number(o.total || 0), 0);
+    const customerMap = buildCustomers(orders);
     const low = inventory.filter(i => Number(i.stock || 0) <= Number(i.threshold || 0) && Number(i.threshold || 0) > 0).length;
     const openTickets = tickets.filter(t => !["Resolved","Closed"].includes(t.status)).length;
     $("#metric-orders").textContent = orders.length;
     $("#metric-low-stock").textContent = low;
     $("#metric-tickets").textContent = openTickets;
     $("#metric-revenue").textContent = money(revenue);
+    $("#metric-today-sales").textContent = money(todaySales);
+    $("#metric-week-sales").textContent = money(weekSales);
+    $("#metric-customers").textContent = customerMap.length;
+    $("#metric-low-stock-top").textContent = low;
     $("#metric-pending").textContent = orders.filter(o=>o.status==="Pending").length;
     $("#metric-processing").textContent = orders.filter(o=>o.status==="Processing/Roasting").length;
     $("#metric-ready").textContent = orders.filter(o=>o.status==="Ready to Ship").length;
@@ -583,6 +595,65 @@
     saveInventory();$("#inventory-dialog").close();toast("Inventory saved");renderInventory();renderOverview();renderAudit();
   }
 
+  function buildCustomers(sourceOrders = getOrders()) {
+    const map = new Map();
+    sourceOrders.forEach(o => {
+      const c = o.customer || {};
+      const key = String(c.email || c.phone || c.name || "Unknown").trim().toLowerCase();
+      if (!key) return;
+      if (!map.has(key)) map.set(key,{name:c.name||"Unnamed",phone:c.phone||"",email:c.email||"",address:c.address||"",orders:0,revenue:0,lastOrder:o.createdAt||"",locations:new Map()});
+      const item=map.get(key);
+      item.orders += 1;
+      item.revenue += Number(o.total||0);
+      if(new Date(o.createdAt||0)>new Date(item.lastOrder||0)) item.lastOrder=o.createdAt||"";
+      const loc=String(c.address||"").split(",")[0].trim() || "—";
+      item.locations.set(loc,(item.locations.get(loc)||0)+1);
+      if(!item.address && c.address) item.address=c.address;
+    });
+    return [...map.values()].map(x=>({...x,location:[...x.locations.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||"—"})).sort((a,b)=>b.revenue-a.revenue);
+  }
+
+  function renderCustomers(){
+    orders=getOrders();
+    const customers=buildCustomers(orders);
+    const search=($("#customer-search")?.value||"").trim().toLowerCase();
+    const filtered=customers.filter(c=>[c.name,c.phone,c.email,c.address,c.location].join(" ").toLowerCase().includes(search));
+    const repeat=customers.filter(c=>c.orders>=2).length;
+    const locations={}; customers.forEach(c=>{locations[c.location]=(locations[c.location]||0)+1;});
+    const top=Object.entries(locations).sort((a,b)=>b[1]-a[1])[0]?.[0]||"—";
+    $("#cust-total").textContent=customers.length;
+    $("#cust-repeat").textContent=repeat;
+    $("#cust-top-location").textContent=top;
+    $("#cust-revenue").textContent=money(customers.reduce((s,c)=>s+c.revenue,0));
+    const root=$("#customers-table");
+    if(!filtered.length){root.innerHTML='<div class="empty"><strong>No customers found</strong>Customers are created from actual stored order records.</div>';return;}
+    root.innerHTML='<table><thead><tr><th>Customer</th><th>Contact</th><th>Location</th><th>Orders</th><th>Total Spend</th><th>Last Order</th></tr></thead><tbody>'+
+      filtered.map(c=>'<tr><td><strong>'+safe(c.name)+'</strong></td><td>'+safe(c.phone||"—")+'<br><span class="panel-note">'+safe(c.email||"")+'</span></td><td>'+safe(c.location)+'</td><td><strong>'+c.orders+'</strong>'+(c.orders>=2?' <span class="status-badge verified">Repeat</span>':'')+'</td><td>'+money(c.revenue)+'</td><td>'+dateTime(c.lastOrder)+'</td></tr>').join("")+
+      '</tbody></table>';
+  }
+
+  function renderRegionalShipping(){
+    const r=read(KEY.shipping,{regional:{batangas:0,manila:150,province:220},freeMinimum:0});
+    const regional=r.regional||{batangas:0,manila:150,province:220};
+    $("#ship-batangas").value=regional.batangas??0;
+    $("#ship-manila").value=regional.manila??150;
+    $("#ship-province").value=regional.province??220;
+    $("#ship-free-min").value=r.freeMinimum??0;
+  }
+
+  function saveRegionalShipping(){
+    const current=read(KEY.shipping,{enabled:true,minPacks:2,fulfillment:"all"});
+    const rule={...current,regional:{
+      batangas:Math.max(0,Number($("#ship-batangas").value||0)),
+      manila:Math.max(0,Number($("#ship-manila").value||0)),
+      province:Math.max(0,Number($("#ship-province").value||0))
+    },freeMinimum:Math.max(0,Number($("#ship-free-min").value||0))};
+    write(KEY.shipping,rule);
+    log("Regional shipping rules updated","shipping","regional",JSON.stringify(rule.regional));
+    toast("Regional shipping rules saved");
+    renderAudit();
+  }
+
   function renderFinancials() {
     orders = getOrders();
     const revenue=orders.reduce((s,o)=>s+o.total,0);
@@ -739,6 +810,7 @@
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   }
   function exportOrders(){downloadCsv("kapeng-barako-orders.csv",[["Order ID","Created","Customer","Phone","Email","Address","Payment","Fulfillment","Status","Total","COGS","Shipping Subsidy","Affiliate Commission"],...orders.map(o=>[o.id,o.createdAt,o.customer.name,o.customer.phone,o.customer.email,o.customer.address,o.payment,o.fulfillment,o.status,o.total,o.cogs,o.shippingSubsidy,o.affiliateCommission])]);}
+  function exportCustomers(){const customers=buildCustomers(getOrders());downloadCsv("kapeng-barako-customers.csv",[["Customer","Phone","Email","Location","Orders","Total Spend","Last Order"],...customers.map(c=>[c.name,c.phone,c.email,c.location,c.orders,c.revenue,c.lastOrder])]);}
   function exportFinancials(){downloadCsv("kapeng-barako-financials.csv",[["Order ID","Payment","Revenue","COGS","Shipping Subsidy","Affiliate Commission","Tracked Net"],...orders.map(o=>[o.id,o.payment,o.total,o.cogs,o.shippingSubsidy,o.affiliateCommission,o.total-o.cogs-o.shippingSubsidy-o.affiliateCommission])]);}
   function exportAudit(){downloadCsv("kapeng-barako-audit.csv",[["Time","Action","Entity","ID","Details"],...read(KEY.audit,[]).map(x=>[x.at,x.action,x.entity,x.entityId,x.details])]);}
   function exportCms(){const blob=new Blob([JSON.stringify(cms,null,2)],{type:"application/json;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="kapeng-barako-cms.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
@@ -833,6 +905,8 @@
     if(action==="add-faq") addFaq();
     if(action==="export-orders") exportOrders();
     if(action==="export-financials") exportFinancials();
+    if(action==="export-customers") exportCustomers();
+    if(action==="save-regional-shipping") saveRegionalShipping();
     if(action==="print-report") printReport();
     if(action==="export-audit") exportAudit();
     if(action==="open-menu") document.body.classList.add("menu-open");
@@ -841,6 +915,7 @@
 
   ["order-search","order-payment-filter","order-courier-filter","order-status-filter"].forEach(id=>$("#"+id)?.addEventListener("input",renderOrders));
   ["ticket-search","ticket-status-filter"].forEach(id=>$("#"+id)?.addEventListener("input",renderTickets));
+  $("#customer-search")?.addEventListener("input",renderCustomers);
 
   $("#order-form")?.addEventListener("submit",saveOrderFromForm);
   $("#product-form")?.addEventListener("submit",saveProductFromForm);
@@ -881,11 +956,13 @@
 
   renderOverview();
   renderOrders();
+  renderCustomers();
   renderInventory();
   renderFinancials();
   renderProducts();
   renderPromos();
   renderSettings();
+  renderRegionalShipping();
   renderCms();
   renderTickets();
   renderAudit();
