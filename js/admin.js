@@ -77,6 +77,7 @@
     shippingSubsidy: Number(o.shippingSubsidy || 0),
     affiliateCommission: Number(o.affiliateCommission || 0),
     status: STATUS.includes(o.status) ? o.status : "Pending",
+    statusUpdatedAt: o.statusUpdatedAt || o.createdAt || new Date().toISOString(),
     tags: Array.isArray(o.tags) ? o.tags : []
   });
 
