@@ -8,15 +8,15 @@
     {id:4,name:"Barako Drip Pack",origin:"Batangas",roast:"Dark Roast",price:165,weight:"10 pcs",note:"Simple coffee for the office",emoji:"✨",bg:"#F5EEE4",stock:24,variants:[{weight:"10 pcs",price:165},{weight:"20 pcs",price:299}],grinds:["Medium"]}
   ];
   const fallbackCms = {
-    heroEyebrow:"Freshly roasted • Quezon City",
-    heroTitle:"Bold coffee.\nMade for\neveryday.",
-    heroDescription:"Personal na roasted, small-batch, at may tunay na character ng Barako.",
+    heroEyebrow:"BATANGAS LIBERICA • SMALL-BATCH ROAST",
+    heroTitle:"Kapeng Barako.\nBold by nature.\nRoasted in Batangas.",
+    heroDescription:"Small-batch Liberica coffee, roasted with intent in Batangas — rich aroma, deep character, unmistakably Barako.",
     story:"Mula sa piling Liberica beans ng Batangas, bawat batch ng Kapeng Barako ay ako mismo ang nagroroast, binabantayan ang init, oras, at kulay hanggang lumabas ang tamang tapang at aroma. Hindi tulad ng commercial coffee na mass-produced para sa consistent volume, ang aming roast ay small-batch at hands-on, kaya bawat tasa ay may mas malalim na character, mas mabangong aroma, at tunay na lutong Barako.",
     delivery:"Payment: GCash, Maya, Cash on Delivery (COD). Fulfillment: Lalamove, J&T, LBC, or meetup within Quezon City. Shipping fee is based on the selected courier and delivery distance/location. Free shipping when you buy 2 packs or more.",
     benefits:[
-      {title:"Matapang / Pure",desc:"Puro at walang halong iba",icon:"☕"},
-      {title:"Gawang Batangas",desc:"Galing sa mga piling sakahan ng Batangas",icon:"⌂"},
-      {title:"Fresh Roast",desc:"Personal na nire-roast sa maliliit na batch",icon:"✦"}
+      {title:"Matapang / Pure",desc:"Puro at walang halong iba",icon:"01"},
+      {title:"Gawang Batangas",desc:"Galing sa mga piling sakahan ng Batangas",icon:"02"},
+      {title:"Fresh Roast",desc:"Personal na nire-roast sa maliliit na batch",icon:"03"}
     ],
     brewSteps:[
       {title:"Pakulo",desc:"Pakuluan ang malinis na tubig hanggang umabot sa tamang init."},
@@ -223,7 +223,7 @@
       const variants=p.variants.map(v=>'<button type="button" class="variant-btn '+(v.weight===c.variant.weight?"active":"")+'" data-variant="'+esc(p.id)+'" data-weight="'+esc(v.weight)+'">'+esc(v.weight)+'</button>').join("");
       const grinds=p.grinds.map(g=>'<option value="'+esc(g)+'" '+(g===c.grind?"selected":"")+'>'+esc(g)+'</option>').join("");
       return '<article class="product-card">'+
-        '<div class="product-art" style="background:'+esc(p.bg||"#F1E6D3")+'"><span class="product-emoji">'+esc(p.emoji||"☕")+'</span><span class="stock-pill '+(low?"low urgent":"")+'">'+(Number(p.stock||0)>0?esc(low?"⚡ Only "+Number(p.stock)+" stock"+(Number(p.stock)===1?"":"s")+" left!":"In stock"):"Out of stock")+'</span><span class="product-price">'+money(c.variant.price)+'</span></div>'+
+        '<div class="product-art product-art-premium product-art-'+((Number(p.id)||1)%4||4)+'"><span class="stock-pill '+(low?"low urgent":"")+'">'+(Number(p.stock||0)>0?esc(low?"⚡ Only "+Number(p.stock)+" stock"+(Number(p.stock)===1?"":"s")+" left!":"In stock"):"Out of stock")+'</span><span class="product-price">'+money(c.variant.price)+'</span></div>'+
         '<div class="product-body"><div class="product-title-row"><h3>'+esc(p.name)+'</h3><span class="tag">'+esc(p.roast||"Fresh roast")+'</span></div>'+
         '<p>'+esc(p.note||"")+'</p><span class="product-label">Weight</span><div class="variant-row">'+variants+'</div>'+
         '<label class="product-label">Grind<select class="product-select" data-grind="'+esc(p.id)+'">'+grinds+'</select></label>'+
