@@ -66,7 +66,9 @@
       email: o.customer?.email || "",
       address: o.customer?.address || ""
     },
-    payment: o.customer?.payment || o.payment || "Cash on Delivery",
+    payment: o.customer?.payment || o.payment || "Cash on Delivery (COD)",
+    paymentReference: o.paymentReference || "",
+    paymentProofName: o.paymentProofName || "",
     fulfillment: o.customer?.fulfillment || o.fulfillment || "Lalamove",
     items: Array.isArray(o.items) ? o.items : [],
     itemNote: o.itemNote || "",
@@ -115,6 +117,9 @@
   let promos = read(KEY.promos, []);
   let products = (read(KEY.products, null) || DEFAULT_PRODUCTS).map(normalizeProduct);
   let settings = {...DEFAULT_SETTINGS,...(read(KEY.settings,{})||{})};
+  settings.paymentMethods=Array.isArray(settings.paymentMethods)&&settings.paymentMethods.length?[...settings.paymentMethods]:[...DEFAULT_SETTINGS.paymentMethods];
+  settings.paymentMethods=[...new Set(settings.paymentMethods.map(x=>x==="Cash on Delivery"?"Cash on Delivery (COD)":x))];
+  ["GCash","Cash on Delivery (COD)","Bank Transfer"].forEach(method=>{if(!settings.paymentMethods.includes(method))settings.paymentMethods.push(method);});
   const DEFAULT_GALLERY = [
     {id:1,image:"images/gallery-01.svg",title:"Roasted Liberica Beans",caption:"Close-up coffee bean study"},
     {id:2,image:"images/gallery-02.svg",title:"Coffee Farm Origins",caption:"Green farm and coffee cherries"},
