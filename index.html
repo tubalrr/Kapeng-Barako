@@ -14,6 +14,33 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+  <aside class="site-sidebar" id="site-sidebar" aria-label="Kapeng Barako navigation">
+    <a class="sidebar-brand" href="#home" aria-label="Kapeng Barako home">
+      <span class="sidebar-brand-mark"><img src="images/favicon.svg" alt="Kapeng Barako Batangas"></span>
+      <span><strong>Kapeng Barako</strong><small>Batangas · Liberica Coffee</small></span>
+    </a>
+    <div class="sidebar-kicker">BATANGAS / SMALL BATCH</div>
+    <nav class="sidebar-nav" aria-label="Primary navigation">
+      <a href="#home" class="sidebar-link active" data-side-nav>Home</a>
+      <a href="#products" class="sidebar-link" data-side-nav>Products</a>
+      <a href="#story" class="sidebar-link" data-side-nav>Our Story</a>
+      <a href="#gallery" class="sidebar-link" data-side-nav>Gallery</a>
+      <a href="#delivery" class="sidebar-link" data-side-nav>Delivery</a>
+      <button class="sidebar-link sidebar-track-link" type="button" data-sidebar-track>Track Order</button>
+      <a href="#faq" class="sidebar-link" data-side-nav>FAQ</a>
+      <a href="#contact" class="sidebar-link" data-side-nav>Contact</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-socials" aria-label="Social platforms">
+        <a id="sidebar-fb" href="#" target="_blank" rel="noopener" aria-label="Facebook"><img src="https://cdn.simpleicons.org/facebook" alt=""></a>
+        <a id="sidebar-ig" href="#" target="_blank" rel="noopener" aria-label="Instagram"><img src="https://cdn.simpleicons.org/instagram" alt=""></a>
+        <a id="sidebar-tiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok"><img src="https://cdn.simpleicons.org/tiktok" alt=""></a>
+      </div>
+      <a class="sidebar-shop" href="#products">Shop Coffee <span>→</span></a>
+      <p>Bold by nature.<br>Roasted in Batangas.</p>
+    </div>
+  </aside>
+
   <header class="site-header" id="top">
     <div class="site-container nav-wrap">
       <a class="brand" href="#top" aria-label="Kapeng Barako home">
@@ -35,7 +62,7 @@
   </header>
 
   <main>
-    <section class="hero section-pad">
+    <section class="hero section-pad" id="home">
       <div class="site-container hero-grid">
         <div class="hero-copy">
           <span class="eyebrow" data-cms="heroEyebrow">Freshly roasted • Quezon City</span>
