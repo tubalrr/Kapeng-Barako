@@ -16,6 +16,8 @@
     lastOrder: "kb_last_order",
     inventory: "kb_inventory",
     promos: "kb_promos",
+    products: "kb_products",
+    settings: "kb_settings",
     cms: "kb_cms",
     tickets: "kb_tickets",
     audit: "kb_admin_audit",
@@ -83,9 +85,34 @@
     return orders;
   };
 
+  const DEFAULT_PRODUCTS = [
+    {id:1,name:"Barako Strong",origin:"Batangas",roast:"Dark Roast",price:189,weight:"250g",note:"Bold, smoky roast",emoji:"☕️",bg:"bg-[#F6E8D5]",stock:18,fresh:"Roasted this week",flavor:"Bold • Smoky • Low Acid",brew:"French Press / Espresso",story:"A full-bodied Liberica roast with the unmistakable character of Batangas Barako.",variants:[{weight:"250g",price:189},{weight:"500g",price:349},{weight:"1kg",price:649}],grinds:["Whole Bean","Coarse","Medium","Fine"],addon:"Barako Drip Pack"},
+    {id:2,name:"QC Blend",origin:"Cavite",roast:"Medium-Dark",price:245,weight:"500g",note:"Chocolate and brown sugar",emoji:"🤎",bg:"bg-[#EDE3D3]",stock:9,fresh:"Small-batch fresh",flavor:"Chocolate • Brown Sugar • Smooth",brew:"Drip / Pour Over",story:"A balanced local blend with rich sweetness and a smooth finish.",variants:[{weight:"250g",price:139},{weight:"500g",price:245},{weight:"1kg",price:459}],grinds:["Whole Bean","Coarse","Medium","Fine"],addon:"Cold Brew Kit"},
+    {id:3,name:"Cold Brew Kit",origin:"Batangas",roast:"Medium Roast",price:320,weight:"Set",note:"Easy to prepare at home",emoji:"🧊",bg:"bg-[#E8DDD0]",stock:6,fresh:"Limited batch",flavor:"Smooth • Cocoa • Refreshing",brew:"Cold Brew",story:"An easy cold-brew setup paired with locally roasted beans.",variants:[{weight:"1 Set",price:320},{weight:"2 Sets",price:599}],grinds:["Coarse","Medium"],addon:"QC Blend"},
+    {id:4,name:"Barako Drip Pack",origin:"Batangas",roast:"Dark Roast",price:165,weight:"10 pcs",note:"Simple coffee for the office",emoji:"✨",bg:"bg-[#F5EEE4]",stock:24,fresh:"Packed fresh",flavor:"Strong • Aromatic • Clean",brew:"Drip / Mug",story:"Convenient single-serve Barako for busy mornings.",variants:[{weight:"10 pcs",price:165},{weight:"20 pcs",price:299}],grinds:["Medium"],addon:"Barako Strong"}
+  ];
+  const DEFAULT_SETTINGS = {
+    paymentMethods:["GCash","Maya","Cash on Delivery (COD)"],
+    fulfillmentMethods:["Lalamove","J&T","LBC","QC Meetup"],
+    shippingNote:"Courier fee is based on the selected courier and delivery distance/location. Final fee is confirmed before fulfillment.",
+    orderNote:"We confirm the final delivery details before fulfillment.",
+    email:"ILAG",
+    phone:"ILAG",
+    location:"ILAG"
+  };
+
+  const normalizeProduct = p => ({
+    ...p,
+    price:Number(p?.price||0),
+    variants:Array.isArray(p?.variants)&&p.variants.length?p.variants:[{weight:p?.weight||"Pack",price:Number(p?.price||0)}],
+    grinds:Array.isArray(p?.grinds)&&p.grinds.length?p.grinds:["Whole Bean","Coarse","Medium","Fine"]
+  });
+
   let orders = getOrders();
   let inventory = read(KEY.inventory, []);
   let promos = read(KEY.promos, []);
+  let products = (read(KEY.products, null) || DEFAULT_PRODUCTS).map(normalizeProduct);
+  let settings = {...DEFAULT_SETTINGS,...(read(KEY.settings,{})||{})};
   let cms = read(KEY.cms, null);
   let tickets = read(KEY.tickets, []);
   let invFilter = "";
@@ -99,6 +126,8 @@
   const saveOrders = () => write(KEY.orders, orders);
   const saveInventory = () => write(KEY.inventory, inventory);
   const savePromos = () => write(KEY.promos, promos);
+  const saveProducts = () => write(KEY.products, products);
+  const saveSettings = () => write(KEY.settings, settings);
   const saveTickets = () => write(KEY.tickets, tickets);
   const saveCms = () => write(KEY.cms, cms);
 
@@ -116,7 +145,9 @@
     if (section === "orders") renderOrders();
     if (section === "inventory") renderInventory();
     if (section === "financials") renderFinancials();
+    if (section === "products") renderProducts();
     if (section === "promos") renderPromos();
+    if (section === "settings") renderSettings();
     if (section === "cms") renderCms();
     if (section === "support") renderTickets();
     if (section === "audit") renderAudit();
@@ -350,6 +381,69 @@
     } else toast("The order must contain a customer phone number for SMS.");
   }
 
+  function renderProducts() {
+    products = (read(KEY.products, products) || products).map(normalizeProduct);
+    const root = $("#products-table");
+    if (!products.length) {
+      root.innerHTML = '<div class="empty"><strong>No products</strong>Add the client’s real products here.</div>';
+      return;
+    }
+    root.innerHTML = '<table><thead><tr><th>Product</th><th>Variants</th><th>Grinds</th><th>Origin</th><th>Roast</th><th>Actions</th></tr></thead><tbody>'+
+      products.map(p=>'<tr><td><strong>'+safe(p.name)+'</strong><br><span class="panel-note">'+money(p.price)+' · '+safe(p.weight||"")+'</span></td><td>'+safe(p.variants.map(v=>v.weight+" · "+money(v.price)).join(" | "))+'</td><td>'+safe(p.grinds.join(" · "))+'</td><td>'+safe(p.origin||"ILAG")+'</td><td>'+safe(p.roast||"ILAG")+'</td><td><button class="table-action" data-edit-product="'+safe(p.id)+'">Edit</button><button class="table-action" data-delete-product="'+safe(p.id)+'">Delete</button></td></tr>').join("")+
+      '</tbody></table>';
+  }
+
+  function openProduct(id){
+    const p=products.find(x=>String(x.id)===String(id));
+    $("#product-edit-id").value=p?.id||"";
+    $("#product-name").value=p?.name||"";
+    $("#product-price").value=p?.price||0;
+    $("#product-weight").value=p?.weight||p?.variants?.[0]?.weight||"";
+    $("#product-emoji").value=p?.emoji||"☕️";
+    $("#product-note").value=p?.note||"";
+    $("#product-variants").value=JSON.stringify(p?.variants||[],null,2);
+    $("#product-grinds").value=(p?.grinds||[]).join("\n");
+    const d=$("#product-dialog");
+    if(typeof d.showModal==="function")d.showModal();else d.setAttribute("open","");
+  }
+
+  function saveProductFromForm(e){
+    e.preventDefault();
+    const id=$("#product-edit-id").value.trim();
+    let variants=[];
+    try { variants=JSON.parse($("#product-variants").value||"[]"); } catch { toast("Variants JSON is invalid."); return; }
+    variants=Array.isArray(variants)?variants.filter(v=>v&&v.weight&&Number.isFinite(Number(v.price))).map(v=>({weight:String(v.weight),price:Number(v.price)})):[];
+    if(!variants.length) variants=[{weight:$("#product-weight").value.trim(),price:Number($("#product-price").value||0)}];
+    const grinds=$("#product-grinds").value.split("\n").map(s=>s.trim()).filter(Boolean);
+    const base=products.find(p=>String(p.id)===String(id))||{};
+    const payload={...base,id:id||uid("PROD"),name:$("#product-name").value.trim(),price:Number($("#product-price").value||variants[0].price),weight:$("#product-weight").value.trim()||variants[0].weight,note:$("#product-note").value.trim(),emoji:$("#product-emoji").value.trim()||"☕️",origin:base.origin||"ILAG",roast:base.roast||"ILAG",bg:base.bg||"bg-[#F6E8D5]",variants,grinds:grinds.length?grinds:["Whole Bean"],stock:base.stock??0,fresh:base.fresh||"",flavor:base.flavor||"",brew:base.brew||"",story:base.story||"",addon:base.addon||""};
+    if(!payload.name){toast("Product name is required.");return;}
+    const idx=products.findIndex(p=>String(p.id)===String(id));
+    if(idx>=0){products[idx]=normalizeProduct(payload);log("Product updated","product",id,payload.name);}
+    else{products.unshift(normalizeProduct(payload));log("Product created","product",payload.id,payload.name);}
+    saveProducts();$("#product-dialog").close();toast("Product saved");renderProducts();renderAudit();
+  }
+
+  function renderSettings(){
+    settings={...DEFAULT_SETTINGS,...(read(KEY.settings,settings)||{})};
+    $(".setting-payment").forEach(x=>x.checked=settings.paymentMethods.includes(x.value));
+    $(".setting-fulfillment").forEach(x=>x.checked=settings.fulfillmentMethods.includes(x.value));
+    $("#settings-shipping-note").value=settings.shippingNote||"";
+    $("#settings-order-note").value=settings.orderNote||"";
+    $("#settings-email").value=settings.email||"ILAG";
+    $("#settings-phone").value=settings.phone||"ILAG";
+    $("#settings-location").value=settings.location||"ILAG";
+  }
+
+  function saveSettingsFromForm(){
+    const payments=$(".setting-payment:checked").map(x=>x.value);
+    const fulfillments=$(".setting-fulfillment:checked").map(x=>x.value);
+    settings={...settings,paymentMethods:payments.length?payments:DEFAULT_SETTINGS.paymentMethods,fulfillmentMethods:fulfillments.length?fulfillments:DEFAULT_SETTINGS.fulfillmentMethods,shippingNote:$("#settings-shipping-note").value.trim(),orderNote:$("#settings-order-note").value.trim(),email:$("#settings-email").value.trim()||"ILAG",phone:$("#settings-phone").value.trim()||"ILAG",location:$("#settings-location").value.trim()||"ILAG"};
+    saveSettings();
+    log("Store settings updated","settings","store","payment and fulfillment options plus contact details");
+    toast("Store settings saved");
+  }
+
   function renderInventory() {
     inventory = read(KEY.inventory, []);
     const total = inventory.reduce((s,i)=>s+Number(i.stock||0),0);
@@ -581,6 +675,11 @@
     const notif=e.target.closest("[data-notify-order]");
     if(notif) notifyOrder(notif.dataset.notifyOrder);
 
+    const pr=e.target.closest("[data-edit-product]");
+    if(pr) openProduct(pr.dataset.editProduct);
+    const pnew=e.target.closest("[data-delete-product]");
+    if(pnew && confirm("Delete this product from the storefront?")){products=products.filter(p=>String(p.id)!==String(pnew.dataset.deleteProduct));saveProducts();log("Product deleted","product",pnew.dataset.deleteProduct);toast("Product deleted");renderProducts();renderAudit();}
+
     const ie=e.target.closest("[data-edit-inv]");
     if(ie) openInventory(ie.dataset.editInv);
     const idel=e.target.closest("[data-delete-inv]");
@@ -614,8 +713,10 @@
     const action=e.target.closest("[data-action]")?.dataset.action;
     if(action==="refresh") refresh();
     if(action==="open-order") openOrder("");
+    if(action==="open-product") openProduct("");
     if(action==="open-inventory") openInventory("");
     if(action==="open-promo") openPromo("");
+    if(action==="save-settings") saveSettingsFromForm();
     if(action==="open-ticket") openTicket("");
     if(action==="save-free-ship") saveShippingRule();
     if(action==="cms-save") saveCmsFromEditor();
@@ -633,12 +734,13 @@
   ["ticket-search","ticket-status-filter"].forEach(id=>$("#"+id)?.addEventListener("input",renderTickets));
 
   $("#order-form")?.addEventListener("submit",saveOrderFromForm);
+  $("#product-form")?.addEventListener("submit",saveProductFromForm);
   $("#inventory-form")?.addEventListener("submit",saveInventoryFromForm);
   $("#promo-form")?.addEventListener("submit",savePromoFromForm);
   $("#ticket-form")?.addEventListener("submit",saveTicketFromForm);
 
   window.addEventListener("storage", e => {
-    if([KEY.orders,KEY.lastOrder,KEY.inventory,KEY.promos,KEY.cms,KEY.tickets,KEY.audit,KEY.shipping].includes(e.key)){
+    if([KEY.orders,KEY.lastOrder,KEY.inventory,KEY.promos,KEY.products,KEY.settings,KEY.cms,KEY.tickets,KEY.audit,KEY.shipping].includes(e.key)){
       refresh();
       $("#sync-status").textContent="Updated from another tab";
     }
@@ -664,6 +766,7 @@
   }
 
   $("#order-dialog")?.addEventListener("close",()=>$("#order-form")?.reset());
+  $("#product-dialog")?.addEventListener("close",()=>$("#product-form")?.reset());
   $("#inventory-dialog")?.addEventListener("close",()=>$("#inventory-form")?.reset());
   $("#promo-dialog")?.addEventListener("close",()=>$("#promo-form")?.reset());
 
@@ -671,7 +774,9 @@
   renderOrders();
   renderInventory();
   renderFinancials();
+  renderProducts();
   renderPromos();
+  renderSettings();
   renderCms();
   renderTickets();
   renderAudit();
