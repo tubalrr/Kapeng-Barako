@@ -74,9 +74,18 @@ function bu(){
       createdAt:new Date().toISOString(),
       customer:customer,
       items:cart.map(({id,name,price,weight,qty})=>({id:id,name:name,price:price,weight:weight,qty:qty})),
-      total:total
+      total:total,
+      status:"Pending",
+      cogs:0,
+      shippingSubsidy:0,
+      affiliateCommission:0
     };
-    try{localStorage.setItem("kb_last_order",JSON.stringify(order))}catch(e){}
+    try{
+      localStorage.setItem("kb_last_order",JSON.stringify(order));
+      const existing=JSON.parse(localStorage.getItem("kb_orders")||"[]");
+      const list=Array.isArray(existing)?existing:[];
+      localStorage.setItem("kb_orders",JSON.stringify([order,...list.filter(x=>x&&x.id!==order.id)]));
+    }catch(e){}
     clear();
     setCheckoutOpen(false);
     setCartOpen(false);
