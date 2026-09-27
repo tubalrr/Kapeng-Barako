@@ -1,148 +1,77 @@
 # Kapeng Barako
 
-A responsive Kapeng Barako coffee storefront prepared for client handoff and customization.
+Responsive single-page coffee storefront with a separate Admin Dashboard.
 
-## Project Structure
+## Structure
 
 ```text
 Kapeng-Barako/
 ├── index.html
 ├── images/
-│   └── favicon.svg
+│   ├── favicon.svg
+│   ├── brew-placeholder.svg
+│   └── gallery-01.svg … gallery-06.svg
 ├── css/
-│   ├── style.css
-│   └── home.css
+│   ├── home.css
+│   ├── admin.css
+│   └── style.css
 ├── js/
-│   └── .gitkeep
+│   ├── storefront.js
+│   ├── admin.js
+│   └── contact.js
 └── pages/
+    ├── admin.html
     └── contact.html
 ```
 
-## Paano palitan ang logo
+## Buyer handoff
 
-### Browser tab favicon
-Palitan ang file:
+### Logo / favicon
+Replace `images/favicon.svg` with the buyer’s final local logo or favicon. The same local asset is used by the storefront and admin browser tab.
 
-`/images/favicon.svg`
+### Colors
+Main storefront colors are at the top of `css/home.css`:
+`--brown`, `--cream`, `--sand`, `--accent`.
+Change those variables to update the visual theme without rewriting the layout.
 
-Panatilihin ang filename para hindi na kailangang baguhin ang HTML.
+### Products
+Open **Admin → Products**. Edit product names, prices, variants/weights, grind options, descriptions, and other catalog data there.
 
-### Website logo / brand mark
-Ang pangunahing **KB** brand mark ay nasa `index.html` at `pages/contact.html`.
-Hanapin ang text na:
+### Contact + social links
+Open **Admin → Store Settings**. Replace every `ILAG` placeholder with the buyer’s real:
+- email
+- phone
+- location
+- Facebook URL
+- Instagram URL
+- TikTok URL
 
-`KB`
+The storefront footer social buttons stay disabled until real URLs are configured.
 
-at palitan ito ng preferred logo markup o initials ng client.
+### Story / benefits / brewing / FAQ / delivery
+Open **Admin → Content & CMS**. The dashboard controls the hero copy, KWENTO story, exactly 3 benefits, exactly 3 brewing steps, delivery policy, and FAQ items.
 
-## Paano palitan ang products
+### Gallery
+Open **Admin → Gallery**. There are exactly 6 local gallery slots. Replace:
+`images/gallery-01.svg` through `images/gallery-06.svg`
+with the buyer’s final high-resolution images in `/images`, then update the six local paths/titles/captions in Admin.
 
-Sa `index.html`, hanapin ang product catalog na nagsisimula sa:
+The six current visuals are temporary local SVG placeholders; they are not intended as the buyer’s final photography.
 
-`var ju=[`
+### How to Brew video
+The storefront uses `images/brew-placeholder.svg` as a local poster. Replace the video placeholder markup in `index.html` with the buyer’s final local video or approved embed code.
 
-Bawat product ay may:
-- `name` — product name
-- `price` — price in Philippine pesos
-- `weight` — pack size
-- `note` — short product description
-- `emoji` — visual placeholder used by the current design
+## Admin-controlled settings
 
-I-edit ang existing product entries para ilagay ang tunay na products ng client.
+The storefront reads these browser storage keys:
+`kb_products`, `kb_settings`, `kb_cms`, `kb_gallery`, and `kb_shipping_rule`.
 
-## Paano palitan ang contact information
+Orders are written to `kb_orders` and `kb_last_order`. The Admin dashboard uses the same records for order management, reporting, waybills, and audit logging.
 
-Sa `pages/contact.html`, palitan ang placeholder:
+## Mobile
 
-`ILAG`
+The storefront and admin use responsive CSS breakpoints for phone, tablet, and desktop layouts. Check the final buyer content in Chrome DevTools before handoff, especially long product names, checkout fields, gallery images, and navigation.
 
-ng tunay na client contact details bago i-deliver ang website.
+## Important production note
 
-Para sa contact form, palitan din ang FormSubmit recipient:
-
-`https://formsubmit.co/ILAG`
-
-gamit ang tunay na receiving email ng client.
-
-## Images
-
-Lahat ng website image assets ay dapat ilagay sa:
-
-`/images`
-
-Gamitin ang local paths gaya ng:
-
-`images/product-name.jpg`
-
-o, mula sa `pages/`:
-
-`../images/product-name.jpg`
-
-Huwag gumamit ng external image-hosting links para sa client-owned image assets.
-
-## Mobile / Responsive
-
-The layout includes responsive breakpoints for phones, tablets, and desktop screens. Before delivery, test the site in Chrome DevTools using common mobile viewport sizes and verify:
-- navigation and buttons remain usable
-- product cards do not overflow horizontally
-- checkout/cart panels fit the viewport
-- Delivery & Payment content remains readable
-- contact form fields remain inside the screen
-
-## Site Title
-
-The website title is:
-
-**Kapeng Barako**
-
-The local favicon is stored in:
-
-`/images/favicon.svg`
-
-## Client Handoff Checklist
-
-Before selling or deploying the website:
-1. Replace logo/branding.
-2. Replace all product names, prices, descriptions, and product images.
-3. Replace every `ILAG` placeholder with real client information.
-4. Confirm payment, delivery, and shipping rules with the client.
-5. Test desktop and mobile layouts.
-6. Replace any remaining placeholder copy before final delivery.
-
-
-## Admin Dashboard
-
-Open `pages/admin.html` for the operations console covering:
-- Advanced Order Management: Kanban/table views for Pending, Verified Payment, Processing/Roasting, Ready to Ship, Dispatched, Delivered, and Cancelled.
-- Payment and fulfillment tagging for GCash, Maya, COD, Lalamove, J&T, LBC, and QC Meetup.
-- Printable waybills, dispatch notification links, manual status overrides, and audit logs.
-- Green-bean and packaging inventory with roast/expiry dates, batch/SKU tracking, low-stock thresholds, and stock-coverage forecasting.
-- Financial ledger by payment channel, COGS, shipping subsidy, affiliate commission, CSV export, and print-to-PDF reporting.
-- Voucher rules, customer segments, and the "Free shipping when you buy 2 packs or more" control.
-- Story, delivery-policy, FAQ editing, and order-linked support tickets.
-
-The dashboard intentionally starts with empty operational records rather than fake/demo data. Its default browser-local adapter is suitable for a single browser during client setup; a production multi-user OMS/CMS should connect the adapter to authenticated server-side storage, payment records, inventory, and messaging services.
-
-### Customer information
-
-The storefront checkout collects:
-- Name
-- Phone
-- Optional email
-- Delivery address
-- Payment method
-- Fulfillment method
-
-Use the client's real values. No sample email or phone number is preloaded.
-
-
-## Gallery
-
-The storefront gallery contains exactly 6 local placeholder assets:
-`images/gallery-01.svg` through `images/gallery-06.svg`.
-
-The placeholders cover roasted Liberica beans, farm origins, a steaming coffee cup, green-bean drying, small-batch roasting, and a rustic coffee lifestyle scene. They are original local SVG placeholders, so the website does not depend on an external image host.
-
-### Replacing gallery photos
-
-Put the buyer’s high-resolution photos inside `/images`, then open **Admin → Gallery** and replace the six local image paths. Keep exactly 6 slots. The storefront automatically uses the saved gallery configuration.
+This repository is a static GitHub Pages frontend. The current order/catalog/admin data adapter uses browser `localStorage` so the site can operate without seeded fake data. A true production multi-user system still needs authenticated server-side storage plus secure payment verification, order processing, inventory persistence, and real SMS/email integrations before handling live customer data at scale.
