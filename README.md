@@ -134,3 +134,15 @@ The storefront checkout collects:
 - Fulfillment method
 
 Use the client's real values. No sample email or phone number is preloaded.
+
+
+## Gallery
+
+The storefront gallery contains exactly 6 local placeholder assets:
+`images/gallery-01.svg` through `images/gallery-06.svg`.
+
+The placeholders cover roasted Liberica beans, farm origins, a steaming coffee cup, green-bean drying, small-batch roasting, and a rustic coffee lifestyle scene. They are original local SVG placeholders, so the website does not depend on an external image host.
+
+### Replacing gallery photos
+
+Put the buyer’s high-resolution photos inside `/images`, then open **Admin → Gallery** and replace the six local image paths. Keep exactly 6 slots. The storefront automatically uses the saved gallery configuration.
