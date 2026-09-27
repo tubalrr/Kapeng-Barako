@@ -164,7 +164,7 @@
     setText("[data-cms='heroDescription']",cms.heroDescription);
     setText("#story-copy",cms.story);
     const benefits=(cms.benefits?.length===3?cms.benefits:fallbackCms.benefits).slice(0,3);
-    $("#benefit-grid").innerHTML=benefits.map(x=>'<article class="benefit-card"><div class="benefit-icon">'+esc(x.icon||"✦")+'</div><h3>'+esc(x.title)+'</h3><p>'+esc(x.desc)+'</p></article>').join("");
+    $("#benefit-grid").innerHTML=benefits.map((x,i)=>'<article class="benefit-card"><div class="benefit-icon">'+String(i+1).padStart(2,"0")+'</div><h3>'+esc(x.title)+'</h3><p>'+esc(x.desc)+'</p></article>').join("");
     setText("#delivery-intro",cms.delivery);
     setText("#shipping-note",settings.shippingNote);
     setText("#shipping-promo",shipping.enabled===false?"Shipping promo is currently unavailable.":"Free shipping when you buy "+Number(shipping.minPacks||2)+" packs or more");
@@ -243,7 +243,7 @@
   function renderCart(){
     const root=$("#cart-list");
     if(!cart.length){root.innerHTML='<div class="empty-cart"><div><div style="font-size:46px">☕</div><strong>Your cart is empty.</strong><span>Add a coffee to begin your order.</span></div></div>';return}
-    root.innerHTML=cart.map((i,idx)=>'<div class="cart-item"><div class="cart-item-art" style="background:'+esc(i.bg)+'">'+esc(i.emoji)+'</div><div><h3>'+esc(i.name)+'</h3><small>'+esc(i.weight)+(i.grind?" · "+esc(i.grind):"")+'</small><div class="qty"><button type="button" data-qty-minus="'+idx+'">−</button><span>'+Number(i.qty)+'</span><button type="button" data-qty-plus="'+idx+'">+</button></div><button type="button" class="remove-item" data-remove="'+idx+'">Remove</button></div><div class="cart-item-price">'+money(i.price*i.qty)+'</div></div>').join("");
+    root.innerHTML=cart.map((i,idx)=>'<div class="cart-item"><div class="cart-item-art">KB</div><div><h3>'+esc(i.name)+'</h3><small>'+esc(i.weight)+(i.grind?" · "+esc(i.grind):"")+'</small><div class="qty"><button type="button" data-qty-minus="'+idx+'">−</button><span>'+Number(i.qty)+'</span><button type="button" data-qty-plus="'+idx+'">+</button></div><button type="button" class="remove-item" data-remove="'+idx+'">Remove</button></div><div class="cart-item-price">'+money(i.price*i.qty)+'</div></div>').join("");
   }
 
   function renderCheckoutOptions(){
