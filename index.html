@@ -61,6 +61,7 @@ function bu(){
     const customer={
       name:String(fd.get("name")||"").trim(),
       phone:String(fd.get("phone")||"").trim(),
+      email:String(fd.get("email")||"").trim(),
       address:String(fd.get("address")||"").trim(),
       payment:String(fd.get("payment")||"Cash on delivery"),
       fulfillment:String(fd.get("fulfillment")||"Lalamove")
@@ -330,6 +331,7 @@ function bu(){
         S("div",{className:"mt-6 grid gap-3",children:[
           p("input",{name:"name",required:true,placeholder:"Full name",className:"h-11 px-4 rounded-full border border-black/10 bg-white outline-none"}),
           p("input",{name:"phone",required:true,placeholder:"Phone number",className:"h-11 px-4 rounded-full border border-black/10 bg-white outline-none"}),
+          p("input",{name:"email",type:"email",placeholder:"Email address (optional)",className:"h-11 px-4 rounded-full border border-black/10 bg-white outline-none"}),
           p("textarea",{name:"address",required:true,placeholder:"Delivery address",rows:3,className:"px-4 py-3 rounded-[18px] border border-black/10 bg-white outline-none"}),
           S("select",{name:"payment",className:"h-11 px-4 rounded-full border border-black/10 bg-white outline-none",children:[
             p("option",{value:"GCash",children:"GCash"}),
