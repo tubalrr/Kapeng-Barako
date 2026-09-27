@@ -30,10 +30,12 @@
     ]
   };
   const fallbackSettings = {
-    paymentMethods:["GCash","Maya","Cash on Delivery (COD)"],
+    paymentMethods:["GCash","Cash on Delivery (COD)","Bank Transfer"],
     fulfillmentMethods:["Lalamove","J&T","LBC","QC Meetup"],
     shippingNote:"Courier fee is based on the selected courier and delivery distance/location. Final fee is confirmed before fulfillment.",
     orderNote:"We confirm the final delivery details before fulfillment.",
+    gcashInstructions:"ILAG — add the buyer’s GCash name/number or QR instructions in Admin → Store Settings.",
+    bankTransferInstructions:"ILAG — add the buyer’s bank name, account name/number, and transfer instructions in Admin → Store Settings.",
     email:"ILAG",phone:"ILAG",location:"ILAG",
     facebook:"ILAG",instagram:"ILAG",tiktok:"ILAG",tagline:"Gawa sa Batangas"
   };
@@ -55,6 +57,15 @@
   const cms={...fallbackCms,...(typeof window.KBStore?.getCms==="function"?window.KBStore.getCms():read("kb_cms",{}))};
   const settings={...fallbackSettings,...(typeof window.KBStore?.getSettings==="function"?window.KBStore.getSettings():read("kb_settings",{}))};
   const shipping={enabled:true,minPacks:2,...read("kb_shipping_rule",{})};
+  let trackedOrderId="";
+  const TRACK_STEPS=[
+    {statuses:["Pending"],title:"Order received",desc:"Your order is recorded and awaiting confirmation."},
+    {statuses:["Verified Payment"],title:"Order confirmed",desc:"Payment has been verified and the order is confirmed."},
+    {statuses:["Processing/Roasting"],title:"Roasting",desc:"Your coffee is being prepared in the current roast batch."},
+    {statuses:["Ready to Ship"],title:"Packed / ready",desc:"Your order is packed and ready for dispatch."},
+    {statuses:["Dispatched"],title:"Out for delivery",desc:"Your order has been handed to the selected fulfillment method."},
+    {statuses:["Delivered"],title:"Delivered",desc:"The order is marked as delivered."}
+  ];
   const gallery=(typeof window.KBStore?.getGallery==="function"?window.KBStore.getGallery():read("kb_gallery",fallbackGallery));
   const cartKey="kb_cart";
   let cart=read(cartKey,[]);
@@ -75,12 +86,54 @@
   };
   const packsInCart=()=>cart.reduce((sum,i)=>{
     const weight=String(i.weight||"").toLowerCase();
-    const n=parseFloat(weight.replace(/[^d.]/g,""));
+    const n=parseFloat(weight.replace(/[^\d.]/g,""));
     return sum + (weight.includes("kg") ? i.qty*n : weight.includes("g") ? i.qty*(n/250) : i.qty);
   },0);
   const cartSubtotal=()=>cart.reduce((s,i)=>s+Number(i.price||0)*Number(i.qty||0),0);
   const freeShip=()=>shipping.enabled!==false&&packsInCart()>=Number(shipping.minPacks||2);
   const cartShippingLabel=()=>freeShip()?"FREE":"Calculated after pack count";
+  const normalizeTrackId=value=>String(value||"").trim().replace(/^#/,"").toUpperCase();
+  const findTrackedOrder=value=>{
+    const wanted=normalizeTrackId(value);
+    if(!wanted)return null;
+    const stored=read("kb_orders",[]);
+    const list=Array.isArray(stored)?stored:[];
+    const match=list.find(o=>normalizeTrackId(o?.id)===wanted);
+    if(match)return match;
+    const last=read("kb_last_order",null);
+    return last&&normalizeTrackId(last.id)===wanted?last:null;
+  };
+  const trackStepIndex=status=>{
+    const n=TRACK_STEPS.findIndex(step=>step.statuses.includes(status));
+    return n<0?0:n;
+  };
+  function renderTrackResult(order){
+    const root=$("#track-result");
+    if(!root)return;
+    if(!order){
+      root.hidden=false;
+      root.innerHTML='<div class="track-empty"><strong>Order not found.</strong><br>Check the Order Number and try again.</div>';
+      return;
+    }
+    root.hidden=false;
+    const cancelled=order.status==="Cancelled";
+    const activeIndex=trackStepIndex(order.status);
+    const timeline=TRACK_STEPS.map((step,index)=>{
+      const done=!cancelled&&index<activeIndex;
+      const current=!cancelled&&index===activeIndex;
+      const marker=done?"✓":current?"•":String(index+1);
+      return '<div class="track-step '+(done?"done ":"")+(current?"current":"")+'"><div class="track-dot">'+marker+'</div><div><h4>'+esc(step.title)+'</h4><p>'+esc(done?"Completed":step.desc)+'</p></div></div>';
+    }).join("");
+    const updated=new Date(order.statusUpdatedAt||order.createdAt||Date.now()).toLocaleString("en-PH",{year:"numeric",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+    const customer=order.customer?.name?'<br><strong>Customer:</strong> '+esc(order.customer.name):"";
+    root.innerHTML='<div class="track-result-head"><div><div class="track-result-id">#'+esc(order.id)+'</div><div class="track-result-meta">Updated '+esc(updated)+'</div></div><span class="track-status-chip '+(cancelled?"cancelled":"")+'">'+esc(order.status)+'</span></div>'+
+      (cancelled?'<div class="track-empty" style="margin-top:13px"><strong>This order is cancelled.</strong><br>Please contact the store if you need help with the order record.</div>':
+      '<div class="track-courier"><strong>Fulfillment:</strong> '+esc(order.fulfillment||"Pending assignment")+customer+'</div><div class="track-timeline">'+timeline+'</div>');
+  }
+  function refreshTrackedOrder(){
+    if(!trackedOrderId||$("#track-layer")?.hidden)return;
+    renderTrackResult(findTrackedOrder(trackedOrderId));
+  }
   const showLayer=id=>{const el=$(id);if(el){el.hidden=false;document.body.classList.add("locked")}};
   const hideLayer=id=>{const el=$(id);if(el){el.hidden=true;if(![...$$(".modal-layer")].some(x=>!x.hidden))document.body.classList.remove("locked")}};
 
@@ -118,10 +171,31 @@
     renderPayments();renderFulfillment();renderGallery();renderSocials();
   }
 
+  function renderPaymentHelp(){
+    const method=$("#checkout-payment")?.value||"";
+    const help=$("#payment-instructions"), ref=$("#payment-reference-wrap"), proof=$("#payment-proof-wrap"), proofInput=$("#payment-proof");
+    if(!help)return;
+    if(method==="GCash"){
+      help.innerHTML="<strong>GCash:</strong> "+esc(settings.gcashInstructions||"Add the store’s GCash payment instructions in Admin → Store Settings.");
+      ref.hidden=false;proof.hidden=false;
+    }else if(method==="Bank Transfer"){
+      help.innerHTML="<strong>Bank Transfer:</strong> "+esc(settings.bankTransferInstructions||"Add the store’s bank details in Admin → Store Settings.");
+      ref.hidden=false;proof.hidden=false;
+    }else if(method==="Cash on Delivery (COD)"||method==="Cash on Delivery"){
+      help.innerHTML="<strong>COD:</strong> No online payment reference is required. Pay according to the confirmed delivery arrangement.";
+      ref.hidden=true;proof.hidden=true;
+      if($("#payment-reference"))$("#payment-reference").value="";
+      if(proofInput)proofInput.value="";
+    }else{
+      help.textContent="Follow the payment instructions confirmed by the store.";
+      ref.hidden=true;proof.hidden=true;
+    }
+  }
   function renderPayments(){
     const list=Array.isArray(settings.paymentMethods)&&settings.paymentMethods.length?settings.paymentMethods:fallbackSettings.paymentMethods;
     $("#payment-list").innerHTML=list.map(x=>'<span class="tag">'+esc(x)+'</span>').join("");
     $("#checkout-payment").innerHTML=list.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");
+    renderPaymentHelp();
   }
   function renderFulfillment(){
     const list=Array.isArray(settings.fulfillmentMethods)&&settings.fulfillmentMethods.length?settings.fulfillmentMethods:fallbackSettings.fulfillmentMethods;
@@ -146,7 +220,7 @@
       const variants=p.variants.map(v=>'<button type="button" class="variant-btn '+(v.weight===c.variant.weight?"active":"")+'" data-variant="'+esc(p.id)+'" data-weight="'+esc(v.weight)+'">'+esc(v.weight)+'</button>').join("");
       const grinds=p.grinds.map(g=>'<option value="'+esc(g)+'" '+(g===c.grind?"selected":"")+'>'+esc(g)+'</option>').join("");
       return '<article class="product-card">'+
-        '<div class="product-art" style="background:'+esc(p.bg||"#F1E6D3")+'"><span class="product-emoji">'+esc(p.emoji||"☕")+'</span><span class="stock-pill '+(low?"low":"")+'">'+(Number(p.stock||0)>0?esc(low?"Low stock":"In stock"):"Out of stock")+'</span><span class="product-price">'+money(c.variant.price)+'</span></div>'+
+        '<div class="product-art" style="background:'+esc(p.bg||"#F1E6D3")+'"><span class="product-emoji">'+esc(p.emoji||"☕")+'</span><span class="stock-pill '+(low?"low urgent":"")+'">'+(Number(p.stock||0)>0?esc(low?"⚡ Only "+Number(p.stock)+" stock"+(Number(p.stock)===1?"":"s")+" left!":"In stock"):"Out of stock")+'</span><span class="product-price">'+money(c.variant.price)+'</span></div>'+
         '<div class="product-body"><div class="product-title-row"><h3>'+esc(p.name)+'</h3><span class="tag">'+esc(p.roast||"Fresh roast")+'</span></div>'+
         '<p>'+esc(p.note||"")+'</p><span class="product-label">Weight</span><div class="variant-row">'+variants+'</div>'+
         '<label class="product-label">Grind<select class="product-select" data-grind="'+esc(p.id)+'">'+grinds+'</select></label>'+
@@ -190,9 +264,12 @@
       payment:String(fd.get("payment")||""),
       fulfillment:String(fd.get("fulfillment")||""),
       voucher:String(fd.get("voucher")||"").trim().toUpperCase(),
+      paymentReference:String(fd.get("paymentReference")||"").trim(),
+      paymentProofName:$("#payment-proof")?.files?.[0]?.name||"",
       shippingFree:freeShip(),
       total:cartSubtotal(),
       status:"Pending",
+      statusUpdatedAt:new Date().toISOString(),
       cogs:0,shippingSubsidy:0,affiliateCommission:0,
       items:cart.map(i=>({id:i.id,name:i.name,price:i.price,weight:i.weight,grind:i.grind,qty:i.qty}))
     };
@@ -224,8 +301,19 @@
     $("#cart-backdrop").onclick=()=>hideLayer("#cart-layer");
     $("#close-checkout").onclick=()=>hideLayer("#checkout-layer");
     $("#checkout-backdrop").onclick=()=>hideLayer("#checkout-layer");
-    $("#checkout-button").onclick=()=>{if(!cart.length){toast("Add a product first.");return}hideLayer("#cart-layer");showLayer("#checkout-layer");$("#checkout-form").hidden=false;$("#order-success").hidden=true;syncUi()};
+    $("#checkout-button").onclick=()=>{if(!cart.length){toast("Add a product first.");return}hideLayer("#cart-layer");showLayer("#checkout-layer");$("#checkout-form").hidden=false;$("#order-success").hidden=true;syncUi();renderPaymentHelp()};
     $("#success-close").onclick=()=>hideLayer("#checkout-layer");
+    $("#open-track").onclick=()=>{showLayer("#track-layer");$("#track-order-id").focus();};
+    $("#hero-track").onclick=()=>{showLayer("#track-layer");$("#track-order-id").focus();};
+    $("#mobile-track").onclick=()=>{showLayer("#track-layer");$("#mobile-nav").style.display="none";$("#menu-button").setAttribute("aria-expanded","false");$("#track-order-id").focus();};
+    $("#close-track").onclick=()=>hideLayer("#track-layer");
+    $("#track-backdrop").onclick=()=>hideLayer("#track-layer");
+    $("#track-form").addEventListener("submit",e=>{e.preventDefault();trackedOrderId=normalizeTrackId($("#track-order-id").value);renderTrackResult(findTrackedOrder(trackedOrderId));});
+    $("#checkout-payment").addEventListener("change",renderPaymentHelp);
+    $("#payment-proof").addEventListener("change",()=>{
+      const f=$("#payment-proof")?.files?.[0];
+      setText("#payment-proof-note",f?"Selected file: "+f.name+" — filename only in current static mode.":"On GitHub Pages mode, the file is not uploaded to a server; only its filename is attached to the local order record.");
+    });
     $("#brew-play").onclick=()=>$("#brew-dialog").showModal();
     $$("[data-close-dialog]").forEach(x=>x.onclick=()=>x.closest("dialog")?.close());
     $("#checkout-form").addEventListener("submit",submitOrder);
@@ -262,8 +350,10 @@
     renderContent();renderHero();renderProducts();syncUi();bind();
     window.addEventListener("storage",e=>{
       if(["kb_products","kb_settings","kb_cms","kb_gallery","kb_shipping_rule"].includes(e.key))window.location.reload();
+      if(e.key==="kb_orders"||e.key==="kb_last_order")refreshTrackedOrder();
       if(e.key==="kb_cart"){cart=read(cartKey,[]);syncUi()}
     });
   }
+  setInterval(refreshTrackedOrder,3000);
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
