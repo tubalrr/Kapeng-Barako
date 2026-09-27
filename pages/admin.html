@@ -241,6 +241,10 @@
               <label>Business email<input id="settings-email" class="input" type="email" placeholder="ILAG"></label>
               <label>Business phone<input id="settings-phone" class="input" type="text" placeholder="ILAG"></label>
               <label>Business location<input id="settings-location" class="input" type="text" placeholder="ILAG"></label>
+              <label>Facebook URL<input id="settings-facebook" class="input" type="url" placeholder="ILAG"></label>
+              <label>Instagram URL<input id="settings-instagram" class="input" type="url" placeholder="ILAG"></label>
+              <label>TikTok URL<input id="settings-tiktok" class="input" type="url" placeholder="ILAG"></label>
+              <label>Footer tagline<input id="settings-tagline" class="input" type="text" placeholder="Gawa sa Batangas"></label>
             </div>
           </div>
         </section>
@@ -251,8 +255,19 @@
             <div class="tool-row"><button class="btn secondary" type="button" data-action="cms-export">Export JSON</button><button class="btn primary" type="button" data-action="cms-save">Save content</button></div>
           </div>
           <div class="panel cms-panel">
-            <label>Storytelling section<textarea id="cms-story" class="textarea" rows="8"></textarea></label>
-            <label>Delivery policy<textarea id="cms-delivery" class="textarea" rows="8"></textarea></label>
+            <div class="panel-subhead"><span>Hero</span></div>
+            <div class="form-grid">
+              <label>Eyebrow<input id="cms-hero-eyebrow" class="input"></label>
+              <label>Hero description<input id="cms-hero-description" class="input"></label>
+              <label class="full">Hero title<textarea id="cms-hero-title" class="textarea" rows="3"></textarea></label>
+            </div>
+            <div class="panel-subhead"><span>Storytelling / KWENTO</span></div>
+            <label>Story<textarea id="cms-story" class="textarea" rows="6"></textarea></label>
+            <div class="panel-subhead"><span>Exactly 3 benefits</span></div>
+            <div id="benefit-editor" class="faq-editor"></div>
+            <div class="panel-subhead"><span>How to Brew — exactly 3 steps</span></div>
+            <div id="brew-editor" class="faq-editor"></div>
+            <label>Delivery policy<textarea id="cms-delivery" class="textarea" rows="6"></textarea></label>
             <div class="panel-subhead"><span>FAQ items</span><button class="text-btn" type="button" data-action="add-faq">+ Add FAQ</button></div>
             <div id="faq-editor" class="faq-editor"></div>
           </div>
