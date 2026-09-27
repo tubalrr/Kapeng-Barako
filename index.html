@@ -61,7 +61,8 @@ function bu(){
       name:String(fd.get("name")||"").trim(),
       phone:String(fd.get("phone")||"").trim(),
       address:String(fd.get("address")||"").trim(),
-      payment:String(fd.get("payment")||"Cash on delivery")
+      payment:String(fd.get("payment")||"Cash on delivery"),
+      fulfillment:String(fd.get("fulfillment")||"Lalamove")
     };
     if(!customer.name||!customer.phone||!customer.address||!cart.length){
       flash("Complete the order details first");
@@ -92,6 +93,7 @@ function bu(){
         S("div",{className:"hidden md:flex items-center gap-8 text-[13.5px] font-medium",children:[
           p("a",{href:"#products",className:"opacity-70 hover:opacity-100 transition",children:"Products"}),
           p("a",{href:"#about",className:"opacity-70 hover:opacity-100 transition",children:"About"}),
+          p("a",{href:"#delivery-payment",className:"opacity-70 hover:opacity-100 transition",children:"Delivery & Payment"}),
           p("a",{href:"pages/contact.html",className:"opacity-70 hover:opacity-100 transition",children:"Contact"})
         ]}),
         S("div",{className:"flex items-center gap-2",children:[
@@ -203,6 +205,53 @@ function bu(){
         p("a",{href:"#products",className:"mt-8 h-11 rounded-full bg-[#FFFCF6] text-[#2B1B12] grid place-items-center text-[13px] font-medium hover:bg-white transition",children:"Browse Products"})
       ]})
     ]}),
+    S("section",{id:"delivery-payment",className:"mx-auto max-w-[1280px] px-6 md:px-10 pb-12 md:pb-16",children:[
+      S("div",{className:"rounded-[30px] border border-[#2B1B12]/10 bg-white shadow-[0_18px_60px_-32px_rgba(43,27,18,0.28)] overflow-hidden",children:[
+        S("div",{className:"p-7 md:p-10 bg-[linear-gradient(135deg,#FFFDF8_0%,#F6E8D5_100%)]",children:[
+          p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-semibold opacity-55",children:"Delivery & Payment"}),
+          p("h2",{className:"serif mt-2 text-[34px] md:text-[48px] leading-[0.96] tracking-[-0.03em] font-[600]",children:"Clear options, easy checkout."}),
+          p("p",{className:"mt-4 max-w-[700px] text-[14.5px] md:text-[15px] leading-[1.7] opacity-70",children:"Choose the payment and fulfillment option that works for you. We confirm the final delivery details before your order is fulfilled."})
+        ]}),
+        S("div",{className:"grid md:grid-cols-3 gap-px bg-[#2B1B12]/10",children:[
+          S("div",{className:"bg-[#FFFCF6] p-7 md:p-8",children:[
+            p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-semibold opacity-50",children:"Payment Methods"}),
+            p("h3",{className:"serif mt-2 text-[24px] font-[600]",children:"Pay your way"}),
+            S("div",{className:"mt-5 grid gap-3",children:[
+              p("div",{className:"flex items-center gap-3 rounded-[16px] bg-white border border-[#2B1B12]/10 px-4 py-3",children:[p("span",{className:"w-8 h-8 rounded-full bg-[#F1E6D3] grid place-items-center text-[12px] font-bold",children:"₱"}),p("span",{className:"text-[14px] font-medium",children:"GCash"})]}),
+              p("div",{className:"flex items-center gap-3 rounded-[16px] bg-white border border-[#2B1B12]/10 px-4 py-3",children:[p("span",{className:"w-8 h-8 rounded-full bg-[#F1E6D3] grid place-items-center text-[12px] font-bold",children:"₱"}),p("span",{className:"text-[14px] font-medium",children:"Maya"})]}),
+              p("div",{className:"flex items-center gap-3 rounded-[16px] bg-white border border-[#2B1B12]/10 px-4 py-3",children:[p("span",{className:"w-8 h-8 rounded-full bg-[#2B1B12] text-white grid place-items-center text-[11px] font-bold",children:"COD"}),p("span",{className:"text-[14px] font-medium",children:"Cash on Delivery"})]})
+            ]})
+          ]}),
+          S("div",{className:"bg-[#FFFCF6] p-7 md:p-8",children:[
+            p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-semibold opacity-50",children:"Courier & Fulfillment"}),
+            p("h3",{className:"serif mt-2 text-[24px] font-[600]",children:"Choose your delivery"}),
+            S("div",{className:"mt-5 grid grid-cols-2 gap-3",children:[
+              p("div",{className:"rounded-[16px] border border-[#2B1B12]/10 bg-white px-4 py-4 text-center",children:[p("div",{className:"text-[15px] font-semibold",children:"Lalamove"}),p("div",{className:"mt-1 text-[11px] opacity-55",children:"Local delivery"})]}),
+              p("div",{className:"rounded-[16px] border border-[#2B1B12]/10 bg-white px-4 py-4 text-center",children:[p("div",{className:"text-[15px] font-semibold",children:"J&T"}),p("div",{className:"mt-1 text-[11px] opacity-55",children:"Parcel shipping"})]}),
+              p("div",{className:"rounded-[16px] border border-[#2B1B12]/10 bg-white px-4 py-4 text-center",children:[p("div",{className:"text-[15px] font-semibold",children:"LBC"}),p("div",{className:"mt-1 text-[11px] opacity-55",children:"Parcel shipping"})]}),
+              p("div",{className:"rounded-[16px] border border-[#2B1B12]/10 bg-white px-4 py-4 text-center",children:[p("div",{className:"text-[15px] font-semibold",children:"QC Meetup"}),p("div",{className:"mt-1 text-[11px] opacity-55",children:"Quezon City"})]})
+            ]})
+          ]}),
+          S("div",{className:"bg-[#2B1B12] text-[#FFFCF6] p-7 md:p-8 flex flex-col justify-between",children:[
+            S("div",{children:[
+              p("div",{className:"text-[11px] uppercase tracking-[0.14em] font-semibold text-white/55",children:"Shipping Rates & Promo"}),
+              p("h3",{className:"serif mt-2 text-[26px] font-[600]",children:"Simple shipping rules."}),
+              S("div",{className:"mt-5 space-y-3",children:[
+                p("div",{className:"rounded-[18px] bg-white/10 border border-white/10 p-4",children:[
+                  p("div",{className:"text-[12px] uppercase tracking-[0.08em] text-white/50",children:"Shipping fee"}),
+                  p("div",{className:"mt-1 text-[14px] leading-[1.5]",children:"Courier fee is based on the selected courier and delivery distance/location. Final fee is confirmed before fulfillment."})
+                ]}),
+                p("div",{className:"rounded-[18px] bg-[#F2D0A4] text-[#2B1B12] p-4",children:[
+                  p("div",{className:"text-[12px] uppercase tracking-[0.08em] font-bold",children:"PROMO"}),
+                  p("div",{className:"mt-1 text-[18px] font-semibold leading-[1.2]",children:"Free shipping when you buy 2 packs or more"})
+                ]})
+              ]})
+            ]}),
+            p("a",{href:"#products",className:"mt-6 h-11 rounded-full bg-[#FFFCF6] text-[#2B1B12] grid place-items-center text-[13px] font-semibold hover:bg-white transition",children:"Shop 2+ Packs"})
+          ]})
+        ]})
+      ]})
+    ]}),
     notice&&p("div",{className:"fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] w-[92%] max-w-[420px] flex justify-center",children:
       S("div",{className:"rounded-full bg-[#2B1B12] text-[#FFFCF6] px-5 py-3 text-[13px] font-medium shadow-[0_16px_40px_-12px_rgba(0,0,0,0.5)] border border-white/10",children:notice})
     }),
@@ -273,8 +322,15 @@ function bu(){
           p("input",{name:"phone",required:true,placeholder:"Phone number",className:"h-11 px-4 rounded-full border border-black/10 bg-white outline-none"}),
           p("textarea",{name:"address",required:true,placeholder:"Delivery address",rows:3,className:"px-4 py-3 rounded-[18px] border border-black/10 bg-white outline-none"}),
           S("select",{name:"payment",className:"h-11 px-4 rounded-full border border-black/10 bg-white outline-none",children:[
-            p("option",{value:"Cash on delivery",children:"Cash on delivery"}),
-            p("option",{value:"Store pickup",children:"Store pickup"})
+            p("option",{value:"GCash",children:"GCash"}),
+            p("option",{value:"Maya",children:"Maya"}),
+            p("option",{value:"Cash on delivery",children:"Cash on Delivery (COD)"})
+          ]}),
+          S("select",{name:"fulfillment",className:"h-11 px-4 rounded-full border border-black/10 bg-white outline-none",children:[
+            p("option",{value:"Lalamove",children:"Lalamove"}),
+            p("option",{value:"J&T",children:"J&T"}),
+            p("option",{value:"LBC",children:"LBC"}),
+            p("option",{value:"QC Meetup",children:"Meetup — Quezon City"})
           ]})
         ]}),
         S("div",{className:"mt-6 flex items-center justify-between rounded-[18px] bg-[#F1E6D3] p-4",children:[
