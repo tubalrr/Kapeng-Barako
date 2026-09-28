@@ -325,3 +325,6 @@ code{font:600 11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:#F
   .admin-sidebar,
   .admin-menu-overlay{transition-duration:.01ms!important}
 }
+
+.metric-card strong.low-stock-alert,.status-card .status-row strong.low-stock-alert{color:#B42318!important}
+.inventory-low{color:#B42318!important;font-weight:900}
