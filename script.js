@@ -622,6 +622,11 @@
       total: Math.max(0, subtotal + shipping - discount),
       status: "Pending",
       statusUpdatedAt: now,
+      route: {
+        origin: "Kapeng Barako, Quezon City, Metro Manila, Philippines",
+        waypoint: getRouteWaypoint(address),
+        destination: address
+      },
       items: cart.map(item => ({ ...item }))
     };
 
@@ -685,6 +690,25 @@
     if (input) input.focus();
   }
 
+  function getRouteWaypoint(address) {
+    const parts = String(address || "")
+      .split(",")
+      .map(part => part.trim())
+      .filter(Boolean);
+
+    if (parts.length >= 3) return parts[parts.length - 2];
+    if (parts.length === 2) return parts[0];
+
+    const text = String(address || "").toLowerCase();
+    if (text.includes("batangas")) return "Calamba, Laguna";
+    if (text.includes("cavite")) return "Tagaytay / Cavite corridor";
+    if (text.includes("laguna")) return "Calamba, Laguna";
+    if (text.includes("rizal")) return "Pasig / Rizal corridor";
+    if (text.includes("bulacan")) return "Valenzuela / Bulacan corridor";
+    if (text.includes("pampanga")) return "San Fernando, Pampanga";
+    return "Delivery area";
+  }
+
   function renderTrackedOrder(order) {
     const root = $("#trackResult");
     const map = $("#trackMap");
@@ -741,34 +765,57 @@
       map.hidden = true;
       map.innerHTML = "";
       const vehicle = $("#trackMapVehicle");
+      const waypointBox = $("#trackWaypoint");
       if (vehicle) vehicle.hidden = true;
+      if (waypointBox) waypointBox.hidden = true;
       return;
     }
 
     const encoded = encodeURIComponent(address);
+    const waypoint = String(
+      order.route?.waypoint ||
+      getRouteWaypoint(address)
+    ).trim();
+
+    const origin = String(
+      order.route?.origin ||
+      "Kapeng Barako, Quezon City, Metro Manila, Philippines"
+    ).trim();
+
+    const directionsUrl =
+      "https://www.google.com/maps/dir/?api=1" +
+      "&origin=" + encodeURIComponent(origin) +
+      "&destination=" + encoded +
+      "&waypoints=" + encodeURIComponent(waypoint) +
+      "&travelmode=driving";
 
     map.hidden = false;
     map.innerHTML =
       '<div class="track-map-head">' +
         '<div>' +
-          '<span class="mini-label">DELIVERY LOCATION</span>' +
-          '<strong>Google Maps</strong>' +
+          '<span class="mini-label">DELIVERY ROUTE</span>' +
+          '<strong>Google Maps • Waypoint</strong>' +
         '</div>' +
-        '<a href="https://www.google.com/maps/search/?api=1&query=' +
-          encoded +
-          '" target="_blank" rel="noopener noreferrer">' +
-          'OPEN IN GOOGLE MAPS ↗' +
+        '<a href="' + directionsUrl + '" target="_blank" rel="noopener noreferrer">' +
+          'OPEN ROUTE IN GOOGLE MAPS ↗' +
         '</a>' +
       '</div>' +
-      '<iframe ' +
-        'title="Delivery location on Google Maps" ' +
-        'src="https://www.google.com/maps?q=' +
-          encoded +
-          '&output=embed" ' +
-        'loading="lazy" ' +
-        'referrerpolicy="strict-origin-when-cross-origin" ' +
-        'allowfullscreen>' +
+      '<div class="track-route-chips">' +
+        '<span><b>START</b>' + esc(origin) + '</span>' +
+        '<span><b>WAYPOINT</b>' + esc(waypoint) + '</span>' +
+        '<span><b>DELIVERY</b>' + esc(address) + '</span>' +
+      '</div>' +
+      '<iframe title="Delivery location on Google Maps" ' +
+        'src="https://www.google.com/maps?q=' + encoded + '&output=embed" ' +
+        'loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>' +
       '</iframe>';
+
+    const waypointBox = $("#trackWaypoint");
+    const waypointText = $("#trackWaypointText");
+    if (waypointBox && waypointText) {
+      waypointText.textContent = waypoint || "Delivery area";
+      waypointBox.hidden = false;
+    }
 
     const vehicle = $("#trackMapVehicle");
     if (vehicle) {
@@ -825,7 +872,9 @@
         map.innerHTML = "";
       }
       const vehicle = $("#trackMapVehicle");
+      const waypointBox = $("#trackWaypoint");
       if (vehicle) vehicle.hidden = true;
+      if (waypointBox) waypointBox.hidden = true;
 
       return;
     }
