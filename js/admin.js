@@ -9,7 +9,13 @@
   const $=s=>document.querySelector(s);
   const $$=s=>[...document.querySelectorAll(s)];
   const read=(k,f)=>{try{const x=localStorage.getItem(k);return x?JSON.parse(x):f}catch{return f}};
-  const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  const write=(k,v)=>{
+    try{
+      const existing=localStorage.getItem(k);
+      if(existing!==null) localStorage.setItem("kb_backup_"+k,existing);
+      localStorage.setItem(k,JSON.stringify(v));
+    }catch{}
+  };
   const money=n=>"₱"+Number(n||0).toLocaleString("en-PH");
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let products=read(PRODUCTS_KEY,[]);if(!Array.isArray(products))products=[];
@@ -17,12 +23,6 @@
   let orderSearch="";
   let lowStockSoundEnabled=localStorage.getItem("kb_low_stock_sound")==="1";
   let lastLowStockCount=-1;
-  const demoSignature=JSON.stringify(DEFAULT_PRODUCTS.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
-  const currentSignature=JSON.stringify(products.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
-  if(currentSignature===demoSignature && !localStorage.getItem("kb_catalog_real_initialized")){
-    products=[];
-    localStorage.removeItem(PRODUCTS_KEY);
-  }
   let orders=Array.isArray(read(ORDERS_KEY,[]))?read(ORDERS_KEY,[]):[];
   let promos=Array.isArray(read(PROMOS_KEY,[]))?read(PROMOS_KEY,[]):[];
 
