@@ -133,3 +133,13 @@ body{font-size:15px}
   .ads-input-grid{grid-template-columns:1fr}
   .ads-container{min-height:160px;padding:22px 16px}
 }
+
+.ads-preview-image{
+  display:block;
+  width:min(100%,520px);
+  max-height:220px;
+  margin:4px auto 6px;
+  object-fit:contain;
+  border-radius:14px;
+  border:1px solid rgba(200,169,81,.28);
+}
