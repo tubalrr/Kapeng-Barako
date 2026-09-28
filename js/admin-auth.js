@@ -50,6 +50,22 @@
     return initPromise;
   }
 
+  function withTimeout(promise, ms, message) {
+    let timer = null;
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          const error = new Error(message);
+          error.code = "AUTH_TIMEOUT";
+          reject(error);
+        }, ms);
+      })
+    ]).finally(() => {
+      if (timer) clearTimeout(timer);
+    });
+  }
+
   function readSession() {
     try {
       const raw = sessionStorage.getItem(SESSION_KEY);
@@ -82,15 +98,21 @@
   async function currentUser() {
     const { auth: currentAuth, authMod } = await init();
     if (currentAuth.currentUser) return currentAuth.currentUser;
-    return new Promise(resolve => {
-      let settled = false;
-      const unsubscribe = authMod.onAuthStateChanged(currentAuth, user => {
-        if (settled) return;
-        settled = true;
-        unsubscribe();
-        resolve(user || null);
-      });
-    });
+
+    return withTimeout(
+      new Promise(resolve => {
+        let settled = false;
+        let unsubscribe = () => {};
+        unsubscribe = authMod.onAuthStateChanged(currentAuth, user => {
+          if (settled) return;
+          settled = true;
+          unsubscribe();
+          resolve(user || null);
+        });
+      }),
+      8000,
+      "Firebase Authentication timed out. Check Authorized Domains and Firebase configuration."
+    );
   }
 
   async function verifyAdmin(user) {
@@ -99,7 +121,11 @@
     if (!session || session.uid !== user.uid) return null;
 
     const { db: currentDb, firestoreMod } = await init();
-    const snap = await firestoreMod.getDoc(firestoreMod.doc(currentDb, "admins", user.uid));
+    const snap = await withTimeout(
+      firestoreMod.getDoc(firestoreMod.doc(currentDb, "admins", user.uid)),
+      8000,
+      "Firebase admin verification timed out. Check Firestore rules and network access."
+    );
     if (!snap.exists() || snap.data()?.active !== true) return null;
 
     return { uid: user.uid, email: user.email || "", ...snap.data() };
