@@ -104,7 +104,6 @@ ${login?"":`<div class="field"><label>Confirm Password</label><input name="confi
 ${login?'<button class="account-btn" id="forgot-btn" type="button" style="width:100%;margin-top:10px">Forgot password?</button>':""}
 <div class="auth-switch">${login?"Don't have an account yet?":"Already have an account?"} <button id="switch-auth" type="button">${login?"Sign Up":"Log In"}</button></div>`;
   document.querySelector("#google-btn").onclick=googleLogin;
-  document.querySelector("#demo-btn").onclick=startDemoAccount;
   document.querySelector("#auth-form").onsubmit=login?loginWithEmail:signup;
   document.querySelector("#switch-auth").onclick=()=>{state.mode=login?"signup":"login";renderAuth()};
   document.querySelector("#forgot-btn")?.addEventListener("click",forgotPassword);
