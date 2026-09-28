@@ -1101,7 +1101,7 @@
     if (!root || !order) return;
 
     const address = String(
-      order.customer?.address || ""
+      order.address || order.customer?.address || ""
     ).trim();
 
     const steps = [
@@ -1113,7 +1113,8 @@
       "Delivered"
     ];
 
-    let active = steps.indexOf(order.status);
+    const normalizedStatus = String(order.status || "Pending") === "Ready" ? "Ready to Ship" : String(order.status || "Pending");
+    let active = steps.indexOf(normalizedStatus);
     if (active < 0) active = 0;
 
     const paymentStatus = String(order.paymentStatus || (order.payment === "GCash" ? "Pending Review" : "Not Required"));
@@ -1231,7 +1232,7 @@
     }
   }
 
-  function trackOrder(event) {
+  async function trackOrder(event) {
     event.preventDefault();
 
     const id = String($("#trackOrderId")?.value || "")
@@ -1241,34 +1242,70 @@
 
     const root = $("#trackResult");
     const map = $("#trackMap");
-
     if (!root) return;
 
-    const orders = read(ORDER_KEY, []);
-    const order = Array.isArray(orders)
-      ? orders.find(
-          item =>
-            String(item.id || "").toUpperCase() === id
-        )
-      : null;
+    root.innerHTML = '<div class="empty">Checking your order…</div>';
 
-    if (!order) {
-      root.innerHTML =
-        '<div class="empty">Order not found. Check your Order ID.</div>';
+    try {
+      const [{ getAuth }, firestore, appModule, config] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js"),
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js"),
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"),
+        import("./js/firebase-config.js")
+      ]);
 
-      if (map) {
-        map.hidden = true;
-        map.innerHTML = "";
+      if (!config.isFirebaseConfigured) {
+        throw new Error("Firebase backend is not configured.");
       }
-      const vehicle = $("#trackMapVehicle");
-      const waypointBox = $("#trackWaypoint");
-      if (vehicle) vehicle.hidden = true;
-      if (waypointBox) waypointBox.hidden = true;
 
-      return;
+      const app = appModule.getApps().length
+        ? appModule.getApp()
+        : appModule.initializeApp(config.firebaseConfig);
+      const auth = getAuth(app);
+      const user = auth.currentUser;
+
+      if (!user) {
+        root.innerHTML = '<div class="empty">Please sign in to your customer account to track an order.</div>';
+        return;
+      }
+
+      const snapshot = await firestore.getDocs(
+        firestore.query(
+          firestore.collection(firestore.getFirestore(app), "orders"),
+          firestore.where("customerUid", "==", user.uid)
+        )
+      );
+
+      const orderDoc = snapshot.docs.find(
+        doc => String(doc.id).toUpperCase() === id
+      );
+
+      if (!orderDoc) {
+        root.innerHTML = '<div class="empty">Order not found in your account. Check your Order ID.</div>';
+        if (map) {
+          map.hidden = true;
+          map.innerHTML = "";
+        }
+        return;
+      }
+
+      const order = {
+        id: orderDoc.id,
+        ...orderDoc.data()
+      };
+
+      renderTrackedOrder(order);
+      write("kb_last_order", {
+        ...order,
+        createdAt: order.createdAt?.toDate
+          ? order.createdAt.toDate().toISOString()
+          : order.createdAt
+      });
+    } catch (error) {
+      console.error("[Kapeng Barako] tracking failed", error);
+      root.innerHTML =
+        '<div class="empty">Unable to load the order right now. Please try again.</div>';
     }
-
-    renderTrackedOrder(order);
   }
 
   function smoothScrollTo(target) {
