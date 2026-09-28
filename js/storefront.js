@@ -59,7 +59,8 @@
   settings.paymentMethods=Array.isArray(settings.paymentMethods)&&settings.paymentMethods.length?[...settings.paymentMethods]:[...fallbackSettings.paymentMethods];
   settings.paymentMethods=[...new Set(settings.paymentMethods.map(x=>x==="Cash on Delivery"?"Cash on Delivery (COD)":x))];
   ["GCash","Cash on Delivery (COD)","Bank Transfer"].forEach(method=>{if(!settings.paymentMethods.includes(method))settings.paymentMethods.push(method);});
-  const shipping={enabled:true,minPacks:2,...read("kb_shipping_rule",{})};
+  const shipping={enabled:true,minPacks:2,regional:{batangas:0,manila:150,province:220},freeMinimum:0,...read("kb_shipping_rule",{})};
+  shipping.regional={batangas:0,manila:150,province:220,...(shipping.regional||{})};
   let trackedOrderId="";
   const TRACK_STEPS=[
     {statuses:["Pending"],title:"Order received",desc:"Your order is recorded and awaiting confirmation."},
@@ -93,8 +94,37 @@
     return sum + (weight.includes("kg") ? i.qty*n : weight.includes("g") ? i.qty*(n/250) : i.qty);
   },0);
   const cartSubtotal=()=>cart.reduce((s,i)=>s+Number(i.price||0)*Number(i.qty||0),0);
-  const freeShip=()=>shipping.enabled!==false&&packsInCart()>=Number(shipping.minPacks||2);
-  const cartShippingLabel=()=>freeShip()?"FREE":"Calculated after pack count";
+  const freeShip=()=>shipping.enabled!==false&&(packsInCart()>=Number(shipping.minPacks||2)||(Number(shipping.freeMinimum||0)>0&&cartSubtotal()>=Number(shipping.freeMinimum)));
+  const regionFromAddress=address=>{
+    const a=String(address||"").toLowerCase();
+    if(/batangas/.test(a))return "batangas";
+    if(/manila/.test(a))return "manila";
+    return "province";
+  };
+  const shippingEstimate=address=>{
+    if(freeShip())return 0;
+    return Math.max(0,Number(shipping.regional?.[regionFromAddress(address)]||0));
+  };
+  const cartShippingLabel=()=>freeShip()?"FREE":"Calculated at checkout";
+  const findPromo=code=>{
+    const wanted=String(code||"").trim().toUpperCase();
+    if(!wanted)return null;
+    const promos=read("kb_promos",[]);
+    return (Array.isArray(promos)?promos:[]).find(p=>String(p.code||"").toUpperCase()===wanted&&p.active!==false)||null;
+  };
+  const promoDiscount=(subtotal,code)=>{
+    const p=findPromo(code);
+    if(!p||packsInCart()<Number(p.minPacks||0))return {amount:0,promo:null};
+    const raw=Number(p.value||0);
+    const amount=p.type==="percent"?subtotal*(raw/100):raw;
+    return {amount:Math.min(subtotal,Math.max(0,amount)),promo:p};
+  };
+  const checkoutTotals=(address,code)=>{
+    const subtotal=cartSubtotal();
+    const shippingFee=shippingEstimate(address);
+    const promo=promoDiscount(subtotal,code);
+    return {subtotal,shippingFee,discount:promo.amount,promo:promo.promo,total:Math.max(0,subtotal+shippingFee-promo.amount)};
+  };
   const normalizeTrackId=value=>String(value||"").trim().replace(/^#/,"").toUpperCase();
   const findTrackedOrder=value=>{
     const wanted=normalizeTrackId(value);
@@ -154,12 +184,28 @@
   const showLayer=id=>{const el=$(id);if(el){el.hidden=false;document.body.classList.add("locked")}};
   const hideLayer=id=>{const el=$(id);if(el){el.hidden=true;if(![...$$(".modal-layer")].some(x=>!x.hidden))document.body.classList.remove("locked")}};
 
+  function syncCheckoutTotals(){
+    const address=$("#checkout-form [name='address']")?.value||"";
+    const voucher=$("#voucher-code")?.value||"";
+    const totals=checkoutTotals(address,voucher);
+    setText("#checkout-subtotal",money(totals.subtotal));
+    setText("#checkout-shipping",totals.shippingFee===0?"FREE":money(totals.shippingFee));
+    setText("#checkout-discount",totals.discount>0?"−"+money(totals.discount):"—");
+    setText("#checkout-total",money(totals.total));
+    const promo=$("#checkout-promo");
+    if(promo){
+      if(voucher.trim()&&!totals.promo)promo.textContent="Voucher not valid or minimum pack requirement not met.";
+      else if(totals.promo)promo.textContent=totals.promo.code+" applied.";
+      else promo.textContent=freeShip()?"Free shipping unlocked.":"Shipping is calculated from your delivery address.";
+    }
+  }
+
   function syncUi(){
     const count=cart.reduce((s,i)=>s+Number(i.qty||0),0);
     setText("#cart-count",count);setText("#hero-cart-count",count);setText("#products-cart-count",count);
     const sub=cartSubtotal();
-    setText("#cart-items-total",count);setText("#cart-total",money(sub));setText("#checkout-total",money(sub));setText("#cart-shipping",cartShippingLabel());
-    renderCart();renderCheckoutOptions();
+    setText("#cart-items-total",count);setText("#cart-total",money(sub));setText("#cart-shipping",cartShippingLabel());
+    renderCart();renderCheckoutOptions();syncCheckoutTotals();
   }
 
   function renderHero(){
@@ -281,14 +327,17 @@
   }
 
   function renderCheckoutOptions(){
-    if($("#checkout-promo"))$("#checkout-promo").textContent=freeShip()?"Free shipping unlocked — 2 packs or more.":"Free shipping is available when you reach "+Number(shipping.minPacks||2)+" packs or more.";
     setText("#checkout-note",settings.orderNote||fallbackSettings.orderNote);
+    syncCheckoutTotals();
   }
 
   function submitOrder(e){
     e.preventDefault();
     if(!cart.length){toast("Your cart is empty.");return}
     const fd=new FormData(e.currentTarget);
+    const address=String(fd.get("address")||"").trim();
+    const voucher=String(fd.get("voucher")||"").trim().toUpperCase();
+    const totals=checkoutTotals(address,voucher);
     const order={
       id:"KB-"+Date.now().toString(36).toUpperCase(),
       createdAt:new Date().toISOString(),
@@ -296,15 +345,20 @@
         name:String(fd.get("name")||"").trim(),
         phone:String(fd.get("phone")||"").trim(),
         email:String(fd.get("email")||"").trim(),
-        address:String(fd.get("address")||"").trim()
+        address
       },
       payment:String(fd.get("payment")||""),
       fulfillment:String(fd.get("fulfillment")||""),
-      voucher:String(fd.get("voucher")||"").trim().toUpperCase(),
+      voucher,
+      promoCode:totals.promo?.code||"",
+      discount:totals.discount,
+      subtotal:totals.subtotal,
+      shippingFee:totals.shippingFee,
       paymentReference:String(fd.get("paymentReference")||"").trim(),
       paymentProofName:$("#payment-proof")?.files?.[0]?.name||"",
-      shippingFree:freeShip(),
-      total:cartSubtotal(),
+      shippingFree:totals.shippingFee===0,
+      shippingRegion:regionFromAddress(address),
+      total:totals.total,
       status:"Pending",
       statusUpdatedAt:new Date().toISOString(),
       cogs:0,shippingSubsidy:0,affiliateCommission:0,
@@ -347,6 +401,8 @@
     $("#track-backdrop").onclick=()=>hideLayer("#track-layer");
     $("#track-form").addEventListener("submit",e=>{e.preventDefault();trackedOrderId=normalizeTrackId($("#track-order-id").value);renderTrackResult(findTrackedOrder(trackedOrderId));});
     $("#checkout-payment").addEventListener("change",renderPaymentHelp);
+    $("#checkout-form [name="address"]")?.addEventListener("input",syncCheckoutTotals);
+    $("#voucher-code")?.addEventListener("input",syncCheckoutTotals);
     $("#payment-proof").addEventListener("change",()=>{
       const f=$("#payment-proof")?.files?.[0];
       setText("#payment-proof-note",f?"Selected file: "+f.name+" — filename only in current static mode.":"On GitHub Pages mode, the file is not uploaded to a server; only its filename is attached to the local order record.");
