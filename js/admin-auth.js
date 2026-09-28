@@ -113,12 +113,7 @@
     try {
       await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
       const credential = await authMod.signInWithEmailAndPassword(currentAuth, normalized, String(password));
-      const admin = await (async () => {
-        const snap = await authMod.getIdTokenResult
-          ? null
-          : null;
-        return verifyAdminWithoutSession(credential.user);
-      })();
+      const admin = await verifyAdminWithoutSession(credential.user);
 
       if (!admin) {
         await authMod.signOut(currentAuth);
