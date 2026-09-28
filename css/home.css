@@ -1113,3 +1113,24 @@ body > .sidebar-toggle{
 body.sidebar-open > .sidebar-toggle{
   left:calc(var(--sidebar-width) + 14px)!important;
 }
+
+/* Restore visible hamburger — keep current stable sidebar layout */
+.site-header .sidebar-toggle{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex:0 0 42px!important;
+  position:fixed!important;
+  left:14px!important;
+  top:14px!important;
+  z-index:99999!important;
+}
+.site-header .sidebar-toggle span{
+  display:block!important;
+  width:19px!important;
+  height:2px!important;
+  margin:0!important;
+  background:var(--gold-2)!important;
+  border-radius:2px!important;
+}
