@@ -1049,3 +1049,40 @@ body.sidebar-collapsed > .sidebar-toggle{
   left:14px!important;
   top:14px!important;
 }
+
+/* FINAL SIDEBAR BEHAVIOR: closed by default, hamburger beside logo */
+body > .sidebar-toggle{
+  position:fixed!important;
+  left:14px!important;
+  top:14px!important;
+  z-index:99999!important;
+  width:42px!important;
+  height:42px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+body > .sidebar-toggle + .site-header{
+  transform:translateX(calc(-1 * var(--sidebar-width)));
+}
+body > .sidebar-toggle + .site-header + main,
+body > .sidebar-toggle + .site-header + main + footer{
+  margin-left:0!important;
+}
+body.sidebar-open > .sidebar-toggle + .site-header{
+  transform:translateX(0);
+}
+body.sidebar-open > .sidebar-toggle + .site-header + main,
+body.sidebar-open > .sidebar-toggle + .site-header + main + footer{
+  margin-left:var(--sidebar-width)!important;
+}
+body > .sidebar-toggle{
+  transition:left .28s ease, background .22s ease;
+}
+body.sidebar-open > .sidebar-toggle{
+  left:calc(var(--sidebar-width) + 14px)!important;
+}
+/* give the brand its own space; hamburger never covers the logo */
+.site-header .brand{
+  padding-left:58px!important;
+}
