@@ -48,3 +48,5 @@
 .gallery-manager-card input:focus{border-color:var(--gold)}
 @media(max-width:1000px){.gallery-manager-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.gallery-manager-grid{grid-template-columns:1fr}.gallery-preview{height:210px}}
+
+.gcash-ref{font-size:11px;letter-spacing:.02em}.gcash-ref.missing{color:#D64545;text-transform:uppercase}
