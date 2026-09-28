@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function verified() {
+      return signedIn() && request.auth.token.email_verified == true;
+    }
+    function owner(uid) {
+      return verified() && request.auth.uid == uid;
+    }
+
+    match /users/{userId} {
+      allow read, create, update, delete: if owner(userId);
+
+      match /addresses/{addressId} {
+        allow read, create, update, delete: if owner(userId);
+      }
+
+      match /wishlist/{itemId} {
+        allow read, create, update, delete: if owner(userId);
+      }
+    }
+
+    match /orders/{orderId} {
+      allow read: if verified() && resource.data.customerUid == request.auth.uid;
+      // Customer-side order creation should be done by a trusted backend/Cloud Function
+      // so price, payment, inventory and status cannot be forged by the browser.
+      allow create, update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
