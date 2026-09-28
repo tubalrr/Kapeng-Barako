@@ -354,12 +354,14 @@
     $("#brew-play").onclick=()=>$("#brew-dialog").showModal();
     $$("[data-close-dialog]").forEach(x=>x.onclick=()=>x.closest("dialog")?.close());
     $("#checkout-form").addEventListener("submit",submitOrder);
-    $("#menu-button").onclick=()=>{
-      const open=document.body.classList.toggle("sidebar-open");
+    const setSidebarOpen=(open)=>{
+      document.body.classList.toggle("sidebar-open",open);
       $("#menu-button").setAttribute("aria-expanded",String(open));
-      $("#menu-button").setAttribute("aria-label",open?"Close sidebar":"Open sidebar");
+      $("#menu-button").setAttribute("aria-label",open?"Close menu":"Open menu");
+      document.body.style.overflow=open?"hidden":"";
     };
-    $$("#mobile-nav a").forEach(a=>a.onclick=()=>{$("#mobile-nav").style.display="none";$("#menu-button").setAttribute("aria-expanded","false")});
+    $("#menu-button").onclick=()=>setSidebarOpen(!document.body.classList.contains("sidebar-open"));
+    $("#mobile-nav a").forEach(a=>a.onclick=()=>{$("#mobile-nav").style.display="none";setSidebarOpen(false)});
     document.addEventListener("click",e=>{
       const v=e.target.closest("[data-variant]");
       if(v){
