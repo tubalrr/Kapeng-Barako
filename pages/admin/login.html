@@ -4,49 +4,80 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>Kapeng Barako — Admin Login</title>
 <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
-<link rel="stylesheet" href="../../css/admin-login.css?v=kb-rebuild-2">
-<script src="../../js/admin-auth.js?v=kb-firebase-auth-3" defer></script>
+<link rel="stylesheet" href="../../css/admin-login.css?v=kb-rebuild-3">
+<script src="../../js/admin-auth.js?v=kb-firebase-auth-4" defer></script>
 </head>
 <body>
 <main class="login-shell">
-  <section class="login-brand"><img class="brand-mark" src="../../images/favicon.svg" alt="Kapeng Barako"><span class="eyebrow">RESTRICTED ADMIN PORTAL</span><h1>Run the<br><em>Barako.</em></h1><p>Orders, stock, customers and sales—inside the Kapeng Barako control room.</p><div class="login-rule"><span>FIREBASE ADMIN SESSION</span><b>8 HOURS</b></div></section>
-  <section class="login-card"><span class="eyebrow">ADMIN ACCESS</span><h2>Sign in.</h2><p>Authorized store administrators only.</p><div id="login-error" class="error" role="alert"></div><button id="google-admin-login" class="login-button" type="button">CONTINUE WITH GOOGLE →</button><div class="seed-note"><strong>Google Admin</strong><small>Use the authorized Google account with an active <code>/admins/{uid}</code> document. Admin access is verified in Firestore after Google authentication.</small></div><a class="back-link" href="../../index.html">← Back to storefront</a></section>
+  <section class="login-brand">
+    <img class="brand-mark" src="../../images/favicon.svg" alt="Kapeng Barako">
+    <span class="eyebrow">RESTRICTED ADMIN PORTAL</span>
+    <h1>Run the<br><em>Barako.</em></h1>
+    <p>Orders, stock, customers and sales—inside the Kapeng Barako control room.</p>
+    <div class="login-rule"><span>FIREBASE ADMIN SESSION</span><b>8 HOURS</b></div>
+  </section>
+  <section class="login-card">
+    <span class="eyebrow">ADMIN ACCESS</span>
+    <h2>Sign in.</h2>
+    <p>Enter your authorized admin email. We'll send a secure sign-in link.</p>
+    <form id="admin-email-form">
+      <label for="admin-email">EMAIL</label>
+      <input id="admin-email" type="email" placeholder="admin@example.com" autocomplete="email" required>
+      <div id="login-error" class="error" role="alert"></div>
+      <button id="email-admin-login" class="login-button" type="submit">SEND SIGN-IN LINK →</button>
+    </form>
+    <div id="email-sent" class="seed-note" hidden>
+      <strong>Check your email</strong>
+      <small>A secure sign-in link was sent. Open it on this device to enter the Admin Console.</small>
+    </div>
+    <div class="seed-note">
+      <strong>Passwordless Admin</strong>
+      <small>No admin password is stored in this website. Access is allowed only when Firebase authenticates the email and the matching <code>/admins/{uid}</code> document is active.</small>
+    </div>
+    <a class="back-link" href="../../index.html">← Back to storefront</a>
+  </section>
 </main>
 <script>
-document.addEventListener("DOMContentLoaded",async()=>{
-  const btn=document.querySelector("#google-admin-login");
-  const err=document.querySelector("#login-error");
+document.addEventListener("DOMContentLoaded", async () => {
+  const form = document.querySelector("#admin-email-form");
+  const emailInput = document.querySelector("#admin-email");
+  const btn = document.querySelector("#email-admin-login");
+  const err = document.querySelector("#login-error");
+  const sent = document.querySelector("#email-sent");
 
-  const params=new URLSearchParams(location.search);
-  if(params.get("reason")==="expired"){
-    err.textContent="Your admin session expired. Please sign in again.";
-  }else if(params.get("reason")==="timeout"){
-    err.textContent="Firebase verification timed out. Check Authorized Domains and Firestore access.";
-  }
-
-  try{
-    const admin=await window.KBAdminAuth.restore();
-    if(admin){location.replace("./index.html");return}
-  }catch(error){
-    err.textContent=error?.message || "Could not restore the admin session.";
-  }
-
-  btn.addEventListener("click",async()=>{
-    err.textContent="";
-    btn.disabled=true;
-    btn.textContent="CONNECTING TO GOOGLE…";
-
-    try{
-      await window.KBAdminAuth.authenticateWithGoogle();
+  try {
+    const linkedAdmin = await window.KBAdminAuth.completeAdminEmailLink();
+    if (linkedAdmin) {
       location.replace("./index.html");
-    }catch(error){
-      console.error("[Kapeng Barako] Google admin login failed",error);
-      err.textContent=error?.message || "Could not sign in with Google.";
-    }finally{
-      btn.disabled=false;
-      btn.textContent="CONTINUE WITH GOOGLE →";
+      return;
+    }
+    const admin = await window.KBAdminAuth.restore();
+    if (admin) {
+      location.replace("./index.html");
+      return;
+    }
+  } catch (error) {
+    err.textContent = error?.message || "The sign-in link could not be completed.";
+  }
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    err.textContent = "";
+    sent.hidden = true;
+    btn.disabled = true;
+    btn.textContent = "SENDING…";
+    try {
+      await window.KBAdminAuth.sendAdminEmailLink(emailInput.value);
+      sent.hidden = false;
+      btn.textContent = "LINK SENT ✓";
+    } catch (error) {
+      console.error("[Kapeng Barako] admin email-link login failed", error);
+      err.textContent = error?.message || "Could not send the sign-in link.";
+      btn.disabled = false;
+      btn.textContent = "SEND SIGN-IN LINK →";
     }
   });
 });
-</script></script>
-</body></html>
+</script>
+</body>
+</html>
