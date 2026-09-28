@@ -2,9 +2,17 @@
   "use strict";
   const PRODUCTS_KEY="kb_rebuild_products", ORDERS_KEY="kb_orders", PROMOS_KEY="kb_promos", SETTINGS_KEY="kb_settings", CMS_KEY="kb_cms", GALLERY_KEY="kb_gallery", ADS_KEY="kb_ads";
   const DEFAULT_PRODUCTS=[
-    {id:"KB250",name:"Barako 250g",size:"250g",price:350,stock:7,badge:"BEST SELLER",roast:"Dark",grind:"Medium",note:"Bold, aromatic, unmistakably Barako."},
-    {id:"KB500",name:"Barako 500g",size:"500g",price:620,stock:7,badge:"FRESH ROAST",roast:"Medium",grind:"Whole",note:"A deeper everyday supply for the serious cup."},
-    {id:"KB1K",name:"Barako 1kg",size:"1kg",price:1150,stock:7,badge:"VALUE",roast:"Dark",grind:"Coarse",note:"The full ritual, ready for the week."}
+    {id:"KB250",name:"Barako Strong",size:"250g",price:350,stock:7,badge:"BEST SELLER",roast:"Dark",grind:"Whole",note:"Bold, aromatic, unmistakably Barako.",image:"",featured:true,origin:"",roastDate:"",roastLevel:"",netWeight:"250g",batch:"",process:"",tastingNotes:""},
+    {id:"KB500",name:"Barako Classic",size:"500g",price:620,stock:7,badge:"FRESH ROAST",roast:"Medium",grind:"Whole",note:"More coffee for the serious daily cup.",image:"",featured:false,origin:"",roastDate:"",roastLevel:"",netWeight:"500g",batch:"",process:"",tastingNotes:""},
+    {id:"KB1K",name:"Barako Reserve",size:"1kg",price:1150,stock:7,badge:"SIGNATURE",roast:"Dark",grind:"Whole",note:"The full ritual, ready for the week.",image:"",featured:false,origin:"",roastDate:"",roastLevel:"",netWeight:"1kg",batch:"",process:"",tastingNotes:""}
+  ];
+  const DEFAULT_GALLERY=[
+    {slot:1,title:"Roast",image:"images/gallery-01.svg",alt:"Roasted Liberica beans"},
+    {slot:2,title:"Farm",image:"images/gallery-02.svg",alt:"Coffee farm"},
+    {slot:3,title:"Cup",image:"images/gallery-03.svg",alt:"Coffee cup"},
+    {slot:4,title:"Harvest",image:"images/gallery-04.svg",alt:"Green coffee beans"},
+    {slot:5,title:"Craft",image:"images/gallery-05.svg",alt:"Small batch roasting"},
+    {slot:6,title:"Ritual",image:"images/gallery-06.svg",alt:"Coffee ritual"}
   ];
   const $=s=>document.querySelector(s);
   const $$=s=>[...document.querySelectorAll(s)];
@@ -18,8 +26,16 @@
   };
   const money=n=>"₱"+Number(n||0).toLocaleString("en-PH");
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  let products=read(PRODUCTS_KEY,[]);if(!Array.isArray(products))products=[];
-  let gallery=read(GALLERY_KEY,[]);if(!Array.isArray(gallery))gallery=[];
+  let products=read(PRODUCTS_KEY,null);
+  if(!Array.isArray(products)||!products.length){
+    products=DEFAULT_PRODUCTS.map(p=>({...p}));
+    write(PRODUCTS_KEY,products);
+  }
+  let gallery=read(GALLERY_KEY,null);
+  if(!Array.isArray(gallery)||!gallery.length){
+    gallery=DEFAULT_GALLERY.map(g=>({...g}));
+    write(GALLERY_KEY,gallery);
+  }
   let ads=read(ADS_KEY,{link:"",image:"",label:""});if(!ads||typeof ads!=="object"||Array.isArray(ads))ads={link:"",image:"",label:""};
   let orderSearch="";
   let lowStockSoundEnabled=localStorage.getItem("kb_low_stock_sound")==="1";
@@ -175,6 +191,10 @@
       '</tbody></table>';
   }
 
+    function paymentStatus(o){
+    if(String(o?.payment||"").toLowerCase()!=="gcash") return "Not Required";
+    return String(o?.paymentStatus||"Pending Review");
+  }
   function renderOrders(){
     refreshData();
     const root=$("#orders-table"), count=$("#order-search-count"), input=$("#order-search");
@@ -189,11 +209,43 @@
     if(count) count.textContent=query ? "Showing "+filtered.length+" of "+sorted.length+" orders" : sorted.length+" orders";
     if(!sorted.length){root.innerHTML='<div class="empty">No orders yet. Customer orders will appear here.</div>';return}
     if(!filtered.length){root.innerHTML='<div class="empty">No orders found for “'+esc(orderSearch)+'”.</div>';return}
-    root.innerHTML='<table class="data-table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Payment</th><th>GCash Ref</th><th>Status</th><th>Update</th></tr></thead><tbody>'+
-      filtered.map(o=>'<tr><td><strong>'+esc(o.id)+'</strong><br><span class="panel-note">'+new Date(o.createdAt||Date.now()).toLocaleString("en-PH",{dateStyle:"medium"})+'</span></td><td>'+esc(o.customer?.name||"Customer")+'<br><span class="panel-note">'+esc(o.customer?.address||"")+'</span></td><td>'+money(o.total)+'</td><td>'+esc(o.payment||"—")+'</td><td><strong class="gcash-ref '+(o.payment==="GCash"&&o.gcashRef?"":"missing")+'">'+(o.payment==="GCash"?(esc(o.gcashRef||"MISSING")):"—")+'</strong></td><td><span class="badge">'+esc(o.status||"Pending")+'</span></td><td><select class="status-select" data-order-status="'+esc(o.id)+'"><option>Pending</option><option>Verified Payment</option><option>Processing/Roasting</option><option>Ready to Ship</option><option>Dispatched</option><option>Delivered</option><option>Cancelled</option></select></td></tr>').join("")+'</tbody></table>';
-    $$("[data-order-status]").forEach(s=>{const o=orders.find(x=>String(x.id)===String(s.dataset.orderStatus));if(o)s.value=o.status;s.addEventListener("change",()=>updateOrderStatus(s.dataset.orderStatus,s.value))});
+    root.innerHTML='<table class="data-table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Payment</th><th>GCash Ref</th><th>Payment Review</th><th>Status</th><th>Update</th></tr></thead><tbody>'+
+      filtered.map(o=>{
+        const gcash=String(o.payment||"").toLowerCase()==="gcash";
+        const pStatus=paymentStatus(o);
+        return '<tr><td><strong>'+esc(o.id)+'</strong><br><span class="panel-note">'+new Date(o.createdAt||Date.now()).toLocaleString("en-PH",{dateStyle:"medium"})+'</span></td>'+
+          '<td>'+esc(o.customer?.name||"Customer")+'<br><span class="panel-note">'+esc(o.customer?.address||"")+'</span></td>'+
+          '<td>'+money(o.total)+'</td><td>'+esc(o.payment||"—")+'</td>'+
+          '<td><strong class="gcash-ref '+(gcash&&o.gcashRef?"":"missing")+'">'+(gcash?esc(o.gcashRef||"MISSING"):"—")+'</strong></td>'+
+          '<td>'+ (gcash
+            ? '<select class="status-select payment-status-select" data-payment-status="'+esc(o.id)+'"><option>Pending Review</option><option>Verified</option><option>Rejected</option></select>'
+            : '<span class="badge">NOT REQUIRED</span>') + '</td>'+
+          '<td><span class="badge">'+esc(o.status||"Pending")+'</span></td>'+
+          '<td><select class="status-select" data-order-status="'+esc(o.id)+'"><option>Pending</option><option>Verified Payment</option><option>Processing/Roasting</option><option>Ready to Ship</option><option>Dispatched</option><option>Delivered</option><option>Cancelled</option></select></td></tr>';
+      }).join("")+'</tbody></table>';
+    $$("[data-order-status]").forEach(s=>{
+      const o=orders.find(x=>String(x.id)===String(s.dataset.orderStatus));
+      if(o)s.value=o.status;
+      s.addEventListener("change",()=>updateOrderStatus(s.dataset.orderStatus,s.value));
+    });
+    $$("[data-payment-status]").forEach(s=>{
+      const o=orders.find(x=>String(x.id)===String(s.dataset.paymentStatus));
+      if(o)s.value=paymentStatus(o);
+      s.addEventListener("change",()=>updatePaymentStatus(s.dataset.paymentStatus,s.value));
+    });
   }
-  function initOrderSearch(){
+  function updatePaymentStatus(id,status){
+    const list=read(ORDERS_KEY,[]);
+    const idx=list.findIndex(o=>String(o.id)===String(id));
+    if(idx<0)return;
+    list[idx]={...list[idx],paymentStatus:status,paymentReviewedAt:new Date().toISOString()};
+    write(ORDERS_KEY,list);
+    toast("Payment for "+id+" → "+status);
+    renderOverview();
+    renderOrders();
+  }
+
+function initOrderSearch(){
     const input=$("#order-search"), clear=$("#clear-order-search");
     if(!input||input.dataset.bound)return;
     input.dataset.bound="1";
