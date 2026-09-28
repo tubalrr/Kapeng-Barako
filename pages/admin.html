@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar" id="sidebar">
+  <div class="app-shell admin-app-shell">
+    <aside class="sidebar admin-sidebar" id="sidebar">
       <div class="brand-block">
         <a class="brand" href="../index.html" aria-label="Kapeng Barako storefront">
           <img src="../images/favicon.svg" alt="" class="brand-mark">
@@ -23,7 +23,7 @@
         <button class="icon-btn mobile-only" type="button" data-action="close-menu" aria-label="Close menu">×</button>
       </div>
 
-      <nav class="side-nav" aria-label="Admin navigation">
+      <nav class="side-nav admin-navigation" aria-label="Admin navigation">
         <button class="nav-item active" type="button" data-section="overview"><span>⌂</span>Overview</button>
         <button class="nav-item" type="button" data-section="orders"><span>▦</span>Orders / OMS</button>
         <button class="nav-item" type="button" data-section="customers"><span>♙</span>Customers</button>
@@ -51,8 +51,8 @@
       </div>
     </aside>
 
-    <main class="main">
-      <header class="topbar">
+    <main class="main admin-main">
+      <header class="topbar admin-topbar">
         <div class="topbar-left">
           <button class="icon-btn mobile-only" type="button" data-action="open-menu" aria-label="Open menu">☰</button>
           <div>
@@ -66,9 +66,9 @@
         </div>
       </header>
 
-      <section class="content">
+      <section class="content admin-content">
         <section class="admin-section active" id="section-overview" data-section-panel="overview">
-          <div class="hero-grid">
+          <div class="hero-grid admin-overview-grid">
             <div class="hero-card">
               <div>
                 <span class="eyebrow">Operations control</span>
@@ -88,7 +88,7 @@
             </div>
           </div>
 
-          <div class="metric-grid">
+          <div class="metric-grid admin-metric-grid">
             <article class="metric-card"><span>Today Sales</span><strong id="metric-today-sales">₱0</strong><small>Revenue from today's orders</small></article>
             <article class="metric-card"><span>This Week</span><strong id="metric-week-sales">₱0</strong><small>Revenue from this week</small></article>
             <article class="metric-card"><span>Customers</span><strong id="metric-customers">0</strong><small>Unique recorded buyers</small></article>
@@ -102,7 +102,7 @@
             <article class="metric-card"><span>Delivered</span><strong id="metric-delivered">0</strong><small>Completed orders</small></article>
           </div>
 
-          <div class="panel">
+          <div class="panel admin-panel">
             <div class="panel-head">
               <div><span class="eyebrow">Fulfillment queue</span><h3>Orders needing attention</h3></div>
               <button class="text-btn" type="button" data-section-jump="orders">View all →</button>
