@@ -123,7 +123,20 @@ function renderProducts(){
       const badge=card.querySelector("[data-stock-badge]");
       const button=card.querySelector("[data-add-to-cart]");
       const price=card.querySelector("[data-price]");
+      const nameEl=card.querySelector(".product-title-line h3");
+      const noteEl=card.querySelector(".product-title-line p");
+      const badgeEl=card.querySelector(".product-badge");
+      const sizeEl=card.querySelector(".image-size");
+      if(nameEl && p.name) nameEl.textContent=p.name;
+      if(noteEl) noteEl.textContent=p.note||"Fresh Kapeng Barako.";
+      if(badgeEl) badgeEl.textContent=p.badge||"NEW";
+      if(sizeEl) sizeEl.textContent=p.size||"";
       if(price) price.textContent=money(p.price);
+
+      const roastValue=String(p.roast||"").trim();
+      const grindValue=String(p.grind||"").trim();
+      card.querySelectorAll("[data-roast-group] .pill").forEach(x=>x.classList.toggle("active",x.textContent.trim()===roastValue));
+      card.querySelectorAll("[data-grind-group] .pill").forEach(x=>x.classList.toggle("active",x.textContent.trim()===grindValue));
       if(badge){
         badge.textContent=stock ? (stock<=5 ? "⚡ Only "+stock+" packs left" : "⚡ "+stock+" packs left") : "SOLD OUT";
         badge.classList.toggle("urgent",stock>0 && stock<=5);
