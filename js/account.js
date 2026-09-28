@@ -296,7 +296,9 @@ function ordersView(){
 }
 
 function trackingStage(order){
- const current=String(order?.status||"Pending").toLowerCase();
+ const raw=String(order?.status||"Pending");
+ const current=raw==="Ready"?"Ready to Ship":raw;
+ const currentKey=current.toLowerCase();
  const stages=[
    ["Pending","Order received"],
    ["Verified Payment","Payment verified"],
@@ -305,8 +307,8 @@ function trackingStage(order){
    ["Dispatched","In transit"],
    ["Delivered","Delivered"]
  ];
- if(current==="cancelled") return {cancelled:true,stages};
- const currentIndex=stages.findIndex(([status])=>status.toLowerCase()===current);
+ if(currentKey==="cancelled") return {cancelled:true,stages};
+ const currentIndex=stages.findIndex(([status])=>status.toLowerCase()===currentKey);
  return {cancelled:false,stages,currentIndex};
 }
 
