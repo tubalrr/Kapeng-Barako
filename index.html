@@ -1141,14 +1141,10 @@
             return Array.isArray(value) ? value : [];
           };
 
+          // Production-only catalog: Admin is the sole source of product records.
           const getProducts = () => {
             const value = read(PRODUCTS_KEY, []);
-            return Array.isArray(value) && value.length
-              ? value
-              : [
-                  {id:"KB250",name:"Barako Strong",size:"250g",price:350,stock:7,roast:"Dark",grind:"Whole"},
-                  {id:"KB500",name:"Barako Classic",size:"500g",price:620,stock:7,roast:"Medium",grind:"Whole"}
-                ];
+            return Array.isArray(value) ? value : [];
           };
 
           const money = value =>
@@ -1205,14 +1201,14 @@
             const card = document.getElementById("kb-starter-bundle");
             if (!card) return;
 
-            const products = getProducts();
-            const strong = products.find(item => String(item.id) === "KB250");
-            const classic = products.find(item => String(item.id) === "KB500");
+            const products = getProducts().filter(Boolean);
+            const primary = products[0];
+            const secondary = products[1];
 
-            const strongStock = Math.max(0, Number(strong?.stock || 0));
-            const classicStock = Math.max(0, Number(classic?.stock || 0));
-            const available = Math.min(strongStock, classicStock);
-            const basePrice = Number(strong?.price || 0) + Number(classic?.price || 0);
+            const primaryStock = Math.max(0, Number(primary?.stock || 0));
+            const secondaryStock = Math.max(0, Number(secondary?.stock || 0));
+            const available = Math.min(primaryStock, secondaryStock);
+            const basePrice = Number(primary?.price || 0) + Number(secondary?.price || 0);
             const bundlePrice = Math.max(0, basePrice - 100);
 
             const title = card.querySelector(".kb-bundle-copy h3");
@@ -1226,9 +1222,11 @@
             const note = card.querySelector(".kb-bundle-roast-note");
             const button = card.querySelector(".kb-bundle-add");
 
-            if (!strong || !classic || available <= 0) {
+            if (!primary || !secondary || available <= 0) {
               if (title) title.textContent = "Starter bundle";
-              if (copy) copy.textContent = "This bundle is unavailable until both catalog products are in stock.";
+              if (copy) copy.textContent = products.length < 2
+                ? "Add at least two products in Admin before this bundle becomes available."
+                : "This bundle is unavailable until both catalog products are in stock.";
               if (stock) {
                 stock.className = "kb-bundle-stock low";
                 stock.innerHTML = '<span class="kb-bundle-stock-dot"></span><span>SOLD OUT</span>';
@@ -1236,19 +1234,19 @@
               if (priceStrong) priceStrong.textContent = "—";
               if (priceDel) priceDel.textContent = "";
               if (savePill) savePill.textContent = "";
-              if (button) { button.disabled = true; button.textContent = "SOLD OUT"; }
+              if (button) { button.disabled = true; button.textContent = "UNAVAILABLE"; }
               return;
             }
 
-            if (title) title.textContent = (strong.name || "Starter") + " + " + (classic.name || "Classic");
-            if (copy) copy.textContent = "One " + (strong.size || "250g") + " pack + one " + (classic.size || "500g") + " pack from the live catalog.";
+            if (title) title.textContent = (primary.name || "Product") + " + " + (secondary.name || "Product");
+            if (copy) copy.textContent = "One " + (primary.size || "pack") + " + one " + (secondary.size || "pack") + " from the live catalog.";
             if (priceStrong) priceStrong.textContent = money(bundlePrice);
             if (priceDel) priceDel.textContent = money(basePrice);
             if (savePill) savePill.textContent = "Save ₱100";
-            if (items[0]) items[0].textContent = strong.size || "—";
-            if (items[1]) items[1].textContent = classic.size || "—";
-            if (itemLabels[0]) itemLabels[0].textContent = (strong.name || "Product") + " · " + (strong.size || "");
-            if (itemLabels[1]) itemLabels[1].textContent = (classic.name || "Product") + " · " + (classic.size || "");
+            if (items[0]) items[0].textContent = primary.size || "—";
+            if (items[1]) items[1].textContent = secondary.size || "—";
+            if (itemLabels[0]) itemLabels[0].textContent = (primary.name || "Product") + " · " + (primary.size || "");
+            if (itemLabels[1]) itemLabels[1].textContent = (secondary.name || "Product") + " · " + (secondary.size || "");
 
             if (stock) {
               stock.className = "kb-bundle-stock" + (available <= 5 ? " low" : "");
@@ -1268,18 +1266,18 @@
             card.className = "product-card kb-bundle-card";
 
             card.innerHTML = `
-              <span class="kb-bundle-save">SAVE ₱100</span>
+              <span class="kb-bundle-save">SAVE</span>
               <div class="kb-bundle-image">
                 <div class="kb-bundle-cups" aria-hidden="true">
-                  <span class="kb-mini-cup">250g</span>
+                  <span class="kb-mini-cup">LIVE</span>
                   <span class="kb-plus">+</span>
-                  <span class="kb-mini-cup">500g</span>
+                  <span class="kb-mini-cup">LIVE</span>
                 </div>
               </div>
               <div class="kb-bundle-copy">
-                <h3>Barako Starter Bundle</h3>
-                <p>Includes 250g Strong + 500g Classic</p>
-                <div class="kb-bundle-price"><strong>₱870</strong><del>₱970</del></div>
+                <h3>Starter Bundle</h3>
+                <p>Two products from the live catalog.</p>
+                <div class="kb-bundle-price"><strong>—</strong><del></del></div>
                 <div class="kb-bundle-stock"><span>Checking stock...</span></div>
                 <div class="kb-bundle-roast-note"></div>
               </div>
@@ -1313,16 +1311,13 @@
             });
 
             card.querySelector(".kb-bundle-add")?.addEventListener("click", () => {
-              const products = getProducts();
-              const strong = products.find(item => String(item.id) === "KB250");
-              const classic = products.find(item => String(item.id) === "KB500");
+              const products = getProducts().filter(Boolean);
+              const primary = products[0];
+              const secondary = products[1];
 
-              if (!strong || !classic) {
-                updateBundleCard();
-                return;
-              }
-
-              if (Number(strong.stock || 0) < 1 || Number(classic.stock || 0) < 1) {
+              if (!primary || !secondary ||
+                  Number(primary.stock || 0) < 1 ||
+                  Number(secondary.stock || 0) < 1) {
                 updateBundleCard();
                 return;
               }
@@ -1333,10 +1328,10 @@
               const cart = getCart();
 
               cart.push({
-                id: "KB250",
-                name: strong.name || "Barako Strong",
-                size: strong.size || "250g",
-                price: Number(strong.price || 0),
+                id: primary.id,
+                name: primary.name || "Product",
+                size: primary.size || "",
+                price: Number(primary.price || 0),
                 roast,
                 grind,
                 qty: 1,
@@ -1344,10 +1339,10 @@
               });
 
               cart.push({
-                id: "KB500",
-                name: classic.name || "Barako Classic",
-                size: classic.size || "500g",
-                price: Number(classic.price || 0),
+                id: secondary.id,
+                name: secondary.name || "Product",
+                size: secondary.size || "",
+                price: Number(secondary.price || 0),
                 roast,
                 grind,
                 qty: 1,
@@ -1366,63 +1361,66 @@
           }
 
           /* =========================
-             TRUST BADGES
+             TRUST SECTION
              ========================= */
 
           function ensureTrustBadges() {
-            if (!PRODUCT_GRID || document.getElementById("kb-trust-badges")) return;
+            const trust = document.getElementById("trust");
+            if (!trust) return;
 
-            const trust = document.createElement("div");
-            trust.id = "kb-trust-badges";
-            trust.setAttribute("aria-label","Store information");
+            const settings = (() => {
+              try { return JSON.parse(localStorage.getItem("kb_settings") || "{}") || {}; }
+              catch { return {}; }
+            })();
 
-            trust.innerHTML = `
-              <div class="kb-trust-grid">
-                <div class="kb-trust-item" id="kbTrustGcash">
-                  <span class="kb-trust-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path></svg>
-                  </span>
-                  <span class="kb-trust-text">GCash Available</span>
-                </div>
-                <div class="kb-trust-item" id="kbTrustCod">
-                  <span class="kb-trust-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8"></path><path d="M8 11h8"></path><path d="M8 15h5"></path></svg>
-                  </span>
-                  <span class="kb-trust-text">COD Available</span>
-                </div>
-                <div class="kb-trust-item" id="kbTrustOrigin">
-                  <span class="kb-trust-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><path d="M12 21s7-5.2 7-11A7 7 0 0 0 5 10c0 5.8 7 11 7 11Z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
-                  </span>
-                  <span class="kb-trust-text" id="kbTrustOriginText">Store origin</span>
-                </div>
-              </div>
-            `;
+            const payment = settings.paymentMethods || {};
+            const gcash = document.getElementById("kbTrustGcash");
+            const cod = document.getElementById("kbTrustCod");
+            const origin = document.getElementById("kbTrustOrigin");
+            const originText = document.getElementById("kbTrustOriginText");
+            if (gcash) gcash.hidden = payment.gcash !== true;
+            if (cod) cod.hidden = payment.cod !== true;
 
-            PRODUCT_GRID.insertAdjacentElement("afterend",trust);
+            const originValue = String(settings.location || settings.businessOrigin || "").trim();
+            if (origin) origin.hidden = !originValue;
+            if (originText) originText.textContent = originValue || "";
 
-            const syncTrust = () => {
-              const settings = (() => {
-                try { return JSON.parse(localStorage.getItem("kb_settings") || "{}") || {}; }
-                catch { return {}; }
-              })();
-              const payment = settings.paymentMethods || {};
-              const gcash = document.getElementById("kbTrustGcash");
-              const cod = document.getElementById("kbTrustCod");
-              const origin = document.getElementById("kbTrustOrigin");
-              const originText = document.getElementById("kbTrustOriginText");
-              if (gcash) gcash.hidden = payment.gcash === false;
-              if (cod) cod.hidden = payment.cod === false;
-              const originValue = String(settings.location || settings.businessOrigin || "").trim();
-              if (origin) origin.hidden = !originValue;
-              if (originText) originText.textContent = originValue || "";
-            };
+            const orders = (() => {
+              try {
+                const value = JSON.parse(localStorage.getItem("kb_orders") || "[]");
+                return Array.isArray(value) ? value : [];
+              } catch { return []; }
+            })();
+            const delivered = orders.filter(order => String(order?.status || "").toLowerCase() === "delivered").length;
+            const deliveredCard = document.getElementById("trustDeliveredCard");
+            const deliveredTitle = document.getElementById("trustDeliveredTitle");
+            if (deliveredCard) deliveredCard.hidden = delivered <= 0;
+            if (deliveredTitle) deliveredTitle.textContent =
+              delivered + (delivered === 1 ? " delivered order" : " delivered orders");
 
-            syncTrust();
-            window.addEventListener("storage", event => {
-              if (event.key === "kb_settings") syncTrust();
-            });
+            const reviewCount = (() => {
+              try {
+                const value = JSON.parse(localStorage.getItem("kb_reviews") || "[]");
+                return Array.isArray(value)
+                  ? value.filter(r => r && r.verified === true && r.published !== false).length
+                  : 0;
+              } catch { return 0; }
+            })();
+            const reviewCard = document.getElementById("trustReviewCard");
+            const reviewTitle = document.getElementById("trustReviewTitle");
+            if (reviewCard) reviewCard.hidden = reviewCount <= 0;
+            if (reviewTitle) reviewTitle.textContent =
+              reviewCount + (reviewCount === 1 ? " verified review" : " verified reviews");
+
+            const hasVisible = [gcash,cod,origin,deliveredCard,reviewCard].some(node => node && !node.hidden);
+            trust.hidden = !hasVisible;
           }
+
+          window.addEventListener("storage", event => {
+            if (["kb_settings","kb_store_settings","kb_orders","kb_reviews"].includes(event.key)) {
+              ensureTrustBadges();
+            }
+          });
 
           /* =========================
              STICKY CART
@@ -1463,9 +1461,11 @@
 
             let discount = 0;
             bundleIds.forEach(id => {
-              const complete = cart.some(line => String(line.bundleId || "") === id && String(line.id) === "KB250") &&
-                cart.some(line => String(line.bundleId || "") === id && String(line.id) === "KB500");
-              if (complete) discount += 100;
+              const bundleLines = cart.filter(line =>
+                String(line.bundleId || "") === id &&
+                Number(line.qty || 0) > 0
+              );
+              if (bundleLines.length >= 2) discount += 100;
             });
 
             if (thumb) thumb.src = "images/gallery-03.svg";
@@ -1768,6 +1768,46 @@
       </script>
 
     </section>
+    <!-- TRUST / CHECKOUT CONFIDENCE -->
+    <section class="section-dark section-space" id="trust" hidden aria-label="Store trust and checkout information">
+      <div class="container">
+        <div class="section-heading-row">
+          <div>
+            <span class="eyebrow">TRUST / CHECKOUT</span>
+            <h2>Real store information.<br><em>No demo claims.</em></h2>
+          </div>
+        </div>
+        <div id="kb-trust-badges" class="kb-trust-grid" aria-label="Live store information">
+          <div class="kb-trust-item" id="kbTrustGcash" hidden>
+            <span class="kb-trust-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path></svg>
+            </span>
+            <span class="kb-trust-text">GCash Available</span>
+          </div>
+          <div class="kb-trust-item" id="kbTrustCod" hidden>
+            <span class="kb-trust-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8"></path><path d="M8 11h8"></path><path d="M8 15h5"></path></svg>
+            </span>
+            <span class="kb-trust-text">COD Available</span>
+          </div>
+          <div class="kb-trust-item" id="kbTrustOrigin" hidden>
+            <span class="kb-trust-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 21s7-5.2 7-11A7 7 0 0 0 5 10c0 5.8 7 11 7 11Z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
+            </span>
+            <span class="kb-trust-text" id="kbTrustOriginText"></span>
+          </div>
+          <div class="kb-trust-item" id="trustDeliveredCard" hidden>
+            <span class="kb-trust-icon" aria-hidden="true">✓</span>
+            <span class="kb-trust-text" id="trustDeliveredTitle"></span>
+          </div>
+          <div class="kb-trust-item" id="trustReviewCard" hidden>
+            <span class="kb-trust-icon" aria-hidden="true">★</span>
+            <span class="kb-trust-text" id="trustReviewTitle"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- DELIVERY & PAYMENT -->
     <section class="section-dark section-space" id="delivery">
       <div class="container delivery-layout">
