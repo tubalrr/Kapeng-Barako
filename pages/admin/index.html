@@ -613,6 +613,11 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     $("#chartNote").textContent = money(values.reduce((a,b)=>a+b,0)) + " / 7d";
   }
 
+  function getPaymentStatus(order) {
+    if (String(order?.payment || "").toLowerCase() !== "gcash") return "Not Required";
+    return String(order?.paymentStatus || "Pending Review");
+  }
+
   function renderOrders() {
     const os = orders().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     const q = orderSearch.trim().toLowerCase();
@@ -621,10 +626,13 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     if(!os.length){ $("#ordersTable").innerHTML='<div class="empty">No orders yet.</div>'; return; }
     if(!filtered.length){ $("#ordersTable").innerHTML='<div class="empty">No matching orders.</div>'; return; }
 
-    $("#ordersTable").innerHTML = '<table><thead><tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>GCash Ref</th><th>Track</th></tr></thead><tbody>'+
+    $("#ordersTable").innerHTML =
+      '<table><thead><tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>GCash Ref</th><th>Payment Review</th><th>Track</th></tr></thead><tbody>'+
       filtered.map(o => {
         const status = normalizeStatus(o.status);
         const ref = gcashRef(o);
+        const isGcash = String(o.payment || "").toLowerCase() === "gcash";
+        const reviewed = getPaymentStatus(o);
         return '<tr>'+
           '<td><strong>'+esc(o.id || "—")+'</strong></td>'+
           '<td><strong>'+esc(customerName(o))+'</strong><span class="muted">'+esc(customerEmail(o))+'</span></td>'+
@@ -632,15 +640,26 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
           '<td>'+itemsCount(o)+'</td>'+
           '<td><strong>'+money(o.total)+'</strong></td>'+
           '<td><select class="status-select" data-status-id="'+esc(o.id)+'"><option value="Pending">Pending</option><option value="Ready">Ready</option><option value="Delivered">Delivered</option></select></td>'+
-          '<td><strong class="gcash-ref '+(!ref && String(o.payment||"").toLowerCase()==="gcash" ? "gcash-missing" : "")+'">'+esc(String(o.payment||"").toLowerCase()==="gcash" ? (ref || "MISSING") : (ref || "—"))+'</strong></td>'+
+          '<td><strong class="gcash-ref '+(isGcash&&!ref?"gcash-missing":"")+'">'+esc(isGcash?(ref||"MISSING"):(ref||"—"))+'</strong></td>'+
+          '<td>'+(
+            isGcash
+            ? '<select class="status-select payment-status-select" data-payment-status="'+esc(o.id)+'"><option value="Pending Review">Pending Review</option><option value="Verified">Verified</option><option value="Rejected">Rejected</option></select>'
+            : '<span class="badge">NOT REQUIRED</span>'
+          )+'</td>'+
           '<td><button class="track-btn" type="button" data-track-id="'+esc(o.id)+'">Track</button></td>'+
         '</tr>';
-      }).join("")+'</tbody></table>';
+      }).join("")+
+      '</tbody></table>';
 
     $$("[data-status-id]").forEach(sel => {
       const o = os.find(x => String(x.id) === String(sel.dataset.statusId));
       if(o) sel.value = normalizeStatus(o.status);
       sel.addEventListener("change", () => updateOrderStatus(sel.dataset.statusId, sel.value));
+    });
+    $$("[data-payment-status]").forEach(sel => {
+      const o = os.find(x => String(x.id) === String(sel.dataset.paymentStatus));
+      if(o) sel.value = getPaymentStatus(o);
+      sel.addEventListener("change", () => updatePaymentStatus(sel.dataset.paymentStatus, sel.value));
     });
     $$("[data-track-id]").forEach(btn => btn.addEventListener("click", () => openTrack(btn.dataset.trackId)));
   }
@@ -652,6 +671,16 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const previous = current[idx]?.status;
     current[idx] = {...current[idx], status, statusUpdatedAt:new Date().toISOString()};
     write(ORDER_KEY,current);
+    renderAll();
+  }
+
+  function updatePaymentStatus(id, status) {
+    const current = orders();
+    const idx = current.findIndex(o => String(o.id) === String(id));
+    if (idx < 0) return;
+    current[idx] = {...current[idx], paymentStatus:status, paymentReviewedAt:new Date().toISOString()};
+    write(ORDER_KEY,current);
+    toast("Payment "+id+" → "+status);
     renderAll();
   }
 
@@ -708,6 +737,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         '<div class="detail-row"><span>Customer</span><strong>'+esc(customerName(o))+'</strong></div>'+
         '<div class="detail-row"><span>Total</span><strong>'+money(o.total)+'</strong></div>'+
         '<div class="detail-row"><span>Payment</span><strong>'+esc(o.payment || "—")+'</strong></div>'+
+        '<div class="detail-row"><span>Payment Review</span><strong>'+esc(getPaymentStatus(o))+'</strong></div>'+
         '<div class="detail-row"><span>GCash Ref</span><strong class="'+(String(o.payment||"").toLowerCase()==="gcash" && !ref ? "gcash-missing" : "")+'">'+esc(ref || "—")+'</strong></div>'+
       '</div>'+
       '<div class="track-list">'+steps.map(step=>{
@@ -1627,6 +1657,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         cms:read(K.CMS,{}),
         gallery:read(K.GALLERY,[]),
         ads:read(K.ADS,{}),
+        reviews:read("kb_reviews",[]),
         activity:read(K.ACTIVITY,[]),
         inventoryHistory:read(K.HISTORY,[]),
         notificationRead:read(K.READ,[])
@@ -1687,7 +1718,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         if (!records || typeof records !== "object") throw new Error("Invalid backup structure");
         const allowed = {
           orders:K.ORDERS,products:K.PRODUCTS,promos:K.PROMOS,settings:K.SETTINGS,
-          storeSettings:K.STORE,cms:K.CMS,gallery:K.GALLERY,ads:K.ADS,
+          storeSettings:K.STORE,cms:K.CMS,gallery:K.GALLERY,ads:K.ADS,reviews:"kb_reviews",
           activity:K.ACTIVITY,inventoryHistory:K.HISTORY,notificationRead:K.READ
         };
         Object.entries(allowed).forEach(([source,key]) => {
@@ -1763,7 +1794,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     captureInventoryChanges();
 
     window.addEventListener("storage",event => {
-      if ([K.ORDERS,K.PRODUCTS,K.STORE,K.ACTIVITY,K.HISTORY,K.READ].includes(event.key)) {
+      if ([K.ORDERS,K.PRODUCTS,K.STORE,K.ACTIVITY,K.HISTORY,K.READ,"kb_reviews"].includes(event.key)) {
         renderAnalytics();
         renderNotifications();
         renderActivity();
