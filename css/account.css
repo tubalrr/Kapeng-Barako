@@ -260,3 +260,8 @@ body{font-size:16px}
 .track-summary{display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--kb-line);font-size:12px}
 .track-cancelled{margin:18px 0;padding:13px 14px;border-radius:12px;background:#f8e9e7;color:var(--kb-danger);font-size:13px;font-weight:800}
 .track-order-btn{font-weight:900}
+
+.address-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.address-card.is-default{border-color:var(--kb-accent);box-shadow:0 0 0 2px rgba(185,133,67,.08)}
+.default-address-badge{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;background:#f4ecdf;color:var(--kb-accent);font-size:9px;font-weight:900;letter-spacing:.08em;white-space:nowrap}
+.primary-outline{border-color:var(--kb-accent);color:var(--kb-accent)}
