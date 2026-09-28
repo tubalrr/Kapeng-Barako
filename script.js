@@ -312,6 +312,8 @@
     if (facebook) { facebook.hidden = !settings.facebook; facebook.href = settings.facebook || "#"; }
     if (messenger) { messenger.hidden = !settings.messenger; messenger.href = settings.messenger || "#"; }
     if (block) block.hidden = !(settings.businessName || settings.email || settings.phone || settings.location || settings.hours || settings.facebook || settings.messenger);
+    const copyrightLocation = $("#footerCopyrightLocation");
+    if (copyrightLocation) copyrightLocation.textContent = settings.location ? " — " + settings.location : "";
   }
 
   function renderAdvertisement() {
@@ -463,7 +465,8 @@
     if (deliveredTitle) deliveredTitle.textContent = delivered + (delivered === 1 ? " delivered order" : " delivered orders");
     if (deliveredText) deliveredText.textContent = "Based on recorded orders in this storefront browser.";
     const settings = read("kb_settings", {}) || {};
-    const roastSchedule = String(settings.roastSchedule || "").trim();
+    const storeSettings = read("kb_store_settings", {}) || {};
+    const roastSchedule = String(storeSettings.roastSchedule || settings.roastSchedule || "").trim();
     const roastCard = $("#trustRoastCard");
     const roastTitle = $("#trustRoastTitle");
     const roastText = $("#trustRoastText");
