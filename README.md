@@ -1,86 +1,67 @@
 # Kapeng Barako
 
-Responsive single-page coffee storefront with a separate Admin Dashboard.
+Production-oriented artisan coffee storefront with a modular admin console and responsive premium UI.
 
-## Structure
+## Project map
 
 ```text
 Kapeng-Barako/
 ├── index.html
-├── images/
-│   ├── favicon.svg
-│   ├── brew-placeholder.svg
-│   └── gallery-01.svg … gallery-06.svg
+├── pages/
+│   ├── admin.html                # legacy redirect
+│   ├── contact.html
+│   └── admin/
+│       ├── login.html            # restricted admin gate
+│       └── index.html            # protected dashboard
 ├── css/
 │   ├── home.css
 │   ├── admin.css
+│   ├── admin-login.css
 │   └── style.css
 ├── js/
 │   ├── storefront.js
+│   ├── conversion.js
+│   ├── admin-auth.js
 │   ├── admin.js
 │   └── contact.js
-└── pages/
-    ├── admin.html
-    └── contact.html
+└── images/
 ```
 
-## Buyer handoff
+## Buyer handoff — edit safely
 
-### Logo / favicon
-Replace `images/favicon.svg` with the buyer’s final local logo or favicon. The same local asset is used by the storefront and admin browser tab.
+**Logo / favicon:** replace `images/favicon.svg` with the final approved logo/favicon. Storefront and admin browser tabs reference this local asset.
 
-### Colors
-Main storefront colors are at the top of `css/home.css`:
-`--brown`, `--cream`, `--sand`, `--accent`.
-Change those variables to update the visual theme without rewriting the layout.
+**Colors:** edit the variables at the top of `css/home.css` (`--espresso`, `--barako`, `--cream`, `--gold`). Keep the variable names unchanged so the component styling remains intact.
 
-### Products
-Open **Admin → Products**. Edit product names, prices, variants/weights, grind options, descriptions, and other catalog data there.
+**Products:** Admin → Products controls names, prices, variants, weights, grind options, descriptions, and stock. The storefront reads `kb_products`.
 
-### Contact + social links
-Open **Admin → Store Settings**. Replace every `ILAG` placeholder with the buyer’s real:
-- email
-- phone
-- location
-- Facebook URL
-- Instagram URL
-- TikTok URL
+**Contact + socials:** Admin → Store Settings controls the email, phone, location, Facebook, Instagram, TikTok, payment instructions, and fulfillment options. Do not replace HTML placeholders manually when the setting is available.
 
-The storefront footer social buttons stay disabled until real URLs are configured.
+**Shipping:** Admin → Shipping Fees controls Batangas, Manila, province rates and the free-shipping rule. The checkout uses the delivery address to select the configured regional rate.
 
-### Story / benefits / brewing / FAQ / delivery
-Open **Admin → Content & CMS**. The dashboard controls the hero copy, KWENTO story, exactly 3 benefits, exactly 3 brewing steps, delivery policy, and FAQ items.
+**Promos:** Admin → Pricing & Promos creates codes such as `BARAKO10`. Active minimum-pack and percentage/fixed rules are applied by the storefront checkout.
 
-### Gallery
-Open **Admin → Gallery**. There are exactly 6 local gallery slots. Replace:
-`images/gallery-01.svg` through `images/gallery-06.svg`
-with the buyer’s final high-resolution images in `/images`, then update the six local paths/titles/captions in Admin.
+**Story / brew / FAQ / announcement:** Admin → Content & CMS controls the hero, story, 3 brew steps, FAQ, and fresh-roast announcement shown on the storefront.
 
-The six current visuals are temporary local SVG placeholders; they are not intended as the buyer’s final photography.
+**Images / video:** replace the local files in `/images` with approved buyer assets. The brew module uses `images/brew-placeholder.svg` until the final video/embed is supplied. Customer reviews intentionally do not use invented testimonials; publish only real, approved brand-owned screenshots/content.
 
-### Track Order
-The storefront includes a **Track Order** modal that looks up an order by Order Number and renders the current fulfillment progress from `kb_orders` / `kb_last_order`. Admin status changes update the tracked status. On GitHub Pages, this is browser-local tracking; cross-device real-time tracking requires an authenticated backend.
+**Wholesale / subscription:** the storefront can save wholesale inquiries and recurring-delivery preferences locally. True recurring billing, automated fulfillment, and business notifications require a backend service.
 
-### Checkout payments
-Default payment options are **GCash**, **Cash on Delivery (COD)**, and **Bank Transfer**. Admin → Store Settings controls which methods appear and can hold the buyer’s GCash/bank instructions. GCash and Bank Transfer expose payment reference and proof fields. In the current static build, the selected proof file is not sent to a server; only its filename is saved with the local order record. A real payment/backend integration should handle secure proof storage and payment verification before live use.
+## Admin access
 
-### Stock urgency
-Products at or below 5 units show an urgency badge such as **“⚡ Only 3 stocks left!”**. The badge reads from the product stock value managed in Admin → Products.
+Open `/pages/admin/login.html`.
 
-### How to Brew video
-The storefront uses `images/brew-placeholder.svg` as a local poster. Replace the video placeholder markup in `index.html` with the buyer’s final local video or approved embed code.
+Default seed:
+`admin@kapengbarako.com` / `barako123`
 
-## Admin-controlled settings
+There is no public administrator registration. The dashboard checks a localStorage admin session, expires it after a fixed period, and logout clears it. The old `/pages/admin.html` path redirects into the new login gate.
 
-The storefront reads these browser storage keys:
-`kb_products`, `kb_settings`, `kb_cms`, `kb_gallery`, and `kb_shipping_rule`.
+**Security limit:** GitHub Pages + localStorage cannot provide a real server-side security boundary. The login gate is a client-side protection layer for this static build. Before handling real customer/payment data in production, connect authentication, orders, inventory, payment verification, file uploads, and admin authorization to a server-side backend.
 
-Orders are written to `kb_orders` and `kb_last_order`. The Admin dashboard uses the same records for order management, reporting, waybills, and audit logging.
+## Current storage model
 
-## Mobile
+`kb_products`, `kb_settings`, `kb_cms`, `kb_gallery`, `kb_shipping_rule`, `kb_promos`, `kb_orders`, `kb_last_order`, plus local admin/session preferences.
 
-The storefront and admin use responsive CSS breakpoints for phone, tablet, and desktop layouts. Check the final buyer content in Chrome DevTools before handoff, especially long product names, checkout fields, gallery images, and navigation.
+## Deployment
 
-## Important production note
-
-This repository is a static GitHub Pages frontend. The current order/catalog/admin data adapter uses browser `localStorage` so the site can operate without seeded fake data. A true production multi-user system still needs authenticated server-side storage plus secure payment verification, order processing, inventory persistence, and real SMS/email integrations before handling live customer data at scale.
+This repository is compatible with GitHub Pages. Test the final buyer content on both desktop and mobile before launch, especially checkout forms, long product names, admin navigation, payment instructions, images, and the protected admin route.
