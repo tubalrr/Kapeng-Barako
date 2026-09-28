@@ -8,6 +8,50 @@
   <title>Kapeng Barako — Admin Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
   <link rel="stylesheet" href="../../css/admin.css?v=20260928-mobile-drawer">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    .sales-overview-box{
+      margin-top:18px;
+      padding:20px;
+      background:#221A0E;
+      border:1px solid #2A2116;
+      border-radius:16px;
+    }
+    .sales-overview-header{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:14px;
+    }
+    .sales-overview-header h3{
+      margin:4px 0 0;
+      color:#F5E9D3;
+      font-size:20px;
+      line-height:1.1;
+    }
+    .sales-overview-header p{
+      margin:5px 0 0;
+      color:rgba(245,233,211,.55);
+      font-size:11px;
+    }
+    .sales-chart-wrap{
+      position:relative;
+      width:100%;
+      height:280px;
+    }
+    .sales-chart-wrap canvas{
+      display:block;
+      width:100%!important;
+      height:100%!important;
+    }
+    @media(max-width:640px){
+      .sales-overview-box{padding:16px}
+      .sales-overview-header{align-items:flex-start;flex-direction:column;gap:4px}
+      .sales-chart-wrap{height:230px}
+    }
+  </style>
+
 </head>
 <body>
   <div class="app-shell admin-app-shell">
@@ -97,6 +141,19 @@
             <article class="metric-card"><span>Customers</span><strong id="metric-customers">0</strong><small>Unique recorded buyers</small></article>
             <article class="metric-card"><span>Low Stock</span><strong id="metric-low-stock-top">0</strong><small>Items at or below threshold</small></article>
           </div>
+
+          <section class="sales-overview-box" aria-labelledby="sales-overview-title">
+            <div class="sales-overview-header">
+              <div>
+                <span class="eyebrow">SALES ANALYTICS</span>
+                <h3 id="sales-overview-title">Sales Overview</h3>
+                <p>Last 7 days</p>
+              </div>
+            </div>
+            <div class="sales-chart-wrap">
+              <canvas id="sales-overview-chart" aria-label="Sales Overview bar chart for the last 7 days" role="img"></canvas>
+            </div>
+          </section>
 
           <div class="metric-grid">
             <article class="metric-card"><span>Pending</span><strong id="metric-pending">0</strong><small>Orders awaiting verification</small></article>
@@ -469,3 +526,192 @@
   </script>
 </body>
 </html>
+<script>
+(() => {
+  "use strict";
+
+  const SAMPLE_SALES = [1200, 1900, 800, 2100, 1600, 2400, 1800];
+  let salesChart = null;
+
+  const phpMoney = value => "₱" + Number(value || 0).toLocaleString("en-PH", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+
+  function weekStartMonday(baseDate = new Date()) {
+    const d = new Date(baseDate);
+    d.setHours(0,0,0,0);
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
+
+  function dayKey(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + d;
+  }
+
+  function readOrders() {
+    try {
+      const primary = JSON.parse(localStorage.getItem("kb_orders") || "[]");
+      const list = Array.isArray(primary) ? primary : [];
+      const last = JSON.parse(localStorage.getItem("kb_last_order") || "null");
+      if (last && last.id && !list.some(o => String(o?.id) === String(last.id))) {
+        list.unshift(last);
+      }
+      return list;
+    } catch {
+      return [];
+    }
+  }
+
+  function buildSalesData() {
+    const start = weekStartMonday();
+    const totals = Array(7).fill(0);
+    const orders = readOrders();
+
+    if (!orders.length) {
+      return SAMPLE_SALES.slice();
+    }
+
+    const validDays = new Set();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      validDays.add(dayKey(d));
+    }
+
+    orders.forEach(order => {
+      const date = new Date(order?.createdAt || order?.date || "");
+      if (Number.isNaN(date.getTime())) return;
+
+      const key = dayKey(date);
+      if (!validDays.has(key)) return;
+
+      const diff = Math.round((new Date(key + "T00:00:00").getTime() - start.getTime()) / 86400000);
+      if (diff >= 0 && diff < 7) {
+        totals[diff] += Number(order?.total || order?.amount || 0);
+      }
+    });
+
+    return totals;
+  }
+
+  function buildLabels() {
+    const start = weekStartMonday();
+    return Array.from({length:7}, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return d.toLocaleDateString("en-US", {weekday:"short"});
+    });
+  }
+
+  function renderSalesOverview() {
+    const canvas = document.getElementById("sales-overview-chart");
+    if (!canvas || typeof Chart === "undefined") return;
+
+    const ctx = canvas.getContext("2d");
+    const data = buildSalesData();
+    const labels = buildLabels();
+
+    if (salesChart) {
+      salesChart.destroy();
+    }
+
+    salesChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "Sales",
+          data,
+          backgroundColor: "#C8A951",
+          borderColor: "#C8A951",
+          borderWidth: 0,
+          borderRadius: 8,
+          barThickness: 18,
+          maxBarThickness: 18,
+          categoryPercentage: 0.72
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 800,
+          easing: "easeOutQuart"
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: context => " " + phpMoney(context.raw)
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            border: {
+              color: "#2A2116"
+            },
+            ticks: {
+              color: "#F5E9D3",
+              font: {
+                size: 10
+              }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: "rgba(245,233,211,.08)"
+            },
+            border: {
+              display: false
+            },
+            ticks: {
+              color: "#F5E9D3",
+              font: {
+                size: 10
+              },
+              callback: value => phpMoney(value)
+            }
+          }
+        }
+      }
+    });
+  }
+
+  window.refreshSalesOverview = renderSalesOverview;
+
+  function initSalesOverview() {
+    renderSalesOverview();
+
+    window.addEventListener("storage", event => {
+      if (["kb_orders", "kb_last_order"].includes(event.key)) {
+        renderSalesOverview();
+      }
+    });
+
+    document.addEventListener("click", event => {
+      if (event.target.closest('[data-action="refresh"]')) {
+        window.setTimeout(renderSalesOverview, 50);
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initSalesOverview, {once:true});
+  } else {
+    initSalesOverview();
+  }
+})();
+</script>
