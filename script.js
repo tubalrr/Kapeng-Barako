@@ -445,9 +445,9 @@
     }
 
     if (lowStockTimer) {
-      if (stock > 0 && stock <= 5) {
+      if (stock > 0 && stock <= 3) {
         lowStockTimer.hidden = false;
-        lowStockTimer.textContent = getNextRoastCountdown();
+        lowStockTimer.textContent = "Roast tomorrow 6AM";
       } else {
         lowStockTimer.hidden = true;
         lowStockTimer.textContent = "";
