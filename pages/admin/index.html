@@ -99,15 +99,17 @@
       <div class="panel ads-manager-panel">
         <div class="ads-input-grid">
           <label>Advertisement link<input id="ads-link" type="url" placeholder="https://example.com/advertisement" inputmode="url" autocomplete="off"></label>
+          <label>Image URL<input id="ads-image" type="url" placeholder="https://example.com/ad.jpg" inputmode="url" autocomplete="off"></label>
           <label>Ad label<input id="ads-label" type="text" placeholder="Sponsored" autocomplete="off"></label>
         </div>
         <div class="ads-container" id="ads-preview">
           <span class="ads-container-kicker">ADVERTISEMENT SLOT</span>
-          <strong id="ads-preview-title">No ad link configured</strong>
-          <p id="ads-preview-copy">Add the destination link above, then save it.</p>
+          <img id="ads-preview-image" class="ads-preview-image" alt="Advertisement preview" hidden>
+          <strong id="ads-preview-title">No ad configured</strong>
+          <p id="ads-preview-copy">Add an advertisement link and image URL above, then save it.</p>
           <a id="ads-preview-open" href="#" target="_blank" rel="noopener noreferrer" hidden>OPEN AD LINK ↗</a>
         </div>
-        <div class="content-note">The saved value is currently stored in this browser's admin storage. No live AdSense code is added yet.</div>
+        <div class="content-note">The saved values are stored in this browser's admin storage. No live AdSense code is added yet.</div>
       </div>
     </section>
 
