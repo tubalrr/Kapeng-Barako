@@ -281,7 +281,7 @@
   }
 
   function openView(view){
-    $$$(".admin-nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+    $(".admin-nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
     $$("[data-view-panel]").forEach(p=>{p.hidden=p.dataset.viewPanel!==view;p.classList.toggle("active",p.dataset.viewPanel===view)});
     $("#view-title").textContent={overview:"Overview",orders:"Orders",inventory:"Inventory",products:"Products",customers:"Customers",promos:"Promos",content:"Content",gallery:"Gallery"}[view]||"Overview";
     closeMenu();
