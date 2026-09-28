@@ -1620,3 +1620,124 @@ body:not(.kb-announcement-visible){
     padding-bottom:72px;
   }
 }
+
+/* =========================================================
+   LAYOUT STABILITY — PREVENT DESKTOP HORIZONTAL OVERFLOW
+   ========================================================= */
+html,
+body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+body{
+  position:relative;
+}
+
+main,
+header,
+footer,
+section,
+.site-header,
+.hero-section{
+  max-width:100%;
+  min-width:0;
+}
+
+.container,
+.nav,
+.hero-grid,
+.hero-copy,
+.hero-visual,
+.story-layout,
+.delivery-layout,
+.confidence-grid,
+.farm-grid,
+.brew-grid,
+.faq-layout,
+.collection-grid,
+.reason-grid,
+.tips-grid,
+.gallery-grid,
+.footer-grid{
+  min-width:0;
+}
+
+.hero-copy,
+.hero-visual{
+  overflow-wrap:anywhere;
+}
+
+.hero-grid > *{
+  min-width:0;
+}
+
+.featured-card{
+  max-width:100%;
+}
+
+@media(max-width:1100px){
+  .hero-grid{
+    grid-template-columns:minmax(0,1fr) minmax(0,.9fr);
+    gap:28px;
+  }
+
+  .hero-copy h1{
+    font-size:clamp(48px,7vw,78px);
+  }
+}
+
+@media(max-width:900px){
+  .hero-grid{
+    grid-template-columns:1fr;
+  }
+
+  .hero-visual{
+    width:100%;
+    min-width:0;
+  }
+
+  .featured-card{
+    width:min(460px,100%);
+  }
+}
+
+@media(max-width:720px){
+  .container{
+    width:calc(100% - 24px);
+    max-width:100%;
+  }
+
+  .nav{
+    width:100%;
+    max-width:100%;
+  }
+
+  .hero-grid{
+    width:100%;
+    padding-left:0;
+    padding-right:0;
+  }
+
+  .hero-copy h1{
+    max-width:100%;
+    font-size:clamp(42px,13vw,62px);
+    overflow-wrap:normal;
+    word-break:normal;
+  }
+
+  .hero-description{
+    max-width:100%;
+  }
+
+  .hero-actions,
+  .hero-meta-grid{
+    max-width:100%;
+  }
+
+  .featured-card{
+    width:100%;
+    max-width:460px;
+  }
+}
