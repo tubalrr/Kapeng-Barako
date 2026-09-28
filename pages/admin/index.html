@@ -175,6 +175,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 .admin-extra-dialog h3{font:600 28px Georgia,serif;margin:6px 0 18px}
 @media(max-width:1050px){.admin-extra-row{grid-template-columns:1fr}.extra-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.extra-grid,.extra-form-grid{grid-template-columns:1fr}.extra-fields{grid-template-columns:1fr}.extra-stat-grid{grid-template-columns:1fr 1fr}}
+.extra-product-photo{width:100%;height:180px;object-fit:cover;border-radius:14px;border:1px solid var(--border);background:#171006;margin-bottom:14px;display:block}
+.review-admin-text{color:#d8c8ae;font-size:10px;line-height:1.6}
+.review-admin-meta{color:var(--muted);font-size:8px;line-height:1.5}
 @media(max-width:560px){.extra-status-grid{grid-template-columns:1fr 1fr}.extra-stat-grid{grid-template-columns:1fr}}
 </style>
 
@@ -242,11 +245,12 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         <button data-view="gallery"><span>08</span>Gallery</button>
         <button data-view="ads"><span>09</span>Ads</button>
         <button data-view="contact"><span>10</span>Contact</button>
-        <button data-view="analytics"><span>11</span>Analytics</button>
-        <button data-view="notifications"><span>12</span>Notifications</button>
-        <button data-view="settings"><span>13</span>Store Settings</button>
-        <button data-view="activity"><span>14</span>Activity Log</button>
-        <button data-view="data"><span>15</span>Data & Backup</button>
+        <button data-view="reviews"><span>11</span>Reviews</button>
+        <button data-view="analytics"><span>12</span>Analytics</button>
+        <button data-view="notifications"><span>13</span>Notifications</button>
+        <button data-view="settings"><span>14</span>Store Settings</button>
+        <button data-view="activity"><span>15</span>Activity Log</button>
+        <button data-view="data"><span>16</span>Data & Backup</button>
       </nav>
       <div class="sidebar-foot">
         <div id="adminEmail" class="sidebar-user">admin</div>
@@ -317,11 +321,11 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         </section>
 
         <section id="view-products" class="view">
-          <div class="hero"><div><div class="kicker">PRODUCTION CATALOG</div><h1>Products</h1><p>Manage the storefront catalog without removing any existing order or inventory data.</p></div><div class="hero-actions"><button id="extraAddProduct" class="primary-btn" type="button">+ Add Product</button></div></div>
-          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">PRODUCT CATALOG</div><h3>Current Products</h3></div><span class="extra-sub">Changes use <code>kb_rebuild_products</code> and sync to the storefront.</span></div><div id="extraProducts" class="extra-grid"></div></section>
+          <div class="hero"><div><div class="kicker">PRODUCTION CATALOG</div><h1>Products</h1><p>One product record controls the storefront name, photo, price, stock and product details.</p></div><div class="hero-actions"><button id="extraAddProduct" class="primary-btn" type="button">+ Add Product</button></div></div>
+          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">PRODUCT CATALOG</div><h3>Current Products</h3></div><span class="extra-sub">Single source: <code>kb_rebuild_products</code></span></div><div id="extraProducts" class="extra-grid"></div></section>
         </section>
 
-        <section id="view-promos" class="view">
+<section id="view-promos" class="view">
           <div class="hero"><div><div class="kicker">PRICING</div><h1>Promos</h1><p>Create and manage discount codes used by the storefront checkout.</p></div><div class="hero-actions"><button id="extraAddPromo" class="primary-btn" type="button">+ Add Promo</button></div></div>
           <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">PROMO RULES</div><h3>Promo Codes</h3></div><span id="extraPromoCount" class="extra-sub"></span></div><div id="extraPromos" class="extra-table"></div></section>
         </section>
@@ -360,7 +364,12 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
           </section>
         </section>
 
-        <section id="view-analytics" class="view">
+        <section id="view-reviews" class="view">
+          <div class="hero"><div><div class="kicker">VERIFIED CUSTOMER VOICE</div><h1>Reviews</h1><p>Only reviews explicitly marked Verified and Published are shown on the public storefront.</p></div><div class="hero-actions"><button id="extraAddReview" class="primary-btn" type="button">+ Add Review</button></div></div>
+          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">REVIEW RECORDS</div><h3>Published Feedback</h3></div><span id="extraReviewCount" class="extra-sub"></span></div><div id="extraReviews" class="extra-table"></div></section>
+        </section>
+
+<section id="view-analytics" class="view">
           <div class="hero"><div><div class="kicker">BUSINESS INTELLIGENCE</div><h1>Analytics</h1><p>Sales, product performance, customer behavior and order flow calculated from the current <code>kb_orders</code> and <code>kb_rebuild_products</code> records.</p></div></div>
           <div class="admin-extra-card">
             <div class="extra-head"><div><div class="kicker">REPORTING WINDOW</div><h3>Performance Overview</h3></div><select id="analyticsRange" class="status-select"><option value="7">Last 7 Days</option><option value="30" selected>Last 30 Days</option><option value="all">All Time</option></select></div>
@@ -394,6 +403,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
               <div class="extra-field"><label for="storeDeliveryFee">Delivery Fee (₱)</label><input id="storeDeliveryFee" type="number" min="0" step="1" value="0"></div>
               <div class="extra-field"><label for="storeFreeDelivery">Free Delivery Threshold (₱)</label><input id="storeFreeDelivery" type="number" min="0" step="1" value="0"></div>
               <div class="extra-field"><label for="storeHours">Business Hours</label><input id="storeHours" placeholder="Mon–Sat · 8:00 AM–5:00 PM"></div>
+              <div class="extra-field"><label for="storeRoastSchedule">Roast Schedule</label><input id="storeRoastSchedule" placeholder="e.g. Tue & Fri"></div>
               <div class="extra-field full"><label>Payment Methods</label><div class="extra-toolbar"><label class="extra-switch"><input id="payGcash" type="checkbox" checked> GCash</label><label class="extra-switch"><input id="payCod" type="checkbox" checked> COD</label><label class="extra-switch"><input id="payBank" type="checkbox" checked> Bank Transfer</label></div></div>
             </div>
           </section>
@@ -782,7 +792,15 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       <div class="extra-field"><label for="extraProductBadge">Badge</label><input id="extraProductBadge" placeholder="NEW"></div>
       <div class="extra-field"><label for="extraProductRoast">Roast</label><select id="extraProductRoast"><option>Light</option><option selected>Medium</option><option>Dark</option></select></div>
       <div class="extra-field"><label for="extraProductGrind">Grind</label><select id="extraProductGrind"><option selected>Whole</option><option>Coarse</option><option>Fine</option></select></div>
-      <div class="extra-field"><label for="extraProductNote">Description</label><input id="extraProductNote" placeholder="Bold and aromatic"></div>
+      <div class="extra-field full"><label for="extraProductImage">Product Photo URL</label><input id="extraProductImage" type="url" placeholder="https://.../product.jpg"></div>
+      <div class="extra-field"><label for="extraProductOrigin">Origin</label><input id="extraProductOrigin" placeholder="Farm / region"></div>
+      <div class="extra-field"><label for="extraProductRoastDate">Roast Date</label><input id="extraProductRoastDate" type="date"></div>
+      <div class="extra-field"><label for="extraProductRoastLevel">Roast Level</label><input id="extraProductRoastLevel" placeholder="Dark"></div>
+      <div class="extra-field"><label for="extraProductNetWeight">Net Weight</label><input id="extraProductNetWeight" placeholder="250g"></div>
+      <div class="extra-field"><label for="extraProductBatch">Batch</label><input id="extraProductBatch" placeholder="Batch code"></div>
+      <div class="extra-field"><label for="extraProductProcess">Process</label><input id="extraProductProcess" placeholder="Washed / Natural"></div>
+      <div class="extra-field"><label for="extraProductNote">Tasting Notes / Description</label><input id="extraProductNote" placeholder="Tasting notes"></div>
+      <div class="extra-field full"><label class="extra-switch"><input id="extraProductFeatured" type="checkbox"> Use as featured product</label></div>
     </div>
     <div class="extra-actions"><button class="ghost-btn" type="button" data-extra-dialog-close>Cancel</button><button class="primary-btn" type="submit">Add Product</button></div>
   </form>
@@ -802,6 +820,21 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     <div class="extra-actions"><button class="ghost-btn" type="button" data-extra-promo-close>Cancel</button><button class="primary-btn" type="submit">Save Promo</button></div>
   </form>
 </dialog>
+<dialog id="extraReviewDialog" class="admin-extra-dialog">
+  <form method="dialog" id="extraReviewForm">
+    <div class="modal-head"><div><div class="kicker">CUSTOMER REVIEW</div><h3>Add Review</h3></div><button class="close" type="button" data-extra-review-close>×</button></div>
+    <div class="extra-form-grid">
+      <div class="extra-field"><label for="extraReviewName">Customer Name</label><input id="extraReviewName" required placeholder="Customer name"></div>
+      <div class="extra-field"><label for="extraReviewRating">Rating</label><select id="extraReviewRating"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+      <div class="extra-field"><label for="extraReviewOrder">Order ID (optional)</label><input id="extraReviewOrder" placeholder="KB-..."></div>
+      <div class="extra-field"><label class="extra-switch"><input id="extraReviewVerified" type="checkbox"> Verified purchase</label></div>
+      <div class="extra-field full"><label for="extraReviewText">Review</label><textarea id="extraReviewText" rows="5" required placeholder="Customer feedback"></textarea></div>
+      <div class="extra-field full"><label class="extra-switch"><input id="extraReviewPublished" type="checkbox" checked> Publish on storefront</label></div>
+    </div>
+    <div class="extra-actions"><button class="ghost-btn" type="button" data-extra-review-close>Cancel</button><button class="primary-btn" type="submit">Save Review</button></div>
+  </form>
+</dialog>
+
 <div id="adminExtraToast" class="admin-toast"></div>
 <script id="admin-extra-script">
 (() => {
@@ -850,22 +883,35 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const list=products();
     root.innerHTML=list.length?list.map(p=>{
       const stock=Number(p.stock||0);
+      const photo=String(p.image||"").trim();
+      const featured=p.featured===true;
       return '<article class="extra-product-card" data-extra-product="'+esc(p.id)+'">'+
-        '<div class="extra-product-top"><div><div class="kicker">'+esc(p.size||"PRODUCT")+'</div><h3>'+esc(p.name||"Product")+'</h3><span class="extra-id">'+esc(p.id||"—")+'</span></div><span class="badge '+(stock<=5?"low":"")+'">'+(stock<=5?"LOW STOCK":"IN STOCK")+'</span></div>'+
+        (photo?'<img class="extra-product-photo" src="'+esc(photo)+'" alt="'+esc(p.name||"Product")+' product photo">':'')+
+        '<div class="extra-product-top"><div><div class="kicker">'+esc(p.size||"PRODUCT")+'</div><h3>'+esc(p.name||"Product")+'</h3><span class="extra-id">'+esc(p.id||"—")+'</span></div><span class="badge '+(stock<=5?"low":"")+'">'+(featured?"FEATURED · ":"")+(stock<=5?"LOW STOCK":"IN STOCK")+'</span></div>'+
         '<div class="extra-fields">'+
           '<div class="extra-field"><label>Price (₱)</label><input type="number" min="0" step="1" value="'+Number(p.price||0)+'" data-x-price="'+esc(p.id)+'"></div>'+
           '<div class="extra-field"><label>Stock (packs)</label><input type="number" min="0" step="1" value="'+stock+'" data-x-stock="'+esc(p.id)+'"></div>'+
           '<div class="extra-field"><label>Roast</label><select data-x-roast="'+esc(p.id)+'"><option>Light</option><option>Medium</option><option>Dark</option></select></div>'+
           '<div class="extra-field"><label>Grind</label><select data-x-grind="'+esc(p.id)+'"><option>Whole</option><option>Coarse</option><option>Fine</option></select></div>'+
+          '<div class="extra-field"><label>Image URL</label><input type="url" value="'+esc(p.image||"")+'" data-x-image="'+esc(p.id)+'" placeholder="https://.../product.jpg"></div>'+
+          '<div class="extra-field"><label>Origin</label><input value="'+esc(p.origin||"")+'" data-x-origin="'+esc(p.id)+'" placeholder="Farm / region"></div>'+
+          '<div class="extra-field"><label>Roast Date</label><input type="date" value="'+esc(p.roastDate||"")+'" data-x-roast-date="'+esc(p.id)+'"></div>'+
+          '<div class="extra-field"><label>Roast Level</label><input value="'+esc(p.roastLevel||p.roast||"")+'" data-x-roast-level="'+esc(p.id)+'" placeholder="Dark"></div>'+
+          '<div class="extra-field"><label>Net Weight</label><input value="'+esc(p.netWeight||p.size||"")+'" data-x-net-weight="'+esc(p.id)+'" data-size-editor="'+esc(p.id)+'"></div>'+
+          '<div class="extra-field"><label>Batch</label><input value="'+esc(p.batch||"")+'" data-x-batch="'+esc(p.id)+'" placeholder="Batch code"></div>'+
+          '<div class="extra-field"><label>Process</label><input value="'+esc(p.process||"")+'" data-x-process="'+esc(p.id)+'" placeholder="Process"></div>'+
+          '<div class="extra-field"><label>Tasting Notes</label><textarea rows="3" data-x-notes="'+esc(p.id)+'" placeholder="Tasting notes">'+esc(p.tastingNotes||p.note||"")+'</textarea></div>'+
         '</div>'+
-        '<div class="extra-note">'+esc(p.note||"")+'</div>'+
+        '<div class="extra-fields"><div class="extra-field full"><label class="extra-switch"><input type="checkbox" '+(featured?"checked":"")+' data-x-featured="'+esc(p.id)+'"> Featured product</label></div></div>'+
         '<div class="extra-actions"><button class="ghost-btn" type="button" data-x-save="'+esc(p.id)+'">Save</button><button class="danger-btn" type="button" data-x-delete="'+esc(p.id)+'">Delete</button></div>'+
       '</article>';
     }).join(""):'<div class="empty">No products found in kb_rebuild_products.</div>';
 
     list.forEach(p=>{
-      document.querySelector('[data-x-roast="'+CSS.escape(String(p.id))+'"]')?.setAttribute("value",p.roast||"Medium");
-      document.querySelector('[data-x-grind="'+CSS.escape(String(p.id))+'"]')?.setAttribute("value",p.grind||"Whole");
+      const roast=document.querySelector('[data-x-roast="'+CSS.escape(String(p.id))+'"]');
+      const grind=document.querySelector('[data-x-grind="'+CSS.escape(String(p.id))+'"]');
+      if(roast)roast.value=p.roast||"Medium";
+      if(grind)grind.value=p.grind||"Whole";
     });
     root.querySelectorAll("[data-x-save]").forEach(btn=>btn.addEventListener("click",()=>saveExtraProduct(btn.dataset.xSave)));
     root.querySelectorAll("[data-x-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteExtraProduct(btn.dataset.xDelete)));
@@ -873,12 +919,25 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   function saveExtraProduct(id){
     const list=products(), idx=list.findIndex(p=>String(p.id)===String(id));if(idx<0)return;
-    const price=Number(document.querySelector('[data-x-price="'+CSS.escape(String(id))+'"]')?.value);
-    const stock=Number(document.querySelector('[data-x-stock="'+CSS.escape(String(id))+'"]')?.value);
-    const roast=document.querySelector('[data-x-roast="'+CSS.escape(String(id))+'"]')?.value||"Medium";
-    const grind=document.querySelector('[data-x-grind="'+CSS.escape(String(id))+'"]')?.value||"Whole";
+    const q=selector=>document.querySelector(selector);
+    const price=Number(q('[data-x-price="'+CSS.escape(String(id))+'"]')?.value);
+    const stock=Number(q('[data-x-stock="'+CSS.escape(String(id))+'"]')?.value);
+    const roast=q('[data-x-roast="'+CSS.escape(String(id))+'"]')?.value||"Medium";
+    const grind=q('[data-x-grind="'+CSS.escape(String(id))+'"]')?.value||"Whole";
+    const image=q('[data-x-image="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
+    const origin=q('[data-x-origin="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
+    const roastDate=q('[data-x-roast-date="'+CSS.escape(String(id))+'"]')?.value||"";
+    const roastLevel=q('[data-x-roast-level="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
+    const netWeight=q('[data-x-net-weight="'+CSS.escape(String(id))+'"]')?.value.trim()||list[idx].size||"";
+    const batch=q('[data-x-batch="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
+    const process=q('[data-x-process="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
+    const tastingNotes=q('[data-x-notes="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
+    const featured=Boolean(q('[data-x-featured="'+CSS.escape(String(id))+'"]')?.checked);
+    if(image&&!/^https?:\/\//i.test(image)&&!/^images\//i.test(image)){toastExtra("Use an image URL or images/ path.");return}
     if(!Number.isFinite(price)||price<0||!Number.isFinite(stock)||stock<0||!Number.isInteger(stock)){toastExtra("Enter a valid non-negative price and whole-number stock.");return}
-    list[idx]={...list[idx],price,stock,roast,grind};write(PRODUCT_KEY,list);notifyStorefront();toastExtra((list[idx].name||id)+" updated.");renderExtraProducts();updateSnapshot();
+    const next=list.map(p=>p.featured===true?{...p,featured:false}:p);
+    next[idx]={...next[idx],price,stock,roast,grind,image,origin,roastDate,roastLevel,netWeight,batch,process,tastingNotes,note:tastingNotes||next[idx].note||""};
+    write(PRODUCT_KEY,next);notifyStorefront();toastExtra((next[idx].name||id)+" updated.");renderExtraProducts();updateSnapshot();
   }
 
   function deleteExtraProduct(id){
@@ -888,16 +947,46 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function addExtraProduct(){
-    const name=document.getElementById("extraProductName")?.value.trim()||"", size=document.getElementById("extraProductSize")?.value.trim()||"", price=Number(document.getElementById("extraProductPrice")?.value||0), stock=Number(document.getElementById("extraProductStock")?.value||0), badge=document.getElementById("extraProductBadge")?.value.trim()||"NEW", roast=document.getElementById("extraProductRoast")?.value||"Medium", grind=document.getElementById("extraProductGrind")?.value||"Whole", note=document.getElementById("extraProductNote")?.value.trim()||"";
+    const val=id=>document.getElementById(id);
+    const name=val("extraProductName")?.value.trim()||"", size=val("extraProductSize")?.value.trim()||"", price=Number(val("extraProductPrice")?.value||0), stock=Number(val("extraProductStock")?.value||0), badge=val("extraProductBadge")?.value.trim()||"NEW", roast=val("extraProductRoast")?.value||"Medium", grind=val("extraProductGrind")?.value||"Whole", note=val("extraProductNote")?.value.trim()||"", image=val("extraProductImage")?.value.trim()||"", origin=val("extraProductOrigin")?.value.trim()||"", roastDate=val("extraProductRoastDate")?.value||"", roastLevel=val("extraProductRoastLevel")?.value.trim()||"", netWeight=val("extraProductNetWeight")?.value.trim()||size, batch=val("extraProductBatch")?.value.trim()||"", process=val("extraProductProcess")?.value.trim()||"", featured=Boolean(val("extraProductFeatured")?.checked);
     if(!name||!size){toastExtra("Product name and size are required.");return}
     if(!Number.isFinite(price)||price<0||!Number.isFinite(stock)||stock<0||!Number.isInteger(stock)){toastExtra("Enter a valid price and whole-number stock.");return}
-    const base=("KB-"+size).toUpperCase().replace(/[^A-Z0-9]/g,"");
-    let id=base||("KB-"+Date.now());
-    while(products().some(p=>String(p.id)===id))id=base+"-"+Date.now().toString(36).toUpperCase();
-    const next=[...products(),{id,name,size,price,stock,badge,roast,grind,note}];
+    if(image&&!/^https?:\/\//i.test(image)&&!/^images\//i.test(image)){toastExtra("Use an image URL or images/ path.");return}
+    let id=("KB-"+size).toUpperCase().replace(/[^A-Z0-9]/g,"")||("KB-"+Date.now());
+    while(products().some(p=>String(p.id)===id))id=id+"-"+Date.now().toString(36).toUpperCase();
+    const next=products().map(p=>featured?{...p,featured:false}:p);
+    next.push({id,name,size,price,stock,badge,roast,grind,note,image,origin,roastDate,roastLevel,netWeight,batch,process,tastingNotes:note,featured});
     write(PRODUCT_KEY,next);notifyStorefront();
     document.getElementById("extraProductDialog")?.close();document.getElementById("extraProductForm")?.reset();
     toastExtra(name+" added.");renderExtraProducts();updateSnapshot();
+  }
+
+  function renderExtraReviews(){
+    const root=document.getElementById("extraReviews");if(!root)return;
+    const list=read("kb_reviews",[]);const reviews=Array.isArray(list)?list:[];
+    const count=document.getElementById("extraReviewCount");if(count)count.textContent=reviews.length+" record"+(reviews.length===1?"":"s");
+    if(!reviews.length){root.innerHTML='<div class="empty">No review records yet.</div>';return}
+    root.innerHTML='<table><thead><tr><th>Customer</th><th>Rating</th><th>Review</th><th>Verification</th><th>Status</th><th></th></tr></thead><tbody>'+
+      reviews.map((r,i)=>'<tr><td><strong>'+esc(r.name||"Customer")+'</strong><div class="review-admin-meta">'+esc(r.orderId||"No order ID")+'</div></td><td>'+Number(r.rating||0)+'/5</td><td><div class="review-admin-text">'+esc(r.text||"")+'</div></td><td><span class="badge '+(r.verified===true?"":"low")+'">'+(r.verified===true?"VERIFIED":"UNVERIFIED")+'</span></td><td><span class="badge '+(r.published===false?"low":"")+'">'+(r.published===false?"HIDDEN":"PUBLISHED")+'</span></td><td><button class="danger-btn" type="button" data-x-review-delete="'+i+'">Delete</button></td></tr>').join("")+
+      '</tbody></table>';
+    root.querySelectorAll("[data-x-review-delete]").forEach(btn=>btn.addEventListener("click",()=>{
+      const idx=Number(btn.dataset.xReviewDelete),current=read("kb_reviews",[]);
+      if(!Array.isArray(current)||!current[idx])return;
+      if(!confirm("Delete this review?"))return;
+      current.splice(idx,1);write("kb_reviews",current);toastExtra("Review deleted.");renderExtraReviews();
+    }));
+  }
+
+  function addExtraReview(){
+    const name=document.getElementById("extraReviewName")?.value.trim()||"", rating=Number(document.getElementById("extraReviewRating")?.value||5), textValue=document.getElementById("extraReviewText")?.value.trim()||"", orderId=document.getElementById("extraReviewOrder")?.value.trim()||"", verified=document.getElementById("extraReviewVerified")?.checked===true, published=document.getElementById("extraReviewPublished")?.checked!==false;
+    if(!name||!textValue){toastExtra("Customer name and review text are required.");return}
+    if(!verified){toastExtra("Mark the review as verified before publishing.");return}
+    const list=read("kb_reviews",[]);const reviews=Array.isArray(list)?list:[];
+    reviews.unshift({id:"R-"+Date.now().toString(36).toUpperCase(),name,rating,text:textValue,orderId,verified:true,published,createdAt:new Date().toISOString()});
+    write("kb_reviews",reviews);
+    document.getElementById("extraReviewDialog")?.close();document.getElementById("extraReviewForm")?.reset();
+    document.getElementById("extraReviewPublished").checked=true;
+    toastExtra("Verified review saved.");renderExtraReviews();
   }
 
   function renderPromos(){
@@ -1003,6 +1092,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const title=document.getElementById("viewTitle");if(title)title.textContent=view.charAt(0).toUpperCase()+view.slice(1);
     document.getElementById("sidebar")?.classList.remove("open");
     if(view==="products")renderExtraProducts();
+    if(view==="reviews")renderExtraReviews();
     if(view==="promos")renderPromos();
     if(view==="content")loadContent();
     if(view==="gallery")renderGallery();
@@ -1021,6 +1111,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     document.getElementById("extraSaveContact")?.addEventListener("click",saveContact);
     document.getElementById("extraSaveAds")?.addEventListener("click",saveAds);
     document.getElementById("extraClearAds")?.addEventListener("click",clearAds);
+    document.getElementById("extraAddReview")?.addEventListener("click",()=>document.getElementById("extraReviewDialog")?.showModal());
+    document.getElementById("extraReviewForm")?.addEventListener("submit",e=>{e.preventDefault();addExtraReview()});
+    document.querySelectorAll("[data-extra-review-close]").forEach(b=>b.addEventListener("click",()=>document.getElementById("extraReviewDialog")?.close()));
     document.getElementById("extraAlertSound")?.addEventListener("click",()=>{
       const enabled=localStorage.getItem(SOUND_KEY)==="1";
       localStorage.setItem(SOUND_KEY,enabled?"0":"1");updateSnapshot();
@@ -1029,8 +1122,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function init(){
-    bindExtraNav();bindDialogs();updateSnapshot();renderExtraProducts();renderPromos();loadContent();loadContact();renderGallery();renderAds();
-    window.addEventListener("storage",e=>{if([PRODUCT_KEY,PROMO_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY,ADS_KEY,"kb_orders"].includes(e.key)){updateSnapshot();renderExtraProducts();renderPromos();renderGallery();renderAds();}});
+    bindExtraNav();bindDialogs();updateSnapshot();renderExtraProducts();renderExtraReviews();renderPromos();loadContent();loadContact();renderGallery();renderAds();
+    window.addEventListener("storage",e=>{if([PRODUCT_KEY,PROMO_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY,ADS_KEY,"kb_orders","kb_reviews"].includes(e.key)){updateSnapshot();renderExtraProducts();renderExtraReviews();renderPromos();renderGallery();renderAds();}});
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
