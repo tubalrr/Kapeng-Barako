@@ -4,11 +4,19 @@ service cloud.firestore {
     function signedIn() {
       return request.auth != null;
     }
+
     function verified() {
       return signedIn() && request.auth.token.email_verified == true;
     }
+
     function owner(uid) {
       return verified() && request.auth.uid == uid;
+    }
+
+    function admin() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
     }
 
     match /users/{userId} {
@@ -23,11 +31,39 @@ service cloud.firestore {
       }
     }
 
+    // Product catalog is public-readable. Only trusted Admin/Functions may mutate it.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    // Customer orders are never writable directly from the browser.
+    // Creation and inventory reservation happen in the Cloud Function transaction.
     match /orders/{orderId} {
-      allow read: if verified() && resource.data.customerUid == request.auth.uid;
-      // Customer-side order creation should be done by a trusted backend/Cloud Function
-      // so price, payment, inventory and status cannot be forged by the browser.
-      allow create, update, delete: if false;
+      allow read: if admin() ||
+        (verified() && resource.data.customer.uid == request.auth.uid) ||
+        (verified() && resource.data.customerUid == request.auth.uid);
+      allow create, update, delete: if admin();
+    }
+
+    match /promos/{promoId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /content/{contentId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    match /admins/{adminId} {
+      allow read: if signedIn() && request.auth.uid == adminId || admin();
+      allow write: if admin();
     }
 
     match /{document=**} {
