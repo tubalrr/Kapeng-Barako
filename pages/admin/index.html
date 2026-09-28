@@ -127,6 +127,57 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   .shell{grid-template-columns:1fr}.sidebar{position:fixed;left:-280px;top:0;width:250px;transition:left .2s ease;box-shadow:var(--shadow)}.sidebar.open{left:0}.menu-btn{display:inline-flex;width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--text);align-items:center;justify-content:center;margin-right:10px}.topbar{padding:0 16px}.content{padding:18px}.top-actions .admin-email{display:none}.inventory-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.metric-grid{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.hero-actions{width:100%}.hero-actions>*{flex:1}.search-row{align-items:stretch;flex-direction:column}.search-row input{width:100%}}
 </style>
+
+<style id="admin-extra-style">
+.admin-extra-row{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:16px;margin-bottom:16px}
+.admin-extra-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.admin-extra-card .extra-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.admin-extra-card .extra-head h3{margin:3px 0 0;font:600 23px Georgia,serif}
+.admin-extra-card .extra-sub{color:var(--muted);font-size:9px}
+.extra-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.extra-stat{padding:13px;border:1px solid var(--border);border-radius:14px;background:#1b1107}
+.extra-stat span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.extra-stat strong{display:block;margin-top:8px;font:600 22px Georgia,serif;color:var(--gold)}
+.extra-status-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.extra-status{padding:12px;border:1px solid var(--border);border-radius:14px;background:#1b1107}
+.extra-status span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;font-weight:800}
+.extra-status strong{display:block;margin-top:8px;font:600 20px Georgia,serif}
+.extra-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.extra-table{width:100%;overflow:auto}
+.extra-table table{min-width:720px}
+.extra-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.extra-product-card,.extra-gallery-card{padding:16px;border:1px solid var(--border);border-radius:18px;background:#1b1107}
+.extra-product-top,.extra-gallery-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.extra-product-card h3,.extra-gallery-card h3{margin:6px 0 3px;font:600 21px Georgia,serif}
+.extra-id{color:var(--muted);font-size:8px}
+.extra-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.extra-field{display:grid;gap:6px}
+.extra-field label{font-size:9px;color:#bba98f;font-weight:800}
+.extra-field input,.extra-field select,.extra-field textarea{width:100%;min-height:42px;border:1px solid var(--border);border-radius:12px;background:#171006;color:var(--text);padding:10px 11px;outline:none}
+.extra-field textarea{min-height:94px;resize:vertical}
+.extra-field input:focus,.extra-field select:focus,.extra-field textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,169,81,.12)}
+.extra-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
+.extra-note{color:var(--muted);font-size:8px;line-height:1.6;margin-top:10px}
+.extra-preview{border:1px solid var(--border);border-radius:16px;background:#171006;min-height:180px;display:grid;place-items:center;overflow:hidden;margin-bottom:14px}
+.extra-preview img{width:100%;height:180px;object-fit:cover;display:block}
+.extra-preview span{color:#6f5c43;font-size:10px;text-transform:uppercase;letter-spacing:.12em}
+.extra-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.extra-form-grid .full{grid-column:1/-1}
+.extra-link{color:var(--gold);font-size:9px;text-decoration:none}
+.extra-link:hover{text-decoration:underline}
+.extra-switch{display:flex;align-items:center;gap:9px;color:var(--text);font-size:10px}
+.extra-switch input{width:16px;height:16px;accent-color:var(--gold)}
+.extra-list{display:grid;gap:10px}
+.extra-list-item{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.extra-list-item:last-child{border-bottom:0}
+.admin-extra-dialog{width:min(560px,calc(100% - 32px));border:1px solid var(--border);border-radius:22px;background:var(--card);color:var(--text);padding:20px;box-shadow:var(--shadow)}
+.admin-extra-dialog::backdrop{background:rgba(0,0,0,.74)}
+.admin-extra-dialog h3{font:600 28px Georgia,serif;margin:6px 0 18px}
+@media(max-width:1050px){.admin-extra-row{grid-template-columns:1fr}.extra-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.extra-grid,.extra-form-grid{grid-template-columns:1fr}.extra-fields{grid-template-columns:1fr}.extra-stat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.extra-status-grid{grid-template-columns:1fr 1fr}.extra-stat-grid{grid-template-columns:1fr}}
+</style>
+
 </head>
 <body>
 <div id="loginScreen" class="login-screen">
@@ -151,6 +202,12 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         <button data-view="orders"><span>02</span>Orders</button>
         <button data-view="inventory"><span>03</span>Inventory</button>
         <button data-view="customers"><span>04</span>Customers</button>
+        <button data-view="products"><span>05</span>Products</button>
+        <button data-view="promos"><span>06</span>Promos</button>
+        <button data-view="content"><span>07</span>Content</button>
+        <button data-view="gallery"><span>08</span>Gallery</button>
+        <button data-view="ads"><span>09</span>Ads</button>
+        <button data-view="contact"><span>10</span>Contact</button>
       </nav>
       <div class="sidebar-foot">
         <div id="adminEmail" class="sidebar-user">admin</div>
@@ -179,6 +236,25 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
             <article class="metric"><span>Pending</span><strong id="mPending">0</strong></article>
             <article id="lowMetric" class="metric"><span>Low Stock</span><strong id="mLow">0</strong><small style="display:block;color:var(--muted);font-size:8px;margin-top:5px">≤ 5 packs</small></article>
           </div>
+          <div class="admin-extra-row">
+            <section class="admin-extra-card">
+              <div class="extra-head"><div><div class="kicker">OPERATIONS SNAPSHOT</div><h3>Sales & Customers</h3></div><div class="extra-toolbar"><button id="extraAlertSound" class="ghost-btn" type="button">Enable Alert Sound</button></div></div>
+              <div class="extra-stat-grid">
+                <article class="extra-stat"><span>Today Sales</span><strong id="extraTodaySales">₱0</strong></article>
+                <article class="extra-stat"><span>This Week</span><strong id="extraWeekSales">₱0</strong></article>
+                <article class="extra-stat"><span>Customers</span><strong id="extraCustomers">0</strong></article>
+              </div>
+            </section>
+            <section class="admin-extra-card">
+              <div class="extra-head"><div><div class="kicker">FULFILLMENT STATUS</div><h3>Order Flow</h3></div><span class="extra-sub">Live from <code>kb_orders</code></span></div>
+              <div class="extra-status-grid">
+                <article class="extra-status"><span>Pending</span><strong id="extraPending">0</strong></article>
+                <article class="extra-status"><span>Ready</span><strong id="extraReady">0</strong></article>
+                <article class="extra-status"><span>Delivered</span><strong id="extraDelivered">0</strong></article>
+                <article class="extra-status"><span>Cancelled</span><strong id="extraCancelled">0</strong></article>
+              </div>
+            </section>
+          </div>
           <div class="grid-two">
             <section class="card"><div class="card-head"><div><div class="kicker">SALES</div><h3>Last 7 Days</h3></div><span id="chartNote" class="card-note">₱0</span></div><div class="chart-wrap"><canvas id="salesChart" width="900" height="270"></canvas></div></section>
             <section class="card"><div class="card-head"><div><div class="kicker">FULFILLMENT</div><h3>Pending Queue</h3></div></div><div id="queue" class="queue"></div></section>
@@ -200,6 +276,66 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
           <div class="hero"><div><div class="kicker">CUSTOMER DIRECTORY</div><h1>Customers</h1><p>Customers are built from the names and contact details inside <code>kb_orders</code>.</p></div></div>
           <section class="card table-card"><div id="customersTable" class="table-wrap"></div></section>
         </section>
+
+        <section id="view-products" class="view">
+          <div class="hero"><div><div class="kicker">PRODUCTION CATALOG</div><h1>Products</h1><p>Manage the storefront catalog without removing any existing order or inventory data.</p></div><div class="hero-actions"><button id="extraAddProduct" class="primary-btn" type="button">+ Add Product</button></div></div>
+          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">PRODUCT CATALOG</div><h3>Current Products</h3></div><span class="extra-sub">Changes use <code>kb_rebuild_products</code> and sync to the storefront.</span></div><div id="extraProducts" class="extra-grid"></div></section>
+        </section>
+
+        <section id="view-promos" class="view">
+          <div class="hero"><div><div class="kicker">PRICING</div><h1>Promos</h1><p>Create and manage discount codes used by the storefront checkout.</p></div><div class="hero-actions"><button id="extraAddPromo" class="primary-btn" type="button">+ Add Promo</button></div></div>
+          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">PROMO RULES</div><h3>Promo Codes</h3></div><span id="extraPromoCount" class="extra-sub"></span></div><div id="extraPromos" class="extra-table"></div></section>
+        </section>
+
+        <section id="view-content" class="view">
+          <div class="hero"><div><div class="kicker">CONTENT</div><h1>Story & Announcements</h1><p>Update approved storefront announcement and contact content stored in this browser.</p></div><div class="hero-actions"><button id="extraSaveContent" class="primary-btn" type="button">Save Content</button></div></div>
+          <section class="admin-extra-card">
+            <div class="extra-form-grid">
+              <div class="extra-field"><label for="extraContentTitle">Announcement Title</label><input id="extraContentTitle" placeholder="Fresh roast update"></div>
+              <div class="extra-field"><label for="extraContentEmail">Business Email</label><input id="extraContentEmail" type="email" placeholder="hello@example.com"></div>
+              <div class="extra-field full"><label for="extraContentBody">Announcement Body</label><textarea id="extraContentBody" rows="5" placeholder="Approved storefront announcement"></textarea></div>
+              <div class="extra-field"><label for="extraContentFacebook">Facebook URL</label><input id="extraContentFacebook" type="url" placeholder="https://facebook.com/..."></div>
+              <div class="extra-field"><label for="extraContentPhone">Phone</label><input id="extraContentPhone" type="tel" placeholder="+63 ..."></div>
+              <div class="extra-field full"><label for="extraContentLocation">Location</label><input id="extraContentLocation" placeholder="Lipa City, Batangas"></div>
+            </div>
+            <div class="extra-note">Only values saved here are reused by the related storefront/contact systems.</div>
+          </section>
+        </section>
+
+        <section id="view-gallery" class="view">
+          <div class="hero"><div><div class="kicker">VISUAL CATALOG</div><h1>Gallery</h1><p>Maintain the six gallery slots used by the storefront.</p></div></div>
+          <section class="admin-extra-card"><div id="extraGallery" class="extra-grid"></div></section>
+        </section>
+
+        <section id="view-ads" class="view">
+          <div class="hero"><div><div class="kicker">ADVERTISEMENT</div><h1>Ads</h1><p>Configure the storefront advertisement container and preview.</p></div><div class="hero-actions"><button id="extraSaveAds" class="primary-btn" type="button">Save Ad</button><button id="extraClearAds" class="ghost-btn" type="button">Clear</button></div></div>
+          <section class="admin-extra-card">
+            <div class="extra-form-grid">
+              <div class="extra-field"><label for="extraAdsLink">Advertisement Link</label><input id="extraAdsLink" type="url" placeholder="https://example.com/ad"></div>
+              <div class="extra-field"><label for="extraAdsLabel">Ad Label</label><input id="extraAdsLabel" placeholder="Sponsored"></div>
+              <div class="extra-field full"><label for="extraAdsImage">Image URL</label><input id="extraAdsImage" type="url" placeholder="https://example.com/ad.jpg"></div>
+            </div>
+            <div class="extra-preview" id="extraAdsPreview"><span>No ad configured</span></div>
+            <div class="extra-actions"><a id="extraAdsOpen" class="extra-link" href="#" target="_blank" rel="noopener noreferrer" hidden>OPEN AD LINK ↗</a></div>
+            <div class="extra-note">No live AdSense code is added here. The saved values remain local to this browser until a backend/content system is connected.</div>
+          </section>
+        </section>
+
+        <section id="view-contact" class="view">
+          <div class="hero"><div><div class="kicker">BUSINESS CONTACT</div><h1>Contact</h1><p>Manage the business contact details used by the contact page and site footer.</p></div><div class="hero-actions"><button id="extraSaveContact" class="primary-btn" type="button">Save Contact</button></div></div>
+          <section class="admin-extra-card">
+            <div class="extra-form-grid">
+              <div class="extra-field"><label for="extraContactBusiness">Business Name</label><input id="extraContactBusiness" placeholder="Kapeng Barako"></div>
+              <div class="extra-field"><label for="extraContactEmail">Email</label><input id="extraContactEmail" type="email" placeholder="hello@example.com"></div>
+              <div class="extra-field"><label for="extraContactPhone">Phone</label><input id="extraContactPhone" type="tel" placeholder="+63 ..."></div>
+              <div class="extra-field"><label for="extraContactHours">Business Hours</label><input id="extraContactHours" placeholder="Mon–Sat · 8:00 AM–5:00 PM"></div>
+              <div class="extra-field full"><label for="extraContactLocation">Address / Location</label><input id="extraContactLocation" placeholder="Lipa City, Batangas"></div>
+              <div class="extra-field"><label for="extraContactFacebook">Facebook URL</label><input id="extraContactFacebook" type="url" placeholder="https://facebook.com/..."></div>
+              <div class="extra-field"><label for="extraContactMessenger">Messenger URL</label><input id="extraContactMessenger" type="url" placeholder="https://m.me/..."></div>
+            </div>
+          </section>
+        </section>
+
       </div>
     </main>
   </div>
@@ -540,6 +676,272 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   window.addEventListener("resize",()=>{if(!$("#view-overview").classList.contains("active"))return;drawSalesChart(orders());});
 
   if(isAdmin()) showApp(); else showLogin();
+})();
+</script>
+
+<dialog id="extraProductDialog" class="admin-extra-dialog">
+  <form method="dialog" id="extraProductForm">
+    <div class="modal-head"><div><div class="kicker">NEW PRODUCT</div><h3>Add Product</h3></div><button class="close" type="button" data-extra-dialog-close>×</button></div>
+    <div class="extra-form-grid">
+      <div class="extra-field"><label for="extraProductName">Product Name</label><input id="extraProductName" required placeholder="Barako Reserve"></div>
+      <div class="extra-field"><label for="extraProductSize">Size</label><input id="extraProductSize" required placeholder="1kg"></div>
+      <div class="extra-field"><label for="extraProductPrice">Price (₱)</label><input id="extraProductPrice" type="number" min="0" step="1" required></div>
+      <div class="extra-field"><label for="extraProductStock">Stock (packs)</label><input id="extraProductStock" type="number" min="0" step="1" value="0" required></div>
+      <div class="extra-field"><label for="extraProductBadge">Badge</label><input id="extraProductBadge" placeholder="NEW"></div>
+      <div class="extra-field"><label for="extraProductRoast">Roast</label><select id="extraProductRoast"><option>Light</option><option selected>Medium</option><option>Dark</option></select></div>
+      <div class="extra-field"><label for="extraProductGrind">Grind</label><select id="extraProductGrind"><option selected>Whole</option><option>Coarse</option><option>Fine</option></select></div>
+      <div class="extra-field"><label for="extraProductNote">Description</label><input id="extraProductNote" placeholder="Bold and aromatic"></div>
+    </div>
+    <div class="extra-actions"><button class="ghost-btn" type="button" data-extra-dialog-close>Cancel</button><button class="primary-btn" type="submit">Add Product</button></div>
+  </form>
+</dialog>
+
+<dialog id="extraPromoDialog" class="admin-extra-dialog">
+  <form method="dialog" id="extraPromoForm">
+    <div class="modal-head"><div><div class="kicker">PROMO RULE</div><h3>New Promo</h3></div><button class="close" type="button" data-extra-promo-close>×</button></div>
+    <div class="extra-form-grid">
+      <div class="extra-field"><label for="extraPromoName">Name</label><input id="extraPromoName" required placeholder="Barako 10"></div>
+      <div class="extra-field"><label for="extraPromoCode">Code</label><input id="extraPromoCode" required placeholder="BARAKO10"></div>
+      <div class="extra-field"><label for="extraPromoType">Type</label><select id="extraPromoType"><option value="percent">Percent</option><option value="fixed">Fixed</option></select></div>
+      <div class="extra-field"><label for="extraPromoValue">Value</label><input id="extraPromoValue" type="number" min="0" step="1" required></div>
+      <div class="extra-field"><label for="extraPromoMin">Minimum Packs</label><input id="extraPromoMin" type="number" min="0" step="1" value="0"></div>
+      <div class="extra-field"><label class="extra-switch"><input id="extraPromoActive" type="checkbox" checked> Active</label></div>
+    </div>
+    <div class="extra-actions"><button class="ghost-btn" type="button" data-extra-promo-close>Cancel</button><button class="primary-btn" type="submit">Save Promo</button></div>
+  </form>
+</dialog>
+<div id="adminExtraToast" class="admin-toast"></div>
+<script id="admin-extra-script">
+(() => {
+  "use strict";
+  const PRODUCT_KEY="kb_rebuild_products", PROMO_KEY="kb_promos", SETTINGS_KEY="kb_settings", CMS_KEY="kb_cms", GALLERY_KEY="kb_gallery", ADS_KEY="kb_ads", SOUND_KEY="kb_low_stock_sound";
+  const read=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw===null?fallback:JSON.parse(raw)}catch{return fallback}};
+  const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
+  const esc=(v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const money=(n)=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
+  const products=()=>{const x=read(PRODUCT_KEY,[]);return Array.isArray(x)?x:[]};
+  const orders=()=>{const x=read("kb_orders",[]);return Array.isArray(x)?x:[]};
+  const customers=()=>{
+    const m=new Map();
+    orders().forEach(o=>{
+      const c=o?.customer||{};
+      const key=String(c.email||o?.email||c.phone||o?.phone||c.name||o?.customerName||"customer").toLowerCase();
+      if(!m.has(key))m.set(key,{name:c.name||o?.customerName||"Customer",email:c.email||o?.email||"",phone:c.phone||o?.phone||"",orders:0,spend:0,address:c.address||o?.address||""});
+      const x=m.get(key);x.orders+=1;x.spend+=Number(o?.total||0);if(c.address||o?.address)x.address=c.address||o.address;
+    });
+    return [...m.values()];
+  };
+  const todayStart=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()};
+  const weekStart=()=>{const d=new Date();const monday=((d.getDay()+6)%7);return new Date(d.getFullYear(),d.getMonth(),d.getDate()-monday).getTime()};
+  const orderStatus=(o)=>String(o?.status||"Pending").toLowerCase();
+
+  function notifyStorefront(){
+    try{localStorage.setItem("kb_admin_catalog_updated",String(Date.now()));localStorage.removeItem("kb_admin_catalog_updated")}catch{}
+    try{const ch="BroadcastChannel" in window?new BroadcastChannel("kapeng-barako-catalog"):null;ch?.postMessage({type:"products-updated",at:Date.now()});setTimeout(()=>ch?.close(),50)}catch{}
+  }
+
+  function updateSnapshot(){
+    const os=orders(), ps=products(), today=todayStart(), week=weekStart();
+    const todaySales=os.filter(o=>{const t=new Date(o.createdAt||0).getTime();return Number.isFinite(t)&&t>=today}).reduce((s,o)=>s+Number(o.total||0),0);
+    const weekSales=os.filter(o=>{const t=new Date(o.createdAt||0).getTime();return Number.isFinite(t)&&t>=week}).reduce((s,o)=>s+Number(o.total||0),0);
+    const count=(status)=>os.filter(o=>orderStatus(o)===status).length;
+    const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+    set("extraTodaySales",money(todaySales));set("extraWeekSales",money(weekSales));set("extraCustomers",customers().length);
+    set("extraPending",count("pending"));set("extraReady",os.filter(o=>["ready","ready to ship","in transit","dispatched","processing/roasting"].includes(orderStatus(o))).length);
+    set("extraDelivered",count("delivered"));set("extraCancelled",count("cancelled"));
+    const btn=document.getElementById("extraAlertSound");
+    if(btn)btn.textContent=localStorage.getItem(SOUND_KEY)==="1"?"Alert Sound: ON":"Enable Alert Sound";
+  }
+
+  function renderExtraProducts(){
+    const root=document.getElementById("extraProducts");if(!root)return;
+    const list=products();
+    root.innerHTML=list.length?list.map(p=>{
+      const stock=Number(p.stock||0);
+      return '<article class="extra-product-card" data-extra-product="'+esc(p.id)+'">'+
+        '<div class="extra-product-top"><div><div class="kicker">'+esc(p.size||"PRODUCT")+'</div><h3>'+esc(p.name||"Product")+'</h3><span class="extra-id">'+esc(p.id||"—")+'</span></div><span class="badge '+(stock<=5?"low":"")+'">'+(stock<=5?"LOW STOCK":"IN STOCK")+'</span></div>'+
+        '<div class="extra-fields">'+
+          '<div class="extra-field"><label>Price (₱)</label><input type="number" min="0" step="1" value="'+Number(p.price||0)+'" data-x-price="'+esc(p.id)+'"></div>'+
+          '<div class="extra-field"><label>Stock (packs)</label><input type="number" min="0" step="1" value="'+stock+'" data-x-stock="'+esc(p.id)+'"></div>'+
+          '<div class="extra-field"><label>Roast</label><select data-x-roast="'+esc(p.id)+'"><option>Light</option><option>Medium</option><option>Dark</option></select></div>'+
+          '<div class="extra-field"><label>Grind</label><select data-x-grind="'+esc(p.id)+'"><option>Whole</option><option>Coarse</option><option>Fine</option></select></div>'+
+        '</div>'+
+        '<div class="extra-note">'+esc(p.note||"")+'</div>'+
+        '<div class="extra-actions"><button class="ghost-btn" type="button" data-x-save="'+esc(p.id)+'">Save</button><button class="danger-btn" type="button" data-x-delete="'+esc(p.id)+'">Delete</button></div>'+
+      '</article>';
+    }).join(""):'<div class="empty">No products found in kb_rebuild_products.</div>';
+
+    list.forEach(p=>{
+      document.querySelector('[data-x-roast="'+CSS.escape(String(p.id))+'"]')?.setAttribute("value",p.roast||"Medium");
+      document.querySelector('[data-x-grind="'+CSS.escape(String(p.id))+'"]')?.setAttribute("value",p.grind||"Whole");
+    });
+    root.querySelectorAll("[data-x-save]").forEach(btn=>btn.addEventListener("click",()=>saveExtraProduct(btn.dataset.xSave)));
+    root.querySelectorAll("[data-x-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteExtraProduct(btn.dataset.xDelete)));
+  }
+
+  function saveExtraProduct(id){
+    const list=products(), idx=list.findIndex(p=>String(p.id)===String(id));if(idx<0)return;
+    const price=Number(document.querySelector('[data-x-price="'+CSS.escape(String(id))+'"]')?.value);
+    const stock=Number(document.querySelector('[data-x-stock="'+CSS.escape(String(id))+'"]')?.value);
+    const roast=document.querySelector('[data-x-roast="'+CSS.escape(String(id))+'"]')?.value||"Medium";
+    const grind=document.querySelector('[data-x-grind="'+CSS.escape(String(id))+'"]')?.value||"Whole";
+    if(!Number.isFinite(price)||price<0||!Number.isFinite(stock)||stock<0||!Number.isInteger(stock)){toastExtra("Enter a valid non-negative price and whole-number stock.");return}
+    list[idx]={...list[idx],price,stock,roast,grind};write(PRODUCT_KEY,list);notifyStorefront();toastExtra((list[idx].name||id)+" updated.");renderExtraProducts();updateSnapshot();
+  }
+
+  function deleteExtraProduct(id){
+    const list=products(), product=list.find(p=>String(p.id)===String(id));if(!product)return;
+    if(!confirm("Delete "+(product.name||id)+" from the catalog?"))return;
+    const next=list.filter(p=>String(p.id)!==String(id));write(PRODUCT_KEY,next);notifyStorefront();toastExtra((product.name||id)+" deleted.");renderExtraProducts();updateSnapshot();
+  }
+
+  function addExtraProduct(){
+    const name=document.getElementById("extraProductName")?.value.trim()||"", size=document.getElementById("extraProductSize")?.value.trim()||"", price=Number(document.getElementById("extraProductPrice")?.value||0), stock=Number(document.getElementById("extraProductStock")?.value||0), badge=document.getElementById("extraProductBadge")?.value.trim()||"NEW", roast=document.getElementById("extraProductRoast")?.value||"Medium", grind=document.getElementById("extraProductGrind")?.value||"Whole", note=document.getElementById("extraProductNote")?.value.trim()||"";
+    if(!name||!size){toastExtra("Product name and size are required.");return}
+    if(!Number.isFinite(price)||price<0||!Number.isFinite(stock)||stock<0||!Number.isInteger(stock)){toastExtra("Enter a valid price and whole-number stock.");return}
+    const base=("KB-"+size).toUpperCase().replace(/[^A-Z0-9]/g,"");
+    let id=base||("KB-"+Date.now());
+    while(products().some(p=>String(p.id)===id))id=base+"-"+Date.now().toString(36).toUpperCase();
+    const next=[...products(),{id,name,size,price,stock,badge,roast,grind,note}];
+    write(PRODUCT_KEY,next);notifyStorefront();
+    document.getElementById("extraProductDialog")?.close();document.getElementById("extraProductForm")?.reset();
+    toastExtra(name+" added.");renderExtraProducts();updateSnapshot();
+  }
+
+  function renderPromos(){
+    const root=document.getElementById("extraPromos");if(!root)return;
+    const list=read(PROMO_KEY,[]);const promos=Array.isArray(list)?list:[];
+    const count=document.getElementById("extraPromoCount");if(count)count.textContent=promos.length+" promo"+(promos.length===1?"":"s");
+    if(!promos.length){root.innerHTML='<div class="empty">No promo codes yet.</div>';return}
+    root.innerHTML='<table><thead><tr><th>Name</th><th>Code</th><th>Rule</th><th>Status</th><th></th></tr></thead><tbody>'+
+      promos.map((p,i)=>'<tr><td><strong>'+esc(p.name||"Promo")+'</strong></td><td><strong>'+esc(p.code||"—")+'</strong></td><td>'+esc(p.type==="percent"?Number(p.value||0)+"% off":money(p.value)+" off")+' · min '+Number(p.minPacks||0)+' packs</td><td><span class="badge '+(p.active===false?"low":"")+'">'+(p.active===false?"OFF":"ACTIVE")+'</span></td><td><button class="danger-btn" type="button" data-x-promo-delete="'+i+'">Delete</button></td></tr>').join("")+
+      '</tbody></table>';
+    root.querySelectorAll("[data-x-promo-delete]").forEach(btn=>btn.addEventListener("click",()=>{const idx=Number(btn.dataset.xPromoDelete);const current=read(PROMO_KEY,[]);if(!Array.isArray(current)||!current[idx])return;if(!confirm("Delete promo "+(current[idx].code||"this code")+"?"))return;current.splice(idx,1);write(PROMO_KEY,current);toastExtra("Promo deleted.");renderPromos()}));
+  }
+
+  function addExtraPromo(){
+    const name=document.getElementById("extraPromoName")?.value.trim()||"", code=(document.getElementById("extraPromoCode")?.value.trim()||"").toUpperCase(), type=document.getElementById("extraPromoType")?.value||"percent", value=Number(document.getElementById("extraPromoValue")?.value||0), minPacks=Number(document.getElementById("extraPromoMin")?.value||0), active=document.getElementById("extraPromoActive")?.checked!==false;
+    if(!name||!code){toastExtra("Promo name and code are required.");return}
+    if(!Number.isFinite(value)||value<0||!Number.isFinite(minPacks)||minPacks<0){toastExtra("Enter valid promo values.");return}
+    const current=read(PROMO_KEY,[]);const next=Array.isArray(current)?current:[];
+    if(next.some(p=>String(p.code||"").toUpperCase()===code)){toastExtra("That promo code already exists.");return}
+    next.push({id:"P-"+Date.now(),name,code,type,value,minPacks,active});write(PROMO_KEY,next);
+    document.getElementById("extraPromoDialog")?.close();document.getElementById("extraPromoForm")?.reset();document.getElementById("extraPromoActive").checked=true;
+    toastExtra(code+" saved.");renderPromos();
+  }
+
+  function loadContent(){
+    const s={...(read(SETTINGS_KEY,{})||{})}, cms={...(read(CMS_KEY,{})||{})};
+    document.getElementById("extraContentTitle").value=String(cms?.announcement?.title||"");
+    document.getElementById("extraContentBody").value=String(cms?.announcement?.body||"");
+    document.getElementById("extraContentEmail").value=String(s.email||"");
+    document.getElementById("extraContentFacebook").value=String(s.facebook||"");
+    document.getElementById("extraContentPhone").value=String(s.phone||"");
+    document.getElementById("extraContentLocation").value=String(s.location||"");
+  }
+  function saveContent(){
+    const s={...(read(SETTINGS_KEY,{})||{})};
+    s.email=document.getElementById("extraContentEmail").value.trim();s.facebook=document.getElementById("extraContentFacebook").value.trim();s.phone=document.getElementById("extraContentPhone").value.trim();s.location=document.getElementById("extraContentLocation").value.trim();
+    const cms={...(read(CMS_KEY,{})||{}),announcement:{title:document.getElementById("extraContentTitle").value.trim(),body:document.getElementById("extraContentBody").value.trim()}};
+    write(SETTINGS_KEY,s);write(CMS_KEY,cms);toastExtra("Content saved.");
+  }
+
+  function loadContact(){
+    const s={...(read(SETTINGS_KEY,{})||{})};
+    const map={business:"extraContactBusiness",email:"extraContactEmail",phone:"extraContactPhone",hours:"extraContactHours",location:"extraContactLocation",facebook:"extraContactFacebook",messenger:"extraContactMessenger"};
+    Object.entries(map).forEach(([key,id])=>{const el=document.getElementById(id);if(el)el.value=String(s[key]||"")});
+  }
+  function saveContact(){
+    const current={...(read(SETTINGS_KEY,{})||{})};
+    Object.assign(current,{
+      businessName:document.getElementById("extraContactBusiness").value.trim(),
+      email:document.getElementById("extraContactEmail").value.trim(),
+      phone:document.getElementById("extraContactPhone").value.trim(),
+      hours:document.getElementById("extraContactHours").value.trim(),
+      location:document.getElementById("extraContactLocation").value.trim(),
+      facebook:document.getElementById("extraContactFacebook").value.trim(),
+      messenger:document.getElementById("extraContactMessenger").value.trim()
+    });
+    write(SETTINGS_KEY,current);toastExtra("Contact details saved.");
+  }
+
+  function renderGallery(){
+    const root=document.getElementById("extraGallery");if(!root)return;
+    const current=read(GALLERY_KEY,[]);const list=Array.isArray(current)?current:[];
+    root.innerHTML=Array.from({length:6},(_,i)=>{const g=list[i]||{slot:i+1,title:"",image:"",alt:""};return '<article class="extra-gallery-card"><div class="extra-gallery-top"><div><div class="kicker">PHOTO '+String(i+1).padStart(2,"0")+'</div><h3>'+esc(g.title||"Gallery Slot")+'</h3></div></div><div class="extra-preview">'+(g.image?'<img src="'+esc(g.image)+'" alt="'+esc(g.alt||"")+'">':'<span>PHOTO '+String(i+1).padStart(2,"0")+'</span>')+'</div><div class="extra-fields"><div class="extra-field"><label>Title</label><input data-g-title="'+i+'" value="'+esc(g.title||"")+'" placeholder="Roasted Liberica"></div><div class="extra-field"><label>Image URL</label><input data-g-image="'+i+'" value="'+esc(g.image||"")+'" placeholder="https://..."></div><div class="extra-field"><label>Alt text</label><input data-g-alt="'+i+'" value="'+esc(g.alt||"")+'" placeholder="Describe the real photo"></div></div><div class="extra-actions"><button class="ghost-btn" type="button" data-g-save="'+i+'">Save Photo</button></div></article>"}).join("");
+    root.querySelectorAll("[data-g-save]").forEach(btn=>btn.addEventListener("click",()=>saveGallery(Number(btn.dataset.gSave))));
+  }
+  function saveGallery(index){
+    const list=read(GALLERY_KEY,[]);const gallery=Array.isArray(list)?list:Array.from({length:6},(_,i)=>({slot:i+1,title:"",image:"",alt:""}));
+    const image=document.querySelector('[data-g-image="'+index+'"]')?.value.trim()||"",title=document.querySelector('[data-g-title="'+index+'"]')?.value.trim()||"",alt=document.querySelector('[data-g-alt="'+index+'"]')?.value.trim()||title;
+    if(image&&!/^https?:\/\//i.test(image)&&!/^images\//i.test(image)){toastExtra("Use an image URL or images/ path.");return}
+    gallery[index]={slot:index+1,title,image,alt};write(GALLERY_KEY,gallery);toastExtra("Gallery photo "+(index+1)+" saved.");renderGallery();
+  }
+
+  function renderAds(){
+    const data=read(ADS_KEY,{link:"",image:"",label:""}),ads=data&&typeof data==="object"&&!Array.isArray(data)?data:{link:"",image:"",label:""};
+    const link=String(ads.link||"").trim(), image=String(ads.image||"").trim(), label=String(ads.label||"Sponsored").trim()||"Sponsored";
+    const li=document.getElementById("extraAdsLink"), im=document.getElementById("extraAdsImage"), la=document.getElementById("extraAdsLabel"), pv=document.getElementById("extraAdsPreview"), op=document.getElementById("extraAdsOpen");
+    if(li)li.value=link;if(im)im.value=image;if(la)la.value=ads.label||"";
+    if(pv)pv.innerHTML=image?'<img src="'+esc(image)+'" alt="Advertisement preview">':(link?'<span>'+esc(label)+'</span>':'<span>No ad configured</span>');
+    if(op){op.hidden=!link;op.href=link||"#"}
+  }
+  function saveAds(){
+    const link=document.getElementById("extraAdsLink").value.trim(), image=document.getElementById("extraAdsImage").value.trim(), label=document.getElementById("extraAdsLabel").value.trim()||"Sponsored";
+    if(link&&!/^https?:\/\//i.test(link)){toastExtra("Use a valid http:// or https:// advertisement link.");return}
+    if(image&&!/^https?:\/\//i.test(image)){toastExtra("Use a valid http:// or https:// image URL.");return}
+    write(ADS_KEY,{link,image,label});toastExtra(link?"Advertisement saved.":"Advertisement cleared.");renderAds();
+  }
+  function clearAds(){localStorage.removeItem(ADS_KEY);toastExtra("Advertisement cleared.");renderAds()}
+
+  function toastExtra(msg){
+    const t=document.getElementById("adminExtraToast");if(!t)return;
+    t.textContent=msg;t.classList.add("show");clearTimeout(window.__kbAdminExtraToast);window.__kbAdminExtraToast=setTimeout(()=>t.classList.remove("show"),2200);
+  }
+
+  function bindExtraNav(){
+    ["products","promos","content","gallery","ads","contact"].forEach(view=>{
+      const btn=document.querySelector('#nav button[data-view="'+view+'"]');if(!btn)return;
+      btn.addEventListener("click",()=>openExtraView(view));
+    });
+  }
+  function openExtraView(view){
+    document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="view-"+view));
+    document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+    const title=document.getElementById("viewTitle");if(title)title.textContent=view.charAt(0).toUpperCase()+view.slice(1);
+    document.getElementById("sidebar")?.classList.remove("open");
+    if(view==="products")renderExtraProducts();
+    if(view==="promos")renderPromos();
+    if(view==="content")loadContent();
+    if(view==="gallery")renderGallery();
+    if(view==="ads")renderAds();
+    if(view==="contact")loadContact();
+  }
+
+  function bindDialogs(){
+    document.getElementById("extraAddProduct")?.addEventListener("click",()=>document.getElementById("extraProductDialog")?.showModal());
+    document.getElementById("extraProductForm")?.addEventListener("submit",e=>{e.preventDefault();addExtraProduct()});
+    document.querySelectorAll("[data-extra-dialog-close]").forEach(b=>b.addEventListener("click",()=>document.getElementById("extraProductDialog")?.close()));
+    document.getElementById("extraAddPromo")?.addEventListener("click",()=>document.getElementById("extraPromoDialog")?.showModal());
+    document.getElementById("extraPromoForm")?.addEventListener("submit",e=>{e.preventDefault();addExtraPromo()});
+    document.querySelectorAll("[data-extra-promo-close]").forEach(b=>b.addEventListener("click",()=>document.getElementById("extraPromoDialog")?.close()));
+    document.getElementById("extraSaveContent")?.addEventListener("click",saveContent);
+    document.getElementById("extraSaveContact")?.addEventListener("click",saveContact);
+    document.getElementById("extraSaveAds")?.addEventListener("click",saveAds);
+    document.getElementById("extraClearAds")?.addEventListener("click",clearAds);
+    document.getElementById("extraAlertSound")?.addEventListener("click",()=>{
+      const enabled=localStorage.getItem(SOUND_KEY)==="1";
+      localStorage.setItem(SOUND_KEY,enabled?"0":"1");updateSnapshot();
+      toastExtra(enabled?"Alert sound disabled.":"Alert sound enabled.");
+    });
+  }
+
+  function init(){
+    bindExtraNav();bindDialogs();updateSnapshot();renderExtraProducts();renderPromos();loadContent();loadContact();renderGallery();renderAds();
+    window.addEventListener("storage",e=>{if([PRODUCT_KEY,PROMO_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY,ADS_KEY,"kb_orders"].includes(e.key)){updateSnapshot();renderExtraProducts();renderPromos();renderGallery();renderAds();}});
+  }
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 </script>
 </body>
