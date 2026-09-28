@@ -626,24 +626,20 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       }).join("")+
       '</tbody></table>';
 
-    $$("[data-status-id]").forEach(sel => {
+    $("[data-status-id]").forEach(sel => {
       const o = os.find(x => String(x.id) === String(sel.dataset.statusId));
       if(o) sel.value = normalizeStatus(o.status);
-      sel.addEventListener("change", () => updateOrderStatus(sel.dataset.statusId, sel.value));
     });
-    $$("[data-payment-status]").forEach(sel => {
+    $("[data-payment-status]").forEach(sel => {
       const o = os.find(x => String(x.id) === String(sel.dataset.paymentStatus));
       if(o) sel.value = getPaymentStatus(o);
-      sel.addEventListener("change", () => updatePaymentStatus(sel.dataset.paymentStatus, sel.value));
     });
-    $$("[data-track-id]").forEach(btn => btn.addEventListener("click", () => openTrack(btn.dataset.trackId)));
   }
 
   function updateOrderStatus(id, status) {
     const current = orders();
     const idx = current.findIndex(o => String(o.id) === String(id));
     if(idx < 0) return;
-    const previous = current[idx]?.status;
     current[idx] = {...current[idx], status, statusUpdatedAt:new Date().toISOString()};
     write(ORDER_KEY,current);
     renderAll();
@@ -667,7 +663,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       const stock = Number(p.stock || 0);
       return '<article class="inventory-card"><div class="inventory-top"><div><div class="kicker">'+esc(p.size || "PRODUCT")+'</div><h3>'+esc(p.name || "Product")+'</h3><span class="inventory-id">'+esc(p.id || "—")+'</span></div><span class="badge '+(stock<=5?"low":"")+'">'+(stock<=5?"LOW STOCK":"IN STOCK")+'</span></div><div class="stock-value '+(stock<=5?"stock-low":"")+'">'+stock+' packs</div><button class="primary-btn" type="button" data-edit-stock="'+esc(p.id)+'">Edit Stock</button></article>';
     }).join("");
-    $$("[data-edit-stock]").forEach(btn => btn.addEventListener("click", () => openStock(btn.dataset.editStock)));
+
   }
 
   function renderCustomers() {
@@ -744,9 +740,26 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     finally { location.replace("./login.html"); }
   });
 
-  $$("#nav button").forEach(btn => btn.addEventListener("click",()=>openView(btn.dataset.view)));
+  $("#nav button").forEach(btn => btn.addEventListener("click",()=>{
+    const view=btn.dataset.view;
+    if(window.KBAdminExtra?.openView && window.KBAdminExtra.views?.includes(view)){ window.KBAdminExtra.openView(view); return; }
+    openView(view);
+  }));
   $("#orderSearch").addEventListener("input",e=>{orderSearch=e.target.value;renderOrders();});
+  $("#ordersTable").addEventListener("change",e=>{
+    const target=e.target;
+    if(target.matches("[data-status-id]")) updateOrderStatus(target.dataset.statusId,target.value);
+    else if(target.matches("[data-payment-status]")) updatePaymentStatus(target.dataset.paymentStatus,target.value);
+  });
+  $("#ordersTable").addEventListener("click",e=>{
+    const button=e.target.closest("[data-track-id]");
+    if(button) openTrack(button.dataset.trackId);
+  });
   $("#menuBtn").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
+  $("#inventoryGrid").addEventListener("click",e=>{
+    const button=e.target.closest("[data-edit-stock]");
+    if(button) openStock(button.dataset.editStock);
+  });
 
   $("#stockForm").addEventListener("submit", e => {
     e.preventDefault();
@@ -921,8 +934,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       if(roast)roast.value=p.roast||"Medium";
       if(grind)grind.value=p.grind||"Whole";
     });
-    root.querySelectorAll("[data-x-save]").forEach(btn=>btn.addEventListener("click",()=>saveExtraProduct(btn.dataset.xSave)));
-    root.querySelectorAll("[data-x-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteExtraProduct(btn.dataset.xDelete)));
   }
 
   function saveExtraProduct(id){
@@ -977,12 +988,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     root.innerHTML='<table><thead><tr><th>Customer</th><th>Rating</th><th>Review</th><th>Verification</th><th>Status</th><th></th></tr></thead><tbody>'+
       reviews.map((r,i)=>'<tr><td><strong>'+esc(r.name||"Customer")+'</strong><div class="review-admin-meta">'+esc(r.orderId||"No order ID")+'</div></td><td>'+Number(r.rating||0)+'/5</td><td><div class="review-admin-text">'+esc(r.text||"")+'</div></td><td><span class="badge '+(r.verified===true?"":"low")+'">'+(r.verified===true?"VERIFIED":"UNVERIFIED")+'</span></td><td><span class="badge '+(r.published===false?"low":"")+'">'+(r.published===false?"HIDDEN":"PUBLISHED")+'</span></td><td><button class="danger-btn" type="button" data-x-review-delete="'+i+'">Delete</button></td></tr>').join("")+
       '</tbody></table>';
-    root.querySelectorAll("[data-x-review-delete]").forEach(btn=>btn.addEventListener("click",()=>{
-      const idx=Number(btn.dataset.xReviewDelete),current=read("kb_reviews",[]);
-      if(!Array.isArray(current)||!current[idx])return;
-      if(!confirm("Delete this review?"))return;
-      current.splice(idx,1);write("kb_reviews",current);toastExtra("Review deleted.");renderExtraReviews();
-    }));
   }
 
   function addExtraReview(){
@@ -1022,7 +1027,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     root.innerHTML='<table><thead><tr><th>Name</th><th>Code</th><th>Rule</th><th>Status</th><th></th></tr></thead><tbody>'+
       promos.map((p,i)=>'<tr><td><strong>'+esc(p.name||"Promo")+'</strong></td><td><strong>'+esc(p.code||"—")+'</strong></td><td>'+esc(p.type==="percent"?Number(p.value||0)+"% off":money(p.value)+" off")+' · min '+Number(p.minPacks||0)+' packs</td><td><span class="badge '+(p.active===false?"low":"")+'">'+(p.active===false?"OFF":"ACTIVE")+'</span></td><td><button class="danger-btn" type="button" data-x-promo-delete="'+i+'">Delete</button></td></tr>').join("")+
       '</tbody></table>';
-    root.querySelectorAll("[data-x-promo-delete]").forEach(btn=>btn.addEventListener("click",()=>{const idx=Number(btn.dataset.xPromoDelete);const current=read(PROMO_KEY,[]);if(!Array.isArray(current)||!current[idx])return;if(!confirm("Delete promo "+(current[idx].code||"this code")+"?"))return;current.splice(idx,1);write(PROMO_KEY,current);toastExtra("Promo deleted.");renderPromos()}));
   }
 
   function addExtraPromo(){
@@ -1076,7 +1080,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const root=document.getElementById("extraGallery");if(!root)return;
     const current=read(GALLERY_KEY,[]);const list=Array.isArray(current)?current:[];
     root.innerHTML=Array.from({length:6},(_,i)=>{const g=list[i]||{slot:i+1,title:"",image:"",alt:""};return '<article class="extra-gallery-card"><div class="extra-gallery-top"><div><div class="kicker">PHOTO '+String(i+1).padStart(2,"0")+'</div><h3>'+esc(g.title||"Gallery Slot")+'</h3></div></div><div class="extra-preview">'+(g.image?'<img src="'+esc(g.image)+'" alt="'+esc(g.alt||"")+'">':'<span>PHOTO '+String(i+1).padStart(2,"0")+'</span>')+'</div><div class="extra-fields"><div class="extra-field"><label>Title</label><input data-g-title="'+i+'" value="'+esc(g.title||"")+'" placeholder="Roasted Liberica"></div><div class="extra-field"><label>Image URL</label><input data-g-image="'+i+'" value="'+esc(g.image||"")+'" placeholder="https://..."></div><div class="extra-field"><label>Alt text</label><input data-g-alt="'+i+'" value="'+esc(g.alt||"")+'" placeholder="Describe the real photo"></div></div><div class="extra-actions"><button class="ghost-btn" type="button" data-g-save="'+i+'">Save Photo</button></div></article>'}).join("");
-    root.querySelectorAll("[data-g-save]").forEach(btn=>btn.addEventListener("click",()=>saveGallery(Number(btn.dataset.gSave))));
   }
   function saveGallery(index){
     const list=read(GALLERY_KEY,[]);const gallery=Array.isArray(list)?list:Array.from({length:6},(_,i)=>({slot:i+1,title:"",image:"",alt:""}));
@@ -1106,12 +1109,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     t.textContent=msg;t.classList.add("show");clearTimeout(window.__kbAdminExtraToast);window.__kbAdminExtraToast=setTimeout(()=>t.classList.remove("show"),2200);
   }
 
-  function bindExtraNav(){
-    ["products","promos","content","gallery","ads","contact"].forEach(view=>{
-      const btn=document.querySelector('#nav button[data-view="'+view+'"]');if(!btn)return;
-      btn.addEventListener("click",()=>openExtraView(view));
-    });
-  }
   function openExtraView(view){
     document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="view-"+view));
     document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
@@ -1148,7 +1145,28 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function init(){
-    bindExtraNav();bindDialogs();updateSnapshot();renderExtraProducts();renderExtraReviews();renderPromos();loadContent();loadContact();renderGallery();renderAds();
+    window.KBAdminExtra={views:["products","promos","content","gallery","ads","contact","reviews","analytics","notifications"],openView:openExtraView};
+    bindDialogs();
+    document.getElementById("extraProducts")?.addEventListener("click",event=>{
+      const save=event.target.closest("[data-x-save]"),del=event.target.closest("[data-x-delete]");
+      if(save)saveExtraProduct(save.dataset.xSave); else if(del)deleteExtraProduct(del.dataset.xDelete);
+    });
+    document.getElementById("extraReviews")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-x-review-delete]");if(!button)return;
+      const idx=Number(button.dataset.xReviewDelete),current=read("kb_reviews",[]);
+      if(!Array.isArray(current)||!current[idx]||!confirm("Delete this review?"))return;
+      current.splice(idx,1);write("kb_reviews",current);toastExtra("Review deleted.");renderExtraReviews();
+    });
+    document.getElementById("extraPromos")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-x-promo-delete]");if(!button)return;
+      const idx=Number(button.dataset.xPromoDelete),current=read(PROMO_KEY,[]);
+      if(!Array.isArray(current)||!current[idx]||!confirm("Delete promo "+(current[idx].code||"this code")+"?"))return;
+      current.splice(idx,1);write(PROMO_KEY,current);toastExtra("Promo deleted.");renderPromos();
+    });
+    document.getElementById("extraGallery")?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-g-save]");if(button)saveGallery(Number(button.dataset.gSave));
+    });
+    updateSnapshot();renderExtraProducts();renderExtraReviews();renderPromos();loadContent();loadContact();renderGallery();renderAds();
     window.addEventListener("storage",e=>{if([PRODUCT_KEY,PROMO_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY,ADS_KEY,"kb_orders","kb_reviews"].includes(e.key)){updateSnapshot();renderExtraProducts();renderExtraReviews();renderPromos();renderGallery();renderAds();}});
   }
 
@@ -1511,8 +1529,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         '</strong></div>'
       ).join("") : '<div class="empty">No line items stored on this order.</div>') +
       '</div></section>';
-    document.getElementById("closeOrderDetail")?.addEventListener("click",() => {host.innerHTML = "";});
-    document.getElementById("printOrderDetail")?.addEventListener("click",() => printOrder(order));
   }
 
   function printOrder(order) {
@@ -1560,7 +1576,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       button.dataset.detailOrder = orderId;
       button.textContent = "View";
       cell.appendChild(button);
-      button.addEventListener("click",() => renderOrderDetail(orderId));
+
     });
   }
 
@@ -1590,7 +1606,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       '</strong></div><div class="profile-cell" style="grid-column:1/-1"><span>Last Order</span><strong>' +
       esc(last?.id || "—") + ' · ' + (last?.createdAt ? new Date(last.createdAt).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}) : "") +
       '</strong></div></div></section>';
-    document.getElementById("closeCustomerProfile")?.addEventListener("click",() => {host.innerHTML="";});
+
   }
 
   function ensureCustomerProfiles() {
@@ -1614,7 +1630,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       button.dataset.customerProfile = customerKey(order);
       button.textContent = "View";
       cell.appendChild(button);
-      button.addEventListener("click",() => showCustomerProfile(button.dataset.customerProfile));
+
     });
   }
 
@@ -1770,6 +1786,24 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       const select = event.target;
       const id = select?.dataset?.orderStatus;
       if (id) log("order","Order " + id + " status changed to " + select.value,{orderId:id,status:select.value});
+    });
+    ordersRoot?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-detail-order]");
+      if(button)renderOrderDetail(button.dataset.detailOrder);
+    });
+    customersRoot?.addEventListener("click",event=>{
+      const button=event.target.closest("[data-customer-profile]");
+      if(button)showCustomerProfile(button.dataset.customerProfile);
+      else if(event.target.closest("#closeCustomerProfile"))document.getElementById("customerProfileHost")?.replaceChildren();
+    });
+    document.addEventListener("click",event=>{
+      if(event.target.closest("#closeOrderDetail"))document.getElementById("orderDetailHost")?.replaceChildren();
+      else if(event.target.closest("#printOrderDetail")){
+        const host=document.getElementById("orderDetailHost");
+        const id=host?.querySelector(".order-detail-head h3")?.textContent?.replace(/^#/,"");
+        const order=id?orders().find(item=>String(item.id)===String(id)):null;
+        if(order)printOrder(order);
+      }
     });
 
     [ordersRoot,customersRoot,inventoryRoot].forEach(root => {
