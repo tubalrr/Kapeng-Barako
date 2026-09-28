@@ -19,8 +19,8 @@ const money = n => "₱" + Number(n || 0).toLocaleString("en-PH",{maximumFractio
 const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const getProducts = () => {
   const saved = read(PRODUCT_KEY,null);
-  if(Array.isArray(saved) && saved.length) return saved;
-  return [];
+  if(Array.isArray(saved)) return saved;
+  return DEFAULT_PRODUCTS.map(p => ({...p}));
 };
 
 let cart = Array.isArray(read(CART_KEY,[])) ? read(CART_KEY,[]) : [];
@@ -64,7 +64,7 @@ function renderCart(){
   }
   $("#checkoutButton").disabled=false;
   root.innerHTML=cart.map((item,i)=>
-    '<div class="cart-item"><div><h3>'+esc(item.name)+'</h3><small>'+esc(item.size)+' • '+esc(item.roast)+' Roast • '+esc(item.grind)+' Grind</small><div class="qty"><button type="button" data-plus="'+i+'">+</button><span>'+Number(item.qty||0)+'</span><button type="button" data-minus="'+i+'">−</button></div><button class="remove-item" type="button" data-remove="'+i+'">Tanggalin</button></div><strong class="cart-price">'+money(Number(item.price||0)*Number(item.qty||0))+'</strong></div>'
+    '<div class="cart-item"><div><h3>'+esc(item.name)+'</h3><small>'+esc(item.size)+' • '+esc(item.roast)+' Roast • '+esc(item.grind)+' Grind</small><div class="qty"><button type="button" data-plus="'+i+'">+</button><span>'+Number(item.qty||0)+'</span><button type="button" data-minus="'+i+'">−</button></div><button class="remove-item" type="button" data-remove="'+i+'">REMOVE</button></div><strong class="cart-price">'+money(Number(item.price||0)*Number(item.qty||0))+'</strong></div>'
   ).join("");
 }
 
@@ -217,7 +217,7 @@ function placeOrder(event){
     return !p || Number(item.qty||0)>Number(p.stock||0);
   });
   if(shortage){
-    toast("May nagbago sa stock. Please review your cart.");
+    toast("Stock has changed. Please review your cart.");
     renderProducts();
     return;
   }
@@ -359,7 +359,16 @@ function setupControls(){
     write("kb_subscription_preference",{product:$("#subscriptionProduct").value,day:$("#subscriptionDay").value,createdAt:new Date().toISOString()});
     toast("Auto-delivery preference saved.");
   });
-  $("#brewVideoButton")?.addEventListener("click",()=>$("#brew-dialog")?.showModal());
+  $("#brewVideoButton")?.addEventListener("click",()=>{
+    const dialog=$("#brew-dialog");
+    if(dialog?.showModal) dialog.showModal();
+    else toast("Brew guide is unavailable.");
+  });
+  $("#brewDialogStart")?.addEventListener("click",()=>{
+    $("#timerReset")?.click();
+    $("#timerStart")?.click();
+    $("#brew-dialog")?.close();
+  });
   $$("[data-close-dialog]").forEach(x=>x.addEventListener("click",()=>x.closest("dialog")?.close()));
 }
 
