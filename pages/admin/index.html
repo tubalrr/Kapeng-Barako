@@ -1115,13 +1115,13 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
   function ensureInventoryHistoryMount(){
     const table=document.getElementById("inventory-table");if(!table||document.getElementById("inventoryHistoryHost"))return;
-    const div=document.createElement("div");div.id="inventoryHistoryHost";table.parentElement?.parentElement?.insertAdjacentElement("afterend",div);
+    const div=document.createElement("div");div.id="inventoryHistoryHost";table.parentElement?.insertAdjacentElement("afterend",div);
     renderInventoryHistory();
   }
   function ensureOrderDetailMount(){
     const table=document.getElementById("orders-table");if(!table||document.getElementById("orderDetailHost"))return;
     const div=document.createElement("div");div.id="orderDetailHost";
-    table.parentElement?.parentElement?.insertAdjacentElement("afterend",div);
+    table.parentElement?.insertAdjacentElement("afterend",div);
     const rows=table.querySelectorAll("tbody tr");
     rows.forEach((row,i)=>{const cell=row.lastElementChild;if(cell&&!cell.querySelector("[data-detail-order]")){const id=filteredOrderRows()[i]?.id;if(id){const b=document.createElement("button");b.type="button";b.className="track-btn";b.dataset.detailOrder=id;b.textContent="View";cell.appendChild(b)}}});
     renderOrderDetail();
@@ -1161,7 +1161,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
   function ensureCustomerProfileMount(){
     const table=document.getElementById("customers-table");if(!table||document.getElementById("customerProfileHost"))return;
-    const div=document.createElement("div");div.id="customerProfileHost";table.parentElement?.parentElement?.insertAdjacentElement("afterend",div);
+    const div=document.createElement("div");div.id="customerProfileHost";table.parentElement?.insertAdjacentElement("afterend",div);
     addCustomerProfileButtons();
   }
   function captureProductChanges(){
