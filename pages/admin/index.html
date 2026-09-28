@@ -20,7 +20,6 @@
             <small>Admin Console</small>
           </span>
         </a>
-        <button class="icon-btn mobile-only" type="button" data-action="close-menu" aria-label="Close menu">×</button>
       </div>
 
       <nav class="side-nav admin-navigation" aria-label="Admin navigation">
@@ -59,7 +58,6 @@
     <main class="main admin-main">
       <header class="topbar admin-topbar">
         <div class="topbar-left">
-          <button class="icon-btn mobile-only legacy-menu-button" type="button" data-action="open-menu" aria-label="Open menu">☰</button>
           <div>
             <span class="eyebrow">Kapeng Barako</span>
             <h1 id="page-heading">Overview</h1>
@@ -448,5 +446,26 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="../../js/admin-auth.js?v=20260928-auth" defer></script>
   <script src="../../js/admin.js?v=20260928-mobile-drawer" defer></script>
+  <script>
+  (() => {
+    const body=document.body;
+    const trigger=document.querySelector(".admin-menu-trigger");
+    const overlay=document.querySelector(".admin-menu-overlay");
+    const sidebar=document.querySelector(".admin-sidebar");
+    if(!trigger||!overlay||!sidebar)return;
+    const setMenu=open=>{
+      body.classList.toggle("menu-open",open);
+      body.style.overflow=open?"hidden":"";
+      trigger.setAttribute("aria-expanded",String(open));
+      trigger.setAttribute("aria-label",open?"Close admin menu":"Open admin menu");
+    };
+    trigger.addEventListener("click",()=>setMenu(!body.classList.contains("menu-open")));
+    overlay.addEventListener("click",()=>setMenu(false));
+    sidebar.querySelectorAll("button.nav-item, a").forEach(el=>{
+      el.addEventListener("click",()=>{ if(window.innerWidth<=900)setMenu(false); });
+    });
+    document.addEventListener("keydown",e=>{if(e.key==="Escape")setMenu(false);});
+  })();
+  </script>
 </body>
 </html>
