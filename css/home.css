@@ -1497,3 +1497,16 @@ body > main:hover,
 body > footer:hover{
   margin-left:var(--kb-sidebar-rail)!important;
 }
+
+
+/* TUBAL HUB reference: keep the sidebar trigger as the 3-dash icon.
+   Do not morph it into an X when the sidebar is open. */
+.site-header .sidebar-toggle[aria-expanded="true"] span:nth-child(1),
+.site-header .sidebar-toggle[aria-expanded="false"] span:nth-child(1),
+.site-header .sidebar-toggle[aria-expanded="true"] span:nth-child(2),
+.site-header .sidebar-toggle[aria-expanded="false"] span:nth-child(2),
+.site-header .sidebar-toggle[aria-expanded="true"] span:nth-child(3),
+.site-header .sidebar-toggle[aria-expanded="false"] span:nth-child(3){
+  transform:none!important;
+  opacity:1!important;
+}
