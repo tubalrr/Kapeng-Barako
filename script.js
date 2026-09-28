@@ -482,11 +482,12 @@
           '<label>Full name<input name="name" autocomplete="name" required></label>' +
           '<label>Phone<input name="phone" autocomplete="tel" required></label>' +
           '<label>Email<input name="email" type="email" autocomplete="email"></label>' +
-          '<label>Payment<select name="payment">' +
+          '<label>Payment<select name="payment" id="checkoutPayment">' +
             '<option>GCash</option>' +
             '<option>Cash on Delivery (COD)</option>' +
             '<option>Bank Transfer</option>' +
           '</select></label>' +
+          '<label id="gcashRefRow">GCash Ref Number<input name="gcashRef" id="gcashRef" inputmode="numeric" maxlength="32" autocomplete="off" placeholder="Enter GCash transaction reference number"></label>' +
           '<label>Delivery address<textarea name="address" rows="3" autocomplete="street-address" required></textarea></label>' +
           '<label>Voucher<input name="voucher" placeholder="Optional"></label>' +
           '<label>Fulfillment<select name="fulfillment">' +
@@ -527,6 +528,17 @@
         if ($("#inlineTotal")) $("#inlineTotal").textContent = money(total);
       };
 
+      const paymentSelect = $("#checkoutPayment");
+      const gcashRefRow = $("#gcashRefRow");
+      const syncGcashRef = () => {
+        if (!paymentSelect || !gcashRefRow) return;
+        const isGcash = paymentSelect.value === "GCash";
+        gcashRefRow.hidden = !isGcash;
+        gcashRefRow.querySelector("input")?.toggleAttribute("required", isGcash);
+      };
+      paymentSelect?.addEventListener("change", syncGcashRef);
+      syncGcashRef();
+
       form?.addEventListener("input", refresh);
 
       $("#cancelCheckout")?.addEventListener("click", () => {
@@ -557,8 +569,15 @@
     const email = String(data.get("email") || "").trim();
     const address = String(data.get("address") || "").trim();
 
+    const payment = String(data.get("payment") || "");
+    const gcashRef = String(data.get("gcashRef") || "").trim();
+
     if (!name || !phone || !address) {
       toast("Please complete the required fields.");
+      return;
+    }
+    if (payment === "GCash" && !gcashRef) {
+      toast("Please enter your GCash Ref Number.");
       return;
     }
 
@@ -593,7 +612,8 @@
         email,
         address
       },
-      payment: String(data.get("payment") || ""),
+      payment,
+      gcashRef,
       fulfillment: String(data.get("fulfillment") || ""),
       voucher: String(data.get("voucher") || "").trim().toUpperCase(),
       subtotal,
