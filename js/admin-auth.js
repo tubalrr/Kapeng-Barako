@@ -131,6 +131,44 @@
     return { uid: user.uid, email: user.email || "", ...snap.data() };
   }
 
+  async function authenticateWithGoogle() {
+    const { auth: currentAuth, authMod } = await init();
+
+    try {
+      await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
+
+      const provider = new authMod.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      const credential = await authMod.signInWithPopup(currentAuth, provider);
+      const admin = await verifyAdminWithoutSession(credential.user);
+
+      if (!admin) {
+        await authMod.signOut(currentAuth);
+        throw new Error("This Google account is not authorized for the Kapeng Barako Admin Console.");
+      }
+
+      rememberAdmin(admin);
+      return admin;
+    } catch (error) {
+      rememberAdmin(null);
+
+      if (error?.code === "auth/popup-closed-by-user") {
+        throw new Error("Google sign-in was cancelled.");
+      }
+
+      if (error?.code === "auth/popup-blocked") {
+        throw new Error("Google sign-in popup was blocked. Allow popups for tubalrr.github.io and try again.");
+      }
+
+      if (error?.code === "auth/unauthorized-domain") {
+        throw new Error("This website is not authorized for Firebase Google Sign-In. Add tubalrr.github.io to Firebase Authentication → Authorized domains.");
+      }
+
+      throw error;
+    }
+  }
+
   async function authenticate(email, password) {
     const { auth: currentAuth, authMod } = await init();
     const normalized = String(email || "").trim().toLowerCase();
@@ -218,6 +256,7 @@
     SESSION_TTL_MS,
     init,
     authenticate,
+    authenticateWithGoogle,
     restore,
     requireAdmin,
     logout,
