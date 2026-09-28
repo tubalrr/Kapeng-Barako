@@ -1032,3 +1032,20 @@ body > .site-header > .sidebar-toggle span{
   visibility:visible!important;
   opacity:1!important;
 }
+
+/* SIDEBAR TOGGLE MUST STAY ABOVE THE SIDEBAR */
+body > .sidebar-toggle{
+  position:fixed!important;
+  left:14px!important;
+  top:14px!important;
+  z-index:99999!important;
+  display:flex!important;
+  width:42px!important;
+  height:42px!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+body.sidebar-collapsed > .sidebar-toggle{
+  left:14px!important;
+  top:14px!important;
+}
