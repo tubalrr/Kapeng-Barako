@@ -239,3 +239,24 @@ body{font-size:16px}
 @media(max-width:430px){
   .account-profile-chip small{font-size:10px}
 }
+
+.track-order-list{display:grid;gap:14px}
+.track-card{border:1px solid var(--kb-line);border-radius:18px;background:#fff;padding:17px}
+.track-card-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.track-card-head>div{display:grid;gap:3px}
+.track-label{font-size:10px;color:var(--kb-muted);font-weight:900;letter-spacing:.1em}
+.track-card-head strong{font-size:17px}
+.track-card-head .order-meta{font-size:12px}
+.track-line{position:relative;display:grid;gap:0;margin:20px 0 16px;padding-left:4px}
+.track-step{position:relative;display:grid;grid-template-columns:22px 1fr;gap:10px;min-height:52px}
+.track-step:not(:last-child):before{content:"";position:absolute;left:10px;top:18px;width:2px;height:43px;background:#e7ddd0}
+.track-dot{width:12px;height:12px;margin-top:4px;border-radius:50%;background:#ddd2c4;border:2px solid #fff;box-shadow:0 0 0 1px #d8cbbb;z-index:1}
+.track-step.done .track-dot{background:var(--kb-accent);box-shadow:0 0 0 1px var(--kb-accent)}
+.track-step.done:not(:last-child):before{background:var(--kb-accent)}
+.track-step.current strong{color:var(--kb-accent)}
+.track-step>div{display:grid;gap:2px}
+.track-step strong{font-size:13px;line-height:1.25}
+.track-step small{font-size:10px;color:var(--kb-muted)}
+.track-summary{display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--kb-line);font-size:12px}
+.track-cancelled{margin:18px 0;padding:13px 14px;border-radius:12px;background:#f8e9e7;color:var(--kb-danger);font-size:13px;font-weight:800}
+.track-order-btn{font-weight:900}
