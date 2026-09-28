@@ -1510,3 +1510,37 @@ body > footer:hover{
   transform:none!important;
   opacity:1!important;
 }
+
+
+/* FINAL FIX: the ☰ control must NEVER disappear when the cursor enters
+   or hovers the sidebar. It stays inside the sidebar header at all times. */
+.site-header .sidebar-toggle{
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  z-index:100000!important;
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+.site-header:hover .sidebar-toggle,
+.site-header:focus-within .sidebar-toggle,
+body.sidebar-open .site-header .sidebar-toggle{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+.site-header .sidebar-toggle span,
+.site-header:hover .sidebar-toggle span,
+body.sidebar-open .site-header .sidebar-toggle span{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  transform:none!important;
+}
+/* Keep the three bars centered and unchanged on hover/open. */
+.site-header .sidebar-toggle:hover{
+  transform:none!important;
+}
