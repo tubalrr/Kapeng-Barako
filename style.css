@@ -1073,3 +1073,33 @@ body{font-size:16px}
   .jt-brand img{width:82px}
   .lbc-brand img{width:51px}
 }
+
+/* LOW-STOCK ROAST COUNTDOWN */
+.low-stock-timer{
+  position:absolute;
+  top:47px;
+  right:14px;
+  z-index:3;
+  padding:6px 9px;
+  border:1px solid rgba(217,92,92,.42);
+  border-radius:999px;
+  background:rgba(26,18,7,.90);
+  color:#E28A8A;
+  font-size:9px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.04em;
+  white-space:nowrap;
+  box-shadow:0 8px 20px rgba(0,0,0,.20);
+}
+.low-stock-timer[hidden]{display:none!important}
+@media(max-width:720px){
+  .low-stock-timer{
+    top:44px;
+    right:10px;
+    max-width:calc(100% - 20px);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:8px;
+  }
+}
