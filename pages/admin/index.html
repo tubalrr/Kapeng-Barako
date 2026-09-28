@@ -814,8 +814,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function openView(view) {
-    $$(".view").forEach(v => v.classList.toggle("active", v.id === "view-"+view));
-    $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-"+view));
+    document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
     $("#viewTitle").textContent = view.charAt(0).toUpperCase()+view.slice(1);
     if(view==="overview")renderOverview();
     if(view==="orders")renderOrders();
@@ -829,7 +829,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     finally { location.replace("./login.html"); }
   });
 
-  $("#nav button").forEach(btn => btn.addEventListener("click",()=>{
+  document.querySelectorAll("#nav button").forEach(btn => btn.addEventListener("click",()=>{
     const view=btn.dataset.view;
     if(window.KBAdminExtra?.openView && window.KBAdminExtra.views?.includes(view)){ window.KBAdminExtra.openView(view); return; }
     openView(view);
@@ -1300,6 +1300,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   }[ch]));
   const money = value => "₱" + Number(value || 0).toLocaleString("en-PH",{maximumFractionDigits:2});
+  const orderTime = value => value && typeof value.toDate === "function" ? value.toDate().getTime() : new Date(value || 0).getTime();
   const orders = () => {
     const value = read(K.ORDERS, []);
     return Array.isArray(value) ? value : [];
