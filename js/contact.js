@@ -27,15 +27,24 @@
   };
 
   document.querySelectorAll("[data-kb-email]").forEach(el => {
-    el.textContent = settings.email || "Contact email not configured";
+    el.textContent = settings.email || "";
   });
 
   document.querySelectorAll("[data-kb-phone]").forEach(el => {
-    el.textContent = settings.phone || "Phone not configured";
+    el.textContent = settings.phone || "";
+    el.parentElement?.parentElement?.toggleAttribute("hidden", !settings.phone);
   });
 
   document.querySelectorAll("[data-kb-location]").forEach(el => {
-    el.textContent = settings.location || "Location not configured";
+    el.textContent = settings.location || "";
+  });
+
+  document.querySelectorAll('[data-kb-contact-detail="email"]').forEach(el => {
+    el.hidden = !settings.email;
+  });
+
+  document.querySelectorAll('[data-kb-contact-detail="location"]').forEach(el => {
+    el.hidden = !settings.location;
   });
 
   const form = document.querySelector("#contactForm");
