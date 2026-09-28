@@ -1004,15 +1004,32 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function addExtraReview(){
-    const name=document.getElementById("extraReviewName")?.value.trim()||"", rating=Number(document.getElementById("extraReviewRating")?.value||5), textValue=document.getElementById("extraReviewText")?.value.trim()||"", orderId=document.getElementById("extraReviewOrder")?.value.trim()||"", verified=document.getElementById("extraReviewVerified")?.checked===true, published=document.getElementById("extraReviewPublished")?.checked!==false;
+    const name=document.getElementById("extraReviewName")?.value.trim()||"";
+    const rating=Number(document.getElementById("extraReviewRating")?.value||5);
+    const textValue=document.getElementById("extraReviewText")?.value.trim()||"";
+    const orderId=document.getElementById("extraReviewOrder")?.value.trim().replace(/^#/,"").toUpperCase()||"";
+    const published=document.getElementById("extraReviewPublished")?.checked!==false;
     if(!name||!textValue){toastExtra("Customer name and review text are required.");return}
-    if(!verified){toastExtra("Mark the review as verified before publishing.");return}
-    const list=read("kb_reviews",[]);const reviews=Array.isArray(list)?list:[];
-    reviews.unshift({id:"R-"+Date.now().toString(36).toUpperCase(),name,rating,text:textValue,orderId,verified:true,published,createdAt:new Date().toISOString()});
+    if(!Number.isInteger(rating)||rating<1||rating>5){toastExtra("Rating must be between 1 and 5.");return}
+    const allOrders=orders();
+    const matched=orderId?allOrders.find(order=>String(order.id||"").toUpperCase()===orderId):null;
+    if(published && (!orderId || !matched)){toastExtra("A published review needs a valid Order ID from kb_orders.");return}
+    if(published && matched && String(matched.status||"").toLowerCase()!=="delivered"){toastExtra("A published review requires a Delivered order.");return}
+    const list=read("kb_reviews",[]);
+    const reviews=Array.isArray(list)?list:[];
+    reviews.unshift({
+      id:"R-"+Date.now().toString(36).toUpperCase(),
+      name,rating,text:textValue,orderId,
+      verified:Boolean(matched),
+      published:published && Boolean(matched),
+      createdAt:new Date().toISOString()
+    });
     write("kb_reviews",reviews);
-    document.getElementById("extraReviewDialog")?.close();document.getElementById("extraReviewForm")?.reset();
+    document.getElementById("extraReviewDialog")?.close();
+    document.getElementById("extraReviewForm")?.reset();
     document.getElementById("extraReviewPublished").checked=true;
-    toastExtra("Verified review saved.");renderExtraReviews();
+    toastExtra(matched?"Verified review saved.":"Review saved as unpublished until tied to a delivered order.");
+    renderExtraReviews();
   }
 
   function renderPromos(){
