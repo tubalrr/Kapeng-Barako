@@ -731,6 +731,163 @@
       </div>
 
       <style>
+        /* BUNDLE CARD */
+        #products.kb-collection .kb-bundle-card {
+          margin-top: 24px;
+          width: 100%;
+          background: #221A0E;
+          border: 1px solid #C8A951;
+          border-radius: 20px;
+          padding: 24px;
+          box-sizing: border-box;
+          display: grid;
+          grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
+          align-items: center;
+          gap: 28px;
+          transition:
+            transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #products.kb-collection .kb-bundle-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+        }
+
+        #products.kb-collection .kb-bundle-kicker {
+          margin: 0 0 8px;
+          color: #C8A951;
+          font-size: 10px;
+          line-height: 1;
+          font-weight: 800;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        #products.kb-collection .kb-bundle-title {
+          margin: 0;
+          color: #F5E9D3;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 30px;
+          line-height: 1.05;
+          font-weight: 700;
+        }
+
+        #products.kb-collection .kb-bundle-copy {
+          margin: 10px 0 0;
+          color: #B8A998;
+          font-size: 13px;
+          line-height: 1.55;
+        }
+
+        #products.kb-collection .kb-bundle-items {
+          margin-top: 16px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        #products.kb-collection .kb-bundle-item {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 8px 11px;
+          border: 1px solid #2A2116;
+          border-radius: 999px;
+          color: #F5E9D3;
+          background: #1A1207;
+          font-size: 11px;
+          line-height: 1;
+        }
+
+        #products.kb-collection .kb-bundle-item::before {
+          content: "•";
+          color: #C8A951;
+        }
+
+        #products.kb-collection .kb-bundle-offer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 18px;
+          padding: 18px 20px;
+          border-radius: 14px;
+          background: #1A1207;
+          border: 1px solid #2A2116;
+        }
+
+        #products.kb-collection .kb-bundle-price-label {
+          color: #B8A998;
+          font-size: 11px;
+          line-height: 1.25;
+          text-transform: uppercase;
+          letter-spacing: 0.6px;
+        }
+
+        #products.kb-collection .kb-bundle-price {
+          margin-top: 4px;
+          color: #C8A951;
+          font-size: 26px;
+          line-height: 1;
+          font-weight: 800;
+        }
+
+        #products.kb-collection .kb-bundle-save {
+          flex: 0 0 auto;
+          padding: 9px 11px;
+          border-radius: 999px;
+          background: #C8A951;
+          color: #1A1207;
+          font-size: 10px;
+          line-height: 1;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        @media (max-width: 760px) {
+          #products.kb-collection .kb-bundle-card {
+            grid-template-columns: 1fr;
+            gap: 18px;
+          }
+
+          #products.kb-collection .kb-bundle-title {
+            font-size: 25px;
+          }
+
+          #products.kb-collection .kb-bundle-offer {
+            align-items: flex-start;
+          }
+        }
+      </style>
+
+      <!-- STARTER BUNDLE -->
+      <article class="kb-bundle-card" aria-label="Barako Starter bundle">
+        <div>
+          <p class="kb-bundle-kicker">STARTER BUNDLE</p>
+          <h3 class="kb-bundle-title">Barako Starter: 250g + 500g</h3>
+          <p class="kb-bundle-copy">
+            Two classic sizes for a stronger everyday coffee ritual — bundled together with <strong style="color:#F5E9D3;">₱100 savings</strong>.
+          </p>
+
+          <div class="kb-bundle-items">
+            <span class="kb-bundle-item">Barako Strong · 250g</span>
+            <span class="kb-bundle-item">Barako Classic · 500g</span>
+          </div>
+        </div>
+
+        <div class="kb-bundle-offer">
+          <div>
+            <div class="kb-bundle-price-label">BUNDLE PRICE</div>
+            <div class="kb-bundle-price">₱870</div>
+          </div>
+
+          <span class="kb-bundle-save">Save ₱100</span>
+        </div>
+      </article>
+
+      <style>
         /* MOBILE STICKY CART — scoped to #products */
         #products #kb-mobile-sticky-cart {
           display: none;
