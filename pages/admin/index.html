@@ -959,6 +959,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   const esc=(v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money=(n)=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
   const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
+  const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
   const products=()=>{const x=read(PRODUCT_KEY,[]);return Array.isArray(x)?x:[]};
   const orders=()=>{const x=window.KBAdminOrders?window.KBAdminOrders():read("kb_orders",[]);return Array.isArray(x)?x:[]};
   const customers=()=>{
