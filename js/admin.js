@@ -1,5 +1,6 @@
 (() => {
   "use strict";
+  if (window.KBAdminAuth && !window.KBAdminAuth.guard()) return;
 
   const STATUS = [
     "Pending",
@@ -158,7 +159,8 @@
       {q:"Matapang ba masyado?",a:"May bold na Barako character, pero puwedeng i-adjust ang dami ng kape at tubig ayon sa panlasa."},
       {q:"Ilang araw shelf life / May expiration ba?",a:"Ang actual shelf life at expiration date ay dapat sundin ayon sa packaging at batch label. Ilagay ang tunay na expiry details bago magbenta."},
       {q:"Pwede ba sa may acid?",a:"Iba-iba ang tolerance ng bawat tao. Kung may acid reflux o sensitibong tiyan, mas ligtas na tanungin ang iyong healthcare professional kung angkop sa iyo ang kape."}
-    ]
+    ],
+    announcement:{title:"Bagong ani na!",body:"Ilagay dito ang latest approved roast or harvest announcement.",date:""}
   };
   if (!cms) cms = defaultCms;
   else cms = {...defaultCms,...cms,benefits:Array.isArray(cms.benefits)&&cms.benefits.length===3?cms.benefits:defaultCms.benefits,brewSteps:Array.isArray(cms.brewSteps)&&cms.brewSteps.length===3?cms.brewSteps:defaultCms.brewSteps,faqs:Array.isArray(cms.faqs)?cms.faqs:defaultCms.faqs};
@@ -748,6 +750,9 @@
     $("#cms-hero-description").value=cms.heroDescription||defaultCms.heroDescription;
     $("#cms-story").value=cms.story||"";
     $("#cms-delivery").value=cms.delivery||"";
+    $("#cms-announcement-title").value=cms.announcement?.title||defaultCms.announcement.title;
+    $("#cms-announcement-body").value=cms.announcement?.body||defaultCms.announcement.body;
+    $("#cms-announcement-date").value=cms.announcement?.date||"";
     const benefits=Array.isArray(cms.benefits)&&cms.benefits.length===3?cms.benefits:defaultCms.benefits;
     $("#benefit-editor").innerHTML=benefits.map((b,i)=>'<div class="faq-item"><input class="input benefit-title" value="'+safe(b.title||"")+'" placeholder="Headline"><input class="input benefit-desc" value="'+safe(b.desc||"")+'" placeholder="Description"><input class="input benefit-icon" value="'+safe(b.icon||"✦")+'" placeholder="Icon"></div>').join("");
     const steps=Array.isArray(cms.brewSteps)&&cms.brewSteps.length===3?cms.brewSteps:defaultCms.brewSteps;
@@ -767,6 +772,11 @@
       heroDescription:$("#cms-hero-description").value.trim(),
       story:$("#cms-story").value.trim(),
       delivery:$("#cms-delivery").value.trim(),
+      announcement:{
+        title:$("#cms-announcement-title").value.trim(),
+        body:$("#cms-announcement-body").value.trim(),
+        date:$("#cms-announcement-date").value
+      },
       benefits:benefits.length===3?benefits:defaultCms.benefits,
       brewSteps:brewSteps.length===3?brewSteps:defaultCms.brewSteps,
       faqs
@@ -930,12 +940,7 @@
     if(action==="open-menu") document.body.classList.add("menu-open");
     if(action==="close-menu") document.body.classList.remove("menu-open");
     if(action==="logout"){
-      try{
-        sessionStorage.removeItem("kb_admin_session");
-        localStorage.removeItem("kb_admin_session");
-        localStorage.removeItem("kb_admin_remember");
-      }catch{}
-      window.location.replace("../index.html");
+      window.KBAdminAuth?.logout();
     }
   });
 
