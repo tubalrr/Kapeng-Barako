@@ -301,3 +301,21 @@ body{font-size:16px}
   .product-title-line p{font-size:12px}
   .reason-card p,.feature-card p,.brew-steps p,.tips-grid p,.review-slot p,.footer-grid p{font-size:12px}
 }
+
+/* READABILITY FLOOR — STOREFRONT */
+.section-marker{font-size:10px}
+.farm-word span{font-size:10px}
+.track-route-chips span{font-size:10px}
+.track-route-chips b{font-size:9px}
+.track-waypoint strong{font-size:9px}
+.track-waypoint small{font-size:10px}
+.track-vehicle-label{font-size:10px}
+.checkout-breakdown>div{font-size:11px}
+.payment-help{font-size:11px}
+.track-step p{font-size:10px}
+.track-customer{font-size:11px}
+.empty{font-size:11px}
+.tiny-toast{font-size:10px}
+.catalog-empty span{font-size:10px}
+.catalog-empty p{font-size:11px}
+.track-map-head a{font-size:10px}
