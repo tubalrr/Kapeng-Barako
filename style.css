@@ -920,3 +920,43 @@ body{font-size:16px}
   .footer-social-icon{width:30px;height:30px}
   .footer-social-icon svg{width:17px;height:17px}
 }
+
+/* REAL PAYMENT BRAND MARKS */
+.trust-logo-box{
+  flex:0 0 auto;
+  width:76px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  padding:7px 9px;
+  border:1px solid rgba(200,169,81,.25);
+  border-radius:12px;
+  background:#F7F5F0;
+  overflow:hidden;
+}
+.trust-payment-logo{
+  display:block;
+  width:100%;
+  max-height:28px;
+  object-fit:contain;
+}
+.gcash-logo-box{
+  background:#ffffff;
+}
+.gcash-logo{
+  width:70px;
+}
+.cod-logo-box{
+  background:#1E1710;
+  border-color:rgba(200,169,81,.35);
+}
+.cod-logo-box strong{
+  margin:0;
+  color:var(--gold2);
+  font:900 14px/1 Inter,ui-sans-serif,system-ui,sans-serif;
+  letter-spacing:.08em;
+}
+@media(max-width:720px){
+  .trust-logo-box{width:68px;height:44px}
+  .gcash-logo{width:62px}
+}
