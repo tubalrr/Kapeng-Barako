@@ -19,7 +19,8 @@ const money = n => "₱" + Number(n || 0).toLocaleString("en-PH",{maximumFractio
 const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const getProducts = () => {
   const saved = read(PRODUCT_KEY,null);
-  return Array.isArray(saved) && saved.length ? saved : DEFAULT_PRODUCTS.map(p=>({...p}));
+  if(Array.isArray(saved) && saved.length) return saved;
+  return [];
 };
 
 let cart = Array.isArray(read(CART_KEY,[])) ? read(CART_KEY,[]) : [];
@@ -70,6 +71,11 @@ function renderCart(){
 function renderProducts(){
   const products=getProducts();
   const grid=$("#productGrid");
+  if(grid && !products.length){
+    grid.innerHTML='<div class="catalog-empty"><span>PRODUCTION CATALOG</span><h3>Products coming soon.</h3><p>The catalog is currently empty. Products are added by the store administrator using real product data.</p></div>';
+    return;
+  }
+  if(grid) grid.querySelectorAll(".catalog-empty").forEach(x=>x.remove());
   if(grid){
     products.forEach(p=>{
       let card=grid.querySelector('[data-product-id="'+CSS.escape(String(p.id))+'"]');
