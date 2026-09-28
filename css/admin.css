@@ -62,3 +62,40 @@
 .metric.low-card.low small{color:#ffb0b0}
 .admin-button.is-enabled{border-color:rgba(200,169,81,.65);background:rgba(200,169,81,.12);color:var(--gold)}
 @media(max-width:700px){.welcome-actions{width:100%}.welcome-actions .admin-button,.welcome-actions a{flex:1}.low-stock-alert{align-items:flex-start}.low-stock-badge{margin-left:0}}
+
+/* GLOBAL READABILITY — ADMIN CONSOLE */
+body{font-size:15px}
+.eyebrow{font-size:11px}
+.admin-nav button,.admin-sidebar-foot a,.admin-sidebar-foot button{font-size:12px}
+.admin-brand small{font-size:11px}
+.admin-user{font-size:12px}
+.admin-button{font-size:12px}
+.welcome p,.view-head p{font-size:14px;line-height:1.6}
+.metric span,.metric small{font-size:12px}
+.metric strong{font-size:30px}
+.panel-note{font-size:12px}
+.panel-head h3{font-size:20px}
+.queue,.status-grid,.table-panel,.inventory-note,.content-note{font-size:12px}
+.data-table{font-size:12px}
+.data-table th{font-size:11px}
+.data-table td{font-size:12px;line-height:1.45}
+.data-table td strong{font-size:13px}
+.badge{font-size:10px}
+.form-panel label,.dialog-close,.dialog-actions,.dialog-actions button{font-size:12px}
+.form-panel input,.form-panel textarea,.form-panel select,.order-search-field input{font-size:14px}
+.order-search-field{font-size:12px}
+.low-stock-alert{font-size:12px}
+.low-stock-alert strong{font-size:11px}
+.low-stock-alert p{font-size:12px}
+.low-stock-badge{font-size:10px}
+.product-manager-head span,.product-manager-id,.product-manager-meta{font-size:10px}
+.product-manager-fields label{font-size:11px}
+.chart-label{font-size:11px}
+.gallery-preview{font-size:11px}
+.gallery-manager-card label{font-size:11px}
+@media(max-width:760px){
+  body{font-size:14px}
+  .welcome p,.view-head p{font-size:13px}
+  .data-table,.data-table td{font-size:12px}
+  .admin-button{font-size:12px}
+}
