@@ -831,6 +831,26 @@
     );
   }
 
+  function syncPaymentOptions(select, preferred) {
+    if (!select) return;
+    const settings = read("kb_settings", {}) || {};
+    const storeSettings = read("kb_store_settings", {}) || {};
+    const saved = settings.paymentMethods || {};
+    const payments = storeSettings.payments || {};
+    const methods = [
+      {value:"GCash", label:"GCash", enabled:saved.gcash !== false && payments.gcash !== false},
+      {value:"Cash on Delivery (COD)", label:"Cash on Delivery (COD)", enabled:saved.cod !== false && payments.cod !== false},
+      {value:"Bank Transfer", label:"Bank Transfer", enabled:saved.bank !== false && payments.bank !== false}
+    ].filter(method => method.enabled);
+    const current = String(preferred || select.value || "");
+    select.innerHTML = methods.length
+      ? methods.map(method => '<option value="' + esc(method.value) + '">' + esc(method.label) + '</option>').join("")
+      : '<option value="">No payment method available</option>';
+    select.disabled = methods.length === 0;
+    if (methods.some(method => method.value === current)) select.value = current;
+    else if (methods[0]) select.value = methods[0].value;
+  }
+
   function checkoutBox() {
     if (!$(".checkout-inline")) {
       const panel = $(".cart-panel");
@@ -847,11 +867,7 @@
           '<label>Full name<input name="name" autocomplete="name" required></label>' +
           '<label>Phone<input name="phone" autocomplete="tel" required></label>' +
           '<label>Email<input name="email" type="email" autocomplete="email"></label>' +
-          '<label>Payment<select name="payment" id="checkoutPayment">' +
-            '<option>GCash</option>' +
-            '<option>Cash on Delivery (COD)</option>' +
-            '<option>Bank Transfer</option>' +
-          '</select></label>' +
+          '<label>Payment<select name="payment" id="checkoutPayment"></select></label>' +
           '<label id="gcashRefRow">GCash Ref Number<input name="gcashRef" id="gcashRef" inputmode="numeric" maxlength="32" autocomplete="off" placeholder="Enter GCash transaction reference number"></label>' +
           '<label>Delivery address<textarea name="address" rows="3" autocomplete="street-address" required></textarea></label>' +
           '<label>Voucher<input name="voucher" placeholder="Optional"></label>' +
@@ -901,6 +917,7 @@
       };
 
       const paymentSelect = $("#checkoutPayment");
+      syncPaymentOptions(paymentSelect, "");
       const gcashRefRow = $("#gcashRefRow");
       const syncGcashRef = () => {
         if (!paymentSelect || !gcashRefRow) return;
@@ -1695,7 +1712,11 @@
         renderReviews();
         renderTrustSignals();
         renderCart();
-        if (event.key === "kb_settings") { renderContactInfo(); renderTrustSignals(); }
+        if (event.key === "kb_settings") {
+          renderContactInfo();
+          renderTrustSignals();
+          syncPaymentOptions($("#checkoutPayment"), $("#checkoutPayment")?.value || "");
+        }
         if (event.key === CMS_KEY) renderAnnouncement();
         if (event.key === ADS_KEY) renderAdvertisement();
       }
