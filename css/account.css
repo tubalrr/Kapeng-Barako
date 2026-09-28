@@ -229,3 +229,13 @@ body{font-size:16px}
   .field input,.field textarea,.field select{font-size:16px}
   .account-profile-chip strong{font-size:11px}
 }
+
+/* READABILITY FLOOR — CUSTOMER ACCOUNT */
+.account-profile-chip small{font-size:10px}
+.profile-avatar.small{font-size:10px}
+.profile-badges span{font-size:10px}
+.profile-meta span{font-size:10px}
+.demo-box small{font-size:10px}
+@media(max-width:430px){
+  .account-profile-chip small{font-size:10px}
+}
