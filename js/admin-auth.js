@@ -166,15 +166,21 @@
   }
 
   async function restore() {
+    // No local admin session means there is nothing to restore.
+    // Redirect immediately instead of waiting on Firebase Auth initialization.
     const session = readSession();
+    if (!session) {
+      return null;
+    }
+
     const user = await currentUser();
 
-    if (!session || !user || session.uid !== user.uid) {
-      if (!session && user) {
+    if (!user || session.uid !== user.uid) {
+      rememberAdmin(null);
+      try {
         const { auth: currentAuth, authMod } = await init();
         await authMod.signOut(currentAuth);
-      }
-      rememberAdmin(null);
+      } catch {}
       return null;
     }
 
