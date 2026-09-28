@@ -1,6 +1,8 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
     function signedIn() {
       return request.auth != null;
     }
@@ -31,19 +33,27 @@ service cloud.firestore {
       }
     }
 
-    // Product catalog is public-readable. Only trusted Admin/Functions may mutate it.
+    // Public catalog reads. Only active admins can edit catalog records.
+    // Customer checkout uses the Cloud Function, which runs with trusted server privileges.
     match /products/{productId} {
       allow read: if true;
       allow write: if admin();
     }
 
-    // Customer orders are never writable directly from the browser.
-    // Creation and inventory reservation happen in the Cloud Function transaction.
+    // Single source of truth for orders.
+    // Customers can read only their own orders.
+    // Active admins can read/update/delete orders.
+    // Direct customer/browser order creation is blocked; createOrder Cloud Function creates orders.
     match /orders/{orderId} {
       allow read: if admin() ||
-        (verified() && resource.data.customer.uid == request.auth.uid) ||
-        (verified() && resource.data.customerUid == request.auth.uid);
-      allow create, update, delete: if admin();
+        (verified() &&
+          (
+            resource.data.customer.uid == request.auth.uid ||
+            resource.data.customerUid == request.auth.uid
+          ));
+
+      allow create: if false;
+      allow update, delete: if admin();
     }
 
     match /promos/{promoId} {
@@ -62,7 +72,7 @@ service cloud.firestore {
     }
 
     match /admins/{adminId} {
-      allow read: if signedIn() && request.auth.uid == adminId || admin();
+      allow read: if (signedIn() && request.auth.uid == adminId) || admin();
       allow write: if admin();
     }
 
