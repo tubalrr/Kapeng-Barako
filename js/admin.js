@@ -23,6 +23,16 @@
   let orderSearch="";
   let lowStockSoundEnabled=localStorage.getItem("kb_low_stock_sound")==="1";
   let lastLowStockCount=-1;
+  let catalogChannel=null;
+  try{
+    if("BroadcastChannel" in window){
+      catalogChannel=new BroadcastChannel("kapeng-barako-catalog");
+    }
+  }catch{}
+  function notifyCatalogChanged(){
+    try{catalogChannel?.postMessage({type:"products-updated",at:Date.now()});}catch{}
+  }
+
   let orders=Array.isArray(read(ORDERS_KEY,[]))?read(ORDERS_KEY,[]):[];
   let promos=Array.isArray(read(PROMOS_KEY,[]))?read(PROMOS_KEY,[]):[];
 
@@ -287,6 +297,7 @@
 
     products=products.map(p=>String(p.id)===String(id)?updated:p);
     write(PRODUCTS_KEY,products);
+    notifyCatalogChanged();
     toast(updated.size+" updated: "+money(updated.price)+" · "+updated.stock+" packs");
     renderProducts();
     renderOverview();
@@ -298,6 +309,7 @@
     if(!confirm("Delete "+product.name+" from the catalog?"))return;
     products=products.filter(p=>String(p.id)!==String(id));
     write(PRODUCTS_KEY,products);
+    notifyCatalogChanged();
     localStorage.setItem("kb_catalog_real_initialized","1");
     toast(product.name+" deleted.");
     renderProducts();
@@ -313,6 +325,7 @@
     }
     products=updated;
     write(PRODUCTS_KEY,products);
+    notifyCatalogChanged();
     toast("All product prices and stock saved.");
     renderProducts();
     renderOverview();
@@ -386,6 +399,7 @@
     const product={id,name,size,price,stock,badge,roast,grind,note};
     products.push(product);
     write(PRODUCTS_KEY,products);
+    notifyCatalogChanged();
     localStorage.setItem("kb_catalog_real_initialized","1");
     $("#product-dialog").close();
     $("#product-form").reset();
