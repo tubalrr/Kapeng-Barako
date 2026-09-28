@@ -394,6 +394,5 @@
       if(e.key==="kb_cart"){cart=read(cartKey,[]);syncUi()}
     });
   }
-  setInterval(refreshTrackedOrder,3000);
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
