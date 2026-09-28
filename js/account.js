@@ -244,7 +244,7 @@ async function loadAccount(){
   const firestoreOrders=ordersSnap.docs.map(d=>({id:d.id,...d.data(),source:"firestore"}));
   const localOrders=getLocalCustomerOrders(state.user.email||state.profile.email);
   const merged=new Map(firestoreOrders.map(order=>[String(order.id),order]));
-  localOrders.forEach(order=>{if(!merged.has(String(order.id)))merged.set(String(order.id),order)});
+  localOrders.forEach(order=>{merged.set(String(order.id),order)});
   state.orders=[...merged.values()].sort((a,b)=>{
     const ta=a.createdAt?.toDate?a.createdAt.toDate().getTime():new Date(a.createdAt||0).getTime();
     const tb=b.createdAt?.toDate?b.createdAt.toDate().getTime():new Date(b.createdAt||0).getTime();
