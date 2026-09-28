@@ -885,7 +885,10 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       renderAll();
       initAdminFirestoreOrders();
     } catch (error) {
-      const reason = error?.code === "FIREBASE_NOT_CONFIGURED" ? "setup" : "expired";
+      const reason =
+        error?.code === "FIREBASE_NOT_CONFIGURED" ? "setup" :
+        error?.code === "AUTH_TIMEOUT" ? "timeout" :
+        "expired";
       location.replace("./login.html?reason="+encodeURIComponent(reason));
     }
   })();
