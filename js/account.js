@@ -50,7 +50,7 @@ function startDemoAccount(){
   const data=getDemoData();
   state.demoActive=true;
   state.user={uid:"demo_customer",displayName:data.profile?.fullName||"Alex Morgan",email:data.profile?.email||"demo@kapengbarako.com",phoneNumber:data.profile?.phone||"+63 917 555 0148",photoURL:data.profile?.photoURL||"",emailVerified:true,isDemo:true,providerData:[{providerId:"demo"}],metadata:{creationTime:"2026-09-01T08:00:00+08:00"}};
-  state.profile=data.profile||{};state.orders=data.orders||[];state.addresses=data.addresses||[];state.wishlist=data.wishlist||[];state.tab="overview";
+  state.profile=data.profile||{};state.orders=data.orders||[];state.addresses=normalizeAddresses(data.addresses||[]);saveCheckoutDefault(defaultAddress());state.wishlist=data.wishlist||[];state.tab="overview";
   renderDashboard();
 }
 function deleteDemoAccount(){
