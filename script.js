@@ -166,6 +166,46 @@
   }
 
   function renderCart() {
+    const products = getProducts();
+    let cartChanged = false;
+
+    cart = cart.filter(item => {
+      const product = products.find(p => String(p.id) === String(item.id));
+      if (!product) {
+        cartChanged = true;
+        return false;
+      }
+
+      const stock = Math.max(0, Number(product.stock || 0));
+      if (stock <= 0) {
+        cartChanged = true;
+        return false;
+      }
+
+      const latestQty = Math.min(Math.max(1, Number(item.qty || 1)), stock);
+      const latest = {
+        ...item,
+        name: product.name,
+        size: product.size,
+        price: Number(product.price || 0),
+        qty: latestQty
+      };
+
+      if (
+        item.name !== latest.name ||
+        item.size !== latest.size ||
+        Number(item.price || 0) !== latest.price ||
+        Number(item.qty || 1) !== latest.qty
+      ) {
+        cartChanged = true;
+      }
+
+      Object.assign(item, latest);
+      return true;
+    });
+
+    if (cartChanged) write(CART_KEY, cart);
+
     updateCartCounters();
 
     const root = $("#cartItems");
