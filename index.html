@@ -1583,7 +1583,7 @@
             card.id = "kb-starter-bundle";
             card.className = "product-card kb-bundle-card";
 
-            card.innerHTML = '
+            card.innerHTML = `
               <span class="kb-bundle-save">SAVE ₱100</span>
               <div class="kb-bundle-image">
                 <div class="kb-bundle-cups" aria-hidden="true">
@@ -1616,7 +1616,7 @@
                 </div>
               </div>
               <button type="button" class="kb-bundle-add">ADD BUNDLE TO CART →</button>
-            ';
+            `;
             PRODUCT_GRID.appendChild(card);
 
             card.querySelectorAll(".kb-bundle-pill").forEach(button => {
@@ -1692,7 +1692,7 @@
             trust.id = "kb-trust-badges";
             trust.setAttribute("aria-label","Trust badges");
 
-            trust.innerHTML = '
+            trust.innerHTML = `
               <div class="kb-trust-grid">
                 <div class="kb-trust-item">
                   <span class="kb-trust-icon" aria-hidden="true">
@@ -1719,7 +1719,7 @@
                   <span class="kb-trust-text">Lipa Batangas Origin</span>
                 </div>
               </div>
-            ';
+            `;
 
             PRODUCT_GRID.insertAdjacentElement("afterend",trust);
           }
