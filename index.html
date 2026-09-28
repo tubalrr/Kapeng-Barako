@@ -77,6 +77,62 @@
       </div></div>
     </section>
 
+
+    <!-- CONVERSION BOOSTERS -->
+    <section class="section-pad kb-conversion" id="conversion">
+      <div class="site-container">
+        <div class="section-heading-row kb-conversion-head">
+          <div><span class="eyebrow">BUY WITH CONFIDENCE</span><h2>Everything after the first sip.</h2><p>Track your order, plan your next delivery, or order for your café.</p></div>
+          <button class="button light compact" id="kb-open-track" type="button">Track My Order →</button>
+        </div>
+        <div class="kb-feature-grid">
+          <article class="kb-feature-card kb-wholesale-card">
+            <span class="kb-feature-kicker">WHOLESALE MODE</span>
+            <h3>Buying for a café or shop?</h3>
+            <p>Switch to bulk mode and send a 10kg+ wholesale inquiry with your preferred roast and grind.</p>
+            <label class="kb-switch"><input id="kb-wholesale-toggle" type="checkbox"><span></span><b>Wholesale mode</b></label>
+            <div id="kb-wholesale-panel" class="kb-hidden-panel" hidden>
+              <div class="kb-wholesale-row"><label>Kilos<input id="kb-wholesale-kg" type="number" min="10" step="1" value="10"></label><label>Roast<select id="kb-wholesale-roast"><option>Dark Roast</option><option>Medium-Dark</option><option>Medium Roast</option></select></label></div>
+              <button class="button dark full" id="kb-wholesale-request" type="button">Request Wholesale Quote</button>
+            </div>
+          </article>
+          <article class="kb-feature-card kb-sub-card">
+            <span class="kb-feature-kicker">AUTO-DELIVERY</span>
+            <h3>Never run out of Barako.</h3>
+            <p>Save a recurring delivery preference. The current GitHub Pages build records the request locally; live recurring fulfillment needs a backend scheduler.</p>
+            <div class="kb-sub-row"><select id="kb-sub-product"></select><select id="kb-sub-weight"></select></div>
+            <label class="kb-date-label">Padalhan ako tuwing <input id="kb-sub-day" type="number" min="1" max="28" value="15"></label>
+            <button class="button light full" id="kb-sub-save" type="button">Save Delivery Preference</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad kb-farm" id="farm-story">
+      <div class="site-container kb-farm-grid">
+        <div class="kb-farm-visual"><div class="kb-farm-orbit"><span>BATANGAS</span><b>LIBERICA</b><small>FARM → ROAST → CUP</small></div></div>
+        <div class="kb-farm-copy"><span class="eyebrow">FARM STORY</span><h2>From Batangas soil<br><em>to your morning ritual.</em></h2><p>Kapeng Barako is closely associated with Batangas and the Philippine Liberica tradition. This section is intentionally ready for the brand's real farmer profile, farm photos, harvest details, and sourcing story.</p><div class="kb-farm-facts"><div><strong>01</strong><span>Local origin</span></div><div><strong>02</strong><span>Small-batch roast</span></div><div><strong>03</strong><span>Farm-to-cup story</span></div></div><div class="kb-source-note">Add the actual farmer name, farm location, and approved photos in Admin before publishing a personal farmer story.</div></div>
+      </div>
+    </section>
+
+    <section class="section-pad kb-reviews" id="reviews">
+      <div class="site-container">
+        <div class="section-heading-row"><div><span class="eyebrow">CUSTOMER VOICE</span><h2>Real people. Real cups.</h2><p>Only verified brand-owned reviews or approved customer screenshots belong here.</p></div><a class="button light compact" href="#" id="kb-facebook-reviews" target="_blank" rel="noopener">Official Facebook →</a></div>
+        <div class="kb-review-grid" id="kb-review-grid"><article class="kb-review-empty"><div class="kb-quote">“</div><h3>Reviews are ready for your real screenshots.</h3><p>No invented testimonials are being shown. Add approved screenshots from the brand's official Facebook Page to publish them here.</p><span>VERIFIED CONTENT SLOT</span></article></div>
+      </div>
+    </section>
+
+    <section class="section-pad kb-brew" id="brew-guide">
+      <div class="site-container kb-brew-grid">
+        <div><span class="eyebrow">INTERACTIVE BREW GUIDE</span><h2>Three minutes.<br><em>One strong cup.</em></h2><p>Use the built-in timer while following the traditional-style brewing sequence configured for this storefront.</p><div class="kb-timer"><strong id="kb-timer-display">03:00</strong><div class="kb-timer-actions"><button class="button dark" id="kb-timer-start" type="button">Start</button><button class="button light" id="kb-timer-pause" type="button">Pause</button><button class="button light" id="kb-timer-reset" type="button">Reset</button></div></div></div>
+        <div class="kb-brew-steps"><article><span>01</span><h3>Heat</h3><p>Prepare hot water and your brewing vessel.</p></article><article><span>02</span><h3>Brew</h3><p>Add your Barako coffee and start the 3-minute timer.</p></article><article><span>03</span><h3>Serve</h3><p>Strain, pour, and enjoy the cup while it is fresh.</p></article></div>
+      </div>
+    </section>
+
+    <section class="section-pad kb-blog" id="coffee-tips">
+      <div class="site-container"><div class="section-heading-row"><div><span class="eyebrow">COFFEE TIPS</span><h2>Learn your Barako.</h2><p>Short guides designed for search, discovery, and better brewing.</p></div></div><div class="kb-blog-grid" id="kb-blog-grid"></div></div>
+    </section>
+
     <section class="section-pad section-dark" id="brew">
       <div class="site-container brew-grid">
         <div class="brew-media"><div class="video-frame"><img src="images/brew-placeholder.svg" alt="Traditional Barako brewing placeholder"><div class="video-overlay"><button class="play-button" id="brew-play" type="button" aria-label="Show video embed instructions">▶</button><span>VIDEO PLACEHOLDER</span></div></div><div class="developer-note"><strong>Developer note</strong><span>Temporary local poster only. Replace this block with the buyer’s actual tutorial video or embed code.</span></div></div>
@@ -109,6 +165,7 @@
   <dialog id="brew-dialog" class="simple-dialog"><div class="dialog-card"><button class="icon-close" data-close-dialog type="button">×</button><span class="eyebrow">VIDEO PLACEHOLDER</span><h2>Swap in the buyer’s tutorial</h2><p>Replace the local <code>images/brew-placeholder.svg</code> poster and the video placeholder markup with the buyer’s actual tutorial or approved embed code.</p><button class="button dark" data-close-dialog type="button">Close</button></div></dialog>
 
   <script src="js/storefront.js" defer></script>
+  <script src="js/conversion.js" defer></script>
   <script type="module" src="js/wishlist.js"></script>
 </body>
 </html>
