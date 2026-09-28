@@ -135,7 +135,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     <div class="kicker">Restricted Admin</div>
     <h1>Run the Barako.</h1>
     <p>Sign in to manage orders, inventory and customer-facing order status.</p>
-    <div class="field"><label for="loginUser">Username</label><input id="loginUser" autocomplete="username" required></div>
+    <div class="field"><label for="loginUser">Username</label><input id="loginUser" autocomplete="username" value="admin" required></div>
     <div class="field"><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
     <div id="loginError" class="login-error"></div>
     <button class="primary-btn full" type="submit">Enter Admin →</button>
@@ -243,7 +243,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   };
   const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
   const money = (n) => "₱" + Number(n || 0).toLocaleString("en-PH", {maximumFractionDigits:2});
-  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","'"':"&quot;","'":"&#39;" }[c]));
+  const esc = (v) => String(v ?? "").replace(/[&<>"\']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\'":"&#39;" }[c]));
   const normalizeStatus = (s) => {
     const v = String(s || "Pending").toLowerCase();
     if (v === "delivered") return "Delivered";
@@ -500,7 +500,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     e.preventDefault();
     const user = $("#loginUser").value.trim();
     const pass = $("#loginPass").value;
-    if(user === ADMIN_USER && pass === ADMIN_PASS){
+    if(user.toLowerCase() === ADMIN_USER && pass === ADMIN_PASS){
       localStorage.setItem(ADMIN_KEY,"1");
       $("#loginError").textContent="";
       showApp();
