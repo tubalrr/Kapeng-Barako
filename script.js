@@ -1187,7 +1187,7 @@
       lockBody(false);
     });
 
-    $("[data-close-dialog]").forEach(button => {
+    $$("[data-close-dialog]").forEach(button => {
       button.addEventListener("click", event => {
         event.preventDefault();
         const dialog = button.closest("dialog");
