@@ -652,30 +652,28 @@
       input.value = lastOrder.id;
     }
 
+    if (lastOrder?.id) {
+      renderTrackedOrder(lastOrder);
+    } else {
+      const map = $("#trackMap");
+      if (map) {
+        map.hidden = true;
+        map.innerHTML = "";
+      }
+    }
+
     if (input) input.focus();
   }
 
-  function trackOrder(event) {
-    event.preventDefault();
-
-    const id = String($("#trackOrderId")?.value || "")
-      .trim()
-      .replace(/^#/, "")
-      .toUpperCase();
-
+  function renderTrackedOrder(order) {
     const root = $("#trackResult");
-    if (!root) return;
+    const map = $("#trackMap");
 
-    const orders = read(ORDER_KEY, []);
-    const order = Array.isArray(orders)
-      ? orders.find(item => String(item.id || "").toUpperCase() === id)
-      : null;
+    if (!root || !order) return;
 
-    if (!order) {
-      root.innerHTML =
-        '<div class="empty">Order not found. Check your Order ID.</div>';
-      return;
-    }
+    const address = String(
+      order.customer?.address || ""
+    ).trim();
 
     const steps = [
       "Pending",
@@ -693,22 +691,98 @@
       '<div class="track-customer">' +
         '<strong>' + esc(order.id) + '</strong><br>' +
         esc(order.customer?.name || "Customer") + '<br>' +
-        esc(order.customer?.address || "") +
+        esc(address || "Delivery address not provided") +
       '</div>' +
       steps.map((step, index) => {
-        const state = index < active ? "done" : index === active ? "active" : "";
-        const mark = index < active ? "✓" : String(index + 1);
+        const state =
+          index < active ? "done" :
+          index === active ? "active" : "";
+
+        const mark =
+          index < active ? "✓" :
+          String(index + 1);
 
         return (
           '<div class="track-step ' + state + '">' +
             '<div class="track-dot">' + mark + '</div>' +
             '<div>' +
               '<h4>' + esc(step) + '</h4>' +
-              '<p>' + (index <= active ? "Recorded" : "Waiting") + '</p>' +
+              '<p>' +
+                (index <= active ? "Recorded" : "Waiting") +
+              '</p>' +
             '</div>' +
           '</div>'
         );
       }).join("");
+
+    if (!map) return;
+
+    if (!address) {
+      map.hidden = true;
+      map.innerHTML = "";
+      return;
+    }
+
+    const encoded = encodeURIComponent(address);
+
+    map.hidden = false;
+    map.innerHTML =
+      '<div class="track-map-head">' +
+        '<div>' +
+          '<span class="mini-label">DELIVERY LOCATION</span>' +
+          '<strong>Google Maps</strong>' +
+        '</div>' +
+        '<a href="https://www.google.com/maps/search/?api=1&query=' +
+          encoded +
+          '" target="_blank" rel="noopener noreferrer">' +
+          'OPEN IN GOOGLE MAPS ↗' +
+        '</a>' +
+      '</div>' +
+      '<iframe ' +
+        'title="Delivery location on Google Maps" ' +
+        'src="https://www.google.com/maps?q=' +
+          encoded +
+          '&output=embed" ' +
+        'loading="lazy" ' +
+        'referrerpolicy="strict-origin-when-cross-origin" ' +
+        'allowfullscreen>' +
+      '</iframe>';
+  }
+
+  function trackOrder(event) {
+    event.preventDefault();
+
+    const id = String($("#trackOrderId")?.value || "")
+      .trim()
+      .replace(/^#/, "")
+      .toUpperCase();
+
+    const root = $("#trackResult");
+    const map = $("#trackMap");
+
+    if (!root) return;
+
+    const orders = read(ORDER_KEY, []);
+    const order = Array.isArray(orders)
+      ? orders.find(
+          item =>
+            String(item.id || "").toUpperCase() === id
+        )
+      : null;
+
+    if (!order) {
+      root.innerHTML =
+        '<div class="empty">Order not found. Check your Order ID.</div>';
+
+      if (map) {
+        map.hidden = true;
+        map.innerHTML = "";
+      }
+
+      return;
+    }
+
+    renderTrackedOrder(order);
   }
 
   function smoothScrollTo(target) {
