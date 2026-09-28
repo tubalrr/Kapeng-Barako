@@ -5,20 +5,22 @@ import { firebaseConfig, isFirebaseConfigured } from "./firebase-config.js";
 
 let auth=null,db=null,user=null;
 const saved=new Set();
-const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let attachQueued=false;
 
 if(isFirebaseConfigured){
   const app=initializeApp(firebaseConfig);
-  auth=getAuth(app);db=getFirestore(app);
+  auth=getAuth(app);
+  db=getFirestore(app);
   onAuthStateChanged(auth,async u=>{
-    user=u||null;saved.clear();
+    user=u||null;
+    saved.clear();
     if(user){
       try{
         const snap=await getDocs(collection(db,"users",user.uid,"wishlist"));
         snap.forEach(d=>saved.add(d.id));
       }catch{}
     }
-    attach();
+    scheduleAttach();
   });
 }
 
@@ -30,17 +32,47 @@ function cardKey(card){
 
 function attach(){
   document.querySelectorAll(".product-card[data-product-id]").forEach(card=>{
-    if(!card.querySelector(".wishlist-heart")){
-      const b=document.createElement("button");
-      b.type="button";b.className="wishlist-heart";b.setAttribute("aria-label","Save to wishlist");
+    let b=card.querySelector(".wishlist-heart");
+    if(!b){
+      b=document.createElement("button");
+      b.type="button";
+      b.className="wishlist-heart";
+      b.setAttribute("aria-label","Save to wishlist");
       b.innerHTML="♡";
       card.querySelector(".product-art")?.appendChild(b);
-      b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();toggle(card,b)});
+      b.addEventListener("click",e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        toggle(card,b);
+      });
     }
-    const key=cardKey(card),b=card.querySelector(".wishlist-heart");
+    const key=cardKey(card);
     const active=saved.has(key);
-    b.classList.toggle("saved",active);b.innerHTML=active?"♥":"♡";b.title=active?"Remove from wishlist":"Save to wishlist";
+    b.classList.toggle("saved",active);
+    b.innerHTML=active?"♥":"♡";
+    b.title=active?"Remove from wishlist":"Save to wishlist";
   });
+}
+
+function scheduleAttach(){
+  if(attachQueued)return;
+  attachQueued=true;
+  requestAnimationFrame(()=>{
+    attachQueued=false;
+    attach();
+  });
+}
+
+function observeProductGrid(){
+  const grid=document.querySelector("#product-grid");
+  if(!grid){
+    document.addEventListener("DOMContentLoaded",observeProductGrid,{once:true});
+    return;
+  }
+
+  const observer=new MutationObserver(scheduleAttach);
+  observer.observe(grid,{childList:true});
+  scheduleAttach();
 }
 
 async function toggle(card,button){
@@ -48,22 +80,33 @@ async function toggle(card,button){
     alert("Please log in to My Account first so your wishlist can be saved securely.");
     return;
   }
+
   const key=cardKey(card);
   const id=card.dataset.productId;
   const name=card.querySelector(".product-title-row h3")?.textContent?.trim()||"Kapeng Barako";
   const weight=card.querySelector(".variant-btn.active")?.dataset.weight||"";
   const grind=card.querySelector(".product-select")?.value||"";
+
   try{
+    button.disabled=true;
     if(saved.has(key)){
-      await deleteDoc(doc(db,"users",user.uid,"wishlist",key));saved.delete(key);
+      await deleteDoc(doc(db,"users",user.uid,"wishlist",key));
+      saved.delete(key);
     }else{
-      await setDoc(doc(db,"users",user.uid,"wishlist",key),{productId:id,name,weight,grind,createdAt:serverTimestamp()},{merge:true});
+      await setDoc(
+        doc(db,"users",user.uid,"wishlist",key),
+        {productId:id,name,weight,grind,createdAt:serverTimestamp()},
+        {merge:true}
+      );
       saved.add(key);
     }
     attach();
-  }catch(e){alert("Could not update your wishlist. Please try again.")}
+  }catch{
+    alert("Could not update your wishlist. Please try again.");
+  }finally{
+    button.disabled=false;
+  }
 }
 
-const observer=new MutationObserver(()=>attach());
-observer.observe(document.documentElement,{childList:true,subtree:true});
-window.addEventListener("load",attach);
+observeProductGrid();
+window.addEventListener("load",scheduleAttach,{once:true});
