@@ -16,15 +16,6 @@
   const PROMO_KEY = "kb_promos";
   const ADS_KEY = "kb_ads";
 
-  const DEFAULT_GALLERY = [
-    {slot:1,title:"Roast",image:"images/gallery-01.svg",alt:"Roasted Liberica beans"},
-    {slot:2,title:"Farm",image:"images/gallery-02.svg",alt:"Coffee farm"},
-    {slot:3,title:"Cup",image:"images/gallery-03.svg",alt:"Coffee cup"},
-    {slot:4,title:"Harvest",image:"images/gallery-04.svg",alt:"Green coffee beans"},
-    {slot:5,title:"Craft",image:"images/gallery-05.svg",alt:"Small batch roasting"},
-    {slot:6,title:"Ritual",image:"images/gallery-06.svg",alt:"Coffee ritual"}
-  ];
-
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
@@ -65,12 +56,11 @@
     return Array.isArray(saved) ? saved : [];
   };
 
+  // Production-only gallery: Admin is the sole source of gallery records.
+  // Empty gallery means empty slots; never seed demo artwork.
   const getGallery = () => {
-    const saved = read(GALLERY_KEY, null);
-    if (Array.isArray(saved) && saved.length) return saved;
-    const seeded = DEFAULT_GALLERY.map(item => ({ ...item }));
-    write(GALLERY_KEY, seeded);
-    return seeded;
+    const saved = read(GALLERY_KEY, []);
+    return Array.isArray(saved) ? saved : [];
   };
 
   let catalogChannel=null;
