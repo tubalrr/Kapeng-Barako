@@ -27,7 +27,7 @@ function shell(){return `
 
 function authScreen(){return `
 <div class="auth-screen"><div class="auth-wrap">
-<section class="auth-visual"><div><div class="account-eyebrow">KAPENG BARAKO · CUSTOMER PORTAL</div><h1>Mas madali ang next cup mo.</h1><p>Save your delivery details, follow your orders, and keep your favorite Barako packs ready for your next checkout.</p></div>
+<section class="auth-visual"><div><div class="account-eyebrow">KAPENG BARAKO · CUSTOMER PORTAL</div><h1>Your next cup, made easier.</h1><p>Save your delivery details, follow your orders, and keep your favorite Barako packs ready for your next checkout.</p></div>
 <div class="auth-points"><div class="auth-point">✓ Order history & delivery status</div><div class="auth-point">✓ Saved delivery addresses</div><div class="auth-point">✓ Wishlist & favorites</div><div class="auth-point">✓ Google sign-in + password recovery</div></div></section>
 <section class="auth-card" id="auth-card"></section>
 </div></div>`}
@@ -53,7 +53,7 @@ ${login?"":`<div class="field"><label>Confirm Password</label><input name="confi
 <button class="account-btn primary" type="submit" id="auth-submit">${login?"Login":"Create Account"}</button>
 </form>
 ${login?'<button class="account-btn" id="forgot-btn" type="button" style="width:100%;margin-top:10px">Forgot password?</button>':""}
-<div class="auth-switch">${login?"Wala ka pang account?":"May account ka na?"} <button id="switch-auth" type="button">${login?"Mag Signup":"Mag Login"}</button></div>`;
+<div class="auth-switch">${login?"Don't have an account yet?":"Already have an account?"} <button id="switch-auth" type="button">${login?"Sign Up":"Log In"}</button></div>`;
   document.querySelector("#google-btn").onclick=googleLogin;
   document.querySelector("#auth-form").onsubmit=login?loginWithEmail:signup;
   document.querySelector("#switch-auth").onclick=()=>{state.mode=login?"signup":"login";renderAuth()};
