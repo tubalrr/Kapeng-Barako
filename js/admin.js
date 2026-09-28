@@ -474,8 +474,8 @@ function initOrderSearch(){
   }
 
   function renderContent(){
-    const s={email:"ILAG",phone:"ILAG",location:"ILAG",facebook:"",...(read(SETTINGS_KEY,{})||{})},cms={announcement:{title:"Bagong ani na!",body:"Add the latest approved roast or harvest update."},...(read(CMS_KEY,{})||{})};
-    $("#content-announcement").value=cms.announcement?.title||"Bagong ani na!";$("#content-body").value=cms.announcement?.body||"";$("#content-facebook").value=s.facebook||"";$("#content-email").value=s.email||"ILAG";$("#content-phone").value=s.phone||"ILAG";$("#content-location").value=s.location||"ILAG";
+    const s={email:"",phone:"",location:"",facebook:"",...(read(SETTINGS_KEY,{})||{})},cms={announcement:{title:"",body:""},...(read(CMS_KEY,{})||{})};
+    $("#content-announcement").value=cms.announcement?.title||"";$("#content-body").value=cms.announcement?.body||"";$("#content-facebook").value=s.facebook||"";$("#content-email").value=s.email||"";$("#content-phone").value=s.phone||"";$("#content-location").value=s.location||"";
   }
   function saveContent(){
     const s={...(read(SETTINGS_KEY,{})||{}),facebook:$("#content-facebook").value.trim(),email:$("#content-email").value.trim(),phone:$("#content-phone").value.trim(),location:$("#content-location").value.trim()};
