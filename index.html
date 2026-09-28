@@ -32,15 +32,27 @@
 
   <title>Kapeng Barako — Bold by Nature</title>
   <link rel="stylesheet" href="style.css?v=kb-readability-10">
+<style id="kb-source-truth-style">
+.product-photo{width:100%;height:100%;display:block;object-fit:cover;border-radius:12px}
+.product-image.has-photo .kb-bean-icon,.product-image.has-photo .bean-cluster{display:none!important}
+.product-image .product-image-fallback{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.featured-product-image{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.featured-product-fallback{width:100%;height:100%;position:relative}
+.product-data-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;color:var(--kb-muted);font-size:9px;line-height:1.35}
+.product-data-meta span{padding:4px 7px;border:1px solid var(--kb-border);border-radius:999px}
+[data-gallery-slot] img{width:100%;height:100%;display:block;object-fit:cover}
+[data-gallery-slot].is-empty{opacity:.58}
+</style>
+
 </head>
 <body>
   <!-- HEADER -->
-  <div class="top-strip" id="kbAnnouncementBar" role="region" aria-label="Store announcement">
+  <div class="top-strip" id="kbAnnouncementBar" role="region" aria-label="Store announcement" hidden>
     <div class="container top-strip-inner">
       <div class="kb-announcement-marquee" aria-label="Store announcement">
         <div class="kb-announcement-track">
-          <span>Free delivery in Batangas • GCash / COD • Fresh roast daily • 500+ orders delivered</span>
-          <span aria-hidden="true">Free delivery in Batangas • GCash / COD • Fresh roast daily • 500+ orders delivered</span>
+          <span id="kbAnnouncementPrimary"></span>
+          <span id="kbAnnouncementSecondary" aria-hidden="true"></span>
         </div>
       </div>
       <button class="kb-announcement-close" id="kbAnnouncementClose" type="button" aria-label="Close announcement">×</button>
@@ -139,26 +151,29 @@
           <article class="featured-card">
             <div class="featured-top">
               <span>FEATURED ROAST</span>
-              <span>01 / 03</span>
+              <span>LIVE CATALOG</span>
             </div>
 
-            <div class="cup-illustration">
-              <span class="steam steam-a"></span>
-              <span class="steam steam-b"></span>
-              <span class="steam steam-c"></span>
-              <span class="cup-saucer"></span>
-              <span class="cup-handle"></span>
-              <span class="cup-body"></span>
-              <span class="cup-coffee"></span>
-              <span class="cup-mark">KB</span>
+            <div class="cup-illustration" id="featuredProductVisual">
+              <img id="featuredProductImage" class="featured-product-image" alt="" hidden>
+              <div id="featuredProductFallback" class="featured-product-fallback" aria-hidden="true">
+                <span class="steam steam-a"></span>
+                <span class="steam steam-b"></span>
+                <span class="steam steam-c"></span>
+                <span class="cup-saucer"></span>
+                <span class="cup-handle"></span>
+                <span class="cup-body"></span>
+                <span class="cup-coffee"></span>
+                <span class="cup-mark">KB</span>
+              </div>
             </div>
 
             <div class="featured-bottom">
               <div>
-                <strong>Barako Strong</strong>
-                <small>Dark Roast • 250g</small>
+                <strong id="featuredProductName">Featured product</strong>
+                <small id="featuredProductMeta">Catalog details</small>
               </div>
-              <strong class="featured-price">₱350</strong>
+              <strong class="featured-price" id="featuredProductPrice">—</strong>
             </div>
           </article>
         </div>
@@ -659,329 +674,10 @@
         </p>
 
         <div class="kb-product-grid" id="productGrid">
-
-          <!-- BARAKO STRONG -->
-          <article class="product-card" data-product-id="KB250">
-            <div class="product-image product-image-250">
-              <span class="stock-badge" data-stock-badge="KB250">7 packs left</span>
-              <span class="low-stock-timer" data-low-stock-timer hidden></span>
-
-              <svg class="kb-bean-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M59 12C76 15 88 31 88 49C88 70 72 86 53 88C34 90 17 79 13 61C9 43 19 23 37 16C44 13 51 11 59 12Z" stroke="currentColor" stroke-width="5"/>
-                <path d="M62 18C49 30 43 43 42 56C41 69 45 78 53 86" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-              </svg>
-
-              <span class="image-size">250g</span>
-            </div>
-
-            <div class="product-content">
-              <div class="product-title-line">
-                <div>
-                  <span class="product-badge">DARK ROAST</span>
-                  <h3>Barako Strong</h3>
-                  <p>250g • Dark Roast</p>
-                </div>
-                <strong class="product-price" data-price="KB250">₱350</strong>
-              </div>
-
-              <div class="selector-block">
-                <span>ROAST</span>
-                <div class="pills" data-roast-group="KB250">
-                  <button type="button" class="pill" data-value="Light">Light</button>
-                  <button type="button" class="pill" data-value="Medium">Med</button>
-                  <button type="button" class="pill active" data-value="Dark">Dark</button>
-                </div>
-              </div>
-
-              <div class="selector-block">
-                <span>GRIND</span>
-                <div class="pills" data-grind-group="KB250">
-                  <button type="button" class="pill active" data-value="Whole">Whole</button>
-                  <button type="button" class="pill" data-value="Coarse">Coarse</button>
-                  <button type="button" class="pill" data-value="Fine">Fine</button>
-                </div>
-              </div>
-
-                            <label class="kb-subscription-option">
-                <input
-                  type="checkbox"
-                  class="kb-subscription-checkbox"
-                  data-product-subscription="KB250"
-                >
-                <span class="kb-subscription-copy">
-                  <span class="kb-subscription-title">Deliver every 2 weeks</span>
-                  <span class="kb-subscription-save">Save 10%</span>
-                </span>
-              </label>
-
-<div class="kb-stock-text">7 packs left</div>
-
-              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB250">
-                ADD TO CART
-              </button>
-            </div>
-          </article>
-
-          <!-- BARAKO CLASSIC -->
-          <article class="product-card" data-product-id="KB500">
-            <div class="product-image product-image-500">
-              <span class="stock-badge" data-stock-badge="KB500">12 packs left</span>
-
-              <svg class="kb-bean-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M59 12C76 15 88 31 88 49C88 70 72 86 53 88C34 90 17 79 13 61C9 43 19 23 37 16C44 13 51 11 59 12Z" stroke="currentColor" stroke-width="5"/>
-                <path d="M62 18C49 30 43 43 42 56C41 69 45 78 53 86" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-              </svg>
-
-              <span class="image-size">500g</span>
-            </div>
-
-            <div class="product-content">
-              <div class="product-title-line">
-                <div>
-                  <span class="product-badge">MEDIUM ROAST</span>
-                  <h3>Barako Classic</h3>
-                  <p>500g • Medium Roast</p>
-                  <span class="kb-bestseller">BESTSELLER</span>
-                </div>
-                <strong class="product-price" data-price="KB500">₱620</strong>
-              </div>
-
-              <div class="selector-block">
-                <span>ROAST</span>
-                <div class="pills" data-roast-group="KB500">
-                  <button type="button" class="pill" data-value="Light">Light</button>
-                  <button type="button" class="pill active" data-value="Medium">Med</button>
-                  <button type="button" class="pill" data-value="Dark">Dark</button>
-                </div>
-              </div>
-
-              <div class="selector-block">
-                <span>GRIND</span>
-                <div class="pills" data-grind-group="KB500">
-                  <button type="button" class="pill active" data-value="Whole">Whole</button>
-                  <button type="button" class="pill" data-value="Coarse">Coarse</button>
-                  <button type="button" class="pill" data-value="Fine">Fine</button>
-                </div>
-              </div>
-
-                            <label class="kb-subscription-option">
-                <input
-                  type="checkbox"
-                  class="kb-subscription-checkbox"
-                  data-product-subscription="KB500"
-                >
-                <span class="kb-subscription-copy">
-                  <span class="kb-subscription-title">Deliver every 2 weeks</span>
-                  <span class="kb-subscription-save">Save 10%</span>
-                </span>
-              </label>
-
-<div class="kb-stock-text">12 packs left</div>
-
-              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB500">
-                ADD TO CART
-              </button>
-            </div>
-          </article>
-
-          <!-- BARAKO RESERVE -->
-          <article class="product-card" data-product-id="KB1K">
-            <div class="product-image product-image-1k">
-              <span class="stock-badge urgent" data-stock-badge="KB1K">3 packs left</span>
-
-              <svg class="kb-bean-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M59 12C76 15 88 31 88 49C88 70 72 86 53 88C34 90 17 79 13 61C9 43 19 23 37 16C44 13 51 11 59 12Z" stroke="currentColor" stroke-width="5"/>
-                <path d="M62 18C49 30 43 43 42 56C41 69 45 78 53 86" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-              </svg>
-
-              <span class="image-size">1kg</span>
-            </div>
-
-            <div class="product-content">
-              <div class="product-title-line">
-                <div>
-                  <span class="product-badge">SIGNATURE</span>
-                  <h3>Barako Reserve</h3>
-                  <p>1kg • Signature</p>
-                  <span class="kb-low-stock">LOW STOCK</span>
-                </div>
-                <strong class="product-price" data-price="KB1K">₱1,150</strong>
-              </div>
-
-              <div class="selector-block">
-                <span>ROAST</span>
-                <div class="pills" data-roast-group="KB1K">
-                  <button type="button" class="pill" data-value="Light">Light</button>
-                  <button type="button" class="pill" data-value="Medium">Med</button>
-                  <button type="button" class="pill active" data-value="Dark">Dark</button>
-                </div>
-              </div>
-
-              <div class="selector-block">
-                <span>GRIND</span>
-                <div class="pills" data-grind-group="KB1K">
-                  <button type="button" class="pill active" data-value="Whole">Whole</button>
-                  <button type="button" class="pill" data-value="Coarse">Coarse</button>
-                  <button type="button" class="pill" data-value="Fine">Fine</button>
-                </div>
-              </div>
-
-                            <label class="kb-subscription-option">
-                <input
-                  type="checkbox"
-                  class="kb-subscription-checkbox"
-                  data-product-subscription="KB1K"
-                >
-                <span class="kb-subscription-copy">
-                  <span class="kb-subscription-title">Deliver every 2 weeks</span>
-                  <span class="kb-subscription-save">Save 10%</span>
-                </span>
-              </label>
-
-<div class="kb-stock-text low">3 packs left</div>
-
-              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB1K">
-                ADD TO CART
-              </button>
-            </div>
-          </article>
-
+          <!-- Product cards are rendered exclusively from kb_rebuild_products. -->
         </div>
-      </div>
 
-      <style>
-        /* BUNDLE CARD */
-        #products.kb-collection .kb-bundle-card {
-          margin-top: 24px;
-          width: 100%;
-          background: #221A0E;
-          border: 1px solid #C8A951;
-          border-radius: 20px;
-          padding: 24px;
-          box-sizing: border-box;
-          display: grid;
-          grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
-          align-items: center;
-          gap: 28px;
-          transition:
-            transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-            box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        #products.kb-collection .kb-bundle-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
-        }
-
-        #products.kb-collection .kb-bundle-kicker {
-          margin: 0 0 8px;
-          color: #C8A951;
-          font-size: 10px;
-          line-height: 1;
-          font-weight: 800;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-        }
-
-        #products.kb-collection .kb-bundle-title {
-          margin: 0;
-          color: #F5E9D3;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 30px;
-          line-height: 1.05;
-          font-weight: 700;
-        }
-
-        #products.kb-collection .kb-bundle-copy {
-          margin: 10px 0 0;
-          color: #B8A998;
-          font-size: 13px;
-          line-height: 1.55;
-        }
-
-        #products.kb-collection .kb-bundle-items {
-          margin-top: 16px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
-
-        #products.kb-collection .kb-bundle-item {
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
-          padding: 8px 11px;
-          border: 1px solid #2A2116;
-          border-radius: 999px;
-          color: #F5E9D3;
-          background: #1A1207;
-          font-size: 11px;
-          line-height: 1;
-        }
-
-        #products.kb-collection .kb-bundle-item::before {
-          content: "•";
-          color: #C8A951;
-        }
-
-        #products.kb-collection .kb-bundle-offer {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 18px;
-          padding: 18px 20px;
-          border-radius: 14px;
-          background: #1A1207;
-          border: 1px solid #2A2116;
-        }
-
-        #products.kb-collection .kb-bundle-price-label {
-          color: #B8A998;
-          font-size: 11px;
-          line-height: 1.25;
-          text-transform: uppercase;
-          letter-spacing: 0.6px;
-        }
-
-        #products.kb-collection .kb-bundle-price {
-          margin-top: 4px;
-          color: #C8A951;
-          font-size: 26px;
-          line-height: 1;
-          font-weight: 800;
-        }
-
-        #products.kb-collection .kb-bundle-save {
-          flex: 0 0 auto;
-          padding: 9px 11px;
-          border-radius: 999px;
-          background: #C8A951;
-          color: #1A1207;
-          font-size: 10px;
-          line-height: 1;
-          font-weight: 800;
-          letter-spacing: 0.5px;
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
-
-        @media (max-width: 760px) {
-          #products.kb-collection .kb-bundle-card {
-            grid-template-columns: 1fr;
-            gap: 18px;
-          }
-
-          #products.kb-collection .kb-bundle-title {
-            font-size: 25px;
-          }
-
-          #products.kb-collection .kb-bundle-offer {
-            align-items: flex-start;
-          }
-        }
-      </style>
-
-      <!-- STARTER BUNDLE -->
+        <!-- STARTER BUNDLE -->
       <article class="kb-bundle-card" aria-label="Barako Starter bundle">
         <div>
           <p class="kb-bundle-kicker">STARTER BUNDLE</p>
@@ -1932,42 +1628,19 @@
     </section>
 
     <!-- CUSTOMER VOICE -->
-    <section class="section-dark section-space premium-reviews-section" id="reviews">
+    <section class="section-dark section-space premium-reviews-section" id="reviews" hidden>
       <div class="container">
         <div class="section-heading-row">
           <div>
             <span class="eyebrow">CUSTOMER VOICE</span>
-            <h2>Three sample reviews.<br><em>Replace with verified feedback.</em></h2>
+            <h2>Verified customer<br><em>feedback.</em></h2>
           </div>
           <span class="section-number">05</span>
         </div>
-
-        <div class="review-demo-note">SAMPLE REVIEWS • DEMO CONTENT ONLY</div>
-
-        <div class="premium-reviews-grid">
-          <article class="premium-review-card">
-            <div class="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
-            <p>“Tastes like real Barako, not burnt.”</p>
-            <strong>Alex M.</strong>
-            <span>Sample review • replace with verified feedback</span>
-          </article>
-          <article class="premium-review-card">
-            <div class="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
-            <p>“Bold aroma and a clean finish. Exactly the kind of cup I look for.”</p>
-            <strong>Jamie R.</strong>
-            <span>Sample review • replace with verified feedback</span>
-          </article>
-          <article class="premium-review-card">
-            <div class="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
-            <p>“The grind selector makes it easy to order the way I brew at home.”</p>
-            <strong>Mia C.</strong>
-            <span>Sample review • replace with verified feedback</span>
-          </article>
-        </div>
+        <div class="review-demo-note" id="reviewsEmptyNote">Only verified reviews published by Admin appear here.</div>
+        <div class="premium-reviews-grid" id="reviewsList"></div>
       </div>
-    </section>
-
-      <script>
+    </section>      <script>
         (() => {
           "use strict";
 
@@ -2167,7 +1840,7 @@
             <h3>Send this to me every</h3>
             <p>Save your recurring delivery preference for your next routine order.</p>
             <div class="form-two">
-              <label>Product<select id="subscriptionProduct"><option value="KB250">Barako 250g</option><option value="KB500">Barako 500g</option><option value="KB1K">Barako 1kg</option></select></label>
+              <label>Product<select id="subscriptionProduct" aria-label="Auto-delivery product"></select></label>
               <label>Schedule<select id="subscriptionDay"><option>5th</option><option selected>15th</option><option>25th</option></select></label>
             </div>
             <button class="button button-outline full" id="subscriptionSave" type="button">SAVE DELIVERY PREFERENCE</button>
@@ -2220,45 +1893,13 @@
     <section class="section-dark section-space" id="gallery">
       <div class="container">
         <div class="section-heading-row"><div><span class="eyebrow">ORIGIN / CRAFT</span><h2>Built around<br><em>the bean.</em></h2></div><span class="section-number">05</span></div>
-        <div class="gallery-grid">
-          <figure><img src="images/gallery-01.svg" alt="Roasted Liberica beans"><figcaption>01 · ROAST</figcaption></figure>
-          <figure><img src="images/gallery-02.svg" alt="Coffee farm"><figcaption>02 · FARM</figcaption></figure>
-          <figure><img src="images/gallery-03.svg" alt="Coffee cup"><figcaption>03 · CUP</figcaption></figure>
-          <figure><img src="images/gallery-04.svg" alt="Green coffee beans"><figcapti    <!-- TRUST / CHECKOUT -->
-    <section class="section-dark section-space trust-section" id="trust">
-      <div class="container">
-        <div class="trust-top">
-          <div>
-            <span class="eyebrow">CHECKOUT & TRUST</span>
-            <h2>Buy with confidence.<br><em>Keep it simple.</em></h2>
-          </div>
-          <span class="trust-note">Secure checkout • Clear delivery</span>
-        </div>
-        <div class="trust-grid">
-          <article class="trust-card trust-payment-card">
-            <span class="trust-logo-box gcash-logo-box">
-              <img class="trust-payment-logo gcash-logo" src="https://upload.wikimedia.org/wikipedia/commons/5/52/GCash_logo.svg" alt="GCash">
-            </span>
-            <div><strong>GCash</strong><p>Fast digital payment for checkout.</p></div>
-          </article>
-          <article class="trust-card trust-payment-card">
-            <span class="trust-logo-box cod-logo-box" aria-hidden="true"><strong>COD</strong></span>
-            <div><strong>Cash on Delivery</strong><p>Pay when your order arrives.</p></div>
-          </article>
-          <article class="trust-card">
-            <span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.7-2.9 8.1-7 10-4.1-1.9-7-5.3-7-10V6l7-3z"></path><path d="m8.5 12 2.2 2.2 4.8-5"></path></svg></span>
-            <div><strong>Secure checkout</strong><p>Your order details stay protected in the checkout flow.</p></div>
-          </article>
-          <article class="trust-card">
-            <span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M5 8.5h9a3 3 0 0 0 0-6H8M19 15.5h-9a3 3 0 0 0 0 6h6"></path></svg></span>
-            <div><strong>Fresh roast daily</strong><p>Small-batch roasting built around freshness.</p></div>
-          </article>
-          <article class="trust-card trust-wide">
-            <span class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5 9 16l11-11"></path><path d="M5 20h14"></path></svg></span>
-            <div><strong>500+ orders delivered</strong><p>Current storefront trust signal.</p></div>
-            <span class="trust-badge">TRUSTED BY BUYERS</span>
-          </article>
-        </div>
+        <div class="gallery-grid" id="mainGalleryGrid">
+          <figure data-gallery-slot="1"><img alt=""><figcaption>01</figcaption></figure>
+          <figure data-gallery-slot="2"><img alt=""><figcaption>02</figcaption></figure>
+          <figure data-gallery-slot="3"><img alt=""><figcaption>03</figcaption></figure>
+          <figure data-gallery-slot="4"><img alt=""><figcaption>04</figcaption></figure>
+          <figure data-gallery-slot="5"><img alt=""><figcaption>05</figcaption></figure>
+          <figure data-gallery-slot="6"><img alt=""><figcaption>06</figcaption></figure></div>
       </div>
     </section>
 
@@ -2277,7 +1918,7 @@ on>04 · HARVEST</figcaption></figure>
         <a class="brand" href="#top"><img src="images/favicon.svg" alt=""><span><strong>Kapeng Barako</strong><small>Bold by Nature</small></span></a>
         <p>Locally inspired Liberica coffee with the character of Batangas.</p>
       </div>
-      <div class="footer-contact-block"><span class="eyebrow">CONTACT</span><strong data-kb-business-name>Kapeng Barako</strong><a data-kb-email-link href="pages/contact.html">Email: <span data-kb-email>Contact email not configured</span></a><a data-kb-phone-link href="pages/contact.html">Phone: <span data-kb-phone>Phone not configured</span></a><span data-kb-location>Location not configured</span><span data-kb-hours></span><a data-kb-facebook href="#" target="_blank" rel="noopener noreferrer" hidden>Facebook →</a><a data-kb-messenger href="#" target="_blank" rel="noopener noreferrer" hidden>Messenger →</a></div>
+      <div class="footer-contact-block" id="footerContactBlock" hidden><span class="eyebrow">CONTACT</span><strong data-kb-business-name></strong><a data-kb-email-link href="pages/contact.html" hidden>Email: <span data-kb-email></span></a><a data-kb-phone-link href="pages/contact.html" hidden>Phone: <span data-kb-phone></span></a><span data-kb-location hidden></span><span data-kb-hours hidden></span><a data-kb-facebook href="#" target="_blank" rel="noopener noreferrer" hidden>Facebook →</a><a data-kb-messenger href="#" target="_blank" rel="noopener noreferrer" hidden>Messenger →</a></div>
       <div class="footer-social-block">
         <span class="eyebrow">SOCIAL</span>
         <a class="footer-social-link" href="#" aria-label="Instagram">
@@ -2292,7 +1933,7 @@ on>04 · HARVEST</figcaption></figure>
           </span>
           <span>TikTok</span>
         </a>
-        <a data-kb-email-link href="pages/contact.html">Email: <span data-kb-email>Contact email not configured</span></a>
+        <a data-kb-email-link href="pages/contact.html" hidden>Email: <span data-kb-email></span></a>
       </div>
       <div><span class="eyebrow">QUICK LINKS</span><a href="#products">Collection</a><a href="#brew-guide">Brew Guide</a><a href="#faq">FAQ</a><a href="#top" data-back-top>Back to top ↑</a></div>
     </div>
