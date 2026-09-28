@@ -176,6 +176,33 @@
     const cms={...(read(CMS_KEY,{})||{}),announcement:{title:$("#content-announcement").value.trim(),body:$("#content-body").value.trim()}};
     write(SETTINGS_KEY,s);write(CMS_KEY,cms);toast("Content saved.");
   }
+  function addProduct(e){
+    e.preventDefault();
+    const name=$("#product-name").value.trim();
+    const size=$("#product-size").value.trim();
+    const price=Number($("#product-price").value||0);
+    const stock=Number($("#product-stock").value||0);
+    const badge=$("#product-badge").value.trim()||"NEW";
+    const roast=$("#product-roast").value;
+    const grind=$("#product-grind").value;
+    const note=$("#product-note").value.trim()||"Fresh Kapeng Barako.";
+    if(!name||!size){toast("Product name and size are required.");return}
+    if(!Number.isFinite(price)||price<0){toast("Enter a valid price.");return}
+    if(!Number.isFinite(stock)||stock<0||!Number.isInteger(stock)){toast("Stock must be a whole number.");return}
+    const idBase=("KB-"+size).toUpperCase().replace(/[^A-Z0-9]/g,"");
+    let id=idBase||("KB-"+Date.now());
+    if(products.some(p=>String(p.id)===id)) id=id+"-"+Date.now().toString(36).toUpperCase();
+    const product={id,name,size,price,stock,badge,roast,grind,note};
+    products.push(product);
+    write(PRODUCTS_KEY,products);
+    $("#product-dialog").close();
+    $("#product-form").reset();
+    $("#product-stock").value="0";
+    toast(name+" added.");
+    renderProducts();
+    renderOverview();
+  }
+
   function seedProducts(){write(PRODUCTS_KEY,DEFAULT_PRODUCTS.map(x=>({...x})));toast("Collection reset to 3 products.");renderOverview();renderProducts()}
   function addPromo(e){
     e.preventDefault();
@@ -198,7 +225,7 @@
     $("#admin-user").textContent=read("kb_admin_session",{})?.email||"admin";
     $("#admin-menu")?.addEventListener("click",toggleMenu);$("#admin-close")?.addEventListener("click",closeMenu);$("#admin-overlay")?.addEventListener("click",closeMenu);$("#logout")?.addEventListener("click",()=>window.KBAdminAuth?.logout());
     $$(".admin-nav button").forEach(b=>b.addEventListener("click",()=>openView(b.dataset.view)));
-    $("#seed-products")?.addEventListener("click",seedProducts);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
+    $("#seed-products")?.addEventListener("click",seedProducts);$("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
     renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();
     window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos()}});
   }
