@@ -273,20 +273,33 @@
     const root = $("#storefront-ad");
     if (!root) return;
 
-    const data = read(ADS_KEY, { link: "", label: "" }) || {};
+    const data = read(ADS_KEY, { link: "", image: "", label: "" }) || {};
     const link = String(data.link || "").trim();
+    const image = String(data.image || "").trim();
     const label = String(data.label || "Sponsored").trim() || "Sponsored";
 
     const title = $("#storefront-ad-title");
     const copy = $("#storefront-ad-copy");
     const open = $("#storefront-ad-open");
+    const imageEl = $("#storefront-ad-image");
 
-    root.classList.toggle("has-link", Boolean(link));
-    if (title) title.textContent = link ? label : "Advertisement";
+    const hasAd = Boolean(link || image);
+    root.classList.toggle("has-link", hasAd);
+
+    if (title) title.textContent = hasAd ? label : "Advertisement";
     if (copy) {
-      copy.textContent = link
+      copy.textContent = hasAd
         ? "Sponsored placement"
         : "Advertisement space";
+    }
+
+    if (imageEl) {
+      imageEl.hidden = !image;
+      imageEl.src = image || "";
+      imageEl.alt = label + " advertisement";
+      imageEl.onerror = () => {
+        imageEl.hidden = true;
+      };
     }
 
     if (open) {
