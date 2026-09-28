@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded",async()=>{
   const params=new URLSearchParams(location.search);
   if(params.get("reason")==="expired"){
     err.textContent="Your admin session expired. Please sign in again.";
+  }else if(params.get("reason")==="timeout"){
+    err.textContent="Firebase verification timed out. Make sure tubalrr.github.io is in Firebase Authentication → Authorized domains, then refresh.";
   }
 
   try{
