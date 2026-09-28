@@ -1797,3 +1797,27 @@ section,
   .cup-illustration .steam-b{margin-left:0;height:68px;}
   .cup-illustration .steam-c{margin-left:13px;height:54px;}
 }
+
+/* CUP STEAM — ALIGN TO THE ACTUAL CUP BODY, NOT THE CARD CENTER */
+.cup-illustration .steam{
+  left:calc(50% - 113px);
+  bottom:196px;
+  width:0;
+  height:64px;
+  transform:translateX(-50%);
+  z-index:6;
+}
+.cup-illustration .steam-a{margin-left:-15px;}
+.cup-illustration .steam-b{margin-left:0;height:78px;animation-delay:.6s;}
+.cup-illustration .steam-c{margin-left:15px;height:60px;animation-delay:1.1s;}
+
+@media(max-width:720px){
+  /* Mobile cup is resized and shifted by the responsive cup geometry. */
+  .cup-illustration .steam{
+    left:calc(50% - 92px);
+    bottom:164px;
+  }
+  .cup-illustration .steam-a{margin-left:-13px;}
+  .cup-illustration .steam-b{margin-left:0;height:68px;}
+  .cup-illustration .steam-c{margin-left:13px;height:54px;}
+}
