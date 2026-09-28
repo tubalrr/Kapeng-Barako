@@ -15,8 +15,8 @@
 </head>
 <body>
   <button class="menu-button sidebar-toggle" id="menu-button" type="button" aria-label="Toggle sidebar" aria-expanded="false"><span></span><span></span><span></span></button>
-  <header class="site-header" id="top">
-    <div class="site-container nav-wrap">
+  <header class="site-header storefront-header" id="top">
+    <div class="site-container navigation-container">
       <a class="brand" href="#top" aria-label="Kapeng Barako home">
         <span class="brand-mark"><img src="images/favicon.svg" alt="Kapeng Barako Batangas logo"></span>
         <span class="brand-copy"><strong>Kapeng Barako</strong><small>Batangas · Liberica Coffee</small></span>
@@ -34,9 +34,9 @@
     </nav>
   </header>
 
-  <main>
-    <section class="hero section-pad">
-      <div class="site-container hero-grid">
+  <main class="storefront-main">
+    <section class="hero hero-section section-pad">
+      <div class="site-container hero-container hero-grid">
         <div class="hero-copy">
           <span class="eyebrow" data-cms="heroEyebrow">Freshly roasted • Quezon City</span>
           <h1>Kapeng Barako.<br><em>Bold by nature.</em><br><span>Roasted in Batangas.</span></h1>
@@ -51,25 +51,25 @@
       </div>
     </section>
 
-    <section class="section-pad section-soft" id="story">
-      <div class="site-container story-grid"><div><span class="eyebrow">KWENTO</span><h2>Hindi lang kape.<br><em>May proseso.</em></h2></div><div class="story-copy"><p id="story-copy"></p><div class="story-pills"><span>LIBERICA</span><span>SMALL BATCH</span><span>BATANGAS</span></div></div></div>
+    <section class="section-pad section-soft story-section" id="story">
+      <div class="site-container story-container story-grid"><div><span class="eyebrow">KWENTO</span><h2>Hindi lang kape.<br><em>May proseso.</em></h2></div><div class="story-copy"><p id="story-copy"></p><div class="story-pills"><span>LIBERICA</span><span>SMALL BATCH</span><span>BATANGAS</span></div></div></div>
     </section>
 
-    <section class="section-pad" id="benefits">
-      <div class="site-container"><div class="section-heading centered"><span class="eyebrow">BAKIT BARAKO?</span><h2>Simple reasons to choose a stronger cup.</h2></div><div class="benefit-grid" id="benefit-grid"></div></div>
+    <section class="section-pad benefits-section" id="benefits">
+      <div class="site-container"><div class="section-heading centered"><span class="eyebrow">BAKIT BARAKO?</span><h2>Simple reasons to choose a stronger cup.</h2></div><div class="benefit-grid benefit-card-grid" id="benefit-grid"></div></div>
     </section>
 
-    <section class="section-pad section-cream" id="products">
+    <section class="section-pad section-cream products-section" id="products">
       <div class="site-container">
         <div class="section-heading-row"><div><span class="eyebrow">THE COLLECTION</span><h2>Barako, in its pure form.</h2><p>Choose your roast format, grind, and make it yours.</p></div><button class="button light compact" id="products-cart" type="button">Cart <span id="products-cart-count">0</span></button></div>
-        <div class="product-grid" id="product-grid"></div>
+        <div class="product-grid product-card-grid" id="product-grid"></div>
       </div>
     </section>
 
-    <section class="section-pad" id="delivery">
-      <div class="site-container"><div class="delivery-card">
+    <section class="section-pad delivery-section" id="delivery">
+      <div class="site-container delivery-container"><div class="delivery-card delivery-card-wrapper">
         <div class="delivery-head"><span class="eyebrow">DELIVERY & PAYMENT</span><h2>From the roast.<br><em>To your door.</em></h2><p id="delivery-intro"></p></div>
-        <div class="delivery-columns">
+        <div class="delivery-columns delivery-grid">
           <div class="info-block"><h3>Payment Methods</h3><div class="tag-list platform-list" id="payment-list"></div></div>
           <div class="info-block"><h3>Courier & Fulfillment</h3><div class="tag-list platform-list" id="fulfillment-list"></div></div>
           <div class="info-block accent-block"><h3>Shipping Rates</h3><p id="shipping-note"></p><strong id="shipping-promo">Free shipping when you buy 2 packs or more</strong></div>
@@ -79,7 +79,7 @@
 
 
     <!-- CONVERSION BOOSTERS -->
-    <section class="section-pad kb-conversion" id="conversion">
+    <section class="section-pad kb-conversion conversion-section" id="conversion">
       <div class="site-container">
         <div class="section-heading-row kb-conversion-head">
           <div><span class="eyebrow">BUY WITH CONFIDENCE</span><h2>Everything after the first sip.</h2><p>Track your order, plan your next delivery, or order for your café.</p></div>
@@ -108,59 +108,59 @@
       </div>
     </section>
 
-    <section class="section-pad kb-farm" id="farm-story">
+    <section class="section-pad kb-farm farm-story-section" id="farm-story">
       <div class="site-container kb-farm-grid">
         <div class="kb-farm-visual"><div class="kb-farm-orbit"><span>BATANGAS</span><b>LIBERICA</b><small>FARM → ROAST → CUP</small></div></div>
         <div class="kb-farm-copy"><span class="eyebrow">FARM STORY</span><h2>From Batangas soil<br><em>to your morning ritual.</em></h2><p>Kapeng Barako is closely associated with Batangas and the Philippine Liberica tradition. This section is intentionally ready for the brand's real farmer profile, farm photos, harvest details, and sourcing story.</p><div class="kb-farm-facts"><div><strong>01</strong><span>Local origin</span></div><div><strong>02</strong><span>Small-batch roast</span></div><div><strong>03</strong><span>Farm-to-cup story</span></div></div><div class="kb-source-note">Add the actual farmer name, farm location, and approved photos in Admin before publishing a personal farmer story.</div></div>
       </div>
     </section>
 
-    <section class="section-pad kb-reviews" id="reviews">
+    <section class="section-pad kb-reviews reviews-section" id="reviews">
       <div class="site-container">
         <div class="section-heading-row"><div><span class="eyebrow">CUSTOMER VOICE</span><h2>Real people. Real cups.</h2><p>Only verified brand-owned reviews or approved customer screenshots belong here.</p></div><a class="button light compact" href="#" id="kb-facebook-reviews" target="_blank" rel="noopener">Official Facebook →</a></div>
         <div class="kb-review-grid" id="kb-review-grid"><article class="kb-review-empty"><div class="kb-quote">“</div><h3>Reviews are ready for your real screenshots.</h3><p>No invented testimonials are being shown. Add approved screenshots from the brand's official Facebook Page to publish them here.</p><span>VERIFIED CONTENT SLOT</span></article></div>
       </div>
     </section>
 
-    <section class="section-pad kb-brew" id="brew-guide">
+    <section class="section-pad kb-brew brew-guide-section" id="brew-guide">
       <div class="site-container kb-brew-grid">
         <div><span class="eyebrow">INTERACTIVE BREW GUIDE</span><h2>Three minutes.<br><em>One strong cup.</em></h2><p>Use the built-in timer while following the traditional-style brewing sequence configured for this storefront.</p><div class="kb-timer"><strong id="kb-timer-display">03:00</strong><div class="kb-timer-actions"><button class="button dark" id="kb-timer-start" type="button">Start</button><button class="button light" id="kb-timer-pause" type="button">Pause</button><button class="button light" id="kb-timer-reset" type="button">Reset</button></div></div></div>
         <div class="kb-brew-steps"><article><span>01</span><h3>Heat</h3><p>Prepare hot water and your brewing vessel.</p></article><article><span>02</span><h3>Brew</h3><p>Add your Barako coffee and start the 3-minute timer.</p></article><article><span>03</span><h3>Serve</h3><p>Strain, pour, and enjoy the cup while it is fresh.</p></article></div>
       </div>
     </section>
 
-    <section class="section-pad kb-blog" id="coffee-tips">
+    <section class="section-pad kb-blog coffee-tips-section" id="coffee-tips">
       <div class="site-container"><div class="section-heading-row"><div><span class="eyebrow">COFFEE TIPS</span><h2>Learn your Barako.</h2><p>Short guides designed for search, discovery, and better brewing.</p></div></div><div class="kb-blog-grid" id="kb-blog-grid"></div></div>
     </section>
 
-    <section class="section-pad section-dark" id="brew">
-      <div class="site-container brew-grid">
+    <section class="section-pad section-dark brew-section" id="brew">
+      <div class="site-container brew-container brew-grid">
         <div class="brew-media"><div class="video-frame"><img src="images/brew-placeholder.svg" alt="Traditional Barako brewing placeholder"><div class="video-overlay"><button class="play-button" id="brew-play" type="button" aria-label="Show video embed instructions">▶</button><span>VIDEO PLACEHOLDER</span></div></div><div class="developer-note"><strong>Developer note</strong><span>Temporary local poster only. Replace this block with the buyer’s actual tutorial video or embed code.</span></div></div>
         <div class="brew-copy"><span class="eyebrow">THE RITUAL</span><h2>Traditional Barako.<br><em>Made simply.</em></h2><p>Three easy steps for a strong, familiar cup.</p><div id="brew-steps" class="steps"></div></div>
       </div>
     </section>
 
-    <section class="section-pad" id="faq"><div class="site-container faq-grid"><div><span class="eyebrow">FAQ</span><h2>Quick answers before you order.</h2></div><div id="faq-list" class="faq-list"></div></div></section>
+    <section class="section-pad faq-section" id="faq"><div class="site-container faq-container faq-grid"><div><span class="eyebrow">FAQ</span><h2>Quick answers before you order.</h2></div><div id="faq-list" class="faq-list"></div></div></section>
 
-    <section class="section-pad section-cream" id="gallery"><div class="site-container">
+    <section class="section-pad section-cream gallery-section" id="gallery"><div class="site-container gallery-container">
       <div class="section-heading-row"><div><span class="eyebrow">ORIGIN / CRAFT</span><h2>From farm to flame.</h2><p>Local visual studies of coffee, craft, and the Batangas spirit.</p></div></div>
-      <div class="gallery-grid" id="gallery-grid"></div>
+      <div class="gallery-grid gallery-card-grid" id="gallery-grid"></div>
       <div class="developer-note gallery-note"><strong>Developer note</strong><span>These 6 local placeholder visuals are temporary. Replace the six files in <code>/images</code> or update their local paths in Admin → Gallery with the buyer’s actual high-resolution photos.</span></div>
     </div></section>
 
-    <section class="section-pad" id="contact"><div class="site-container contact-grid">
+    <section class="section-pad contact-section" id="contact"><div class="site-container contact-container contact-grid">
       <div><span class="eyebrow">CONTACT</span><h2>Ready for your<br><em>next cup?</em></h2><p>Questions about coffee, delivery, or your order? Send us a message.</p><div class="contact-meta"><span>📍 <b data-store-location>ILAG</b></span><span>✉️ <b data-store-email>ILAG</b></span><span>☎️ <b data-store-phone>ILAG</b></span></div></div>
       <div class="contact-card"><h3>Client contact form</h3><p>Use the buyer’s configured contact details from the Admin dashboard.</p><a class="button dark full" href="pages/contact.html">Open Contact Form →</a></div>
     </div></section>
   </main>
 
-  <footer class="site-footer"><div class="site-container footer-grid"><div class="footer-brand"><span class="brand-mark"><img src="images/favicon.svg" alt="Kapeng Barako Batangas logo"></span><div><strong>Kapeng Barako Batangas</strong><small id="footer-tagline">BATANGAS · LIBERICA · SMALL BATCH</small></div></div><div class="footer-socials"><a id="social-fb" href="#" aria-label="Facebook" target="_blank" rel="noopener"><img class="platform-logo" src="https://cdn.simpleicons.org/facebook" alt="" loading="lazy"><span>Facebook</span></a><a id="social-ig" href="#" aria-label="Instagram" target="_blank" rel="noopener"><img class="platform-logo" src="https://cdn.simpleicons.org/instagram" alt="" loading="lazy"><span>Instagram</span></a><a id="social-tiktok" href="#" aria-label="TikTok" target="_blank" rel="noopener"><img class="platform-logo" src="https://cdn.simpleicons.org/tiktok" alt="" loading="lazy"><span>TikTok</span></a></div><div class="footer-copy">© 2026 Kapeng Barako</div></div></footer>
+  <footer class="site-footer"><div class="site-container footer-wrapper footer-grid"><div class="footer-brand"><span class="brand-mark"><img src="images/favicon.svg" alt="Kapeng Barako Batangas logo"></span><div><strong>Kapeng Barako Batangas</strong><small id="footer-tagline">BATANGAS · LIBERICA · SMALL BATCH</small></div></div><div class="footer-socials"><a id="social-fb" href="#" aria-label="Facebook" target="_blank" rel="noopener"><img class="platform-logo" src="https://cdn.simpleicons.org/facebook" alt="" loading="lazy"><span>Facebook</span></a><a id="social-ig" href="#" aria-label="Instagram" target="_blank" rel="noopener"><img class="platform-logo" src="https://cdn.simpleicons.org/instagram" alt="" loading="lazy"><span>Instagram</span></a><a id="social-tiktok" href="#" aria-label="TikTok" target="_blank" rel="noopener"><img class="platform-logo" src="https://cdn.simpleicons.org/tiktok" alt="" loading="lazy"><span>TikTok</span></a></div><div class="footer-copy">© 2026 Kapeng Barako</div></div></footer>
 
-  <div class="modal-layer" id="cart-layer" hidden><button class="modal-backdrop" id="cart-backdrop" type="button" aria-label="Close cart"></button><aside class="cart-drawer" aria-label="Shopping cart"><div class="drawer-head"><div><span class="eyebrow">YOUR ORDER</span><h2>Your Cart</h2></div><button class="icon-close" id="close-cart" type="button" aria-label="Close cart">×</button></div><div class="cart-list" id="cart-list"></div><div class="cart-summary"><div><span>Items</span><strong id="cart-items-total">0</strong></div><div><span>Shipping</span><strong id="cart-shipping">Calculated after pack count</strong></div><div class="grand"><span>Total</span><strong id="cart-total">₱0</strong></div><button class="button dark full" id="checkout-button" type="button">Checkout →</button></div></aside></div>
+  <div class="modal-layer" id="cart-layer" hidden><button class="modal-backdrop" id="cart-backdrop" type="button" aria-label="Close cart"></button><aside class="cart-drawer cart-container" aria-label="Shopping cart"><div class="drawer-head"><div><span class="eyebrow">YOUR ORDER</span><h2>Your Cart</h2></div><button class="icon-close" id="close-cart" type="button" aria-label="Close cart">×</button></div><div class="cart-list" id="cart-list"></div><div class="cart-summary"><div><span>Items</span><strong id="cart-items-total">0</strong></div><div><span>Shipping</span><strong id="cart-shipping">Calculated after pack count</strong></div><div class="grand"><span>Total</span><strong id="cart-total">₱0</strong></div><button class="button dark full" id="checkout-button" type="button">Checkout →</button></div></aside></div>
 
-  <div class="modal-layer" id="checkout-layer" hidden><button class="modal-backdrop" id="checkout-backdrop" type="button" aria-label="Close checkout"></button><section class="checkout-modal" aria-label="Checkout"><div class="drawer-head"><div><span class="eyebrow">CHECKOUT</span><h2>Place your order</h2></div><button class="icon-close" id="close-checkout" type="button" aria-label="Close checkout">×</button></div><form id="checkout-form" class="checkout-form"><div class="form-grid"><label>Full name<input name="name" required autocomplete="name"></label><label>Phone<input name="phone" required autocomplete="tel"></label><label>Email <span class="optional">optional</span><input name="email" type="email" autocomplete="email"></label><label>Payment<select name="payment" id="checkout-payment"></select></label><label class="full">Delivery address<textarea name="address" rows="3" required autocomplete="street-address"></textarea></label><label>Fulfillment<select name="fulfillment" id="checkout-fulfillment"></select></label><label>Voucher <span class="optional">optional</span><input name="voucher" id="voucher-code" autocomplete="off"></label></div><div class="payment-panel" id="payment-panel"><div class="payment-panel-title">Payment details</div><div id="payment-instructions" class="payment-help"></div><label class="full payment-reference-wrap" id="payment-reference-wrap" hidden>Payment reference <span class="optional">optional</span><input name="paymentReference" id="payment-reference" type="text" autocomplete="off" placeholder="Reference / transaction number"></label><label class="full payment-proof-wrap" id="payment-proof-wrap" hidden>Payment proof <span class="optional">optional</span><input id="payment-proof" type="file" accept="image/*,.pdf"><small class="upload-note" id="payment-proof-note">On GitHub Pages mode, the file is not uploaded to a server; only its filename is attached to the local order record.</small></label></div><div class="checkout-promo" id="checkout-promo"></div><div class="checkout-total"><span>Order total</span><strong id="checkout-total">₱0</strong></div><button class="button dark full" type="submit">Place Order</button><p class="form-footnote" id="checkout-note"></p></form><div class="order-success" id="order-success" hidden><div class="success-icon">✓</div><h3>Order recorded.</h3><p id="success-text"></p><button class="button dark full" id="success-close" type="button">Done</button></div></section></div>
+  <div class="modal-layer" id="checkout-layer" hidden><button class="modal-backdrop" id="checkout-backdrop" type="button" aria-label="Close checkout"></button><section class="checkout-modal checkout-container" aria-label="Checkout"><div class="drawer-head"><div><span class="eyebrow">CHECKOUT</span><h2>Place your order</h2></div><button class="icon-close" id="close-checkout" type="button" aria-label="Close checkout">×</button></div><form id="checkout-form" class="checkout-form"><div class="form-grid"><label>Full name<input name="name" required autocomplete="name"></label><label>Phone<input name="phone" required autocomplete="tel"></label><label>Email <span class="optional">optional</span><input name="email" type="email" autocomplete="email"></label><label>Payment<select name="payment" id="checkout-payment"></select></label><label class="full">Delivery address<textarea name="address" rows="3" required autocomplete="street-address"></textarea></label><label>Fulfillment<select name="fulfillment" id="checkout-fulfillment"></select></label><label>Voucher <span class="optional">optional</span><input name="voucher" id="voucher-code" autocomplete="off"></label></div><div class="payment-panel" id="payment-panel"><div class="payment-panel-title">Payment details</div><div id="payment-instructions" class="payment-help"></div><label class="full payment-reference-wrap" id="payment-reference-wrap" hidden>Payment reference <span class="optional">optional</span><input name="paymentReference" id="payment-reference" type="text" autocomplete="off" placeholder="Reference / transaction number"></label><label class="full payment-proof-wrap" id="payment-proof-wrap" hidden>Payment proof <span class="optional">optional</span><input id="payment-proof" type="file" accept="image/*,.pdf"><small class="upload-note" id="payment-proof-note">On GitHub Pages mode, the file is not uploaded to a server; only its filename is attached to the local order record.</small></label></div><div class="checkout-promo" id="checkout-promo"></div><div class="checkout-total"><span>Order total</span><strong id="checkout-total">₱0</strong></div><button class="button dark full" type="submit">Place Order</button><p class="form-footnote" id="checkout-note"></p></form><div class="order-success" id="order-success" hidden><div class="success-icon">✓</div><h3>Order recorded.</h3><p id="success-text"></p><button class="button dark full" id="success-close" type="button">Done</button></div></section></div>
 
-  <div class="modal-layer" id="track-layer" hidden><button class="modal-backdrop" id="track-backdrop" type="button" aria-label="Close order tracking"></button><section class="track-modal" aria-label="Track order"><div class="drawer-head"><div><span class="eyebrow">ORDER TRACKING</span><h2>Track your order</h2></div><button class="icon-close" id="close-track" type="button" aria-label="Close order tracking">×</button></div><p class="track-intro">Enter the Order Number from your confirmation, then check the latest status available for this order.</p><form id="track-form" class="track-form"><label for="track-order-id">Order Number<input id="track-order-id" class="track-input" type="text" inputmode="text" autocomplete="off" placeholder="#KB-2026-001" required></label><button class="button dark full" type="submit">Track Order →</button></form><div id="track-result" class="track-result" hidden></div><div id="track-map-wrap" class="track-map-wrap" hidden><div class="track-map-head"><div><span class="eyebrow">DELIVERY LOCATION</span><h3>Google Maps</h3></div><a id="track-map-link" class="track-map-link" href="#" target="_blank" rel="noopener">Open in Google Maps ↗</a></div><iframe id="track-map" class="track-map" title="Order delivery location map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div><p class="track-note">Tracking updates automatically when the order record changes in this browser.</p></section></div>
+  <div class="modal-layer" id="track-layer" hidden><button class="modal-backdrop" id="track-backdrop" type="button" aria-label="Close order tracking"></button><section class="track-modal tracking-container" aria-label="Track order"><div class="drawer-head"><div><span class="eyebrow">ORDER TRACKING</span><h2>Track your order</h2></div><button class="icon-close" id="close-track" type="button" aria-label="Close order tracking">×</button></div><p class="track-intro">Enter the Order Number from your confirmation, then check the latest status available for this order.</p><form id="track-form" class="track-form"><label for="track-order-id">Order Number<input id="track-order-id" class="track-input" type="text" inputmode="text" autocomplete="off" placeholder="#KB-2026-001" required></label><button class="button dark full" type="submit">Track Order →</button></form><div id="track-result" class="track-result" hidden></div><div id="track-map-wrap" class="track-map-wrap" hidden><div class="track-map-head"><div><span class="eyebrow">DELIVERY LOCATION</span><h3>Google Maps</h3></div><a id="track-map-link" class="track-map-link" href="#" target="_blank" rel="noopener">Open in Google Maps ↗</a></div><iframe id="track-map" class="track-map" title="Order delivery location map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div><p class="track-note">Tracking updates automatically when the order record changes in this browser.</p></section></div>
 
   <dialog id="brew-dialog" class="simple-dialog"><div class="dialog-card"><button class="icon-close" data-close-dialog type="button">×</button><span class="eyebrow">VIDEO PLACEHOLDER</span><h2>Swap in the buyer’s tutorial</h2><p>Replace the local <code>images/brew-placeholder.svg</code> poster and the video placeholder markup with the buyer’s actual tutorial or approved embed code.</p><button class="button dark" data-close-dialog type="button">Close</button></div></dialog>
 
