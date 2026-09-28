@@ -49,7 +49,8 @@
     </section>
 
     <section class="admin-view" id="view-orders" data-view-panel="orders" hidden>
-      <div class="view-head"><div><span class="eyebrow">ORDER MANAGEMENT</span><h2>Orders</h2><p>Orders created on the storefront are stored in <code>kb_orders</code>.</p></div></div>
+      <div class="view-head"><div><span class="eyebrow">ORDER MANAGEMENT</span><h2>Orders</h2><p>Search by Order ID or customer name.</p></div></div>
+      <div class="order-search-bar"><label class="order-search-field"><span aria-hidden="true">⌕</span><input id="order-search" type="search" placeholder="Search Order ID or customer name..." autocomplete="off" aria-label="Search orders by Order ID or customer name"><button id="clear-order-search" type="button" aria-label="Clear order search">×</button></label><span id="order-search-count" class="panel-note"></span></div>
       <div class="panel table-panel"><div id="orders-table"></div></div>
     </section>
 
