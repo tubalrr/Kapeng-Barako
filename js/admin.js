@@ -20,7 +20,7 @@
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let products=read(PRODUCTS_KEY,[]);if(!Array.isArray(products))products=[];
   let gallery=read(GALLERY_KEY,[]);if(!Array.isArray(gallery))gallery=[];
-  let ads=read(ADS_KEY,{link:"",label:""});if(!ads||typeof ads!=="object"||Array.isArray(ads))ads={link:"",label:""};
+  let ads=read(ADS_KEY,{link:"",image:"",label:""});if(!ads||typeof ads!=="object"||Array.isArray(ads))ads={link:"",image:"",label:""};
   let orderSearch="";
   let lowStockSoundEnabled=localStorage.getItem("kb_low_stock_sound")==="1";
   let lastLowStockCount=-1;
@@ -220,15 +220,21 @@
     $$("[data-gallery-save]").forEach(btn=>btn.addEventListener("click",()=>saveGallery(Number(btn.dataset.gallerySave))));
   }
   function renderAds(){
-    const linkInput=$("#ads-link"), labelInput=$("#ads-label"), preview=$("#ads-preview");
+    const linkInput=$("#ads-link"), imageInput=$("#ads-image"), labelInput=$("#ads-label"), preview=$("#ads-preview");
     if(!linkInput||!labelInput||!preview)return;
     const link=String(ads.link||"").trim();
+    const image=String(ads.image||"").trim();
     const label=String(ads.label||"Sponsored").trim()||"Sponsored";
     linkInput.value=link;
+    if(imageInput) imageInput.value=image;
     labelInput.value=ads.label||"";
-    const title=$("#ads-preview-title"), copy=$("#ads-preview-copy"), open=$("#ads-preview-open");
-    if(title)title.textContent=link?label:"No ad link configured";
-    if(copy)copy.textContent=link?"Advertisement link is configured and ready for the storefront connection.":"Add the destination link above, then save it.";
+    const title=$("#ads-preview-title"), copy=$("#ads-preview-copy"), open=$("#ads-preview-open"), previewImage=$("#ads-preview-image");
+    if(title)title.textContent=(link||image)?label:"No ad configured";
+    if(copy)copy.textContent=(link||image)?"Advertisement is configured and ready for the storefront.":"Add an advertisement link and image URL above, then save it.";
+    if(previewImage){
+      previewImage.hidden=!image;
+      previewImage.src=image||"";
+    }
     if(open){
       open.hidden=!link;
       open.href=link||"#";
@@ -238,19 +244,24 @@
 
   function saveAds(){
     const link=$("#ads-link")?.value.trim()||"";
+    const image=$("#ads-image")?.value.trim()||"";
     const label=$("#ads-label")?.value.trim()||"Sponsored";
     if(link && !/^https?:\/\//i.test(link)){
       toast("Use a valid http:// or https:// advertisement link.");
       return;
     }
-    ads={link,label};
+    if(image && !/^https?:\/\//i.test(image)){
+      toast("Use a valid http:// or https:// image URL.");
+      return;
+    }
+    ads={link,image,label};
     write(ADS_KEY,ads);
     toast(link?"Advertisement link saved.":"Advertisement link cleared.");
     renderAds();
   }
 
   function clearAds(){
-    ads={link:"",label:""};
+    ads={link:"",image:"",label:""};
     try{localStorage.removeItem(ADS_KEY)}catch{}
     toast("Advertisement link cleared.");
     renderAds();
