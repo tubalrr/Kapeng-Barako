@@ -311,6 +311,7 @@
     $("#metric-customers").textContent = customerMap.length;
     $("#metric-low-stock-top").textContent = low;
     $("#metric-low-stock-top").classList.toggle("low-stock-alert", low > 0);
+    $("#metric-low-stock-top").closest(".metric-card")?.classList.toggle("low-stock-card", low > 0);
     $("#metric-low-stock-top").classList.toggle("low-stock-alert", low > 0);
     $("#metric-pending").textContent = orders.filter(o=>o.status==="Pending").length;
     $("#metric-processing").textContent = orders.filter(o=>o.status==="Processing/Roasting").length;
@@ -646,6 +647,7 @@
     $("#inv-pack").textContent = pack.toLocaleString();
     $("#inv-alerts").textContent = alerts;
     $("#inv-alerts").classList.toggle("low-stock-alert", alerts > 0);
+    $("#inv-alerts").closest(".metric-card")?.classList.toggle("low-stock-card", alerts > 0);
     const list = inventory.filter(i=>!invFilter || i.category===invFilter);
     const root = $("#inventory-table");
     if (!list.length) {
