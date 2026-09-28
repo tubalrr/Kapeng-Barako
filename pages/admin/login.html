@@ -5,53 +5,48 @@
 <title>Kapeng Barako — Admin Login</title>
 <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
 <link rel="stylesheet" href="../../css/admin-login.css?v=kb-rebuild-2">
-<script src="../../js/admin-auth.js?v=kb-firebase-auth-1" defer></script>
+<script src="../../js/admin-auth.js?v=kb-firebase-auth-3" defer></script>
 </head>
 <body>
 <main class="login-shell">
   <section class="login-brand"><img class="brand-mark" src="../../images/favicon.svg" alt="Kapeng Barako"><span class="eyebrow">RESTRICTED ADMIN PORTAL</span><h1>Run the<br><em>Barako.</em></h1><p>Orders, stock, customers and sales—inside the Kapeng Barako control room.</p><div class="login-rule"><span>FIREBASE ADMIN SESSION</span><b>8 HOURS</b></div></section>
-  <section class="login-card"><span class="eyebrow">ADMIN ACCESS</span><h2>Sign in.</h2><p>Authorized store administrators only.</p><form id="admin-login-form"><label>Email<input id="admin-email" type="email" placeholder="admin@example.com" autocomplete="username" required></label><label>Password<input id="admin-password" type="password" placeholder="Firebase password" autocomplete="current-password" required></label><div id="login-error" class="error" role="alert"></div><button id="login-submit" class="login-button" type="submit">ENTER CONSOLE →</button></form><div class="seed-note"><strong>Firebase Admin</strong><small>Sign in with a Firebase Authentication account that has an active <code>/admins/{uid}</code> document. No admin password is stored in this website.</small></div><a class="back-link" href="../../index.html">← Back to storefront</a></section>
+  <section class="login-card"><span class="eyebrow">ADMIN ACCESS</span><h2>Sign in.</h2><p>Authorized store administrators only.</p><div id="login-error" class="error" role="alert"></div><button id="google-admin-login" class="login-button" type="button">CONTINUE WITH GOOGLE →</button><div class="seed-note"><strong>Google Admin</strong><small>Use the authorized Google account with an active <code>/admins/{uid}</code> document. Admin access is verified in Firestore after Google authentication.</small></div><a class="back-link" href="../../index.html">← Back to storefront</a></section>
 </main>
 <script>
 document.addEventListener("DOMContentLoaded",async()=>{
-  const form=document.querySelector("#admin-login-form");
-  const btn=document.querySelector("#login-submit");
+  const btn=document.querySelector("#google-admin-login");
   const err=document.querySelector("#login-error");
 
   const params=new URLSearchParams(location.search);
   if(params.get("reason")==="expired"){
     err.textContent="Your admin session expired. Please sign in again.";
   }else if(params.get("reason")==="timeout"){
-    err.textContent="Firebase verification timed out. Make sure tubalrr.github.io is in Firebase Authentication → Authorized domains, then refresh.";
+    err.textContent="Firebase verification timed out. Check Authorized Domains and Firestore access.";
   }
 
   try{
     const admin=await window.KBAdminAuth.restore();
     if(admin){location.replace("./index.html");return}
   }catch(error){
-    if(error?.code==="FIREBASE_NOT_CONFIGURED"){
-      err.textContent="Firebase is not configured yet. Complete docs/FIREBASE_SETUP.md.";
-    }
+    err.textContent=error?.message || "Could not restore the admin session.";
   }
 
-  form.addEventListener("submit",async e=>{
-    e.preventDefault();
+  btn.addEventListener("click",async()=>{
     err.textContent="";
     btn.disabled=true;
-    btn.textContent="CHECKING…";
+    btn.textContent="CONNECTING TO GOOGLE…";
+
     try{
-      await window.KBAdminAuth.authenticate(
-        document.querySelector("#admin-email").value,
-        document.querySelector("#admin-password").value
-      );
+      await window.KBAdminAuth.authenticateWithGoogle();
       location.replace("./index.html");
     }catch(error){
-      err.textContent=error?.message || "Could not sign in.";
+      console.error("[Kapeng Barako] Google admin login failed",error);
+      err.textContent=error?.message || "Could not sign in with Google.";
     }finally{
       btn.disabled=false;
-      btn.textContent="ENTER CONSOLE →";
+      btn.textContent="CONTINUE WITH GOOGLE →";
     }
   });
 });
-</script>
+</script></script>
 </body></html>
