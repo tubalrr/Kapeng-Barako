@@ -303,12 +303,14 @@
     $("#metric-orders").textContent = orders.length;
     $("#metric-low-stock").textContent = low;
     $("#metric-low-stock").classList.toggle("low-stock-alert", low > 0);
+    $("#metric-low-stock").classList.toggle("low-stock-alert", low > 0);
     $("#metric-tickets").textContent = openTickets;
     $("#metric-revenue").textContent = money(revenue);
     $("#metric-today-sales").textContent = money(todaySales);
     $("#metric-week-sales").textContent = money(weekSales);
     $("#metric-customers").textContent = customerMap.length;
     $("#metric-low-stock-top").textContent = low;
+    $("#metric-low-stock-top").classList.toggle("low-stock-alert", low > 0);
     $("#metric-low-stock-top").classList.toggle("low-stock-alert", low > 0);
     $("#metric-pending").textContent = orders.filter(o=>o.status==="Pending").length;
     $("#metric-processing").textContent = orders.filter(o=>o.status==="Processing/Roasting").length;
