@@ -1709,3 +1709,234 @@ body.sidebar-open > footer{
 body > .site-header:hover{
   width:var(--sidebar-width)!important;
 }
+
+
+/* =========================================================
+   PREMIUM MOBILE DRAWER — smooth right-side dashboard
+   ========================================================= */
+@media (max-width:900px){
+  body{
+    overflow-x:hidden;
+  }
+
+  body.sidebar-open{
+    overflow:hidden!important;
+  }
+
+  /* Fixed hamburger stays independent from the drawer */
+  body > .sidebar-toggle{
+    top:16px!important;
+    left:16px!important;
+    width:48px!important;
+    height:48px!important;
+    border-radius:14px!important;
+    color:#F5E9D3!important;
+    background:rgba(26,18,7,.94)!important;
+    border:1px solid rgba(245,233,211,.18)!important;
+    box-shadow:0 10px 30px rgba(0,0,0,.28)!important;
+    transition:background .25s ease,transform .25s ease!important;
+  }
+
+  body > .sidebar-toggle span{
+    width:21px!important;
+    height:2px!important;
+    background:#F5E9D3!important;
+    transform-origin:center!important;
+    transition:
+      transform .35s cubic-bezier(.4,0,.2,1),
+      opacity .35s cubic-bezier(.4,0,.2,1)!important;
+  }
+
+  /* Hamburger → X */
+  body > .sidebar-toggle[aria-expanded="true"] span:nth-child(1){
+    transform:translateY(7px) rotate(45deg)!important;
+  }
+
+  body > .sidebar-toggle[aria-expanded="true"] span:nth-child(2){
+    opacity:0!important;
+    transform:scaleX(0)!important;
+  }
+
+  body > .sidebar-toggle[aria-expanded="true"] span:nth-child(3){
+    transform:translateY(-7px) rotate(-45deg)!important;
+  }
+
+  /* Right-side drawer */
+  body > .site-header{
+    position:fixed!important;
+    top:0!important;
+    right:-100%!important;
+    left:auto!important;
+    bottom:0!important;
+
+    width:80%!important;
+    max-width:320px!important;
+    height:100vh!important;
+    height:100dvh!important;
+
+    margin:0!important;
+    padding:0!important;
+
+    background:#1A1207!important;
+    box-shadow:-20px 0 60px rgba(0,0,0,.5)!important;
+
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain!important;
+
+    transform:none!important;
+    transition:right .45s cubic-bezier(.4,0,.2,1)!important;
+
+    z-index:2147482000!important;
+    will-change:right!important;
+  }
+
+  body.sidebar-open > .site-header{
+    right:0!important;
+    transform:none!important;
+  }
+
+  /* Drawer layout */
+  body > .site-header .nav-wrap{
+    width:100%!important;
+    height:auto!important;
+    min-height:100%!important;
+    padding:90px 24px 34px!important;
+    margin:0!important;
+
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:0!important;
+  }
+
+  /* Hide desktop-only branding/actions inside compact drawer */
+  body > .site-header .brand{
+    margin:0 0 28px!important;
+    padding:0!important;
+    min-height:auto!important;
+    height:auto!important;
+    border:0!important;
+  }
+
+  body > .site-header .brand-copy{
+    opacity:1!important;
+    transform:none!important;
+    pointer-events:auto!important;
+  }
+
+  body > .site-header .desktop-nav{
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:0!important;
+
+    opacity:1!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    overflow:visible!important;
+  }
+
+  /* Staggered menu links */
+  body > .site-header .desktop-nav a,
+  body > .site-header .nav-track-button{
+    min-height:58px!important;
+    height:auto!important;
+    padding:0!important;
+
+    display:flex!important;
+    align-items:center!important;
+
+    background:transparent!important;
+    border-radius:0!important;
+
+    color:#F5E9D3!important;
+    font-family:Georgia,"Times New Roman",serif!important;
+    font-size:22px!important;
+    font-weight:400!important;
+    letter-spacing:0!important;
+    text-transform:none!important;
+
+    opacity:0!important;
+    transform:translateX(20px)!important;
+
+    transition:
+      opacity .4s ease,
+      transform .45s cubic-bezier(.4,0,.2,1)!important;
+  }
+
+  body > .site-header .desktop-nav a:before{
+    display:none!important;
+  }
+
+  body.sidebar-open > .site-header .desktop-nav a,
+  body.sidebar-open > .site-header .nav-track-button{
+    opacity:1!important;
+    transform:translateX(0)!important;
+  }
+
+  body.sidebar-open > .site-header .desktop-nav a:nth-child(1){
+    transition-delay:.10s!important;
+  }
+
+  body.sidebar-open > .site-header .desktop-nav a:nth-child(2){
+    transition-delay:.15s!important;
+  }
+
+  body.sidebar-open > .site-header .desktop-nav a:nth-child(3){
+    transition-delay:.20s!important;
+  }
+
+  body.sidebar-open > .site-header .desktop-nav a:nth-child(4){
+    transition-delay:.25s!important;
+  }
+
+  body.sidebar-open > .site-header .desktop-nav a:nth-child(5){
+    transition-delay:.30s!important;
+  }
+
+  body.sidebar-open > .site-header .desktop-nav a:nth-child(6){
+    transition-delay:.35s!important;
+  }
+
+  body.sidebar-open > .site-header .nav-track-button{
+    transition-delay:.40s!important;
+    justify-content:flex-start!important;
+    color:#C8A951!important;
+  }
+
+  body > .site-header .desktop-nav a:hover,
+  body > .site-header .nav-track-button:hover{
+    color:#F5E9D3!important;
+    background:transparent!important;
+  }
+
+  body > .site-header .nav-actions{
+    width:100%!important;
+    margin-top:auto!important;
+    padding:24px 0 0!important;
+
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+    transform:none!important;
+  }
+
+  /* Do not use the old mobile-nav dropdown */
+  body > .site-header .mobile-nav{
+    display:none!important;
+  }
+
+  /* Keep page underneath the drawer instead of shifting it */
+  body > main,
+  body > footer,
+  body.sidebar-open > main,
+  body.sidebar-open > footer{
+    margin-left:0!important;
+  }
+}
