@@ -22,7 +22,7 @@
       <button data-view="products"><span>04</span>Products</button>
       <button data-view="customers"><span>05</span>Customers</button>
       <button data-view="promos"><span>06</span>Promos</button>
-      <button data-view="content"><span>07</span>Content</button><button data-view="gallery"><span>08</span>Gallery</button>
+      <button data-view="content"><span>07</span>Content</button><button data-view="gallery"><span>08</span>Gallery</button><button data-view="ads"><span>09</span>Ads</button>
     </nav>
     <div class="admin-sidebar-foot"><a href="../../index.html">← Storefront</a><button id="logout" type="button">Logout</button></div>
   </aside>
@@ -94,6 +94,22 @@
       <div class="view-head"><div><span class="eyebrow">VISUAL CATALOG</span><h2>Gallery Manager</h2><p>Replace the six main-site gallery photos with your real product, farm, roast, or coffee photos.</p></div></div>
       <div class="panel table-panel"><div id="gallery-table"></div></div>
     </section>
+    <section class="admin-view" id="view-ads" data-view-panel="ads" hidden>
+      <div class="view-head"><div><span class="eyebrow">ADVERTISEMENT</span><h2>Ad Container</h2><p>Enter the advertisement destination link here. This is the admin container only; storefront placement can be connected next.</p></div><div class="view-head-actions"><button id="save-ads" class="admin-button gold" type="button">Save Ad Link</button><button id="clear-ads" class="admin-button outline" type="button">Clear</button></div></div>
+      <div class="panel ads-manager-panel">
+        <div class="ads-input-grid">
+          <label>Advertisement link<input id="ads-link" type="url" placeholder="https://example.com/advertisement" inputmode="url" autocomplete="off"></label>
+          <label>Ad label<input id="ads-label" type="text" placeholder="Sponsored" autocomplete="off"></label>
+        </div>
+        <div class="ads-container" id="ads-preview">
+          <span class="ads-container-kicker">ADVERTISEMENT SLOT</span>
+          <strong id="ads-preview-title">No ad link configured</strong>
+          <p id="ads-preview-copy">Add the destination link above, then save it.</p>
+          <a id="ads-preview-open" href="#" target="_blank" rel="noopener noreferrer" hidden>OPEN AD LINK ↗</a>
+        </div>
+        <div class="content-note">The saved value is currently stored in this browser's admin storage. No live AdSense code is added yet.</div>
+      </div>
+    </section>
 
     <section class="admin-view" id="view-content" data-view-panel="content" hidden>
       <div class="view-head"><div><span class="eyebrow">CONTENT</span><h2>Story & announcements</h2><p>Safe place to update approved contact, announcement and social-proof content.</p></div><button id="save-content" class="admin-button gold" type="button">Save content</button></div>
@@ -125,5 +141,5 @@
   };
 })();
 </script>
-<script src="../../js/admin.js?v=kb-production-14" defer></script>
+<script src="../../js/admin.js?v=kb-production-15" defer></script>
 </body></html>
