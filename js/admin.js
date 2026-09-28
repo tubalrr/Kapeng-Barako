@@ -183,7 +183,11 @@
     });
     const label = $(".nav-item.active")?.textContent?.trim() || "Overview";
     $("#page-heading").textContent = label;
-    if (window.innerWidth < 900) document.body.classList.remove("menu-open");
+    if (window.innerWidth < 900) {
+      document.body.classList.remove("menu-open");
+      document.body.style.overflow="";
+      document.querySelector(".admin-menu-trigger")?.setAttribute("aria-expanded","false");
+    }
     if (section === "overview") renderOverview();
     if (section === "orders") renderOrders();
     if (section === "customers") renderCustomers();
@@ -937,8 +941,16 @@
     if(action==="save-regional-shipping") saveRegionalShipping();
     if(action==="print-report") printReport();
     if(action==="export-audit") exportAudit();
-    if(action==="open-menu") document.body.classList.add("menu-open");
-    if(action==="close-menu") document.body.classList.remove("menu-open");
+    if(action==="open-menu"){
+      document.body.classList.add("menu-open");
+      document.body.style.overflow="hidden";
+      document.querySelector(".admin-menu-trigger")?.setAttribute("aria-expanded","true");
+    }
+    if(action==="close-menu"){
+      document.body.classList.remove("menu-open");
+      document.body.style.overflow="";
+      document.querySelector(".admin-menu-trigger")?.setAttribute("aria-expanded","false");
+    }
     if(action==="logout"){
       window.KBAdminAuth?.logout();
     }
