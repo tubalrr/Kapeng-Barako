@@ -956,10 +956,6 @@
     }
   });
 
-  setInterval(() => {
-    const next=getOrders();
-    if(JSON.stringify(next)!==JSON.stringify(orders)){orders=next;renderOverview();if($('[data-section-panel="orders"]')&&!$('[data-section-panel="orders"]').hidden)renderOrders();if(!$('[data-section-panel="financials"]').hidden)renderFinancials();}
-  },3000);
 
   function applySegment(){
     orders=getOrders();
