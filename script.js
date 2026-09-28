@@ -63,7 +63,7 @@ function renderCart(){
   }
   $("#checkoutButton").disabled=false;
   root.innerHTML=cart.map((item,i)=>
-    '<div class="cart-item"><div><h3>'+esc(item.name)+'</h3><small>'+esc(item.size)+' • '+esc(item.roast)+' Roast • '+esc(item.grind)+' Grind</small><div class="qty"><button type="button" data-plus="'+i+'">+</button><span>'+Number(item.qty||0)+'</span><button type="button" data-minus="'+i+'">−</button></div><button class="remove-item" type="button" data-remove="'+i+'">Remove</button></div><strong class="cart-price">'+money(Number(item.price||0)*Number(item.qty||0))+'</strong></div>'
+    '<div class="cart-item"><div><h3>'+esc(item.name)+'</h3><small>'+esc(item.size)+' • '+esc(item.roast)+' Roast • '+esc(item.grind)+' Grind</small><div class="qty"><button type="button" data-plus="'+i+'">+</button><span>'+Number(item.qty||0)+'</span><button type="button" data-minus="'+i+'">−</button></div><button class="remove-item" type="button" data-remove="'+i+'">Tanggalin</button></div><strong class="cart-price">'+money(Number(item.price||0)*Number(item.qty||0))+'</strong></div>'
   ).join("");
 }
 
@@ -75,7 +75,7 @@ function renderProducts(){
     const badge=card.querySelector("[data-stock-badge]");
     const button=card.querySelector("[data-add-to-cart]");
     if(badge){
-      badge.textContent=stock ? (stock<=5 ? "⚡ Only "+stock+" packs left" : "⚡ "+stock+" packs left") : "SOLD OUT";
+      badge.textContent=stock ? (stock<=5 ? "⚡ Humigit-kumulang "+stock+" packs left" : "⚡ "+stock+" packs left") : "SOLD OUT";
       badge.classList.toggle("urgent",stock>0 && stock<=5);
     }
     if(button){
@@ -99,14 +99,14 @@ function addToCart(id){
   const existing=cart.find(x=>String(x.id)===String(id)&&x.roast===roast&&x.grind===grind);
   const next=Number(existing?.qty||0)+1;
   const stock=Math.max(0,Number(product.stock||0));
-  if(stock<=0){toast("Sold out na ang "+product.name+".");return}
-  if(next>stock){toast("Only "+stock+" pack(s) left.");return}
+  if(stock<=0){toast("Ubos na ang "+product.name+".");return}
+  if(next>stock){toast("Humigit-kumulang "+stock+" pack(s) na lang.");return}
   if(existing) existing.qty=next;
   else cart.push({id:product.id,name:product.name,size:product.size,price:Number(product.price||0),roast,grind,qty:1});
   write(CART_KEY,cart);
   renderCart();
   setModal("#cartModal",true);
-  toast(product.name+" added sa cart.");
+  toast(product.name+" naidagdag sa cart.");
 }
 
 function changeQty(index,delta){
@@ -117,7 +117,7 @@ function changeQty(index,delta){
   const stock=Number(product?.stock||0);
   if(next<=0) cart.splice(index,1);
   else if(next<=stock) item.qty=next;
-  else toast("Stock limit: "+stock+" pack(s).");
+  else toast("Limit ng stock: "+stock+" pack(s).");
   write(CART_KEY,cart);
   renderCart();
 }
@@ -146,16 +146,16 @@ function checkoutBox(){
   const box=document.createElement("div");
   box.className="checkout-inline";
   box.innerHTML='<div class="inline-head"><span>CHECKOUT</span><button type="button" id="cancelCheckout">×</button></div><form id="checkoutFormInline" class="checkout-form">'+
-    '<label>Full name<input name="name" required></label>'+
+    '<label>Buong pangalan<input name="name" required></label>'+
     '<label>Phone<input name="phone" required></label>'+
     '<label>Email<input name="email" type="email"></label>'+
-    '<label>Payment<select name="payment"><option>GCash</option><option>Cash on Delivery (COD)</option><option>Bank Transfer</option></select></label>'+
-    '<label>Delivery address<textarea name="address" rows="3" required></textarea></label>'+
-    '<label>Voucher<input name="voucher" placeholder="Optional"></label>'+
-    '<label>Fulfillment<select name="fulfillment"><option>Lalamove</option><option>J&T</option><option>LBC</option><option>QC Meetup</option></select></label>'+
+    '<label>Paraan ng bayad<select name="payment"><option>GCash</option><option>Cash on Delivery (COD)</option><option>Bank Transfer</option></select></label>'+
+    '<label>Address ng paghahatid<textarea name="address" rows="3" required></textarea></label>'+
+    '<label>Voucher<input name="voucher" placeholder="Opsyonal"></label>'+
+    '<label>Paraan ng paghahatid<select name="fulfillment"><option>Lalamove</option><option>J&T</option><option>LBC</option><option>QC Meetup</option></select></label>'+
     '<div class="inline-summary"><div><span>Subtotal</span><strong id="inlineSubtotal">₱0</strong></div><div><span>Shipping</span><strong id="inlineShipping">—</strong></div><div><span>Discount</span><strong id="inlineDiscount">—</strong></div><div class="grand"><span>Total</span><strong id="inlineTotal">₱0</strong></div></div>'+
-    '<button class="button button-gold full" type="submit">PLACE ORDER →</button>'+
-    '<small>Order data is saved in this browser only.</small></form>';
+    '<button class="button button-gold full" type="submit">ISUMITE ANG ORDER →</button>'+
+    '<small>Ang order data ay naka-save lamang sa browser na ito.</small></form>';
   $("#cartModal .cart-panel").appendChild(box);
   $("#checkoutButton").hidden=true;
 
@@ -185,7 +185,7 @@ function placeOrder(event){
     return !p || Number(item.qty||0)>Number(p.stock||0);
   });
   if(shortage){
-    toast("May nagbago sa stock. Please review your cart.");
+    toast("May nagbago sa stock. Pakisuri ang iyong cart.");
     renderProducts();
     return;
   }
@@ -242,15 +242,15 @@ function trackOrder(event){
   const root=$("#trackResult");
 
   if(!order){
-    root.innerHTML='<div class="empty">Order not found. Check your Order ID.</div>';
+    root.innerHTML='<div class="empty">Hindi makita ang order. Suriin ang iyong Order ID.</div>';
     return;
   }
 
-  const steps=["Pending","Verified Payment","Processing/Roasting","Ready to Ship","Dispatched","Delivered"];
+  const steps=["Pending","Verified Paraan ng bayad","Processing/Roasting","Ready to Ship","Dispatched","Delivered"];
   const active=Math.max(0,steps.indexOf(order.status));
 
-  root.innerHTML='<div class="track-customer"><strong>'+esc(order.id)+'</strong><br>'+esc(order.customer?.name||"Customer")+'<br>'+esc(order.customer?.address||"")+'</div>'+
-    steps.map((step,i)=>'<div class="track-step '+(i<active?"done ":"")+(i===active?"active":"")+'"><div class="track-dot">'+(i<active?"✓":i+1)+'</div><div><h4>'+esc(step)+'</h4><p>'+(i<=active?"Recorded":"Waiting")+'</p></div></div>').join("");
+  root.innerHTML='<div class="track-customer"><strong>'+esc(order.id)+'</strong><br>'+esc(order.customer?.name||"Mamimili")+'<br>'+esc(order.customer?.address||"")+'</div>'+
+    steps.map((step,i)=>'<div class="track-step '+(i<active?"done ":"")+(i===active?"active":"")+'"><div class="track-dot">'+(i<active?"✓":i+1)+'</div><div><h4>'+esc(step)+'</h4><p>'+(i<=active?"Naitala":"Naghihintay")+'</p></div></div>').join("");
 }
 
 function setupMenu(){
@@ -284,7 +284,7 @@ function setupTimer(){
       if(brewSeconds<=0){
         clearInterval(brewTimer);
         brewTimer=null;
-        toast("Brew timer complete.");
+        toast("Tapos na ang timer ng pagtitimpla.");
       }
     },1000);
   });
@@ -321,11 +321,11 @@ function setupControls(){
   $("#wholesaleRequest")?.addEventListener("click",()=>{
     const kg=Math.max(10,Number($("#wholesaleKg").value||10));
     write("kb_wholesale_request",{kg,roast:$("#wholesaleRoast").value,createdAt:new Date().toISOString()});
-    toast("Wholesale inquiry saved.");
+    toast("Na-save ang pakyawang inquiry.");
   });
   $("#subscriptionSave")?.addEventListener("click",()=>{
     write("kb_subscription_preference",{product:$("#subscriptionProduct").value,day:$("#subscriptionDay").value,createdAt:new Date().toISOString()});
-    toast("Auto-delivery preference saved.");
+    toast("Na-save ang iskedyul ng awtomatikong padala.");
   });
   $("#brewVideoButton")?.addEventListener("click",()=>$("#brew-dialog")?.showModal());
   $$("[data-close-dialog]").forEach(x=>x.addEventListener("click",()=>x.closest("dialog")?.close()));
