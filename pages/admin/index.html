@@ -1040,188 +1040,661 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 <script id="admin-advanced-script">
 (() => {
   "use strict";
-  const K={ORDERS:"kb_orders",PRODUCTS:"kb_rebuild_products",PROMOS:"kb_promos",SETTINGS:"kb_settings",CMS:"kb_cms",GALLERY:"kb_gallery",ADS:"kb_ads",ACTIVITY:"kb_activity_log",HISTORY:"kb_inventory_history",READ:"kb_notification_read",STORE:"kb_store_settings",DEMO:"kb_demo_customer_v1"};
-  const read=(k,f)=>{try{const raw=localStorage.getItem(k);return raw===null?f:JSON.parse(raw)}catch{return f}};
-  const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
-  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const money=n=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
-  const orders=()=>{const x=read(K.ORDERS,[]);return Array.isArray(x)?x:[]};
-  const products=()=>{const x=read(K.PRODUCTS,[]);return Array.isArray(x)?x:[]};
-  const customerKey=o=>String(o?.customer?.email||o?.email||o?.customer?.phone||o?.phone||o?.customer?.name||o?.customerName||"customer").toLowerCase();
-  const customerName=o=>String(o?.customer?.name||o?.customerName||"Customer");
-  const nowText=()=>new Date().toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"});
-  const toast=m=>{const t=document.getElementById("adminExtraToast")||document.getElementById("admin-toast");if(!t)return;t.textContent=m;t.classList.add("show");clearTimeout(window.__kbAdvToast);window.__kbAdvToast=setTimeout(()=>t.classList.remove("show"),2400)};
-  const activity=()=>{const x=read(K.ACTIVITY,[]);return Array.isArray(x)?x:[]};
-  function log(type,message,meta={}){const list=activity();list.unshift({id:"A-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),type,message,meta,at:new Date().toISOString()});write(K.ACTIVITY,list.slice(0,300));renderActivity()}
-  const settings=()=>{const x=read(K.SETTINGS,{});return x&&typeof x==="object"?x:{}};
-  const unreadIds=()=>{const x=read(K.READ,[]);return Array.isArray(x)?x.map(String):[]};
-  function renderAnalytics(){
-    const range=document.getElementById("analyticsRange")?.value||"30", os=orders(), ps=products(), cutoff=range==="all"?0:Date.now()-Number(range)*86400000;
-    const filtered=os.filter(o=>{const t=new Date(o.createdAt||0).getTime();return Number.isFinite(t)&&t>=cutoff});
-    const revenue=filtered.reduce((s,o)=>s+Number(o.total||0),0), count=filtered.length;
-    const aov=count?revenue/count:0;
-    const customersMap=new Map();os.forEach(o=>{const k=customerKey(o);const c=customersMap.get(k)||{orders:0};c.orders++;customersMap.set(k,c)});
-    const totalCustomers=customersMap.size, repeat=[...customersMap.values()].filter(c=>c.orders>1).length;
-    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
-    set("anRevenue",money(revenue));set("anOrders",count);set("anAov",money(aov));set("anCustomers",totalCustomers);set("anRepeat",repeat);set("anRepeatRate",totalCustomers?(repeat/totalCustomers*100).toFixed(1)+"%":"0%");
-    set("anTrendTotal",money(revenue));
-    const days=[], values=[];
-    const n=range==="all"?Math.min(14,Math.max(1,Math.ceil((Date.now()-Math.min(...filtered.map(o=>new Date(o.createdAt||Date.now()).getTime()),Date.now()))/86400000))):Number(range);
-    const countDays=Math.min(14,Math.max(1,n));
-    for(let i=countDays-1;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const from=d.getTime(),to=from+86400000;days.push(d.toLocaleDateString("en-PH",{weekday:"short",day:"numeric"}));values.push(filtered.filter(o=>{const t=new Date(o.createdAt||0).getTime();return t>=from&&t<to}).reduce((s,o)=>s+Number(o.total||0),0))}
-    const max=Math.max(...values,1), bars=document.getElementById("anSalesBars");
-    if(bars)bars.innerHTML=values.map((v,i)=>'<div class="advanced-bar-col"><span class="advanced-bar-value">'+(v?money(v):"₱0")+'</span><div class="advanced-bar-fill" style="height:'+Math.max(4,(v/max)*160)+'px"></div><span class="advanced-bar-label">'+esc(days[i])+'</span></div>').join("");
-    const itemMap=new Map();
-    filtered.forEach(o=>(Array.isArray(o.items)?o.items:[]).forEach(it=>{const key=String(it.id||it.productId||it.name||"item");const x=itemMap.get(key)||{name:it.name||key,qty:0,revenue:0};x.qty+=Number(it.qty||1);x.revenue+=Number(it.price||0)*Number(it.qty||1);itemMap.set(key,x)}));
-    const ranked=[...itemMap.values()].sort((a,b)=>b.qty-a.qty).slice(0,8), pr=document.getElementById("anProducts");
-    if(pr)pr.innerHTML=ranked.length?ranked.map((p,i)=>'<div class="extra-list-item"><div><strong style="font-size:10px">'+(i+1)+". "+esc(p.name)+'</strong><span class="extra-note">'+p.qty+" units sold</span></div><strong style="font-size:10px;color:var(--gold)">'+money(p.revenue)+'</strong></div>').join(""):'<div class="empty">No product sales in this range.</div>';
-    const statuses=["Pending","Verified Payment","Processing/Roasting","Ready to Ship","Dispatched","Delivered","Cancelled"],sr=document.getElementById("anStatus");
-    if(sr)sr.innerHTML=statuses.map(s=>'<article class="extra-status"><span>'+esc(s)+'</span><strong>'+filtered.filter(o=>String(o.status||"Pending")===s).length+'</strong></article>').join("");
+  const K = {
+    ORDERS:"kb_orders",
+    PRODUCTS:"kb_rebuild_products",
+    PROMOS:"kb_promos",
+    SETTINGS:"kb_settings",
+    STORE:"kb_store_settings",
+    CMS:"kb_cms",
+    GALLERY:"kb_gallery",
+    ADS:"kb_ads",
+    ACTIVITY:"kb_activity_log",
+    HISTORY:"kb_inventory_history",
+    READ:"kb_notification_read",
+    DEMO:"kb_demo_customer_v1"
+  };
+  const read = (key, fallback) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? fallback : JSON.parse(raw);
+    } catch {
+      return fallback;
+    }
+  };
+  const write = (key, value) => {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+  };
+  const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[ch]));
+  const money = value => "₱" + Number(value || 0).toLocaleString("en-PH",{maximumFractionDigits:2});
+  const orders = () => {
+    const value = read(K.ORDERS, []);
+    return Array.isArray(value) ? value : [];
+  };
+  const products = () => {
+    const value = read(K.PRODUCTS, []);
+    return Array.isArray(value) ? value : [];
+  };
+  const getActivity = () => {
+    const value = read(K.ACTIVITY, []);
+    return Array.isArray(value) ? value : [];
+  };
+  const customerKey = order => String(
+    order?.customer?.email || order?.email || order?.customer?.phone ||
+    order?.phone || order?.customer?.name || order?.customerName || "customer"
+  ).toLowerCase();
+  const customerName = order => String(order?.customer?.name || order?.customerName || "Customer");
+  const toast = message => {
+    const node = document.getElementById("adminExtraToast") || document.getElementById("admin-toast");
+    if (!node) return;
+    node.textContent = message;
+    node.classList.add("show");
+    clearTimeout(window.__kbAdvancedToast);
+    window.__kbAdvancedToast = setTimeout(() => node.classList.remove("show"), 2200);
+  };
+  const log = (type, message, meta) => {
+    const list = getActivity();
+    list.unshift({
+      id:"A-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),
+      type,
+      message,
+      meta:meta || {},
+      at:new Date().toISOString()
+    });
+    write(K.ACTIVITY, list.slice(0,300));
+    renderActivity();
+  };
+
+  function renderAnalytics() {
+    const range = document.getElementById("analyticsRange")?.value || "30";
+    const all = orders();
+    const cutoff = range === "all" ? 0 : Date.now() - Number(range) * 86400000;
+    const filtered = all.filter(order => {
+      const time = new Date(order.createdAt || 0).getTime();
+      return Number.isFinite(time) && time >= cutoff;
+    });
+    const revenue = filtered.reduce((sum, order) => sum + Number(order.total || 0), 0);
+    const count = filtered.length;
+    const aov = count ? revenue / count : 0;
+    const customersMap = new Map();
+    all.forEach(order => {
+      const key = customerKey(order);
+      customersMap.set(key, (customersMap.get(key) || 0) + 1);
+    });
+    const totalCustomers = customersMap.size;
+    const repeatCustomers = [...customersMap.values()].filter(n => n > 1).length;
+    const set = (id, value) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    };
+    set("anRevenue", money(revenue));
+    set("anOrders", count);
+    set("anAov", money(aov));
+    set("anCustomers", totalCustomers);
+    set("anRepeat", repeatCustomers);
+    set("anRepeatRate", totalCustomers ? (repeatCustomers / totalCustomers * 100).toFixed(1) + "%" : "0%");
+    set("anTrendTotal", money(revenue));
+
+    const days = [];
+    const values = [];
+    const dayCount = range === "all" ? 14 : Math.min(14, Math.max(1, Number(range)));
+    for (let index = dayCount - 1; index >= 0; index--) {
+      const day = new Date();
+      day.setHours(0,0,0,0);
+      day.setDate(day.getDate() - index);
+      const from = day.getTime();
+      const to = from + 86400000;
+      days.push(day.toLocaleDateString("en-PH",{weekday:"short",day:"numeric"}));
+      values.push(filtered.filter(order => {
+        const time = new Date(order.createdAt || 0).getTime();
+        return time >= from && time < to;
+      }).reduce((sum, order) => sum + Number(order.total || 0), 0));
+    }
+    const maxValue = Math.max(...values, 1);
+    const bars = document.getElementById("anSalesBars");
+    if (bars) {
+      bars.innerHTML = values.map((value, index) =>
+        '<div class="advanced-bar-col">' +
+          '<span class="advanced-bar-value">' + (value ? money(value) : "₱0") + '</span>' +
+          '<div class="advanced-bar-fill" style="height:' + Math.max(4, value / maxValue * 160) + 'px"></div>' +
+          '<span class="advanced-bar-label">' + esc(days[index]) + '</span>' +
+        '</div>'
+      ).join("");
+    }
+
+    const productMap = new Map();
+    filtered.forEach(order => {
+      (Array.isArray(order.items) ? order.items : []).forEach(item => {
+        const id = String(item.id || item.productId || item.name || "item");
+        const row = productMap.get(id) || {name:item.name || id, qty:0, revenue:0};
+        row.qty += Number(item.qty || 1);
+        row.revenue += Number(item.price || 0) * Number(item.qty || 1);
+        productMap.set(id, row);
+      });
+    });
+    const ranked = [...productMap.values()].sort((a,b) => b.qty - a.qty).slice(0,8);
+    const productRoot = document.getElementById("anProducts");
+    if (productRoot) {
+      productRoot.innerHTML = ranked.length ? ranked.map((item,index) =>
+        '<div class="extra-list-item"><div><strong style="font-size:10px">' +
+        (index + 1) + ". " + esc(item.name) +
+        '</strong><span class="extra-note">' + item.qty + ' units sold</span></div>' +
+        '<strong style="font-size:10px;color:var(--gold)">' + money(item.revenue) + '</strong></div>'
+      ).join("") : '<div class="empty">No product sales in this range.</div>';
+    }
+
+    const statuses = ["Pending","Verified Payment","Processing/Roasting","Ready to Ship","Dispatched","Delivered","Cancelled"];
+    const statusRoot = document.getElementById("anStatus");
+    if (statusRoot) {
+      statusRoot.innerHTML = statuses.map(status =>
+        '<article class="extra-status"><span>' + esc(status) + '</span><strong>' +
+        filtered.filter(order => String(order.status || "Pending") === status).length +
+        '</strong></article>'
+      ).join("");
+    }
   }
-  function buildNotifications(){
-    const result=[], os=orders(), ps=products(), threshold=Number(read(K.STORE,{lowStock:5}).lowStock||5);
-    ps.filter(p=>Number(p.stock||0)<=threshold).forEach(p=>result.push({id:"stock:"+p.id,type:"Inventory",title:"Low stock: "+p.name,body:Number(p.stock||0)+" packs remaining.",priority:"high"}));
-    os.filter(o=>String(o.status||"Pending")==="Pending").slice(0,20).forEach(o=>result.push({id:"order:"+o.id,type:"Orders",title:"Pending order "+(o.id||"—"),body:customerName(o)+" · "+money(o.total),priority:"normal"}));
-    os.filter(o=>String(o.payment||"").toLowerCase()==="gcash"&&!String(o.gcashRef||o.gcashReference||"").trim()).slice(0,20).forEach(o=>result.push({id:"gcash:"+o.id,type:"Payment",title:"Missing GCash reference",body:"Order "+(o.id||"—")+" needs payment reference review.",priority:"high"}));
-    return result.slice(0,50);
+
+  function buildNotifications() {
+    const list = [];
+    const threshold = Number(read(K.STORE,{lowStock:5})?.lowStock ?? 5);
+    products().filter(product => Number(product.stock || 0) <= threshold).forEach(product => {
+      list.push({
+        id:"stock:"+product.id,
+        type:"Inventory",
+        title:"Low stock: " + product.name,
+        body:Number(product.stock || 0) + " packs remaining."
+      });
+    });
+    orders().filter(order => String(order.status || "Pending") === "Pending").slice(0,20).forEach(order => {
+      list.push({
+        id:"order:"+order.id,
+        type:"Orders",
+        title:"Pending order " + (order.id || "—"),
+        body:customerName(order) + " · " + money(order.total)
+      });
+    });
+    orders().filter(order => String(order.payment || "").toLowerCase() === "gcash" &&
+      !String(order.gcashRef || order.gcashReference || order.gcash_ref || "").trim()
+    ).slice(0,20).forEach(order => {
+      list.push({
+        id:"gcash:"+order.id,
+        type:"Payment",
+        title:"Missing GCash reference",
+        body:"Order " + (order.id || "—") + " needs payment review."
+      });
+    });
+    return list.slice(0,60);
   }
-  function renderNotifications(){
-    const list=buildNotifications(),readSet=new Set(unreadIds()),root=document.getElementById("notificationList"),count=document.getElementById("notificationCount"),unread=list.filter(n=>!readSet.has(n.id)).length;
-    if(count)count.textContent=unread+" unread";
-    if(!root)return;
-    root.innerHTML=list.length?list.map(n=>'<div class="notification-item '+(readSet.has(n.id)?"":"unread")+'"><div style="display:flex;gap:10px"><span class="notification-dot '+(readSet.has(n.id)?"read":"")+'"></span><div class="notification-copy"><strong>'+esc(n.title)+'</strong><span>'+esc(n.type)+" · "+esc(n.body)+'</span></div></div><div class="notification-actions"><button class="ghost-btn" type="button" data-notification-id="'+esc(n.id)+'">'+(readSet.has(n.id)?"Read":"Mark Read")+'</button></div></div>').join(""):'<div class="empty">No operational notifications.</div>';
-    root.querySelectorAll("[data-notification-id]").forEach(b=>b.addEventListener("click",()=>{const s=new Set(unreadIds());s.add(b.dataset.notificationId);write(K.READ,[...s]);renderNotifications()}));
+
+  function renderNotifications() {
+    const list = buildNotifications();
+    const readSet = new Set((read(K.READ,[]) || []).map(String));
+    const unread = list.filter(item => !readSet.has(item.id)).length;
+    const count = document.getElementById("notificationCount");
+    const root = document.getElementById("notificationList");
+    if (count) count.textContent = unread + " unread";
+    if (!root) return;
+    root.innerHTML = list.length ? list.map(item =>
+      '<div class="notification-item ' + (readSet.has(item.id) ? "" : "unread") + '">' +
+        '<div style="display:flex;gap:10px"><span class="notification-dot ' +
+        (readSet.has(item.id) ? "read" : "") + '"></span><div class="notification-copy">' +
+        '<strong>' + esc(item.title) + '</strong><span>' + esc(item.type) + " · " + esc(item.body) +
+        '</span></div></div><div class="notification-actions">' +
+        '<button class="ghost-btn" type="button" data-notification-id="' + esc(item.id) + '">' +
+        (readSet.has(item.id) ? "Read" : "Mark Read") + '</button></div></div>'
+    ).join("") : '<div class="empty">No operational notifications.</div>';
+    root.querySelectorAll("[data-notification-id]").forEach(button => {
+      button.addEventListener("click", () => {
+        const current = new Set((read(K.READ,[]) || []).map(String));
+        current.add(button.dataset.notificationId);
+        write(K.READ,[...current]);
+        renderNotifications();
+      });
+    });
   }
-  function renderSettings(){
-    const s={status:"open",lowStock:5,deliveryFee:0,freeDeliveryThreshold:0,hours:"",payments:{gcash:true,cod:true,bank:true},...read(K.STORE,{})};
-    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v};
-    set("storeStatus",s.status);set("storeLowStock",s.lowStock);set("storeDeliveryFee",s.deliveryFee);set("storeFreeDelivery",s.freeDeliveryThreshold);set("storeHours",s.hours);
-    document.getElementById("payGcash").checked=s.payments?.gcash!==false;document.getElementById("payCod").checked=s.payments?.cod!==false;document.getElementById("payBank").checked=s.payments?.bank!==false;
+
+  function renderSettings() {
+    const saved = read(K.STORE,{});
+    const data = {
+      status:saved.status || "open",
+      lowStock:Number(saved.lowStock ?? 5),
+      deliveryFee:Number(saved.deliveryFee ?? 0),
+      freeDeliveryThreshold:Number(saved.freeDeliveryThreshold ?? 0),
+      hours:saved.hours || "",
+      payments:saved.payments || {gcash:true,cod:true,bank:true}
+    };
+    const set = (id,value) => {
+      const node = document.getElementById(id);
+      if (node) node.value = value;
+    };
+    set("storeStatus",data.status);
+    set("storeLowStock",data.lowStock);
+    set("storeDeliveryFee",data.deliveryFee);
+    set("storeFreeDelivery",data.freeDeliveryThreshold);
+    set("storeHours",data.hours);
+    const gcash = document.getElementById("payGcash");
+    const cod = document.getElementById("payCod");
+    const bank = document.getElementById("payBank");
+    if (gcash) gcash.checked = data.payments.gcash !== false;
+    if (cod) cod.checked = data.payments.cod !== false;
+    if (bank) bank.checked = data.payments.bank !== false;
   }
-  function saveSettings(){
-    const value={status:document.getElementById("storeStatus").value,lowStock:Math.max(0,Number(document.getElementById("storeLowStock").value||0)),deliveryFee:Math.max(0,Number(document.getElementById("storeDeliveryFee").value||0)),freeDeliveryThreshold:Math.max(0,Number(document.getElementById("storeFreeDelivery").value||0)),hours:document.getElementById("storeHours").value.trim(),payments:{gcash:document.getElementById("payGcash").checked,cod:document.getElementById("payCod").checked,bank:document.getElementById("payBank").checked}};
-    write(K.STORE,value);const shared=settings();write(K.SETTINGS,{...shared,storeStatus:value.status,lowStockThreshold:value.lowStock,deliveryFee:value.deliveryFee,freeDeliveryThreshold:value.freeDeliveryThreshold,businessHours:value.hours,paymentMethods:value.payments});log("settings","Updated store settings",{...value});toast("Store settings saved.");
+
+  function saveSettings() {
+    const data = {
+      status:document.getElementById("storeStatus").value,
+      lowStock:Math.max(0,Number(document.getElementById("storeLowStock").value || 0)),
+      deliveryFee:Math.max(0,Number(document.getElementById("storeDeliveryFee").value || 0)),
+      freeDeliveryThreshold:Math.max(0,Number(document.getElementById("storeFreeDelivery").value || 0)),
+      hours:document.getElementById("storeHours").value.trim(),
+      payments:{
+        gcash:document.getElementById("payGcash").checked,
+        cod:document.getElementById("payCod").checked,
+        bank:document.getElementById("payBank").checked
+      }
+    };
+    write(K.STORE,data);
+    const shared = read(K.SETTINGS,{});
+    write(K.SETTINGS,{
+      ...shared,
+      storeStatus:data.status,
+      lowStockThreshold:data.lowStock,
+      deliveryFee:data.deliveryFee,
+      freeDeliveryThreshold:data.freeDeliveryThreshold,
+      businessHours:data.hours,
+      paymentMethods:data.payments
+    });
+    log("settings","Updated store settings",data);
+    toast("Store settings saved.");
+    renderNotifications();
   }
-  function renderActivity(){
-    const root=document.getElementById("activityList"),count=document.getElementById("activityCount"),list=activity().slice(0,100);
-    if(count)count.textContent=list.length+" event"+(list.length===1?"":"s");
-    if(!root)return;
-    root.innerHTML=list.length?list.map(a=>'<div class="audit-row"><div><strong>'+esc(a.message)+'</strong><span>'+esc(a.type||"Admin")+' · '+esc(a.at?new Date(a.at).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}):"")+'</span></div><span>ADMIN</span></div>').join(""):'<div class="empty">No activity recorded yet.</div>';
+
+  function renderActivity() {
+    const root = document.getElementById("activityList");
+    const count = document.getElementById("activityCount");
+    const list = getActivity().slice(0,100);
+    if (count) count.textContent = list.length + " event" + (list.length === 1 ? "" : "s");
+    if (!root) return;
+    root.innerHTML = list.length ? list.map(entry =>
+      '<div class="audit-row"><div><strong>' + esc(entry.message) + '</strong><span>' +
+      esc(entry.type || "Admin") + ' · ' +
+      esc(entry.at ? new Date(entry.at).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}) : "") +
+      '</span></div><span>ADMIN</span></div>'
+    ).join("") : '<div class="empty">No activity recorded yet.</div>';
   }
-  function renderInventoryHistory(){
-    const host=document.getElementById("inventoryHistoryHost");if(!host)return;
-    const list=read(K.HISTORY,[]);const rows=Array.isArray(list)?list.slice(0,50):[];
-    host.innerHTML='<div class="inventory-history-panel"><div class="extra-head"><div><div class="kicker">INVENTORY AUDIT</div><h3>Stock History</h3></div><span class="extra-sub">'+rows.length+" record"+(rows.length===1?"":"s")+'</span></div>'+(rows.length?'<div>'+rows.map(r=>'<div class="audit-row"><div><strong>'+esc(r.productName||r.productId||"Product")+'</strong><span>'+esc(r.previousStock)+" → "+esc(r.newStock)+" packs · "+esc(r.action||"Updated")+'</span></div><span>'+esc(r.at?new Date(r.at).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}):"")+'</span></div>').join("")+'</div>':'<div class="empty">Stock changes made after this module was enabled will appear here.</div>')+'</div>';
+
+  function renderInventoryHistory() {
+    const mount = document.getElementById("inventoryHistoryHost");
+    if (!mount) return;
+    const list = read(K.HISTORY,[]);
+    const rows = Array.isArray(list) ? list.slice(0,80) : [];
+    mount.innerHTML =
+      '<div class="inventory-history-panel"><div class="extra-head"><div><div class="kicker">INVENTORY AUDIT</div>' +
+      '<h3>Stock History</h3></div><span class="extra-sub">' + rows.length + ' record' + (rows.length === 1 ? "" : "s") +
+      '</span></div>' +
+      (rows.length ? rows.map(row =>
+        '<div class="audit-row"><div><strong>' + esc(row.productName || row.productId || "Product") +
+        '</strong><span>' + esc(row.previousStock) + ' → ' + esc(row.newStock) + ' packs · ' + esc(row.action || "Updated") +
+        '</span></div><span>' + esc(row.at ? new Date(row.at).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}) : "") +
+        '</span></div>'
+      ).join("") : '<div class="empty">Stock changes made after this module was enabled will appear here.</div>') +
+      '</div>';
   }
-  function ensureInventoryHistoryMount(){
-    const table=document.getElementById("inventory-table");if(!table||document.getElementById("inventoryHistoryHost"))return;
-    const div=document.createElement("div");div.id="inventoryHistoryHost";table.parentElement?.insertAdjacentElement("afterend",div);
+
+  function ensureInventoryHistory() {
+    const table = document.getElementById("inventory-table");
+    if (!table) return;
+    let mount = document.getElementById("inventoryHistoryHost");
+    if (!mount) {
+      mount = document.createElement("div");
+      mount.id = "inventoryHistoryHost";
+      table.parentElement?.insertAdjacentElement("afterend",mount);
+    }
     renderInventoryHistory();
   }
-  function ensureOrderDetailMount(){
-    const table=document.getElementById("orders-table");if(!table||document.getElementById("orderDetailHost"))return;
-    const div=document.createElement("div");div.id="orderDetailHost";
-    table.parentElement?.insertAdjacentElement("afterend",div);
-    const rows=table.querySelectorAll("tbody tr");
-    rows.forEach((row,i)=>{const cell=row.lastElementChild;if(cell&&!cell.querySelector("[data-detail-order]")){const id=filteredOrderRows()[i]?.id;if(id){const b=document.createElement("button");b.type="button";b.className="track-btn";b.dataset.detailOrder=id;b.textContent="View";cell.appendChild(b)}}});
-    renderOrderDetail();
+
+  function filteredOrderList() {
+    const query = (document.getElementById("order-search")?.value || "").trim().toLowerCase();
+    return orders().slice().sort((a,b) =>
+      new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    ).filter(order => !query ||
+      String(order.id || "").toLowerCase().includes(query) ||
+      customerName(order).toLowerCase().includes(query)
+    );
   }
-  function filteredOrderRows(){const q=(document.getElementById("order-search")?.value||"").trim().toLowerCase();return orders().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).filter(o=>!q||String(o.id||"").toLowerCase().includes(q)||customerName(o).toLowerCase().includes(q))}
-  function renderOrderDetail(id){
-    const host=document.getElementById("orderDetailHost");if(!host)return;
-    if(!id){host.innerHTML="";return}
-    const o=orders().find(x=>String(x.id)===String(id));if(!o){host.innerHTML="";return}
-    const items=Array.isArray(o.items)?o.items:[];
-    host.innerHTML='<section class="order-detail-panel"><div class="order-detail-head"><div><div class="kicker">ORDER DETAIL</div><h3>#'+esc(o.id||"—")+'</h3></div><div class="extra-actions" style="margin:0"><button id="printOrderDetail" class="ghost-btn" type="button">Print Receipt</button><button id="closeOrderDetail" class="ghost-btn" type="button">Close</button></div></div><div class="profile-grid"><div class="profile-cell"><span>Customer</span><strong>'+esc(customerName(o))+'</strong></div><div class="profile-cell"><span>Payment</span><strong>'+esc(o.payment||"—")+(o.gcashRef?" · "+esc(o.gcashRef):"")+'</strong></div><div class="profile-cell"><span>Address</span><strong>'+esc(o.customer?.address||o.address||"—")+'</strong></div><div class="profile-cell"><span>Total</span><strong>'+money(o.total)+'</strong></div></div><div style="margin-top:14px" class="order-detail-items">'+(items.length?items.map(it=>'<div class="order-detail-item"><div><strong>'+esc(it.name||it.id||"Product")+'</strong><span>'+esc(it.size||"")+'</span></div><strong>×'+Number(it.qty||1)+'</strong><strong>'+money(Number(it.price||0)*Number(it.qty||1))+'</strong></div>').join(""):'<div class="empty">No line items stored on this order.</div>')+'</div></section>';
-    document.getElementById("closeOrderDetail")?.addEventListener("click",()=>renderOrderDetail());
-    document.getElementById("printOrderDetail")?.addEventListener("click",()=>printOrder(o));
+
+  function renderOrderDetail(orderId) {
+    const host = document.getElementById("orderDetailHost");
+    if (!host) return;
+    const order = orders().find(item => String(item.id) === String(orderId));
+    if (!order) { host.innerHTML = ""; return; }
+    const items = Array.isArray(order.items) ? order.items : [];
+    host.innerHTML =
+      '<section class="order-detail-panel"><div class="order-detail-head"><div><div class="kicker">ORDER DETAIL</div><h3>#' +
+      esc(order.id || "—") + '</h3></div><div class="extra-actions" style="margin:0">' +
+      '<button id="printOrderDetail" class="ghost-btn" type="button">Print Receipt</button>' +
+      '<button id="closeOrderDetail" class="ghost-btn" type="button">Close</button></div></div>' +
+      '<div class="profile-grid"><div class="profile-cell"><span>Customer</span><strong>' + esc(customerName(order)) +
+      '</strong></div><div class="profile-cell"><span>Payment</span><strong>' + esc(order.payment || "—") +
+      (order.gcashRef ? " · " + esc(order.gcashRef) : "") + '</strong></div><div class="profile-cell"><span>Address</span><strong>' +
+      esc(order.customer?.address || order.address || "—") + '</strong></div><div class="profile-cell"><span>Total</span><strong>' +
+      money(order.total) + '</strong></div></div><div class="order-detail-items">' +
+      (items.length ? items.map(item =>
+        '<div class="order-detail-item"><div><strong>' + esc(item.name || item.id || "Product") +
+        '</strong><span>' + esc(item.size || "") + '</span></div><strong>×' +
+        Number(item.qty || 1) + '</strong><strong>' + money(Number(item.price || 0) * Number(item.qty || 1)) +
+        '</strong></div>'
+      ).join("") : '<div class="empty">No line items stored on this order.</div>') +
+      '</div></section>';
+    document.getElementById("closeOrderDetail")?.addEventListener("click",() => {host.innerHTML = "";});
+    document.getElementById("printOrderDetail")?.addEventListener("click",() => printOrder(order));
   }
-  function printOrder(o){
-    const items=Array.isArray(o.items)?o.items:[];
-    const w=window.open("","_blank","width=720,height=820");if(!w){toast("Pop-up blocked. Allow pop-ups to print.");return}
-    w.document.write('<!doctype html><html><head><title>Receipt '+esc(o.id)+'</title><style>body{font:14px Arial,sans-serif;padding:32px;color:#222}h1{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;margin-top:22px}td,th{padding:9px;border-bottom:1px solid #ddd;text-align:left}@media print{button{display:none}}</style></head><body><h1>Kapeng Barako</h1><p>Order '+esc(o.id||"—")+'<br>'+esc(customerName(o))+'<br>'+esc(o.customer?.address||o.address||"")+'</p><table><tr><th>Item</th><th>Qty</th><th>Total</th></tr>'+(items.map(it=>'<tr><td>'+esc(it.name||it.id||"Product")+'</td><td>'+Number(it.qty||1)+'</td><td>'+money(Number(it.price||0)*Number(it.qty||1))+'</td></tr>').join(""))+'</table><h2>Total: '+money(o.total)+'</h2></body></html>');w.document.close();w.focus();setTimeout(()=>w.print(),200);log("order","Printed receipt for "+o.id)}
-  function addOrderDetailButtons(){
-    const host=document.getElementById("orders-table");if(!host)return;
-    const rows=host.querySelectorAll("tbody tr"), list=filteredOrderRows();
-    rows.forEach((row,i)=>{const cell=row.lastElementChild;if(!cell||cell.querySelector("[data-detail-order]"))return;const id=list[i]?.id;if(!id)return;const b=document.createElement("button");b.type="button";b.className="track-btn";b.dataset.detailOrder=id;b.textContent="View";cell.appendChild(b)});
-    host.querySelectorAll("[data-detail-order]").forEach(b=>{if(b.dataset.bound)return;b.dataset.bound="1";b.addEventListener("click",()=>renderOrderDetail(b.dataset.detailOrder))});
+
+  function printOrder(order) {
+    const win = window.open("","_blank","width=720,height=820");
+    if (!win) { toast("Pop-up blocked. Allow pop-ups to print."); return; }
+    const items = Array.isArray(order.items) ? order.items : [];
+    const rows = items.map(item =>
+      "<tr><td>" + esc(item.name || item.id || "Product") + "</td><td>" +
+      Number(item.qty || 1) + "</td><td>" + money(Number(item.price || 0) * Number(item.qty || 1)) + "</td></tr>"
+    ).join("");
+    win.document.write(
+      "<!doctype html><html><head><title>Receipt " + esc(order.id) +
+      "</title><style>body{font:14px Arial,sans-serif;padding:32px;color:#222}" +
+      "h1{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;margin-top:22px}" +
+      "td,th{padding:9px;border-bottom:1px solid #ddd;text-align:left}</style></head><body>" +
+      "<h1>Kapeng Barako</h1><p>Order " + esc(order.id || "—") + "<br>" +
+      esc(customerName(order)) + "<br>" + esc(order.customer?.address || order.address || "") +
+      "</p><table><tr><th>Item</th><th>Qty</th><th>Total</th></tr>" + rows +
+      "</table><h2>Total: " + money(order.total) + "</h2></body></html>"
+    );
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(),200);
+    log("order","Printed receipt for " + (order.id || "—"));
   }
-  function addCustomerProfileButtons(){
-    const host=document.getElementById("customers-table");if(!host)return;
-    const rows=host.querySelectorAll("tbody tr"), list=[...new Map(orders().map(o=>[customerKey(o),o])).values()];
-    rows.forEach((row,i)=>{const cell=row.lastElementChild;if(!cell||cell.querySelector("[data-customer-profile]"))return;const o=list[i];if(!o)return;const b=document.createElement("button");b.type="button";b.className="track-btn";b.dataset.customerProfile=customerKey(o);b.textContent="View";cell.appendChild(b)});
-    host.querySelectorAll("[data-customer-profile]").forEach(b=>{if(b.dataset.bound)return;b.dataset.bound="1";b.addEventListener("click",()=>showCustomerProfile(b.dataset.customerProfile))});
-  }
-  function showCustomerProfile(key){
-    const os=orders().filter(o=>customerKey(o)===key), first=os[0];if(!first)return;
-    const host=document.getElementById("customerProfileHost");if(!host)return;
-    const spend=os.reduce((s,o)=>s+Number(o.total||0),0),last=os.slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))[0];
-    host.innerHTML='<section class="customer-profile-panel"><div class="order-detail-head"><div><div class="kicker">CUSTOMER PROFILE</div><h3>'+esc(customerName(first))+'</h3></div><button id="closeCustomerProfile" class="ghost-btn" type="button">Close</button></div><div class="profile-grid"><div class="profile-cell"><span>Email</span><strong>'+esc(first.customer?.email||first.email||"—")+'</strong></div><div class="profile-cell"><span>Phone</span><strong>'+esc(first.customer?.phone||first.phone||"—")+'</strong></div><div class="profile-cell"><span>Orders</span><strong>'+os.length+'</strong></div><div class="profile-cell"><span>Total Spend</span><strong>'+money(spend)+'</strong></div><div class="profile-cell" style="grid-column:1/-1"><span>Last Order</span><strong>'+esc(last?.id||"—")+' · '+(last?.createdAt?new Date(last.createdAt).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}):"")+'</strong></div></div></section>';
-    document.getElementById("closeCustomerProfile")?.addEventListener("click",()=>{host.innerHTML=""});
-  }
-  function ensureCustomerProfileMount(){
-    const table=document.getElementById("customers-table");if(!table||document.getElementById("customerProfileHost"))return;
-    const div=document.createElement("div");div.id="customerProfileHost";table.parentElement?.insertAdjacentElement("afterend",div);
-    addCustomerProfileButtons();
-  }
-  function captureProductChanges(){
-    const current=products(), previous=read("kb_adv_last_products",null);
-    if(Array.isArray(previous)){
-      current.forEach(p=>{const old=previous.find(x=>String(x.id)===String(p.id));if(old&&Number(old.stock||0)!==Number(p.stock||0)){const hist=read(K.HISTORY,[]);const list=Array.isArray(hist)?hist:[];list.unshift({productId:p.id,productName:p.name,previousStock:Number(old.stock||0),newStock:Number(p.stock||0),action:"Stock updated",at:new Date().toISOString()});write(K.HISTORY,list.slice(0,200));log("inventory",(p.name||p.id)+" stock changed: "+Number(old.stock||0)+" → "+Number(p.stock||0),{productId:p.id,previousStock:old.stock,newStock:p.stock})}});
+
+  function ensureOrderDetails() {
+    const table = document.getElementById("orders-table");
+    if (!table) return;
+    let host = document.getElementById("orderDetailHost");
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "orderDetailHost";
+      table.parentElement?.insertAdjacentElement("afterend",host);
     }
-    write("kb_adv_last_products",current.map(p=>({id:p.id,stock:Number(p.stock||0)})));renderInventoryHistory();
+    const rows = table.querySelectorAll("tbody tr");
+    const list = filteredOrderList();
+    rows.forEach((row,index) => {
+      const cell = row.lastElementChild;
+      const orderId = list[index]?.id;
+      if (!cell || !orderId || cell.querySelector("[data-detail-order]")) return;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "track-btn";
+      button.dataset.detailOrder = orderId;
+      button.textContent = "View";
+      cell.appendChild(button);
+      button.addEventListener("click",() => renderOrderDetail(orderId));
+    });
   }
-  function installObservers(){
-    const ordersRoot=document.getElementById("orders-table"),customersRoot=document.getElementById("customers-table"),inventoryRoot=document.getElementById("inventory-table");
-    [ordersRoot,customersRoot,inventoryRoot].forEach(root=>{if(!root)return;new MutationObserver(()=>{if(root.id==="orders-table")addOrderDetailButtons();if(root.id==="customers-table")addCustomerProfileButtons();if(root.id==="inventory-table")ensureInventoryHistoryMount()}).observe(root,{childList:true,subtree:true})});
-    ordersRoot?.addEventListener("change",e=>{const id=e.target?.dataset?.orderStatus;if(id)log("order","Order "+id+" status changed to "+e.target.value,{orderId:id,status:e.target.value})});
-    let lastSig=JSON.stringify(products().map(p=>({id:p.id,stock:Number(p.stock||0)})));write("kb_adv_last_products",products().map(p=>({id:p.id,stock:Number(p.stock||0)})));
-    try{if("BroadcastChannel" in window){const ch=new BroadcastChannel("kapeng-barako-catalog");ch.addEventListener("message",()=>{const next=JSON.stringify(products().map(p=>({id:p.id,stock:Number(p.stock||0)})));if(next!==lastSig){lastSig=next;captureProductChanges()}})}}catch{}
+
+  function customerList() {
+    const map = new Map();
+    orders().forEach(order => {
+      const key = customerKey(order);
+      if (!map.has(key)) map.set(key,order);
+    });
+    return [...map.values()];
   }
-  function exportBackup(){
-    const data={version:1,createdAt:new Date().toISOString(),records:{orders:read(K.ORDERS,[]),products:read(K.PRODUCTS,[]),promos:read(K.PROMOS,[]),settings:read(K.SETTINGS,{}),storeSettings:read(K.STORE,{}),cms:read(K.CMS,{}),gallery:read(K.GALLERY,[]),ads:read(K.ADS,{}),activity:read(K.ACTIVITY,[]),inventoryHistory:read(K.HISTORY,[]),notificationRead:read(K.READ,[])}};
-    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="kapeng-barako-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);log("backup","Downloaded business data backup");toast("Backup downloaded.");
+
+  function showCustomerProfile(key) {
+    const list = orders().filter(order => customerKey(order) === String(key));
+    const first = list[0];
+    const host = document.getElementById("customerProfileHost");
+    if (!host || !first) return;
+    const spend = list.reduce((sum,order) => sum + Number(order.total || 0),0);
+    const last = list.slice().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+    host.innerHTML =
+      '<section class="customer-profile-panel"><div class="order-detail-head"><div><div class="kicker">CUSTOMER PROFILE</div><h3>' +
+      esc(customerName(first)) + '</h3></div><button id="closeCustomerProfile" class="ghost-btn" type="button">Close</button></div>' +
+      '<div class="profile-grid"><div class="profile-cell"><span>Email</span><strong>' +
+      esc(first.customer?.email || first.email || "—") + '</strong></div><div class="profile-cell"><span>Phone</span><strong>' +
+      esc(first.customer?.phone || first.phone || "—") + '</strong></div><div class="profile-cell"><span>Orders</span><strong>' +
+      list.length + '</strong></div><div class="profile-cell"><span>Total Spend</span><strong>' + money(spend) +
+      '</strong></div><div class="profile-cell" style="grid-column:1/-1"><span>Last Order</span><strong>' +
+      esc(last?.id || "—") + ' · ' + (last?.createdAt ? new Date(last.createdAt).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}) : "") +
+      '</strong></div></div></section>';
+    document.getElementById("closeCustomerProfile")?.addEventListener("click",() => {host.innerHTML="";});
   }
-  function csvCell(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
-  function exportCsv(){
-    const rows=[["Order ID","Date","Customer","Email","Phone","Address","Items","Total","Payment","GCash Ref","Status"]];
-    orders().forEach(o=>rows.push([o.id,new Date(o.createdAt||"").toISOString(),customerName(o),o.customer?.email||o.email||"",o.customer?.phone||o.phone||"",o.customer?.address||o.address||"",Array.isArray(o.items)?o.items.reduce((s,it)=>s+Number(it.qty||1),0):0,Number(o.total||0),o.payment||"",o.gcashRef||"",o.status||"Pending"]));
-    const blob=new Blob(["\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\n")],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="kapeng-barako-orders.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);log("orders","Exported orders CSV",{count:rows.length-1});toast("Orders CSV exported.");
+
+  function ensureCustomerProfiles() {
+    const table = document.getElementById("customers-table");
+    if (!table) return;
+    let host = document.getElementById("customerProfileHost");
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "customerProfileHost";
+      table.parentElement?.insertAdjacentElement("afterend",host);
+    }
+    const rows = table.querySelectorAll("tbody tr");
+    const list = customerList();
+    rows.forEach((row,index) => {
+      const cell = row.lastElementChild;
+      const order = list[index];
+      if (!cell || !order || cell.querySelector("[data-customer-profile]")) return;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "track-btn";
+      button.dataset.customerProfile = customerKey(order);
+      button.textContent = "View";
+      cell.appendChild(button);
+      button.addEventListener("click",() => showCustomerProfile(button.dataset.customerProfile));
+    });
   }
-  function importBackup(file){
-    const reader=new FileReader();
-    reader.onload=()=>{
-      try{
-        const payload=JSON.parse(String(reader.result||"")),r=payload.records;if(!r||typeof r!=="object")throw new Error("Invalid backup structure");
-        const allowed={orders:K.ORDERS,products:K.PRODUCTS,promos:K.PROMOS,settings:K.SETTINGS,storeSettings:K.STORE,cms:K.CMS,gallery:K.GALLERY,ads:K.ADS,activity:K.ACTIVITY,inventoryHistory:K.HISTORY,notificationRead:K.READ};
-        Object.entries(allowed).forEach(([src,dst])=>{if(src in r)write(dst,r[src])});
-        log("backup","Restored business data from JSON backup");toast("Backup restored. Reloading admin data.");
-        setTimeout(()=>location.reload(),350);
-      }catch(err){toast("Backup import failed: "+err.message)}
+
+  function captureInventoryChanges() {
+    const current = products().map(product => ({id:String(product.id),stock:Number(product.stock || 0),name:product.name}));
+    const previous = read("kb_adv_last_products",[]);
+    if (Array.isArray(previous) && previous.length) {
+      current.forEach(product => {
+        const old = previous.find(item => item.id === product.id);
+        if (old && old.stock !== product.stock) {
+          const history = read(K.HISTORY,[]);
+          const list = Array.isArray(history) ? history : [];
+          list.unshift({
+            productId:product.id,
+            productName:product.name,
+            previousStock:old.stock,
+            newStock:product.stock,
+            action:"Stock updated",
+            at:new Date().toISOString()
+          });
+          write(K.HISTORY,list.slice(0,200));
+          log("inventory",product.name + " stock changed: " + old.stock + " → " + product.stock);
+        }
+      });
+    }
+    write("kb_adv_last_products",current);
+    renderInventoryHistory();
+  }
+
+  function exportBackup() {
+    const payload = {
+      version:2,
+      createdAt:new Date().toISOString(),
+      records:{
+        orders:read(K.ORDERS,[]),
+        products:read(K.PRODUCTS,[]),
+        promos:read(K.PROMOS,[]),
+        settings:read(K.SETTINGS,{}),
+        storeSettings:read(K.STORE,{}),
+        cms:read(K.CMS,{}),
+        gallery:read(K.GALLERY,[]),
+        ads:read(K.ADS,{}),
+        activity:read(K.ACTIVITY,[]),
+        inventoryHistory:read(K.HISTORY,[]),
+        notificationRead:read(K.READ,[])
+      }
+    };
+    const blob = new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "kapeng-barako-backup-" + new Date().toISOString().slice(0,10) + ".json";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url),1000);
+    log("backup","Downloaded business data backup");
+    toast("Backup downloaded.");
+  }
+
+  function csvCell(value) {
+    return '"' + String(value ?? "").replace(/"/g,'""') + '"';
+  }
+
+  function exportOrdersCsv() {
+    const rows = [[
+      "Order ID","Date","Customer","Email","Phone","Address","Items","Total","Payment","GCash Ref","Status"
+    ]];
+    orders().forEach(order => {
+      rows.push([
+        order.id || "",
+        order.createdAt ? new Date(order.createdAt).toISOString() : "",
+        customerName(order),
+        order.customer?.email || order.email || "",
+        order.customer?.phone || order.phone || "",
+        order.customer?.address || order.address || "",
+        Array.isArray(order.items) ? order.items.reduce((sum,item) => sum + Number(item.qty || 1),0) : 0,
+        Number(order.total || 0),
+        order.payment || "",
+        order.gcashRef || order.gcashReference || "",
+        order.status || "Pending"
+      ]);
+    });
+    const csv = "\ufeff" + rows.map(row => row.map(csvCell).join(",")).join("\n");
+    const blob = new Blob([csv],{type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "kapeng-barako-orders.csv";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url),1000);
+    log("orders","Exported orders CSV",{count:rows.length-1});
+    toast("Orders CSV exported.");
+  }
+
+  function importBackup(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(String(reader.result || ""));
+        const records = payload.records;
+        if (!records || typeof records !== "object") throw new Error("Invalid backup structure");
+        const allowed = {
+          orders:K.ORDERS,products:K.PRODUCTS,promos:K.PROMOS,settings:K.SETTINGS,
+          storeSettings:K.STORE,cms:K.CMS,gallery:K.GALLERY,ads:K.ADS,
+          activity:K.ACTIVITY,inventoryHistory:K.HISTORY,notificationRead:K.READ
+        };
+        Object.entries(allowed).forEach(([source,key]) => {
+          if (Object.prototype.hasOwnProperty.call(records,source)) write(key,records[source]);
+        });
+        toast("Backup restored. Reloading...");
+        setTimeout(() => location.reload(),300);
+      } catch (error) {
+        toast("Backup import failed: " + error.message);
+      }
     };
     reader.readAsText(file);
   }
-  function clearDemo(){
-    if(!confirm("Remove the demo customer flag? Real orders and catalog records will remain."))return;
-    localStorage.removeItem(K.DEMO);log("maintenance","Removed demo customer flag");toast("Demo customer removed.");
-  }
-  function markAllRead(){write(K.READ,buildNotifications().map(n=>n.id));renderNotifications();log("notifications","Marked all notifications as read")}
-  function clearActivity(){if(!confirm("Clear the admin activity log?"))return;localStorage.removeItem(K.ACTIVITY);renderActivity();toast("Activity log cleared.")}
 
-  function init(){
+  function clearDemo() {
+    if (!confirm("Remove the demo customer flag? Real orders and catalog records stay untouched.")) return;
+    localStorage.removeItem(K.DEMO);
+    log("maintenance","Removed demo customer flag");
+    toast("Demo customer removed.");
+  }
+
+  function bind() {
     document.getElementById("analyticsRange")?.addEventListener("change",renderAnalytics);
     document.getElementById("saveStoreSettings")?.addEventListener("click",saveSettings);
-    document.getElementById("markAllRead")?.addEventListener("click",markAllRead);
-    document.getElementById("clearActivity")?.addEventListener("click",clearActivity);
+    document.getElementById("markAllRead")?.addEventListener("click",() => {
+      write(K.READ,buildNotifications().map(item => item.id));
+      renderNotifications();
+      log("notifications","Marked all notifications as read");
+    });
+    document.getElementById("clearActivity")?.addEventListener("click",() => {
+      if (!confirm("Clear the admin activity log?")) return;
+      localStorage.removeItem(K.ACTIVITY);
+      renderActivity();
+      toast("Activity log cleared.");
+    });
     document.getElementById("exportBackup")?.addEventListener("click",exportBackup);
-    document.getElementById("exportOrdersCsv")?.addEventListener("click",exportCsv);
+    document.getElementById("exportOrdersCsv")?.addEventListener("click",exportOrdersCsv);
     document.getElementById("clearDemoData")?.addEventListener("click",clearDemo);
-    document.getElementById("importBackup")?.addEventListener("change",e=>{if(e.target.files?.[0])importBackup(e.target.files[0])});
-    renderAnalytics();renderNotifications();renderSettings();renderActivity();ensureInventoryHistoryMount();ensureOrderDetailMount();ensureCustomerProfileMount();installObservers();
-    window.addEventListener("storage",e=>{if([K.ORDERS,K.PRODUCTS,K.STORE,K.ACTIVITY,K.HISTORY,K.READ].includes(e.key)){renderAnalytics();renderNotifications();renderActivity();ensureInventoryHistoryMount();ensureOrderDetailMount();ensureCustomerProfileMount()}});
-    setInterval(()=>{renderAnalytics();renderNotifications();addOrderDetailButtons();addCustomerProfileButtons();},4000);
+    document.getElementById("importBackup")?.addEventListener("change",event => {
+      const file = event.target.files?.[0];
+      if (file) importBackup(file);
+    });
+
+    const ordersRoot = document.getElementById("orders-table");
+    const customersRoot = document.getElementById("customers-table");
+    const inventoryRoot = document.getElementById("inventory-table");
+
+    ordersRoot?.addEventListener("change",event => {
+      const select = event.target;
+      const id = select?.dataset?.orderStatus;
+      if (id) log("order","Order " + id + " status changed to " + select.value,{orderId:id,status:select.value});
+    });
+
+    [ordersRoot,customersRoot,inventoryRoot].forEach(root => {
+      if (!root) return;
+      new MutationObserver(() => {
+        if (root === ordersRoot) ensureOrderDetails();
+        if (root === customersRoot) ensureCustomerProfiles();
+        if (root === inventoryRoot) ensureInventoryHistory();
+      }).observe(root,{childList:true,subtree:true});
+    });
+
+    const baseline = products().map(product => ({id:String(product.id),stock:Number(product.stock || 0),name:product.name}));
+    write("kb_adv_last_products",baseline);
+
+    renderAnalytics();
+    renderNotifications();
+    renderSettings();
+    renderActivity();
+    ensureOrderDetails();
+    ensureCustomerProfiles();
+    ensureInventoryHistory();
+    captureInventoryChanges();
+
+    window.addEventListener("storage",event => {
+      if ([K.ORDERS,K.PRODUCTS,K.STORE,K.ACTIVITY,K.HISTORY,K.READ].includes(event.key)) {
+        renderAnalytics();
+        renderNotifications();
+        renderActivity();
+        ensureOrderDetails();
+        ensureCustomerProfiles();
+        ensureInventoryHistory();
+        if (event.key === K.PRODUCTS) captureInventoryChanges();
+      }
+    });
+
+    setInterval(() => {
+      renderAnalytics();
+      renderNotifications();
+      ensureOrderDetails();
+      ensureCustomerProfiles();
+      ensureInventoryHistory();
+    },3000);
   }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded",bind);
+  } else {
+    bind();
+  }
 })();
 </script>
 </body>
