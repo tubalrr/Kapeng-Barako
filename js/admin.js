@@ -15,6 +15,8 @@
   let products=read(PRODUCTS_KEY,[]);if(!Array.isArray(products))products=[];
   let gallery=read(GALLERY_KEY,[]);if(!Array.isArray(gallery))gallery=[];
   let orderSearch="";
+  let lowStockSoundEnabled=localStorage.getItem("kb_low_stock_sound")==="1";
+  let lastLowStockCount=-1;
   const demoSignature=JSON.stringify(DEFAULT_PRODUCTS.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
   const currentSignature=JSON.stringify(products.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
   if(currentSignature===demoSignature && !localStorage.getItem("kb_catalog_real_initialized")){
@@ -35,9 +37,45 @@
   function weekSales(){const t=startOfWeek();return orders.filter(o=>new Date(o.createdAt||0).getTime()>=t).reduce((n,o)=>n+Number(o.total||0),0)}
   function customers(){const m=new Map();orders.forEach(o=>{const c=o.customer||{};const key=(c.email||c.phone||c.name||"unknown").toLowerCase();if(!m.has(key))m.set(key,{name:c.name||"Unnamed",phone:c.phone||"",email:c.email||"",orders:0,revenue:0,address:c.address||""});const x=m.get(key);x.orders++;x.revenue+=Number(o.total||0);if(c.address)x.address=c.address});return [...m.values()]}
 
+  function playLowStockAlert(){
+    if(!lowStockSoundEnabled)return;
+    try{
+      const AudioCtx=window.AudioContext||window.webkitAudioContext;
+      if(!AudioCtx)return;
+      const ctx=window.__kbAlertAudioCtx||new AudioCtx();
+      window.__kbAlertAudioCtx=ctx;
+      if(ctx.state==="suspended")ctx.resume().catch(()=>{});
+      const now=ctx.currentTime;
+      [0,1,2].forEach((step)=>{
+        const osc=ctx.createOscillator(),gain=ctx.createGain();
+        osc.type="sine";
+        osc.frequency.value=step===1?880:660;
+        gain.gain.setValueAtTime(0.0001,now+step*0.16);
+        gain.gain.exponentialRampToValueAtTime(0.08,now+step*0.16+0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001,now+step*0.16+0.12);
+        osc.connect(gain);gain.connect(ctx.destination);
+        osc.start(now+step*0.16);osc.stop(now+step*0.16+0.14);
+      });
+    }catch{}
+  }
+
+  function renderLowStockAlert(low){
+    const root=$("#low-stock-alert"), card=$("#low-card");
+    if(!root||!card)return;
+    const count=low.length;
+    card.classList.toggle("low",count>0);
+    root.hidden=count===0;
+    if(count===0){root.innerHTML="";lastLowStockCount=0;return;}
+    const names=low.slice(0,4).map(p=>'<b>'+esc(p.name)+'</b> <span>('+Number(p.stock||0)+' packs)</span>').join(" · ");
+    root.innerHTML='<div class="low-stock-icon">!</div><div><strong>LOW STOCK ALERT</strong><p>'+count+' product'+(count===1?" is":"s are")+' at ≤ 5 packs. '+names+(count>4?" · +"+(count-4)+" more":"")+'</p></div><span class="low-stock-badge">'+count+' LOW</span>';
+    if(count>0 && count!==lastLowStockCount) playLowStockAlert();
+    lastLowStockCount=count;
+  }
+
   function renderOverview(){
     refreshData();
     const low=lowProducts(), cs=customers();
+    renderLowStockAlert(low);
     $("#metric-orders").textContent=orders.length;$("#metric-low").textContent=low.length;$("#metric-tickets").textContent="0";$("#metric-revenue").textContent=money(revenue());
     $("#metric-today").textContent=money(todaySales());$("#metric-week").textContent=money(weekSales());$("#metric-customers").textContent=cs.length;
     $("#low-card").classList.toggle("low",low.length>0);
@@ -293,8 +331,22 @@
     if(window.KBAdminAuth&&!window.KBAdminAuth.guard())return;
     $("#admin-user").textContent=read("kb_admin_session",{})?.email||"admin";
     $("#admin-menu")?.addEventListener("click",toggleMenu);$("#admin-close")?.addEventListener("click",closeMenu);$("#admin-overlay")?.addEventListener("click",closeMenu);$("#logout")?.addEventListener("click",()=>window.KBAdminAuth?.logout());
-    $$(".admin-nav button").forEach(b=>b.addEventListener("click",()=>openView(b.dataset.view)));
+    $(".admin-nav button").forEach(b=>b.addEventListener("click",()=>openView(b.dataset.view)));
     initOrderSearch();
+    const soundBtn=$("#enable-low-stock-sound");
+    if(soundBtn){
+      const syncSoundButton=()=>{soundBtn.textContent=lowStockSoundEnabled?"🔔 Alert Sound: ON":"🔔 Enable Alert Sound";soundBtn.classList.toggle("is-enabled",lowStockSoundEnabled);};
+      soundBtn.addEventListener("click",async()=>{
+        lowStockSoundEnabled=!lowStockSoundEnabled;
+        localStorage.setItem("kb_low_stock_sound",lowStockSoundEnabled?"1":"0");
+        if(lowStockSoundEnabled){
+          try{const AudioCtx=window.AudioContext||window.webkitAudioContext; if(AudioCtx){window.__kbAlertAudioCtx=window.__kbAlertAudioCtx||new AudioCtx(); await window.__kbAlertAudioCtx.resume();}}catch{}
+          playLowStockAlert();
+        }
+        syncSoundButton();
+      });
+      syncSoundButton();
+    }
     $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
     renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();
     window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderGallery()}});
