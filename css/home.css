@@ -1544,3 +1544,83 @@ body.sidebar-open .site-header .sidebar-toggle span{
 .site-header .sidebar-toggle:hover{
   transform:none!important;
 }
+
+
+/* =========================================================
+   CANONICAL SIDEBAR TOGGLE — final override
+   The hamburger belongs to the sidebar itself.
+   It must remain visible while the pointer is inside the sidebar.
+   ========================================================= */
+.site-header > .sidebar-toggle{
+  position:absolute!important;
+  top:14px!important;
+  left:14px!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  min-height:42px!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  z-index:2147483000!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:none!important;
+  clip:auto!important;
+  overflow:visible!important;
+}
+
+.site-header:hover > .sidebar-toggle,
+.site-header:focus-within > .sidebar-toggle,
+body.sidebar-open .site-header > .sidebar-toggle,
+body.sidebar-collapsed .site-header > .sidebar-toggle{
+  position:absolute!important;
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:none!important;
+}
+
+.site-header > .sidebar-toggle span,
+.site-header:hover > .sidebar-toggle span,
+body.sidebar-open .site-header > .sidebar-toggle span{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  width:19px!important;
+  height:2px!important;
+  min-width:19px!important;
+  min-height:2px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:999px!important;
+  transform:none!important;
+  background:var(--gold-2)!important;
+}
+
+.site-header > .sidebar-toggle:hover{
+  transform:none!important;
+}
+
+.site-header > .sidebar-toggle[aria-expanded="true"] span,
+.site-header > .sidebar-toggle[aria-expanded="false"] span{
+  transform:none!important;
+  opacity:1!important;
+}
+
+/* Never let the navigation or brand paint over the toggle. */
+.site-header > .nav-wrap{
+  position:relative!important;
+  z-index:1!important;
+}
+.site-header > .sidebar-toggle{
+  z-index:2147483000!important;
+}
