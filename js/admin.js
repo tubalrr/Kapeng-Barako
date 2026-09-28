@@ -486,7 +486,7 @@
     settings.paymentMethods=Array.isArray(settings.paymentMethods)&&settings.paymentMethods.length?[...settings.paymentMethods]:[...DEFAULT_SETTINGS.paymentMethods];
     settings.paymentMethods=[...new Set(settings.paymentMethods.map(x=>x==="Cash on Delivery"?"Cash on Delivery (COD)":x))];
     ["GCash","Cash on Delivery (COD)","Bank Transfer"].forEach(method=>{if(!settings.paymentMethods.includes(method))settings.paymentMethods.push(method);});
-    $(".setting-payment").forEach(x=>x.checked=settings.paymentMethods.includes(x.value));
+    $$(".setting-payment").forEach(x=>x.checked=settings.paymentMethods.includes(x.value));
     $$(" .setting-fulfillment").forEach(x=>x.checked=settings.fulfillmentMethods.includes(x.value));
     $("#settings-shipping-note").value=settings.shippingNote||"";
     $("#settings-order-note").value=settings.orderNote||"";
