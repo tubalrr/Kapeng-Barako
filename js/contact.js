@@ -80,13 +80,15 @@
       const success = document.createElement("div");
       success.className = "form-success";
       success.textContent = saved
-        ? "Your message has been saved. The business email is not configured yet, so no email was sent."
+        ? "Your message has been saved locally. Email delivery is unavailable until a business email is configured in Admin → Contact."
         : "Your message could not be saved in this browser. Please contact the business directly.";
 
       form.replaceWith(success);
     });
 
-    if (note) note.textContent = "The business email is not configured yet. Submissions are saved locally until an email is configured.";
+    if (note) note.textContent = configuredEmail
+      ? "Messages are sent to the business email configured in Admin → Contact."
+      : "Messages are saved locally until a business email is configured in Admin → Contact.";
   }
 
   window.addEventListener("storage", event => {
