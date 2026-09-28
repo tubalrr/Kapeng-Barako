@@ -617,7 +617,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       const to = from + 86400000;
       days.push(day.toLocaleDateString("en-PH",{weekday:"short"}));
       values.push(os.filter(o => {
-        const t = new Date(o.createdAt || 0).getTime();
+        const t = orderTime(o.createdAt);
         return Number.isFinite(t) && t >= from && t < to;
       }).reduce((sum,o) => sum + Number(o.total || 0),0));
     }
@@ -955,6 +955,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
   const esc=(v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money=(n)=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
+  const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
   const products=()=>{const x=read(PRODUCT_KEY,[]);return Array.isArray(x)?x:[]};
   const orders=()=>{const x=window.KBAdminOrders?window.KBAdminOrders():read("kb_orders",[]);return Array.isArray(x)?x:[]};
   const customers=()=>{
@@ -978,7 +979,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   function updateSnapshot(){
     const os=orders(), ps=products(), today=todayStart(), week=weekStart();
-    const todaySales=os.filter(o=>{const t=new Date(o.createdAt||0).getTime();return Number.isFinite(t)&&t>=today}).reduce((s,o)=>s+Number(o.total||0),0);
+    const todaySales=os.filter(o=>{const t=orderTime(o.createdAt);return Number.isFinite(t)&&t>=today}).reduce((s,o)=>s+Number(o.total||0),0);
     const weekSales=os.filter(o=>{const t=new Date(o.createdAt||0).getTime();return Number.isFinite(t)&&t>=week}).reduce((s,o)=>s+Number(o.total||0),0);
     const count=(status)=>os.filter(o=>orderStatus(o)===status).length;
     const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
@@ -1339,7 +1340,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const all = orders();
     const cutoff = range === "all" ? 0 : Date.now() - Number(range) * 86400000;
     const filtered = all.filter(order => {
-      const time = new Date(order.createdAt || 0).getTime();
+      const time = orderTime(order.createdAt);
       return Number.isFinite(time) && time >= cutoff;
     });
     const revenue = filtered.reduce((sum, order) => sum + Number(order.total || 0), 0);
@@ -1589,7 +1590,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   function filteredOrderList() {
     const query = (document.getElementById("orderSearch")?.value || "").trim().toLowerCase();
     return orders().slice().sort((a,b) =>
-      new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+      orderTime(b.createdAt) - orderTime(a.createdAt)
     ).filter(order => !query ||
       String(order.id || "").toLowerCase().includes(query) ||
       customerName(order).toLowerCase().includes(query)
@@ -1685,7 +1686,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const host = document.getElementById("customerProfileHost");
     if (!host || !first) return;
     const spend = list.reduce((sum,order) => sum + Number(order.total || 0),0);
-    const last = list.slice().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+    const last = list.slice().sort((a,b) => orderTime(b.createdAt) - orderTime(a.createdAt))[0];
     host.innerHTML =
       '<section class="customer-profile-panel"><div class="order-detail-head"><div><div class="kicker">CUSTOMER PROFILE</div><h3>' +
       esc(customerName(first)) + '</h3></div><button id="closeCustomerProfile" class="ghost-btn" type="button">Close</button></div>' +
@@ -1694,7 +1695,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       esc(first.customer?.phone || first.phone || "—") + '</strong></div><div class="profile-cell"><span>Orders</span><strong>' +
       list.length + '</strong></div><div class="profile-cell"><span>Total Spend</span><strong>' + money(spend) +
       '</strong></div><div class="profile-cell" style="grid-column:1/-1"><span>Last Order</span><strong>' +
-      esc(last?.id || "—") + ' · ' + (last?.createdAt ? new Date(last.createdAt).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}) : "") +
+      esc(last?.id || "—") + ' · ' + (last?.createdAt ? new Date(orderTime(last.createdAt)).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}) : "") +
       '</strong></div></div></section>';
 
   }
@@ -1791,7 +1792,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     orders().forEach(order => {
       rows.push([
         order.id || "",
-        order.createdAt ? new Date(order.createdAt).toISOString() : "",
+        order.createdAt ? new Date(orderTime(order.createdAt)).toISOString() : "",
         customerName(order),
         order.customer?.email || order.email || "",
         order.customer?.phone || order.phone || "",
