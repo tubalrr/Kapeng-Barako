@@ -223,7 +223,8 @@
     const linkInput=$("#ads-link"), imageInput=$("#ads-image"), labelInput=$("#ads-label"), preview=$("#ads-preview");
     if(!linkInput||!labelInput||!preview)return;
     const link=String(ads.link||"").trim();
-    const image=String(ads.image||"").trim();
+    const savedImage=String(ads.image||"").trim();
+    const image=savedImage || (/^https?:\/\/.*\.(?:avif|gif|jpe?g|png|webp|svg)(?:[?#].*)?$/i.test(link)?link:"");
     const label=String(ads.label||"Sponsored").trim()||"Sponsored";
     linkInput.value=link;
     if(imageInput) imageInput.value=image;
