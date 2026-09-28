@@ -685,11 +685,11 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       }).join("")+
       '</tbody></table>';
 
-    $( "[data-status-id]" ).forEach(sel => {
+    document.querySelectorAll("[data-status-id]").forEach(sel => {
       const o = os.find(x => String(x.id) === String(sel.dataset.statusId));
       if(o) sel.value = normalizeStatus(o.status);
     });
-    $( "[data-payment-status]" ).forEach(sel => {
+    document.querySelectorAll("[data-payment-status]").forEach(sel => {
       const o = os.find(x => String(x.id) === String(sel.dataset.paymentStatus));
       if(o) sel.value = getPaymentStatus(o);
     });
@@ -958,7 +958,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
   const esc=(v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money=(n)=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
-  const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
   const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
   const products=()=>{const x=read(PRODUCT_KEY,[]);return Array.isArray(x)?x:[]};
   const orders=()=>{const x=window.KBAdminOrders?window.KBAdminOrders():read("kb_orders",[]);return Array.isArray(x)?x:[]};
