@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const PRODUCTS_KEY="kb_rebuild_products", ORDERS_KEY="kb_orders", PROMOS_KEY="kb_promos", SETTINGS_KEY="kb_settings", CMS_KEY="kb_cms";
+  const PRODUCTS_KEY="kb_rebuild_products", ORDERS_KEY="kb_orders", PROMOS_KEY="kb_promos", SETTINGS_KEY="kb_settings", CMS_KEY="kb_cms", GALLERY_KEY="kb_gallery";
   const DEFAULT_PRODUCTS=[
     {id:"KB250",name:"Barako 250g",size:"250g",price:350,stock:7,badge:"BEST SELLER",roast:"Dark",grind:"Medium",note:"Bold, aromatic, unmistakably Barako."},
     {id:"KB500",name:"Barako 500g",size:"500g",price:620,stock:7,badge:"FRESH ROAST",roast:"Medium",grind:"Whole",note:"A deeper everyday supply for the serious cup."},
