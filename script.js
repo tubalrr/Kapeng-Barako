@@ -150,10 +150,38 @@
   }
 
   function cartTotal() {
-    return cart.reduce(
-      (total, item) => total + Number(item.price || 0) * Math.max(0, Number(item.qty || 0)),
+    const baseTotal = cart.reduce(
+      (total, item) =>
+        total + Number(item.price || 0) * Math.max(0, Number(item.qty || 0)),
       0
     );
+
+    const bundleIds = new Set(
+      cart
+        .filter(item => item.bundleId)
+        .map(item => String(item.bundleId))
+    );
+
+    let bundleDiscount = 0;
+
+    bundleIds.forEach(bundleId => {
+      const hasStrong = cart.some(
+        item => String(item.bundleId || "") === bundleId &&
+          String(item.id) === "KB250" &&
+          Number(item.qty || 0) > 0
+      );
+      const hasClassic = cart.some(
+        item => String(item.bundleId || "") === bundleId &&
+          String(item.id) === "KB500" &&
+          Number(item.qty || 0) > 0
+      );
+
+      if (hasStrong && hasClassic) {
+        bundleDiscount += 100;
+      }
+    });
+
+    return Math.max(0, baseTotal - bundleDiscount);
   }
 
   function updateCartCounters() {
@@ -538,6 +566,7 @@
     const grind = getSelected(card, "data-grind-group", product.grind || "Whole");
 
     const existing = cart.find(item =>
+      !item.bundleId &&
       String(item.id) === String(product.id) &&
       item.roast === roast &&
       item.grind === grind
