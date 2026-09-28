@@ -11,6 +11,14 @@
     {tag:"COFFEE 101",title:"Whole bean o ground coffee?",text:"Choose your grind based on how you brew and how quickly you use your coffee.",time:"3 min read"}
   ];
 
+  function cmsData(){
+    try{return JSON.parse(localStorage.getItem("kb_cms")||"{}")||{};}catch{return{}}
+  }
+
+  function storeSettings(){
+    try{return JSON.parse(localStorage.getItem("kb_settings")||"{}")||{};}catch{return{}}
+  }
+
   let seconds=180;
   let timer=null;
 
@@ -25,7 +33,10 @@
   function renderBlog(){
     const root=$("#kb-blog-grid");
     if(!root)return;
-    root.innerHTML=blogs.map((b,i)=>
+    const cms=cmsData();
+    const a=cms.announcement;
+    const cards=a?.title ? [{tag:"ANNOUNCEMENT",title:a.title,text:a.body||"Latest store update.",time:a.date||"Fresh update"},...blogs] : blogs;
+    root.innerHTML=cards.slice(0,3).map((b,i)=>
       '<article class="kb-blog-card">'+
         '<span>'+esc(b.tag)+'</span>'+
         '<div class="kb-blog-index">0'+(i+1)+'</div>'+
@@ -34,6 +45,19 @@
         '<small>'+esc(b.time)+' · Read guide →</small>'+
       '</article>'
     ).join("");
+  }
+
+  function renderReviewLink(){
+    const a=$("#kb-facebook-reviews");
+    if(!a)return;
+    const s=storeSettings();
+    const url=String(s.facebook||"").trim();
+    if(/^https?:\/\//i.test(url)){a.href=url;a.style.removeProperty("pointer-events");a.style.removeProperty("opacity");}
+    else {a.removeAttribute("href");a.style.pointerEvents="none";a.style.opacity=".55";}
+  }
+
+  function renderVideoTrigger(){
+    $("#kb-brew-video")?.addEventListener("click",()=>$("#brew-dialog")?.showModal());
   }
 
   function renderSubscription(){
@@ -122,6 +146,8 @@
 
   function init(){
     renderBlog();
+    renderReviewLink();
+    renderVideoTrigger();
     renderSubscription();
     setupWholesale();
     setupSubscription();
