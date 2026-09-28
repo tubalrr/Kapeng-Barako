@@ -77,7 +77,36 @@
   let voucherApplied=null;
 
   const $=s=>document.querySelector(s);
-  const $$=s=>[...document.querySelectorAll(s)];
+  const $=s=>[...document.querySelectorAll(s)];
+
+  function setupSidebarToggle(){
+    const menu=$("#menu-button");
+    if(!menu||menu.dataset.sidebarBound==="true")return;
+    menu.dataset.sidebarBound="true";
+
+    const setSidebarOpen=open=>{
+      document.body.classList.toggle("sidebar-open",open);
+      menu.setAttribute("aria-expanded",String(open));
+      menu.setAttribute("aria-label",open?"Close menu":"Open menu");
+      document.body.style.overflow=open?"hidden":"";
+    };
+
+    menu.addEventListener("click",event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      setSidebarOpen(!document.body.classList.contains("sidebar-open"));
+    });
+
+    document.addEventListener("keydown",event=>{
+      if(event.key==="Escape" && document.body.classList.contains("sidebar-open")){
+        setSidebarOpen(false);
+      }
+    });
+
+    document.querySelectorAll("#mobile-nav a").forEach(link=>{
+      link.addEventListener("click",()=>setSidebarOpen(false));
+    });
+  }
   const setText=(sel,v)=>{const el=$(sel);if(el)el.textContent=v??""};
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const saveCart=()=>localStorage.setItem(cartKey,JSON.stringify(cart));
