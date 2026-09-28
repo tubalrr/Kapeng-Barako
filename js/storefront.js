@@ -361,7 +361,7 @@
       document.body.style.overflow=open?"hidden":"";
     };
     $("#menu-button").onclick=()=>setSidebarOpen(!document.body.classList.contains("sidebar-open"));
-    $("#mobile-nav a").forEach(a=>a.onclick=()=>{$("#mobile-nav").style.display="none";setSidebarOpen(false)});
+    $$("#mobile-nav a").forEach(a=>a.onclick=()=>{$("#mobile-nav").style.display="none";setSidebarOpen(false)});
     document.addEventListener("click",e=>{
       const v=e.target.closest("[data-variant]");
       if(v){
