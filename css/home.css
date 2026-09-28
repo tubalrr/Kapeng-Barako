@@ -2078,3 +2078,44 @@ body > .site-header{
 .kb-video-card:after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(18,12,5,.82),transparent 60%)}
 .kb-video-card .button{position:absolute;left:18px;bottom:18px;z-index:1}
 @media(max-width:560px){.kb-video-card{aspect-ratio:16/10;min-height:170px}}
+
+
+/* =========================================================
+   STOREFRONT CHECKOUT / COMPOSITING OPTIMIZATION
+   Lightweight payment proof + QR module. Avoid expensive
+   backdrop filters on scrolling surfaces.
+   ========================================================= */
+.gcash-qr-wrap{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:14px;
+  align-items:center;
+  margin:12px 0 14px;
+  padding:14px;
+  border:1px solid rgba(26,18,7,.12);
+  border-radius:16px;
+  background:#FFF9EE;
+}
+.gcash-qr-copy{display:grid;gap:4px;color:#4D3D2B}
+.gcash-qr-copy strong{font:600 17px/1 "Playfair Display",Georgia,serif;color:#2B1B12}
+.gcash-qr-copy span{font-size:11px;line-height:1.55;color:#796B59}
+.gcash-qr{
+  width:108px;
+  height:108px;
+  object-fit:contain;
+  border-radius:10px;
+  background:#fff;
+  border:1px solid rgba(26,18,7,.10);
+}
+.modal-backdrop,
+.simple-dialog::backdrop,
+.wishlist-heart,
+.site-header,
+body > .site-header{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+@media(max-width:560px){
+  .gcash-qr-wrap{grid-template-columns:1fr}
+  .gcash-qr{width:92px;height:92px}
+}
