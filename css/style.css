@@ -340,3 +340,19 @@ textarea{
     justify-content:center;
   }
 }
+
+/* GLOBAL READABILITY — CONTACT PAGE */
+body{font-size:16px}
+.eyebrow{font-size:11px}
+.contact-copy p,.form-note{font-size:14px;line-height:1.7}
+.detail-card strong{font-size:14px}
+.detail-card span{font-size:13px}
+.form-card label{font-size:12px}
+.form-card input,.form-card textarea{font-size:15px}
+.submit-button{font-size:12px}
+.site-footer{font-size:13px}
+@media(max-width:700px){
+  body{font-size:15px}
+  .contact-copy p,.form-note{font-size:13px}
+  .form-card input,.form-card textarea{font-size:16px}
+}
