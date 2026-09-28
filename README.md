@@ -1,56 +1,52 @@
 # Kapeng Barako
 
-Production-oriented artisan coffee storefront with a modular admin console and premium customer-facing UI.
+Premium dark-theme artisan coffee storefront and static admin console for GitHub Pages.
 
-## Frontend storefront
+## Architecture
 
-The buyer-facing page is `/index.html`. Main modules include:
+- `index.html` — customer storefront
+- `css/home.css` — storefront design system
+- `js/storefront.js` — cart, checkout, tracking, stock and conversion logic
+- `pages/admin/login.html` — restricted admin login gate
+- `pages/admin/index.html` — dashboard
+- `css/admin.css` / `js/admin.js` — dashboard UI and analytics
+- `images/` — local logo and gallery placeholders
 
-- Persistent premium navigation with Products, Farm Story, Brew Guide, Track Order, Cart, and My Account.
-- Hero storytelling for Batangas Liberica and small-batch roasting.
-- Product cards with weight variants, grind selection, stock-urgency badges, wishlist hearts, and cart actions.
-- Checkout with GCash, Cash on Delivery, Bank Transfer, payment reference/proof fields, regional shipping, promos, and free-shipping rules.
-- Track Order lookup using the order records available to the current static build.
-- Wholesale Mode for 10kg+ quote requests.
-- Auto-delivery preference capture.
-- Farm Story, Brew Guide + 3-minute timer, Coffee Tips, Gallery, FAQ, and Contact.
-- Optional GCash QR display during checkout when `settings.gcashQr` is configured.
+## Buyer handoff
 
-## Safe customization
+### Logo
+Replace `images/favicon.svg` with the approved brand logo/favicon. Keep the same filename.
 
-**Logo / favicon:** replace `images/favicon.svg` with the final approved logo/favicon.
+### Colors
+The premium dark palette is defined in `css/home.css`:
+`--bg`, `--card`, `--border`, `--text`, `--gold`.
 
-**Colors:** edit the design variables near the top of `css/home.css`. Keep the existing variable names unchanged.
+The admin palette is defined in `css/admin.css`.
 
-**Products:** Admin → Products writes product data to `kb_products`. The storefront reads that local data and falls back to built-in demo products.
+### Products + inventory
+The storefront uses `kb_rebuild_products` for the three collection products:
+- 250g — ₱350
+- 500g — ₱620
+- 1kg — ₱1,150
 
-**Contact + social links:** Admin → Store Settings writes `kb_settings`.
+Stock is stored with each product. A successful checkout deducts the ordered pack quantity automatically. Admin reads the same product records. At 5 packs or below, the inventory status is shown as a low-stock alert.
 
-**GCash QR:** configure `gcashQr` in `kb_settings` with an approved image URL or local image path. The checkout only shows the QR when GCash is selected. Never publish a placeholder QR as a real payment destination.
+### Cart + orders
+Cart: `kb_cart`.
+Orders: `kb_orders`.
+Latest order: `kb_last_order`.
 
-**Shipping:** Admin → Shipping Fees controls regional rates and the free-shipping threshold.
+The storefront validates current stock again immediately before creating an order.
 
-**Promos:** Admin → Pricing & Promos controls active voucher rules applied by the storefront checkout.
+### Shipping + promotions
+Shipping rules can use `kb_shipping_rule`; promo rules use `kb_promos`. The checkout displays subtotal, shipping, discount and final total.
 
-**Story / brew / FAQ / announcement:** Admin → Content & CMS controls the storefront CMS values stored in `kb_cms`.
+### Content
+Admin → Content stores announcement/contact/social values through `kb_cms` and `kb_settings`. Do not publish invented farmer identities or customer testimonials. Add only approved brand content and real screenshots.
 
-**Images / video:** replace approved local assets in `/images`. The brew modules use local placeholders until the final buyer-owned media is supplied.
-
-**Reviews:** only publish real, approved customer feedback or screenshots. The static storefront does not scrape Facebook reviews automatically.
-
-## Static-build limitations
-
-GitHub Pages + browser localStorage provides the storefront experience but is not a server-side order system. Orders, subscriptions, wholesale requests, and tracking records remain browser-local unless a backend is connected.
-
-True automated recurring fulfillment, shared multi-device live tracking, secure payment verification, uploaded payment files, and server-side admin authorization require a backend service.
-
-## Performance
-
-The storefront avoids continuous order polling, limits the wishlist observer to the product grid, lazy-loads gallery images, and avoids expensive full-screen compositing effects.
-
-## Deployment
-
-This repository is compatible with GitHub Pages. After publishing, hard-refresh with **Ctrl + Shift + R** when validating the latest frontend build. Test desktop and mobile separately, especially navigation, product variants, checkout, tracking, and payment fields.
+### Images + video
+The brew guide uses `images/brew-placeholder.svg`. Replace it with the approved visual or adapt the video dialog to the final embed.
+The Origin / Craft gallery uses `images/gallery-01.svg` through `images/gallery-06.svg`.
 
 ## Admin access
 
@@ -59,4 +55,21 @@ Open `/pages/admin/login.html`.
 Default seed:
 `admin@kapengbarako.com` / `barako123`
 
-GitHub Pages + localStorage cannot provide a real server-side security boundary. Connect authentication and business data to a backend before production use with real customer/payment information.
+The current implementation is intentionally a client-side localStorage gate because this repository is static GitHub Pages. It is **not** a real server-side security boundary. Before using live customer/payment data at scale, add authenticated server-side authorization, database storage, secure file uploads, and payment verification.
+
+## Sales chart
+
+Admin uses Chart.js from a CDN for the last-7-days bar chart. If the CDN is unavailable, the dashboard includes a local bar fallback so the rest of the admin page still works.
+
+## Mobile behavior
+
+Storefront and admin sidebars use transform-based off-canvas motion:
+- 3-line hamburger → X
+- `0.35s cubic-bezier(.4,0,.2,1)` icon morph
+- `0.45s cubic-bezier(.4,0,.2,1)` drawer slide
+- overlay + body scroll lock
+- desktop sidebar stays open in admin
+
+## Deployment
+
+Enable GitHub Pages from the `main` branch. The project requires no build step.
