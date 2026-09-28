@@ -99,3 +99,19 @@ body{font-size:15px}
   .data-table,.data-table td{font-size:12px}
   .admin-button{font-size:12px}
 }
+
+/* READABILITY FLOOR — ADMIN */
+.admin-nav button span{font-size:10px}
+.product-manager-head span,.product-manager-id,.product-manager-meta{font-size:10px}
+.product-manager-fields label{font-size:11px}
+.chart-label{font-size:11px}
+.status-grid span{font-size:10px}
+.data-table th{font-size:10px}
+.data-table td{font-size:12px}
+.data-table td strong{font-size:13px}
+.badge{font-size:10px}
+.inventory-note{font-size:11px}
+.content-note{font-size:11px}
+.admin-toast{font-size:11px}
+.low-stock-alert strong{font-size:10px}
+.low-stock-badge{font-size:10px}
