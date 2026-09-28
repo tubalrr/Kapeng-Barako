@@ -2044,3 +2044,28 @@ body > .site-header:hover{
   .kb-farm-facts div:last-child{border-bottom:0}
   .kb-timer>strong{font-size:56px}
 }
+
+
+/* =========================================================
+   PERFORMANCE STABILITY PATCH
+   Remove expensive full-screen texture/compositing and use
+   transform-based mobile drawer motion.
+   ========================================================= */
+body:before{display:none!important}
+.site-header,
+body > .site-header{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+@media(max-width:900px){
+  body > .site-header{
+    right:0!important;
+    transform:translate3d(100%,0,0)!important;
+    transition:transform .35s cubic-bezier(.4,0,.2,1)!important;
+    will-change:transform;
+  }
+  body.sidebar-open > .site-header{
+    right:0!important;
+    transform:translate3d(0,0,0)!important;
+  }
+}
