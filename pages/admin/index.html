@@ -178,6 +178,40 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 @media(max-width:560px){.extra-status-grid{grid-template-columns:1fr 1fr}.extra-stat-grid{grid-template-columns:1fr}}
 </style>
 
+
+<style id="admin-advanced-style">
+.advanced-bars{display:flex;align-items:flex-end;gap:8px;height:230px;padding:14px 4px 4px;overflow-x:auto}
+.advanced-bar-col{min-width:42px;height:100%;display:flex;flex:1;align-items:flex-end;justify-content:flex-end;flex-direction:column;gap:6px}
+.advanced-bar-fill{width:100%;min-height:4px;border-radius:8px 8px 3px 3px;background:var(--gold);box-shadow:0 8px 18px rgba(200,169,81,.12)}
+.advanced-bar-label{font-size:8px;color:var(--muted);text-align:center;white-space:nowrap}
+.advanced-bar-value{font-size:7px;color:#d6c39e;white-space:nowrap}
+.notification-item{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--border)}
+.notification-item:last-child{border-bottom:0}
+.notification-copy strong{display:block;font-size:10px}
+.notification-copy span{display:block;color:var(--muted);font-size:8px;line-height:1.6;margin-top:4px}
+.notification-item.unread{background:linear-gradient(90deg,rgba(200,169,81,.05),transparent);padding-left:10px;padding-right:10px;border-radius:12px}
+.notification-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:4px;flex:0 0 auto}
+.notification-dot.read{background:#4d3e2c}
+.notification-actions{display:flex;gap:6px;align-items:center}
+.order-detail-panel{margin-top:14px;padding:18px;border:1px solid var(--border);border-radius:18px;background:#1b1107}
+.order-detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+.order-detail-head h3{margin:4px 0 0;font:600 24px Georgia,serif}
+.order-detail-items{display:grid;gap:8px}
+.order-detail-item{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:10px;border:1px solid var(--border);border-radius:12px;background:#171006}
+.order-detail-item span{color:var(--muted);font-size:8px}
+.order-detail-item strong{font-size:9px}
+.customer-profile-panel{margin-top:14px;padding:18px;border:1px solid var(--border);border-radius:18px;background:#1b1107}
+.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.profile-cell{padding:12px;border:1px solid var(--border);border-radius:12px;background:#171006}
+.profile-cell span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;font-weight:800}
+.profile-cell strong{display:block;margin-top:6px;font-size:10px;word-break:break-word}
+.inventory-history-panel{margin-top:14px;padding:18px;border:1px solid var(--border);border-radius:18px;background:#1b1107}
+.audit-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.audit-row:last-child{border-bottom:0}
+.audit-row strong{font-size:9px}.audit-row span{display:block;color:var(--muted);font-size:8px;margin-top:3px}
+@media(max-width:760px){.profile-grid{grid-template-columns:1fr}.order-detail-item{grid-template-columns:1fr auto}.advanced-bars{gap:6px}}
+</style>
+
 </head>
 <body>
 <div id="loginScreen" class="login-screen">
@@ -208,6 +242,11 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         <button data-view="gallery"><span>08</span>Gallery</button>
         <button data-view="ads"><span>09</span>Ads</button>
         <button data-view="contact"><span>10</span>Contact</button>
+        <button data-view="analytics"><span>11</span>Analytics</button>
+        <button data-view="notifications"><span>12</span>Notifications</button>
+        <button data-view="settings"><span>13</span>Store Settings</button>
+        <button data-view="activity"><span>14</span>Activity Log</button>
+        <button data-view="data"><span>15</span>Data & Backup</button>
       </nav>
       <div class="sidebar-foot">
         <div id="adminEmail" class="sidebar-user">admin</div>
@@ -319,6 +358,59 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
             <div class="extra-actions"><a id="extraAdsOpen" class="extra-link" href="#" target="_blank" rel="noopener noreferrer" hidden>OPEN AD LINK ↗</a></div>
             <div class="extra-note">No live AdSense code is added here. The saved values remain local to this browser until a backend/content system is connected.</div>
           </section>
+        </section>
+
+        <section id="view-analytics" class="view">
+          <div class="hero"><div><div class="kicker">BUSINESS INTELLIGENCE</div><h1>Analytics</h1><p>Sales, product performance, customer behavior and order flow calculated from the current <code>kb_orders</code> and <code>kb_rebuild_products</code> records.</p></div></div>
+          <div class="admin-extra-card">
+            <div class="extra-head"><div><div class="kicker">REPORTING WINDOW</div><h3>Performance Overview</h3></div><select id="analyticsRange" class="status-select"><option value="7">Last 7 Days</option><option value="30" selected>Last 30 Days</option><option value="all">All Time</option></select></div>
+            <div class="extra-stat-grid">
+              <article class="extra-stat"><span>Revenue</span><strong id="anRevenue">₱0</strong></article>
+              <article class="extra-stat"><span>Orders</span><strong id="anOrders">0</strong></article>
+              <article class="extra-stat"><span>Avg Order</span><strong id="anAov">₱0</strong></article>
+            </div>
+          </div>
+          <div class="admin-extra-row">
+            <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">SALES TREND</div><h3>Daily Sales</h3></div><span id="anTrendTotal" class="extra-sub">₱0</span></div><div id="anSalesBars" class="advanced-bars"></div></section>
+            <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">CUSTOMER BEHAVIOR</div><h3>Customer Metrics</h3></div></div><div class="extra-stat-grid"><article class="extra-stat"><span>Total Customers</span><strong id="anCustomers">0</strong></article><article class="extra-stat"><span>Repeat Customers</span><strong id="anRepeat">0</strong></article><article class="extra-stat"><span>Repeat Rate</span><strong id="anRepeatRate">0%</strong></article></div></section>
+          </div>
+          <div class="admin-extra-row">
+            <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">PRODUCT PERFORMANCE</div><h3>Best Sellers</h3></div></div><div id="anProducts" class="extra-list"></div></section>
+            <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">ORDER FLOW</div><h3>Status Breakdown</h3></div></div><div id="anStatus" class="extra-status-grid"></div></section>
+          </div>
+        </section>
+
+        <section id="view-notifications" class="view">
+          <div class="hero"><div><div class="kicker">ATTENTION CENTER</div><h1>Notifications</h1><p>Operational alerts generated from current orders, payments and inventory. Nothing here is fabricated.</p></div><div class="hero-actions"><button id="markAllRead" class="ghost-btn" type="button">Mark All Read</button></div></div>
+          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">LIVE ALERTS</div><h3>Needs Attention</h3></div><span id="notificationCount" class="badge"></span></div><div id="notificationList" class="extra-list"></div></section>
+        </section>
+
+        <section id="view-settings" class="view">
+          <div class="hero"><div><div class="kicker">STORE CONTROL</div><h1>Store Settings</h1><p>Manage business-wide delivery, payments, stock thresholds and operating hours saved under the shared store settings record.</p></div><div class="hero-actions"><button id="saveStoreSettings" class="primary-btn" type="button">Save Settings</button></div></div>
+          <section class="admin-extra-card">
+            <div class="extra-form-grid">
+              <div class="extra-field"><label for="storeStatus">Store Status</label><select id="storeStatus"><option value="open">Open</option><option value="closed">Closed</option></select></div>
+              <div class="extra-field"><label for="storeLowStock">Low Stock Threshold</label><input id="storeLowStock" type="number" min="0" step="1" value="5"></div>
+              <div class="extra-field"><label for="storeDeliveryFee">Delivery Fee (₱)</label><input id="storeDeliveryFee" type="number" min="0" step="1" value="0"></div>
+              <div class="extra-field"><label for="storeFreeDelivery">Free Delivery Threshold (₱)</label><input id="storeFreeDelivery" type="number" min="0" step="1" value="0"></div>
+              <div class="extra-field"><label for="storeHours">Business Hours</label><input id="storeHours" placeholder="Mon–Sat · 8:00 AM–5:00 PM"></div>
+              <div class="extra-field full"><label>Payment Methods</label><div class="extra-toolbar"><label class="extra-switch"><input id="payGcash" type="checkbox" checked> GCash</label><label class="extra-switch"><input id="payCod" type="checkbox" checked> COD</label><label class="extra-switch"><input id="payBank" type="checkbox" checked> Bank Transfer</label></div></div>
+            </div>
+          </section>
+        </section>
+
+        <section id="view-activity" class="view">
+          <div class="hero"><div><div class="kicker">AUDIT TRAIL</div><h1>Activity Log</h1><p>Records actions generated by the admin controls and catalog/order changes detected in this browser.</p></div><div class="hero-actions"><button id="clearActivity" class="danger-btn" type="button">Clear Log</button></div></div>
+          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">RECENT EVENTS</div><h3>Admin Activity</h3></div><span id="activityCount" class="extra-sub"></span></div><div id="activityList" class="extra-list"></div></section>
+        </section>
+
+        <section id="view-data" class="view">
+          <div class="hero"><div><div class="kicker">DATA MANAGEMENT</div><h1>Data & Backup</h1><p>Export and restore the local business records used by this admin. Backups stay on your device unless you share the file.</p></div></div>
+          <div class="admin-extra-row">
+            <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">BACKUP</div><h3>Export Business Data</h3></div></div><p class="extra-note">Includes orders, products, promos, settings, CMS content, gallery, ads, inventory history, activity log and notification state.</p><div class="extra-actions"><button id="exportBackup" class="primary-btn" type="button">Download JSON Backup</button><button id="exportOrdersCsv" class="ghost-btn" type="button">Export Orders CSV</button></div></section>
+            <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">RESTORE</div><h3>Import JSON Backup</h3></div></div><input id="importBackup" type="file" accept="application/json,.json"><p class="extra-note">Import replaces the selected supported local records with values from the backup file. Review the file before restoring.</p></section>
+          </div>
+          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">MAINTENANCE</div><h3>Test Data</h3></div></div><p class="extra-note">Remove only the demo customer flag created by this site. Real orders, products and customer records are left untouched.</p><div class="extra-actions"><button id="clearDemoData" class="danger-btn" type="button">Remove Demo Customer</button></div></section>
         </section>
 
         <section id="view-contact" class="view">
@@ -941,6 +1033,194 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     window.addEventListener("storage",e=>{if([PRODUCT_KEY,PROMO_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY,ADS_KEY,"kb_orders"].includes(e.key)){updateSnapshot();renderExtraProducts();renderPromos();renderGallery();renderAds();}});
   }
 
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+</script>
+
+<script id="admin-advanced-script">
+(() => {
+  "use strict";
+  const K={ORDERS:"kb_orders",PRODUCTS:"kb_rebuild_products",PROMOS:"kb_promos",SETTINGS:"kb_settings",CMS:"kb_cms",GALLERY:"kb_gallery",ADS:"kb_ads",ACTIVITY:"kb_activity_log",HISTORY:"kb_inventory_history",READ:"kb_notification_read",STORE:"kb_store_settings",DEMO:"kb_demo_customer_v1"};
+  const read=(k,f)=>{try{const raw=localStorage.getItem(k);return raw===null?f:JSON.parse(raw)}catch{return f}};
+  const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const money=n=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
+  const orders=()=>{const x=read(K.ORDERS,[]);return Array.isArray(x)?x:[]};
+  const products=()=>{const x=read(K.PRODUCTS,[]);return Array.isArray(x)?x:[]};
+  const customerKey=o=>String(o?.customer?.email||o?.email||o?.customer?.phone||o?.phone||o?.customer?.name||o?.customerName||"customer").toLowerCase();
+  const customerName=o=>String(o?.customer?.name||o?.customerName||"Customer");
+  const nowText=()=>new Date().toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"});
+  const toast=m=>{const t=document.getElementById("adminExtraToast")||document.getElementById("admin-toast");if(!t)return;t.textContent=m;t.classList.add("show");clearTimeout(window.__kbAdvToast);window.__kbAdvToast=setTimeout(()=>t.classList.remove("show"),2400)};
+  const activity=()=>{const x=read(K.ACTIVITY,[]);return Array.isArray(x)?x:[]};
+  function log(type,message,meta={}){const list=activity();list.unshift({id:"A-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),type,message,meta,at:new Date().toISOString()});write(K.ACTIVITY,list.slice(0,300));renderActivity()}
+  const settings=()=>{const x=read(K.SETTINGS,{});return x&&typeof x==="object"?x:{}};
+  const unreadIds=()=>{const x=read(K.READ,[]);return Array.isArray(x)?x.map(String):[]};
+  function renderAnalytics(){
+    const range=document.getElementById("analyticsRange")?.value||"30", os=orders(), ps=products(), cutoff=range==="all"?0:Date.now()-Number(range)*86400000;
+    const filtered=os.filter(o=>{const t=new Date(o.createdAt||0).getTime();return Number.isFinite(t)&&t>=cutoff});
+    const revenue=filtered.reduce((s,o)=>s+Number(o.total||0),0), count=filtered.length;
+    const aov=count?revenue/count:0;
+    const customersMap=new Map();os.forEach(o=>{const k=customerKey(o);const c=customersMap.get(k)||{orders:0};c.orders++;customersMap.set(k,c)});
+    const totalCustomers=customersMap.size, repeat=[...customersMap.values()].filter(c=>c.orders>1).length;
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+    set("anRevenue",money(revenue));set("anOrders",count);set("anAov",money(aov));set("anCustomers",totalCustomers);set("anRepeat",repeat);set("anRepeatRate",totalCustomers?(repeat/totalCustomers*100).toFixed(1)+"%":"0%");
+    set("anTrendTotal",money(revenue));
+    const days=[], values=[];
+    const n=range==="all"?Math.min(14,Math.max(1,Math.ceil((Date.now()-Math.min(...filtered.map(o=>new Date(o.createdAt||Date.now()).getTime()),Date.now()))/86400000))):Number(range);
+    const countDays=Math.min(14,Math.max(1,n));
+    for(let i=countDays-1;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);const from=d.getTime(),to=from+86400000;days.push(d.toLocaleDateString("en-PH",{weekday:"short",day:"numeric"}));values.push(filtered.filter(o=>{const t=new Date(o.createdAt||0).getTime();return t>=from&&t<to}).reduce((s,o)=>s+Number(o.total||0),0))}
+    const max=Math.max(...values,1), bars=document.getElementById("anSalesBars");
+    if(bars)bars.innerHTML=values.map((v,i)=>'<div class="advanced-bar-col"><span class="advanced-bar-value">'+(v?money(v):"₱0")+'</span><div class="advanced-bar-fill" style="height:'+Math.max(4,(v/max)*160)+'px"></div><span class="advanced-bar-label">'+esc(days[i])+'</span></div>').join("");
+    const itemMap=new Map();
+    filtered.forEach(o=>(Array.isArray(o.items)?o.items:[]).forEach(it=>{const key=String(it.id||it.productId||it.name||"item");const x=itemMap.get(key)||{name:it.name||key,qty:0,revenue:0};x.qty+=Number(it.qty||1);x.revenue+=Number(it.price||0)*Number(it.qty||1);itemMap.set(key,x)}));
+    const ranked=[...itemMap.values()].sort((a,b)=>b.qty-a.qty).slice(0,8), pr=document.getElementById("anProducts");
+    if(pr)pr.innerHTML=ranked.length?ranked.map((p,i)=>'<div class="extra-list-item"><div><strong style="font-size:10px">'+(i+1)+". "+esc(p.name)+'</strong><span class="extra-note">'+p.qty+" units sold</span></div><strong style="font-size:10px;color:var(--gold)">'+money(p.revenue)+'</strong></div>').join(""):'<div class="empty">No product sales in this range.</div>';
+    const statuses=["Pending","Verified Payment","Processing/Roasting","Ready to Ship","Dispatched","Delivered","Cancelled"],sr=document.getElementById("anStatus");
+    if(sr)sr.innerHTML=statuses.map(s=>'<article class="extra-status"><span>'+esc(s)+'</span><strong>'+filtered.filter(o=>String(o.status||"Pending")===s).length+'</strong></article>').join("");
+  }
+  function buildNotifications(){
+    const result=[], os=orders(), ps=products(), threshold=Number(read(K.STORE,{lowStock:5}).lowStock||5);
+    ps.filter(p=>Number(p.stock||0)<=threshold).forEach(p=>result.push({id:"stock:"+p.id,type:"Inventory",title:"Low stock: "+p.name,body:Number(p.stock||0)+" packs remaining.",priority:"high"}));
+    os.filter(o=>String(o.status||"Pending")==="Pending").slice(0,20).forEach(o=>result.push({id:"order:"+o.id,type:"Orders",title:"Pending order "+(o.id||"—"),body:customerName(o)+" · "+money(o.total),priority:"normal"}));
+    os.filter(o=>String(o.payment||"").toLowerCase()==="gcash"&&!String(o.gcashRef||o.gcashReference||"").trim()).slice(0,20).forEach(o=>result.push({id:"gcash:"+o.id,type:"Payment",title:"Missing GCash reference",body:"Order "+(o.id||"—")+" needs payment reference review.",priority:"high"}));
+    return result.slice(0,50);
+  }
+  function renderNotifications(){
+    const list=buildNotifications(),readSet=new Set(unreadIds()),root=document.getElementById("notificationList"),count=document.getElementById("notificationCount"),unread=list.filter(n=>!readSet.has(n.id)).length;
+    if(count)count.textContent=unread+" unread";
+    if(!root)return;
+    root.innerHTML=list.length?list.map(n=>'<div class="notification-item '+(readSet.has(n.id)?"":"unread")+'"><div style="display:flex;gap:10px"><span class="notification-dot '+(readSet.has(n.id)?"read":"")+'"></span><div class="notification-copy"><strong>'+esc(n.title)+'</strong><span>'+esc(n.type)+" · "+esc(n.body)+'</span></div></div><div class="notification-actions"><button class="ghost-btn" type="button" data-notification-id="'+esc(n.id)+'">'+(readSet.has(n.id)?"Read":"Mark Read")+'</button></div></div>').join(""):'<div class="empty">No operational notifications.</div>';
+    root.querySelectorAll("[data-notification-id]").forEach(b=>b.addEventListener("click",()=>{const s=new Set(unreadIds());s.add(b.dataset.notificationId);write(K.READ,[...s]);renderNotifications()}));
+  }
+  function renderSettings(){
+    const s={status:"open",lowStock:5,deliveryFee:0,freeDeliveryThreshold:0,hours:"",payments:{gcash:true,cod:true,bank:true},...read(K.STORE,{})};
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v};
+    set("storeStatus",s.status);set("storeLowStock",s.lowStock);set("storeDeliveryFee",s.deliveryFee);set("storeFreeDelivery",s.freeDeliveryThreshold);set("storeHours",s.hours);
+    document.getElementById("payGcash").checked=s.payments?.gcash!==false;document.getElementById("payCod").checked=s.payments?.cod!==false;document.getElementById("payBank").checked=s.payments?.bank!==false;
+  }
+  function saveSettings(){
+    const value={status:document.getElementById("storeStatus").value,lowStock:Math.max(0,Number(document.getElementById("storeLowStock").value||0)),deliveryFee:Math.max(0,Number(document.getElementById("storeDeliveryFee").value||0)),freeDeliveryThreshold:Math.max(0,Number(document.getElementById("storeFreeDelivery").value||0)),hours:document.getElementById("storeHours").value.trim(),payments:{gcash:document.getElementById("payGcash").checked,cod:document.getElementById("payCod").checked,bank:document.getElementById("payBank").checked}};
+    write(K.STORE,value);const shared=settings();write(K.SETTINGS,{...shared,storeStatus:value.status,lowStockThreshold:value.lowStock,deliveryFee:value.deliveryFee,freeDeliveryThreshold:value.freeDeliveryThreshold,businessHours:value.hours,paymentMethods:value.payments});log("settings","Updated store settings",{...value});toast("Store settings saved.");
+  }
+  function renderActivity(){
+    const root=document.getElementById("activityList"),count=document.getElementById("activityCount"),list=activity().slice(0,100);
+    if(count)count.textContent=list.length+" event"+(list.length===1?"":"s");
+    if(!root)return;
+    root.innerHTML=list.length?list.map(a=>'<div class="audit-row"><div><strong>'+esc(a.message)+'</strong><span>'+esc(a.type||"Admin")+' · '+esc(a.at?new Date(a.at).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}):"")+'</span></div><span>ADMIN</span></div>').join(""):'<div class="empty">No activity recorded yet.</div>';
+  }
+  function renderInventoryHistory(){
+    const host=document.getElementById("inventoryHistoryHost");if(!host)return;
+    const list=read(K.HISTORY,[]);const rows=Array.isArray(list)?list.slice(0,50):[];
+    host.innerHTML='<div class="inventory-history-panel"><div class="extra-head"><div><div class="kicker">INVENTORY AUDIT</div><h3>Stock History</h3></div><span class="extra-sub">'+rows.length+" record"+(rows.length===1?"":"s")+'</span></div>'+(rows.length?'<div>'+rows.map(r=>'<div class="audit-row"><div><strong>'+esc(r.productName||r.productId||"Product")+'</strong><span>'+esc(r.previousStock)+" → "+esc(r.newStock)+" packs · "+esc(r.action||"Updated")+'</span></div><span>'+esc(r.at?new Date(r.at).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}):"")+'</span></div>').join("")+'</div>':'<div class="empty">Stock changes made after this module was enabled will appear here.</div>')+'</div>';
+  }
+  function ensureInventoryHistoryMount(){
+    const table=document.getElementById("inventory-table");if(!table||document.getElementById("inventoryHistoryHost"))return;
+    const div=document.createElement("div");div.id="inventoryHistoryHost";table.parentElement?.parentElement?.insertAdjacentElement("afterend",div);
+    renderInventoryHistory();
+  }
+  function ensureOrderDetailMount(){
+    const table=document.getElementById("orders-table");if(!table||document.getElementById("orderDetailHost"))return;
+    const div=document.createElement("div");div.id="orderDetailHost";
+    table.parentElement?.parentElement?.insertAdjacentElement("afterend",div);
+    const rows=table.querySelectorAll("tbody tr");
+    rows.forEach((row,i)=>{const cell=row.lastElementChild;if(cell&&!cell.querySelector("[data-detail-order]")){const id=filteredOrderRows()[i]?.id;if(id){const b=document.createElement("button");b.type="button";b.className="track-btn";b.dataset.detailOrder=id;b.textContent="View";cell.appendChild(b)}}});
+    renderOrderDetail();
+  }
+  function filteredOrderRows(){const q=(document.getElementById("order-search")?.value||"").trim().toLowerCase();return orders().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).filter(o=>!q||String(o.id||"").toLowerCase().includes(q)||customerName(o).toLowerCase().includes(q))}
+  function renderOrderDetail(id){
+    const host=document.getElementById("orderDetailHost");if(!host)return;
+    if(!id){host.innerHTML="";return}
+    const o=orders().find(x=>String(x.id)===String(id));if(!o){host.innerHTML="";return}
+    const items=Array.isArray(o.items)?o.items:[];
+    host.innerHTML='<section class="order-detail-panel"><div class="order-detail-head"><div><div class="kicker">ORDER DETAIL</div><h3>#'+esc(o.id||"—")+'</h3></div><div class="extra-actions" style="margin:0"><button id="printOrderDetail" class="ghost-btn" type="button">Print Receipt</button><button id="closeOrderDetail" class="ghost-btn" type="button">Close</button></div></div><div class="profile-grid"><div class="profile-cell"><span>Customer</span><strong>'+esc(customerName(o))+'</strong></div><div class="profile-cell"><span>Payment</span><strong>'+esc(o.payment||"—")+(o.gcashRef?" · "+esc(o.gcashRef):"")+'</strong></div><div class="profile-cell"><span>Address</span><strong>'+esc(o.customer?.address||o.address||"—")+'</strong></div><div class="profile-cell"><span>Total</span><strong>'+money(o.total)+'</strong></div></div><div style="margin-top:14px" class="order-detail-items">'+(items.length?items.map(it=>'<div class="order-detail-item"><div><strong>'+esc(it.name||it.id||"Product")+'</strong><span>'+esc(it.size||"")+'</span></div><strong>×'+Number(it.qty||1)+'</strong><strong>'+money(Number(it.price||0)*Number(it.qty||1))+'</strong></div>').join(""):'<div class="empty">No line items stored on this order.</div>')+'</div></section>';
+    document.getElementById("closeOrderDetail")?.addEventListener("click",()=>renderOrderDetail());
+    document.getElementById("printOrderDetail")?.addEventListener("click",()=>printOrder(o));
+  }
+  function printOrder(o){
+    const items=Array.isArray(o.items)?o.items:[];
+    const w=window.open("","_blank","width=720,height=820");if(!w){toast("Pop-up blocked. Allow pop-ups to print.");return}
+    w.document.write('<!doctype html><html><head><title>Receipt '+esc(o.id)+'</title><style>body{font:14px Arial,sans-serif;padding:32px;color:#222}h1{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;margin-top:22px}td,th{padding:9px;border-bottom:1px solid #ddd;text-align:left}@media print{button{display:none}}</style></head><body><h1>Kapeng Barako</h1><p>Order '+esc(o.id||"—")+'<br>'+esc(customerName(o))+'<br>'+esc(o.customer?.address||o.address||"")+'</p><table><tr><th>Item</th><th>Qty</th><th>Total</th></tr>'+(items.map(it=>'<tr><td>'+esc(it.name||it.id||"Product")+'</td><td>'+Number(it.qty||1)+'</td><td>'+money(Number(it.price||0)*Number(it.qty||1))+'</td></tr>').join(""))+'</table><h2>Total: '+money(o.total)+'</h2></body></html>');w.document.close();w.focus();setTimeout(()=>w.print(),200);log("order","Printed receipt for "+o.id)}
+  function addOrderDetailButtons(){
+    const host=document.getElementById("orders-table");if(!host)return;
+    const rows=host.querySelectorAll("tbody tr"), list=filteredOrderRows();
+    rows.forEach((row,i)=>{const cell=row.lastElementChild;if(!cell||cell.querySelector("[data-detail-order]"))return;const id=list[i]?.id;if(!id)return;const b=document.createElement("button");b.type="button";b.className="track-btn";b.dataset.detailOrder=id;b.textContent="View";cell.appendChild(b)});
+    host.querySelectorAll("[data-detail-order]").forEach(b=>{if(b.dataset.bound)return;b.dataset.bound="1";b.addEventListener("click",()=>renderOrderDetail(b.dataset.detailOrder))});
+  }
+  function addCustomerProfileButtons(){
+    const host=document.getElementById("customers-table");if(!host)return;
+    const rows=host.querySelectorAll("tbody tr"), list=[...new Map(orders().map(o=>[customerKey(o),o])).values()];
+    rows.forEach((row,i)=>{const cell=row.lastElementChild;if(!cell||cell.querySelector("[data-customer-profile]"))return;const o=list[i];if(!o)return;const b=document.createElement("button");b.type="button";b.className="track-btn";b.dataset.customerProfile=customerKey(o);b.textContent="View";cell.appendChild(b)});
+    host.querySelectorAll("[data-customer-profile]").forEach(b=>{if(b.dataset.bound)return;b.dataset.bound="1";b.addEventListener("click",()=>showCustomerProfile(b.dataset.customerProfile))});
+  }
+  function showCustomerProfile(key){
+    const os=orders().filter(o=>customerKey(o)===key), first=os[0];if(!first)return;
+    const host=document.getElementById("customerProfileHost");if(!host)return;
+    const spend=os.reduce((s,o)=>s+Number(o.total||0),0),last=os.slice().sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))[0];
+    host.innerHTML='<section class="customer-profile-panel"><div class="order-detail-head"><div><div class="kicker">CUSTOMER PROFILE</div><h3>'+esc(customerName(first))+'</h3></div><button id="closeCustomerProfile" class="ghost-btn" type="button">Close</button></div><div class="profile-grid"><div class="profile-cell"><span>Email</span><strong>'+esc(first.customer?.email||first.email||"—")+'</strong></div><div class="profile-cell"><span>Phone</span><strong>'+esc(first.customer?.phone||first.phone||"—")+'</strong></div><div class="profile-cell"><span>Orders</span><strong>'+os.length+'</strong></div><div class="profile-cell"><span>Total Spend</span><strong>'+money(spend)+'</strong></div><div class="profile-cell" style="grid-column:1/-1"><span>Last Order</span><strong>'+esc(last?.id||"—")+' · '+(last?.createdAt?new Date(last.createdAt).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}):"")+'</strong></div></div></section>';
+    document.getElementById("closeCustomerProfile")?.addEventListener("click",()=>{host.innerHTML=""});
+  }
+  function ensureCustomerProfileMount(){
+    const table=document.getElementById("customers-table");if(!table||document.getElementById("customerProfileHost"))return;
+    const div=document.createElement("div");div.id="customerProfileHost";table.parentElement?.parentElement?.insertAdjacentElement("afterend",div);
+    addCustomerProfileButtons();
+  }
+  function captureProductChanges(){
+    const current=products(), previous=read("kb_adv_last_products",null);
+    if(Array.isArray(previous)){
+      current.forEach(p=>{const old=previous.find(x=>String(x.id)===String(p.id));if(old&&Number(old.stock||0)!==Number(p.stock||0)){const hist=read(K.HISTORY,[]);const list=Array.isArray(hist)?hist:[];list.unshift({productId:p.id,productName:p.name,previousStock:Number(old.stock||0),newStock:Number(p.stock||0),action:"Stock updated",at:new Date().toISOString()});write(K.HISTORY,list.slice(0,200));log("inventory",(p.name||p.id)+" stock changed: "+Number(old.stock||0)+" → "+Number(p.stock||0),{productId:p.id,previousStock:old.stock,newStock:p.stock})}});
+    }
+    write("kb_adv_last_products",current.map(p=>({id:p.id,stock:Number(p.stock||0)})));renderInventoryHistory();
+  }
+  function installObservers(){
+    const ordersRoot=document.getElementById("orders-table"),customersRoot=document.getElementById("customers-table"),inventoryRoot=document.getElementById("inventory-table");
+    [ordersRoot,customersRoot,inventoryRoot].forEach(root=>{if(!root)return;new MutationObserver(()=>{if(root.id==="orders-table")addOrderDetailButtons();if(root.id==="customers-table")addCustomerProfileButtons();if(root.id==="inventory-table")ensureInventoryHistoryMount()}).observe(root,{childList:true,subtree:true})});
+    ordersRoot?.addEventListener("change",e=>{const id=e.target?.dataset?.orderStatus;if(id)log("order","Order "+id+" status changed to "+e.target.value,{orderId:id,status:e.target.value})});
+    let lastSig=JSON.stringify(products().map(p=>({id:p.id,stock:Number(p.stock||0)})));write("kb_adv_last_products",products().map(p=>({id:p.id,stock:Number(p.stock||0)})));
+    try{if("BroadcastChannel" in window){const ch=new BroadcastChannel("kapeng-barako-catalog");ch.addEventListener("message",()=>{const next=JSON.stringify(products().map(p=>({id:p.id,stock:Number(p.stock||0)})));if(next!==lastSig){lastSig=next;captureProductChanges()}})}}catch{}
+  }
+  function exportBackup(){
+    const data={version:1,createdAt:new Date().toISOString(),records:{orders:read(K.ORDERS,[]),products:read(K.PRODUCTS,[]),promos:read(K.PROMOS,[]),settings:read(K.SETTINGS,{}),storeSettings:read(K.STORE,{}),cms:read(K.CMS,{}),gallery:read(K.GALLERY,[]),ads:read(K.ADS,{}),activity:read(K.ACTIVITY,[]),inventoryHistory:read(K.HISTORY,[]),notificationRead:read(K.READ,[])}};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="kapeng-barako-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);log("backup","Downloaded business data backup");toast("Backup downloaded.");
+  }
+  function csvCell(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
+  function exportCsv(){
+    const rows=[["Order ID","Date","Customer","Email","Phone","Address","Items","Total","Payment","GCash Ref","Status"]];
+    orders().forEach(o=>rows.push([o.id,new Date(o.createdAt||"").toISOString(),customerName(o),o.customer?.email||o.email||"",o.customer?.phone||o.phone||"",o.customer?.address||o.address||"",Array.isArray(o.items)?o.items.reduce((s,it)=>s+Number(it.qty||1),0):0,Number(o.total||0),o.payment||"",o.gcashRef||"",o.status||"Pending"]));
+    const blob=new Blob(["\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\n")],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="kapeng-barako-orders.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);log("orders","Exported orders CSV",{count:rows.length-1});toast("Orders CSV exported.");
+  }
+  function importBackup(file){
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const payload=JSON.parse(String(reader.result||"")),r=payload.records;if(!r||typeof r!=="object")throw new Error("Invalid backup structure");
+        const allowed={orders:K.ORDERS,products:K.PRODUCTS,promos:K.PROMOS,settings:K.SETTINGS,storeSettings:K.STORE,cms:K.CMS,gallery:K.GALLERY,ads:K.ADS,activity:K.ACTIVITY,inventoryHistory:K.HISTORY,notificationRead:K.READ};
+        Object.entries(allowed).forEach(([src,dst])=>{if(src in r)write(dst,r[src])});
+        log("backup","Restored business data from JSON backup");toast("Backup restored. Reloading admin data.");
+        setTimeout(()=>location.reload(),350);
+      }catch(err){toast("Backup import failed: "+err.message)}
+    };
+    reader.readAsText(file);
+  }
+  function clearDemo(){
+    if(!confirm("Remove the demo customer flag? Real orders and catalog records will remain."))return;
+    localStorage.removeItem(K.DEMO);log("maintenance","Removed demo customer flag");toast("Demo customer removed.");
+  }
+  function markAllRead(){write(K.READ,buildNotifications().map(n=>n.id));renderNotifications();log("notifications","Marked all notifications as read")}
+  function clearActivity(){if(!confirm("Clear the admin activity log?"))return;localStorage.removeItem(K.ACTIVITY);renderActivity();toast("Activity log cleared.")}
+
+  function init(){
+    document.getElementById("analyticsRange")?.addEventListener("change",renderAnalytics);
+    document.getElementById("saveStoreSettings")?.addEventListener("click",saveSettings);
+    document.getElementById("markAllRead")?.addEventListener("click",markAllRead);
+    document.getElementById("clearActivity")?.addEventListener("click",clearActivity);
+    document.getElementById("exportBackup")?.addEventListener("click",exportBackup);
+    document.getElementById("exportOrdersCsv")?.addEventListener("click",exportCsv);
+    document.getElementById("clearDemoData")?.addEventListener("click",clearDemo);
+    document.getElementById("importBackup")?.addEventListener("change",e=>{if(e.target.files?.[0])importBackup(e.target.files[0])});
+    renderAnalytics();renderNotifications();renderSettings();renderActivity();ensureInventoryHistoryMount();ensureOrderDetailMount();ensureCustomerProfileMount();installObservers();
+    window.addEventListener("storage",e=>{if([K.ORDERS,K.PRODUCTS,K.STORE,K.ACTIVITY,K.HISTORY,K.READ].includes(e.key)){renderAnalytics();renderNotifications();renderActivity();ensureInventoryHistoryMount();ensureOrderDetailMount();ensureCustomerProfileMount()}});
+    setInterval(()=>{renderAnalytics();renderNotifications();addOrderDetailButtons();addCustomerProfileButtons();},4000);
+  }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 </script>
