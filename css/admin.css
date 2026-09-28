@@ -38,3 +38,13 @@
 .order-search-field button{position:absolute;right:8px;width:30px;height:30px;border:0;border-radius:50%;background:transparent;color:var(--muted);font-size:20px;cursor:pointer}
 .order-search-field button:hover{background:rgba(200,169,81,.12);color:var(--text)}
 @media(max-width:600px){.order-search-bar{align-items:stretch}.order-search-field{width:100%}}
+
+.gallery-manager-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.gallery-manager-card{border:1px solid var(--border);border-radius:18px;padding:14px;background:var(--card);display:grid;gap:10px}
+.gallery-preview{height:190px;border-radius:14px;overflow:hidden;background:#efe8dc;display:grid;place-items:center;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.12em}
+.gallery-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery-manager-card label{display:grid;gap:6px;font-size:10px;font-weight:800;color:var(--muted)}
+.gallery-manager-card input{height:40px;border:1px solid var(--border);border-radius:10px;padding:0 10px;background:var(--bg);color:var(--text);outline:none}
+.gallery-manager-card input:focus{border-color:var(--gold)}
+@media(max-width:1000px){.gallery-manager-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.gallery-manager-grid{grid-template-columns:1fr}.gallery-preview{height:210px}}
