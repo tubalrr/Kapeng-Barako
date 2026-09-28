@@ -144,3 +144,22 @@ a{text-decoration:none;color:inherit}
   .profile-avatar.large{width:62px;height:62px;min-width:62px;font-size:18px}
   .profile-meta{grid-template-columns:1fr}
 }
+
+
+/* DEMO CUSTOMER */
+.demo-box{display:grid;gap:10px;margin-top:12px;padding:13px;border:1px solid #ead2ae;border-radius:15px;background:#fff8ed}
+.demo-box>div{display:grid;gap:3px}
+.demo-box strong{font-size:12px}
+.demo-box span,.demo-box small{color:var(--kb-muted);font-size:10px;line-height:1.4}
+.demo-box small{font-size:9px}
+.demo-btn{width:100%}
+.demo-remove-card{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:20px;padding:14px;border:1px solid #eadfd2;border-radius:15px;background:#fff8ef}
+.demo-remove-card>div{display:grid;gap:3px}
+.demo-remove-card strong{font-size:12px}
+.demo-remove-card span{font-size:10px;color:var(--kb-muted);line-height:1.4}
+.danger-outline{border-color:#d9aaa5;color:var(--kb-danger);background:#fff}
+.danger-outline:hover{background:#fbefed}
+@media(max-width:620px){
+  .demo-remove-card{align-items:flex-start;flex-direction:column}
+  .demo-remove-card .small-btn{width:100%}
+}
