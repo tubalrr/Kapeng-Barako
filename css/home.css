@@ -87,6 +87,14 @@ code{font:600 11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:rg
 .cart-button span:last-child{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--gold);color:var(--espresso);display:grid;place-items:center;font-size:9px}
 .bag-mark{display:grid;place-items:center;color:var(--cream)}
 .bag-mark svg{width:15px;height:15px}
+
+.nav-account-link{height:40px;padding:0 13px;border:1px solid rgba(200,169,81,.34);border-radius:999px;display:inline-flex;align-items:center;color:var(--gold-2);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:900}
+.nav-account-link:hover{background:rgba(200,169,81,.10);color:var(--cream)}
+.product-art{position:relative}
+.wishlist-heart{position:absolute;right:13px;top:13px;width:38px;height:38px;border:1px solid rgba(245,233,211,.22);border-radius:50%;background:rgba(26,18,7,.72);backdrop-filter:blur(8px);color:#fff9ee;font-size:20px;line-height:1;display:grid;place-items:center;z-index:5}
+.wishlist-heart:hover{transform:scale(1.05);background:rgba(26,18,7,.9)}
+.wishlist-heart.saved{color:var(--gold-2);border-color:rgba(225,201,120,.55)}
+
 .nav-cta{height:40px;padding:0 17px;border-radius:999px;background:var(--gold);color:var(--espresso);display:grid;place-items:center;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900}
 .nav-cta:hover{background:var(--gold-2)}
 .menu-button{display:none;width:40px;padding:0}
