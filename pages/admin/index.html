@@ -267,7 +267,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       <div class="content">
         <section id="view-overview" class="view active">
           <div class="hero">
-            <div><div class="kicker">OPERATIONS</div><h1>Dashboard</h1><p>Real-time totals from <code>kb_orders</code> and the current product inventory in this browser.</p></div>
+            <div><div class="kicker">OPERATIONS</div><h1>Dashboard</h1><p>Real-time totals from the centralized Firestore order records and the current product inventory.</p></div>
             <div class="hero-actions"><a class="ghost-btn" href="../../index.html" style="display:inline-flex;align-items:center;text-decoration:none">Storefront →</a></div>
           </div>
           <div class="metric-grid">
@@ -302,7 +302,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         </section>
 
         <section id="view-orders" class="view">
-          <div class="hero"><div><div class="kicker">ORDER MANAGEMENT</div><h1>Orders</h1><p>Customer orders use the shared <code>kb_orders</code> record. Status edits are written back immediately.</p></div></div>
+          <div class="hero"><div><div class="kicker">ORDER MANAGEMENT</div><h1>Orders</h1><p>Customer orders use the centralized Firestore order records. Status edits are written back immediately.</p></div></div>
           <div class="search-row"><input id="orderSearch" type="search" placeholder="Search Order ID or customer name..." autocomplete="off"><span id="orderCount" class="search-count"></span></div>
           <section class="card table-card"><div id="ordersTable" class="table-wrap"></div></section>
         </section>
@@ -313,7 +313,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         </section>
 
         <section id="view-customers" class="view">
-          <div class="hero"><div><div class="kicker">CUSTOMER DIRECTORY</div><h1>Customers</h1><p>Customers are built from the names and contact details inside <code>kb_orders</code>.</p></div></div>
+          <div class="hero"><div><div class="kicker">CUSTOMER DIRECTORY</div><h1>Customers</h1><p>Customers are built from the names and contact details inside the centralized Firestore order records.</p></div></div>
           <section class="card table-card"><div id="customersTable" class="table-wrap"></div></section>
         </section>
 
@@ -459,6 +459,10 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   const ORDER_KEY = "kb_orders";
   const PRODUCT_KEY = "kb_rebuild_products";
+  let firestoreDb = null;
+  let firestoreOrders = [];
+  let firestoreOrdersReady = false;
+  let firestoreOrdersUnsubscribe = null;
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
 
@@ -490,8 +494,63 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function orders() {
+    if (firestoreOrdersReady) return firestoreOrders;
     const list = read(ORDER_KEY, []);
     return Array.isArray(list) ? list : [];
+  }
+
+  window.KBAdminOrders = () => orders();
+
+  function orderTime(value) {
+    if (value && typeof value.toDate === "function") return value.toDate().getTime();
+    const time = new Date(value || 0).getTime();
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  async function initAdminFirestoreOrders() {
+    try {
+      const [{ getApps, getApp, initializeApp }, firestore, config] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js"),
+        import("../../js/firebase-config.js")
+      ]);
+
+      if (!config.isFirebaseConfigured) return;
+
+      const app = getApps().length ? getApp() : initializeApp(config.firebaseConfig);
+      firestoreDb = firestore.getFirestore(app);
+
+      if (firestoreOrdersUnsubscribe) firestoreOrdersUnsubscribe();
+
+      firestoreOrdersUnsubscribe = firestore.onSnapshot(
+        firestore.query(firestore.collection(firestoreDb, "orders"), firestore.orderBy("createdAt", "desc")),
+        snapshot => {
+          firestoreOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), source: "firestore" }));
+          firestoreOrdersReady = true;
+          renderAll();
+          if (window.KBAdminExtra?.refresh) window.KBAdminExtra.refresh();
+        },
+        error => {
+          console.error("[Kapeng Barako] admin orders listener failed", error);
+          firestoreOrdersReady = false;
+          renderAll();
+        }
+      );
+    } catch (error) {
+      console.error("[Kapeng Barako] admin Firestore setup failed", error);
+      firestoreOrdersReady = false;
+    }
+  }
+
+  async function updateFirestoreOrder(id, fields) {
+    if (!firestoreDb) throw new Error("Firestore admin data is not ready.");
+    const [{ doc, updateDoc, serverTimestamp }] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js")
+    ]);
+    await updateDoc(doc(firestoreDb, "orders", String(id)), {
+      ...fields,
+      updatedAt: serverTimestamp()
+    });
   }
 
   function customerName(o) {
@@ -529,7 +588,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     $("#mLow").textContent = low.length;
     $("#lowMetric").classList.toggle("low", low.length > 0);
 
-    const queue = os.filter(o => normalizeStatus(o.status) !== "Delivered").sort((a,b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)).slice(0,8);
+    const queue = os.filter(o => normalizeStatus(o.status) !== "Delivered").sort((a,b) => orderTime(a.createdAt) - orderTime(b.createdAt)).slice(0,8);
     $("#queue").innerHTML = queue.length ? queue.map(o =>
       '<div class="queue-row"><div><strong>'+esc(o.id || "—")+'</strong><small>'+esc(customerName(o))+'</small></div><div><span class="badge '+statusClass(o.status)+'">'+esc(normalizeStatus(o.status))+'</span><small>'+money(o.total)+'</small></div></div>'
     ).join("") : '<div class="empty">No pending orders.</div>';
@@ -594,7 +653,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function renderOrders() {
-    const os = orders().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    const os = orders().slice().sort((a,b) => orderTime(b.createdAt) - orderTime(a.createdAt));
     const q = orderSearch.trim().toLowerCase();
     const filtered = q ? os.filter(o => String(o.id || "").toLowerCase().includes(q) || customerName(o).toLowerCase().includes(q)) : os;
     $("#orderCount").textContent = q ? filtered.length+" of "+os.length+" orders" : os.length+" orders";
@@ -611,7 +670,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         return '<tr>'+
           '<td><strong>'+esc(o.id || "—")+'</strong></td>'+
           '<td><strong>'+esc(customerName(o))+'</strong><span class="muted">'+esc(customerEmail(o))+'</span></td>'+
-          '<td>'+esc(new Date(o.createdAt || Date.now()).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}))+'</td>'+
+          '<td>'+esc(new Date(orderTime(o.createdAt) || Date.now()).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}))+'</td>'+
           '<td>'+itemsCount(o)+'</td>'+
           '<td><strong>'+money(o.total)+'</strong></td>'+
           '<td><select class="status-select" data-status-id="'+esc(o.id)+'"><option value="Pending">Pending</option><option value="Ready">Ready</option><option value="Delivered">Delivered</option></select></td>'+
@@ -636,23 +695,53 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     });
   }
 
-  function updateOrderStatus(id, status) {
-    const current = orders();
-    const idx = current.findIndex(o => String(o.id) === String(id));
-    if(idx < 0) return;
-    current[idx] = {...current[idx], status, statusUpdatedAt:new Date().toISOString()};
-    write(ORDER_KEY,current);
-    renderAll();
+  async function updateOrderStatus(id, status) {
+    try {
+      if (firestoreOrdersReady) {
+        await updateFirestoreOrder(id, {
+          status,
+          statusUpdatedAt: new Date()
+        });
+        toast("Order " + id + " → " + status);
+        return;
+      }
+
+      const current = orders().slice();
+      const idx = current.findIndex(o => String(o.id) === String(id));
+      if(idx < 0) return;
+      current[idx] = {...current[idx], status, statusUpdatedAt:new Date().toISOString()};
+      write(ORDER_KEY,current);
+      renderAll();
+    } catch (error) {
+      console.error("[Kapeng Barako] order status update failed", error);
+      toast("Could not update order status.");
+      renderOrders();
+    }
   }
 
-  function updatePaymentStatus(id, status) {
-    const current = orders();
-    const idx = current.findIndex(o => String(o.id) === String(id));
-    if (idx < 0) return;
-    current[idx] = {...current[idx], paymentStatus:status, paymentReviewedAt:new Date().toISOString()};
-    write(ORDER_KEY,current);
-    toast("Payment "+id+" → "+status);
-    renderAll();
+  async function updatePaymentStatus(id, status) {
+    try {
+      if (firestoreOrdersReady) {
+        await updateFirestoreOrder(id, {
+          paymentStatus: status,
+          paymentReviewedAt: new Date()
+        });
+        toast("Payment " + id + " → " + status);
+        return;
+      }
+
+      const current = orders().slice();
+      const idx = current.findIndex(o => String(o.id) === String(id));
+      if (idx < 0) return;
+      current[idx] = {...current[idx], paymentStatus:status, paymentReviewedAt:new Date().toISOString()};
+      write(ORDER_KEY,current);
+      toast("Payment " + id + " → " + status);
+      renderAll();
+    } catch (error) {
+      console.error("[Kapeng Barako] payment update failed", error);
+      toast("Could not update payment status.");
+      renderOrders();
+    }
   }
 
   function renderInventory() {
@@ -794,6 +883,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       $("#adminApp").classList.remove("hidden");
       $("#adminEmail").textContent = admin.email || "ADMIN";
       renderAll();
+      initAdminFirestoreOrders();
     } catch (error) {
       const reason = error?.code === "FIREBASE_NOT_CONFIGURED" ? "setup" : "expired";
       location.replace("./login.html?reason="+encodeURIComponent(reason));
@@ -866,7 +956,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   const esc=(v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money=(n)=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
   const products=()=>{const x=read(PRODUCT_KEY,[]);return Array.isArray(x)?x:[]};
-  const orders=()=>{const x=read("kb_orders",[]);return Array.isArray(x)?x:[]};
+  const orders=()=>{const x=window.KBAdminOrders?window.KBAdminOrders():read("kb_orders",[]);return Array.isArray(x)?x:[]};
   const customers=()=>{
     const m=new Map();
     orders().forEach(o=>{
