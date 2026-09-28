@@ -275,7 +275,8 @@
 
     const data = read(ADS_KEY, { link: "", image: "", label: "" }) || {};
     const link = String(data.link || "").trim();
-    const image = String(data.image || "").trim();
+    const savedImage = String(data.image || "").trim();
+    const image = savedImage || (/^https?:\/\/.*\.(?:avif|gif|jpe?g|png|webp|svg)(?:[?#].*)?$/i.test(link) ? link : "");
     const label = String(data.label || "Sponsored").trim() || "Sponsored";
 
     const title = $("#storefront-ad-title");
