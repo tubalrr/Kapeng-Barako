@@ -131,74 +131,60 @@
     return { uid: user.uid, email: user.email || "", ...snap.data() };
   }
 
-  async function authenticateWithGoogle() {
+  async function sendAdminEmailLink(email) {
     const { auth: currentAuth, authMod } = await init();
+    const normalized = String(email || "").trim().toLowerCase();
+    if (!normalized) throw new Error("Enter your admin email.");
 
     try {
+      const actionCodeSettings = {
+        url: new URL("./login.html", window.location.href).href,
+        handleCodeInApp: true
+      };
       await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
-
-      const provider = new authMod.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
-
-      const credential = await authMod.signInWithPopup(currentAuth, provider);
-      const admin = await verifyAdminWithoutSession(credential.user);
-
-      if (!admin) {
-        await authMod.signOut(currentAuth);
-        throw new Error("This Google account is not authorized for the Kapeng Barako Admin Console.");
-      }
-
-      rememberAdmin(admin);
-      return admin;
+      await authMod.sendSignInLinkToEmail(currentAuth, normalized, actionCodeSettings);
+      localStorage.setItem("kb_admin_email_for_signin", normalized);
+      return { email: normalized };
     } catch (error) {
-      rememberAdmin(null);
-
-      if (error?.code === "auth/popup-closed-by-user") {
-        throw new Error("Google sign-in was cancelled.");
-      }
-
-      if (error?.code === "auth/popup-blocked") {
-        throw new Error("Google sign-in popup was blocked. Allow popups for tubalrr.github.io and try again.");
-      }
-
-      if (error?.code === "auth/unauthorized-domain") {
-        throw new Error("This website is not authorized for Firebase Google Sign-In. Add tubalrr.github.io to Firebase Authentication → Authorized domains.");
-      }
-
+      if (error?.code === "auth/unauthorized-continue-uri")
+        throw new Error("This Admin Login URL is not authorized in Firebase Authentication.");
+      if (error?.code === "auth/operation-not-allowed")
+        throw new Error("Email link sign-in is not enabled yet. Enable Email link in Firebase Authentication → Sign-in method.");
+      if (error?.code === "auth/unauthorized-domain")
+        throw new Error("Add tubalrr.github.io to Firebase Authentication → Authorized domains.");
       throw error;
     }
   }
 
-  async function authenticate(email, password) {
+  async function completeAdminEmailLink() {
     const { auth: currentAuth, authMod } = await init();
-    const normalized = String(email || "").trim().toLowerCase();
-    if (!normalized || !password) throw new Error("Enter your admin email and password.");
+    if (!authMod.isSignInWithEmailLink(currentAuth, window.location.href)) return null;
 
-    try {
-      await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
-      const credential = await authMod.signInWithEmailAndPassword(currentAuth, normalized, String(password));
-      const admin = await verifyAdminWithoutSession(credential.user);
+    let email = "";
+    try { email = localStorage.getItem("kb_admin_email_for_signin") || ""; } catch {}
+    if (!email) email = window.prompt("Confirm your admin email address:");
+    email = String(email || "").trim().toLowerCase();
+    if (!email) throw new Error("Admin email confirmation is required.");
 
-      if (!admin) {
-        await authMod.signOut(currentAuth);
-        throw new Error("This account is not authorized for the Kapeng Barako Admin Console.");
-      }
+    const credential = await authMod.signInWithEmailLink(currentAuth, email, window.location.href);
+    try { localStorage.removeItem("kb_admin_email_for_signin"); } catch {}
 
-      rememberAdmin(admin);
-      return admin;
-    } catch (error) {
-      rememberAdmin(null);
-      if (["auth/invalid-credential","auth/invalid-login-credentials","auth/user-not-found","auth/wrong-password"].includes(error?.code)) {
-        throw new Error("Invalid admin email or password.");
-      }
-      throw error;
+    const admin = await verifyAdminWithoutSession(credential.user);
+    if (!admin) {
+      await authMod.signOut(currentAuth);
+      throw new Error("This email is not authorized for the Kapeng Barako Admin Console.");
     }
+
+    rememberAdmin(admin);
+    return admin;
   }
 
   async function verifyAdminWithoutSession(user) {
     if (!user) return null;
     const { db: currentDb, firestoreMod } = await init();
-    const snap = await firestoreMod.getDoc(firestoreMod.doc(currentDb, "admins", user.uid));
+    const snap = await firestoreMod.getDoc(
+      firestoreMod.doc(currentDb, "admins", user.uid)
+    );
     if (!snap.exists() || snap.data()?.active !== true) return null;
     return { uid: user.uid, email: user.email || "", ...snap.data() };
   }
@@ -255,8 +241,8 @@
     SESSION_KEY,
     SESSION_TTL_MS,
     init,
-    authenticate,
-    authenticateWithGoogle,
+    sendAdminEmailLink,
+    completeAdminEmailLink,
     restore,
     requireAdmin,
     logout,
