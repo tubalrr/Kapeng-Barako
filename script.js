@@ -849,7 +849,7 @@
             '<div class="grand"><span>Total</span><strong id="inlineTotal">₱0</strong></div>' +
           '</div>' +
           '<button class="button button-gold full" type="submit">PLACE ORDER →</button>' +
-          '<small>Order data is stored in this browser in the current GitHub Pages build.</small>' +
+          '<small>Orders are securely processed through your signed-in customer account.</small>' +
         '</form>';
 
       panel.appendChild(box);
