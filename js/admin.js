@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const PRODUCTS_KEY="kb_rebuild_products", ORDERS_KEY="kb_orders", PROMOS_KEY="kb_promos", SETTINGS_KEY="kb_settings", CMS_KEY="kb_cms", GALLERY_KEY="kb_gallery";
+  const PRODUCTS_KEY="kb_rebuild_products", ORDERS_KEY="kb_orders", PROMOS_KEY="kb_promos", SETTINGS_KEY="kb_settings", CMS_KEY="kb_cms", GALLERY_KEY="kb_gallery", ADS_KEY="kb_ads";
   const DEFAULT_PRODUCTS=[
     {id:"KB250",name:"Barako 250g",size:"250g",price:350,stock:7,badge:"BEST SELLER",roast:"Dark",grind:"Medium",note:"Bold, aromatic, unmistakably Barako."},
     {id:"KB500",name:"Barako 500g",size:"500g",price:620,stock:7,badge:"FRESH ROAST",roast:"Medium",grind:"Whole",note:"A deeper everyday supply for the serious cup."},
@@ -20,6 +20,7 @@
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let products=read(PRODUCTS_KEY,[]);if(!Array.isArray(products))products=[];
   let gallery=read(GALLERY_KEY,[]);if(!Array.isArray(gallery))gallery=[];
+  let ads=read(ADS_KEY,{link:"",label:""});if(!ads||typeof ads!=="object"||Array.isArray(ads))ads={link:"",label:""};
   let orderSearch="";
   let lowStockSoundEnabled=localStorage.getItem("kb_low_stock_sound")==="1";
   let lastLowStockCount=-1;
@@ -218,6 +219,43 @@
     root.innerHTML='<div class="gallery-manager-grid">'+items.map((g,i)=>'<article class="gallery-manager-card"><div class="gallery-preview">'+(g.image?'<img src="'+esc(g.image)+'" alt="'+esc(g.alt||"")+'">':'<span>PHOTO '+String(i+1).padStart(2,"0")+'</span>')+'</div><label>Photo '+(i+1)+' title<input data-gallery-title="'+i+'" value="'+esc(g.title||"")+'" placeholder="e.g. Roasted Liberica"></label><label>Image URL<input data-gallery-image="'+i+'" value="'+esc(g.image||"")+'" placeholder="https://.../image.jpg"></label><label>Alt text<input data-gallery-alt="'+i+'" value="'+esc(g.alt||"")+'" placeholder="Describe the real photo"></label><button class="admin-button gold" type="button" data-gallery-save="'+i+'">Save Photo '+(i+1)+'</button></article>').join("")+'</div>';
     $$("[data-gallery-save]").forEach(btn=>btn.addEventListener("click",()=>saveGallery(Number(btn.dataset.gallerySave))));
   }
+  function renderAds(){
+    const linkInput=$("#ads-link"), labelInput=$("#ads-label"), preview=$("#ads-preview");
+    if(!linkInput||!labelInput||!preview)return;
+    const link=String(ads.link||"").trim();
+    const label=String(ads.label||"Sponsored").trim()||"Sponsored";
+    linkInput.value=link;
+    labelInput.value=ads.label||"";
+    const title=$("#ads-preview-title"), copy=$("#ads-preview-copy"), open=$("#ads-preview-open");
+    if(title)title.textContent=link?label:"No ad link configured";
+    if(copy)copy.textContent=link?"Advertisement link is configured and ready for the storefront connection.":"Add the destination link above, then save it.";
+    if(open){
+      open.hidden=!link;
+      open.href=link||"#";
+    }
+    preview.classList.toggle("has-link",Boolean(link));
+  }
+
+  function saveAds(){
+    const link=$("#ads-link")?.value.trim()||"";
+    const label=$("#ads-label")?.value.trim()||"Sponsored";
+    if(link && !/^https?:\/\//i.test(link)){
+      toast("Use a valid http:// or https:// advertisement link.");
+      return;
+    }
+    ads={link,label};
+    write(ADS_KEY,ads);
+    toast(link?"Advertisement link saved.":"Advertisement link cleared.");
+    renderAds();
+  }
+
+  function clearAds(){
+    ads={link:"",label:""};
+    try{localStorage.removeItem(ADS_KEY)}catch{}
+    toast("Advertisement link cleared.");
+    renderAds();
+  }
+
   function saveGallery(index){
     const image=document.querySelector('[data-gallery-image="'+index+'"]')?.value.trim()||"";
     const title=document.querySelector('[data-gallery-title="'+index+'"]')?.value.trim()||"";
@@ -420,9 +458,9 @@
   function openView(view){
     $$(".admin-nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
     $$("[data-view-panel]").forEach(p=>{p.hidden=p.dataset.viewPanel!==view;p.classList.toggle("active",p.dataset.viewPanel===view)});
-    $("#view-title").textContent={overview:"Overview",orders:"Orders",inventory:"Inventory",products:"Products",customers:"Customers",promos:"Promos",content:"Content",contact:"Contact",gallery:"Gallery"}[view]||"Overview";
+    $("#view-title").textContent={overview:"Overview",orders:"Orders",inventory:"Inventory",products:"Products",customers:"Customers",promos:"Promos",content:"Content",contact:"Contact",gallery:"Gallery",ads:"Ads"}[view]||"Overview";
     closeMenu();
-    if(view==="overview")renderOverview();if(view==="orders")renderOrders();if(view==="inventory")renderInventorySummary();if(view==="products")renderProducts();if(view==="customers")renderCustomers();if(view==="promos")renderPromos();if(view==="content")renderContent();if(view==="contact")renderContact();if(view==="gallery")renderGallery();
+    if(view==="overview")renderOverview();if(view==="orders")renderOrders();if(view==="inventory")renderInventorySummary();if(view==="products")renderProducts();if(view==="customers")renderCustomers();if(view==="promos")renderPromos();if(view==="content")renderContent();if(view==="contact")renderContact();if(view==="gallery")renderGallery();if(view==="ads")renderAds();
   }
   function closeMenu(){document.body.classList.remove("menu-open");$("#admin-menu")?.classList.remove("is-open");$("#admin-sidebar")?.classList.remove("is-open");$("#admin-overlay")?.classList.remove("is-open");$("#admin-menu")?.setAttribute("aria-expanded","false");}
   function toggleMenu(){const open=!document.body.classList.contains("menu-open");document.body.classList.toggle("menu-open",open);$("#admin-menu").classList.toggle("is-open",open);$("#admin-sidebar").classList.toggle("is-open",open);$("#admin-overlay").classList.toggle("is-open",open);$("#admin-menu").setAttribute("aria-expanded",String(open))}
@@ -446,10 +484,10 @@
       });
       syncSoundButton();
     }
-    $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#save-contact")?.addEventListener("click",saveContact);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
-    renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderContact();renderGallery();
-    syncMainPageData().then(()=>{refreshData();renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();});
-    window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderGallery()}});
+    $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$("#save-ads")?.addEventListener("click",saveAds);$("#clear-ads")?.addEventListener("click",clearAds);$$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#save-contact")?.addEventListener("click",saveContact);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
+    renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderContact();renderGallery();renderAds();
+    syncMainPageData().then(()=>{refreshData();renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();renderAds();});
+    window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY,ADS_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderGallery();renderAds()}});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
