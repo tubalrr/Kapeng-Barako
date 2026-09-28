@@ -90,6 +90,7 @@ function renderAuth(){
 <p class="sub">${login?"Sign in to manage your Kapeng Barako orders.":"Use your real contact details for delivery and account recovery."}</p>
 <div id="auth-msg"></div>
 <button class="google-btn" id="google-btn" type="button"><span class="google-mark">G</span> Continue with Google</button>
+<div class="demo-box"><div><strong>TEST / DEMO ACCOUNT</strong><span>For testing My Orders and Track My Order. This data is local test data only.</span></div><button class="account-btn gold demo-btn" id="demo-btn" type="button">OPEN TEST ACCOUNT</button></div>
 <div class="divider">Continue with your real account</div>
 <form class="auth-form" id="auth-form">
 ${login?"":`<div class="field"><label>Full Name</label><input name="name" autocomplete="name" required></div>
@@ -104,6 +105,7 @@ ${login?"":`<div class="field"><label>Confirm Password</label><input name="confi
 ${login?'<button class="account-btn" id="forgot-btn" type="button" style="width:100%;margin-top:10px">Forgot password?</button>':""}
 <div class="auth-switch">${login?"Don't have an account yet?":"Already have an account?"} <button id="switch-auth" type="button">${login?"Sign Up":"Log In"}</button></div>`;
   document.querySelector("#google-btn").onclick=googleLogin;
+  document.querySelector("#demo-btn").onclick=startDemoAccount;
   document.querySelector("#auth-form").onsubmit=login?loginWithEmail:signup;
   document.querySelector("#switch-auth").onclick=()=>{state.mode=login?"signup":"login";renderAuth()};
   document.querySelector("#forgot-btn")?.addEventListener("click",forgotPassword);
