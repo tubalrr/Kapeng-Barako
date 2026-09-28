@@ -189,3 +189,43 @@ a{text-decoration:none;color:inherit}
   .account-profile-chip strong{font-size:10.5px;max-width:92px}
   .account-profile-chip small{display:none}
 }
+
+/* GLOBAL READABILITY — CUSTOMER ACCOUNT */
+body{font-size:16px}
+.account-brand small{font-size:11px}
+.account-btn{font-size:12px;line-height:1.25}
+.account-tab{font-size:14px;line-height:1.35}
+.account-eyebrow{font-size:11px}
+.panel-head h2{font-size:23px}
+.panel-head p{font-size:14px;line-height:1.6}
+.stat-card span{font-size:12px}
+.stat-card strong{font-size:27px}
+.order-id{font-size:14px}
+.order-meta{font-size:13px}
+.status{font-size:11px}
+.order-item{font-size:13px;line-height:1.4}
+.address-card h3,.wish-card h3{font-size:16px}
+.address-card p,.wish-card p{font-size:13px;line-height:1.6}
+.small-btn{font-size:12px}
+.field label{font-size:11px}
+.field input,.field textarea,.field select{font-size:15px}
+.check-row{font-size:13px;line-height:1.5}
+.notice{font-size:13px;line-height:1.55}
+.auth-visual p,.auth-card .sub{font-size:14px;line-height:1.7}
+.auth-point{font-size:13px;line-height:1.45}
+.google-btn{font-size:13px}
+.divider{font-size:11px}
+.auth-switch{font-size:13px}
+.profile-summary-copy>span{font-size:13px}
+.profile-badges span{font-size:10px}
+.profile-meta span{font-size:10px}
+.profile-meta strong{font-size:14px}
+.demo-box strong,.demo-remove-card strong{font-size:13px}
+.demo-box span,.demo-box small,.demo-remove-card span{font-size:11px}
+@media(max-width:620px){
+  body{font-size:15px}
+  .account-btn{font-size:12px}
+  .account-tab{font-size:13px}
+  .field input,.field textarea,.field select{font-size:16px}
+  .account-profile-chip strong{font-size:11px}
+}
