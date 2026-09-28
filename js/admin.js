@@ -13,6 +13,7 @@
   const money=n=>"₱"+Number(n||0).toLocaleString("en-PH");
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let products=read(PRODUCTS_KEY,[]);if(!Array.isArray(products))products=[];
+  let orderSearch="";
   const demoSignature=JSON.stringify(DEFAULT_PRODUCTS.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
   const currentSignature=JSON.stringify(products.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
   if(currentSignature===demoSignature && !localStorage.getItem("kb_catalog_real_initialized")){
@@ -70,12 +71,44 @@
   }
 
   function renderOrders(){
-    refreshData();const root=$("#orders-table");if(!orders.length){root.innerHTML='<div class="empty">No orders yet. Customer orders will appear here.</div>';return}
+    refreshData();
+    const root=$("#orders-table"), count=$("#order-search-count"), input=$("#order-search");
+    if(input && input.value!==orderSearch) input.value=orderSearch;
+    const query=orderSearch.trim().toLowerCase();
+    const sorted=orders.slice().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    const filtered=query?sorted.filter(o=>{
+      const id=String(o.id||"").toLowerCase();
+      const name=String(o.customer?.name||"").toLowerCase();
+      return id.includes(query)||name.includes(query);
+    }):sorted;
+    if(count) count.textContent=query ? "Showing "+filtered.length+" of "+sorted.length+" orders" : sorted.length+" orders";
+    if(!sorted.length){root.innerHTML='<div class="empty">No orders yet. Customer orders will appear here.</div>';return}
+    if(!filtered.length){root.innerHTML='<div class="empty">No orders found for “'+esc(orderSearch)+'”.</div>';return}
     root.innerHTML='<table class="data-table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th>Update</th></tr></thead><tbody>'+
-      orders.slice().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).map(o=>'<tr><td><strong>'+esc(o.id)+'</strong><br><span class="panel-note">'+new Date(o.createdAt||Date.now()).toLocaleString("en-PH",{dateStyle:"medium"})+'</span></td><td>'+esc(o.customer?.name||"Customer")+'<br><span class="panel-note">'+esc(o.customer?.address||"")+'</span></td><td>'+money(o.total)+'</td><td>'+esc(o.payment||"—")+'</td><td><span class="badge">'+esc(o.status||"Pending")+'</span></td><td><select class="status-select" data-order-status="'+esc(o.id)+'"><option>Pending</option><option>Verified Payment</option><option>Processing/Roasting</option><option>Ready to Ship</option><option>Dispatched</option><option>Delivered</option><option>Cancelled</option></select></td></tr>').join("")+'</tbody></table>';
-    $$("[data-order-status]").forEach(s=>{const o=orders.find(x=>String(x.id)===String(s.dataset.orderStatus));if(o)s.value=o.status;s.addEventListener("change",()=>updateOrderStatus(s.dataset.orderStatus,s.value))});
+      filtered.map(o=>'<tr><td><strong>'+esc(o.id)+'</strong><br><span class="panel-note">'+new Date(o.createdAt||Date.now()).toLocaleString("en-PH",{dateStyle:"medium"})+'</span></td><td>'+esc(o.customer?.name||"Customer")+'<br><span class="panel-note">'+esc(o.customer?.address||"")+'</span></td><td>'+money(o.total)+'</td><td>'+esc(o.payment||"—")+'</td><td><span class="badge">'+esc(o.status||"Pending")+'</span></td><td><select class="status-select" data-order-status="'+esc(o.id)+'"><option>Pending</option><option>Verified Payment</option><option>Processing/Roasting</option><option>Ready to Ship</option><option>Dispatched</option><option>Delivered</option><option>Cancelled</option></select></td></tr>').join("")+'</tbody></table>';
+    $("[data-order-status]").forEach(s=>{const o=orders.find(x=>String(x.id)===String(s.dataset.orderStatus));if(o)s.value=o.status;s.addEventListener("change",()=>updateOrderStatus(s.dataset.orderStatus,s.value))});
   }
+  function initOrderSearch(){
+    const input=$("#order-search"), clear=$("#clear-order-search");
+    if(!input||input.dataset.bound)return;
+    input.dataset.bound="1";
+    input.addEventListener("input",()=>{
+      orderSearch=input.value;
+      renderOrders();
+      input.focus();
+      input.setSelectionRange(input.value.length,input.value.length);
+    });
+    clear?.addEventListener("click",()=>{
+      orderSearch="";
+      input.value="";
+      renderOrders();
+      input.focus();
+    });
+  }
+
   function updateOrderStatus(id,status){const list=read(ORDERS_KEY,[]);const idx=list.findIndex(o=>String(o.id)===String(id));if(idx<0)return;list[idx]={...list[idx],status,statusUpdatedAt:new Date().toISOString()};write(ORDERS_KEY,list);toast("Order "+id+" → "+status);renderOverview();renderOrders()}
+
+  initOrderSearch();
 
   function renderProducts(){
     refreshData();
