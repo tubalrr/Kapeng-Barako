@@ -115,3 +115,21 @@ body{font-size:15px}
 .admin-toast{font-size:11px}
 .low-stock-alert strong{font-size:10px}
 .low-stock-badge{font-size:10px}
+
+
+/* Advertisement manager */
+.ads-manager-panel{display:grid;gap:18px}
+.ads-input-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(180px,1fr);gap:12px}
+.ads-input-grid label{display:grid;gap:7px;color:#8C7D6A;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.ads-input-grid input{width:100%;border:1px solid #392C1E;border-radius:12px;background:#171007;color:var(--text);padding:12px 13px;outline:0;font-size:13px}
+.ads-input-grid input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,169,81,.08)}
+.ads-container{min-height:190px;display:grid;place-items:center;align-content:center;gap:8px;padding:28px;border:1px dashed rgba(200,169,81,.28);border-radius:20px;background:linear-gradient(135deg,#1B1107,#21170C);text-align:center}
+.ads-container.has-link{border-style:solid;border-color:rgba(200,169,81,.5);background:linear-gradient(135deg,#21170C,#291E10)}
+.ads-container-kicker{color:var(--gold);font-size:8px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+.ads-container strong{font:600 24px/1.1 Georgia,serif;color:var(--text)}
+.ads-container p{margin:0;max-width:620px;color:#8D7F6B;font-size:11px}
+.ads-container a{margin-top:5px;color:var(--gold);font-size:9px;font-weight:900;letter-spacing:.1em}
+@media(max-width:680px){
+  .ads-input-grid{grid-template-columns:1fr}
+  .ads-container{min-height:160px;padding:22px 16px}
+}
