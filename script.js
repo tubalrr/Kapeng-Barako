@@ -78,6 +78,14 @@
     }
   }catch{}
 
+  let centralOrderModulePromise = null;
+
+  async function createBackendOrder(payload) {
+    centralOrderModulePromise ||= import("./js/firebase-backend.js");
+    const backend = await centralOrderModulePromise;
+    return backend.createCentralOrder(payload);
+  }
+
   let cart = read(CART_KEY, []);
   if (!Array.isArray(cart)) cart = [];
 
@@ -899,7 +907,7 @@
     $("#checkoutFormInline")?.dispatchEvent(new Event("input"));
   }
 
-  function placeOrder(event) {
+  async function placeOrder(event) {
     event.preventDefault();
 
     if (!cart.length) {
@@ -914,21 +922,22 @@
     const phone = String(data.get("phone") || "").trim();
     const email = String(data.get("email") || "").trim();
     const address = String(data.get("address") || "").trim();
-
     const payment = String(data.get("payment") || "");
     const gcashRef = String(data.get("gcashRef") || "").trim();
+    const voucher = String(data.get("voucher") || "").trim().toUpperCase();
+    const fulfillment = String(data.get("fulfillment") || "").trim();
 
     if (!name || !phone || !address) {
       toast("Please complete the required fields.");
       return;
     }
+
     if (payment === "GCash" && !gcashRef) {
       toast("Please enter your GCash Ref Number.");
       return;
     }
 
     const liveProducts = getProducts();
-
     const shortage = cart.find(item => {
       const product = liveProducts.find(
         liveItem => String(liveItem.id) === String(item.id)
@@ -943,76 +952,104 @@
       return;
     }
 
-    const subtotal = cartTotal();
-    const shipping = shippingFee(address);
-    const discount = promoDiscount(data.get("voucher"), subtotal);
+    const submit = form.querySelector('button[type="submit"]');
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = "PLACING ORDER…";
+    }
 
-    const now = new Date().toISOString();
+    const clientOrderId = "KB-" + Date.now().toString(36).toUpperCase() + "-" +
+      Math.random().toString(36).slice(2, 7).toUpperCase();
 
-    const order = {
-      id: "KB-" + Date.now().toString(36).toUpperCase(),
-      createdAt: now,
-      customer: {
-        name,
-        phone,
-        email,
-        address
-      },
-      payment,
-      gcashRef,
-      paymentStatus: payment === "GCash" ? "Pending Review" : "Not Required",
-      paymentReviewedAt: "",
-      fulfillment: String(data.get("fulfillment") || ""),
-      voucher: String(data.get("voucher") || "").trim().toUpperCase(),
-      subtotal,
-      shippingFee: shipping,
-      discount,
-      total: Math.max(0, subtotal + shipping - discount),
-      status: "Pending",
-      statusUpdatedAt: now,
-      route: {
-        origin: "Kapeng Barako, Quezon City, Metro Manila, Philippines",
-        waypoint: getRouteWaypoint(address),
-        destination: address
-      },
-      items: cart.map(item => ({ ...item }))
-    };
+    try {
+      const result = await createBackendOrder({
+        clientOrderId,
+        customer: { name, phone, email },
+        address,
+        paymentMethod: payment,
+        gcashRef,
+        fulfillment,
+        voucher,
+        items: cart.map(item => ({
+          productId: item.id,
+          qty: Math.max(1, Number(item.qty || 1)),
+          roast: item.roast || "",
+          grind: item.grind || ""
+        }))
+      });
 
-    const updatedProducts = liveProducts.map(product => {
-      const line = order.items.find(
-        item => String(item.id) === String(product.id)
-      );
+      const serverTotal = Number(result?.total || 0);
+      const now = new Date().toISOString();
 
-      if (!line) return product;
-
-      return {
-        ...product,
-        stock: Math.max(
-          0,
-          Number(product.stock || 0) - Number(line.qty || 0)
-        )
+      // Local state is only a UI cache/pointer. Firestore is the order source of truth.
+      const localPreview = {
+        id: result?.id || clientOrderId,
+        createdAt: now,
+        customer: { name, phone, email, address },
+        payment,
+        gcashRef,
+        paymentStatus: payment === "GCash" ? "Pending Review" : "Not Required",
+        fulfillment,
+        voucher,
+        subtotal: cartTotal(),
+        shippingFee: shippingFee(address),
+        discount: promoDiscount(voucher, cartTotal()),
+        total: serverTotal,
+        status: "Pending",
+        statusUpdatedAt: now,
+        route: {
+          origin: "Kapeng Barako, Quezon City, Metro Manila, Philippines",
+          waypoint: getRouteWaypoint(address),
+          destination: address
+        },
+        items: cart.map(item => ({ ...item }))
       };
-    });
 
-    const orders = read(ORDER_KEY, []);
+      const updatedProducts = liveProducts.map(product => {
+        const line = localPreview.items.find(
+          item => String(item.id) === String(product.id)
+        );
+        if (!line) return product;
+        return {
+          ...product,
+          stock: Math.max(
+            0,
+            Number(product.stock || 0) - Number(line.qty || 0)
+          )
+        };
+      });
 
-    write(PRODUCT_KEY, updatedProducts);
-    write(ORDER_KEY, [
-      order,
-      ...(Array.isArray(orders) ? orders : [])
-    ]);
-    write("kb_last_order", order);
+      write(PRODUCT_KEY, updatedProducts);
+      write("kb_last_order", localPreview);
 
-    cart = [];
-    write(CART_KEY, cart);
+      cart = [];
+      write(CART_KEY, cart);
 
-    $(".checkout-inline")?.remove();
-    if ($("#checkoutButton")) $("#checkoutButton").hidden = false;
+      $(".checkout-inline")?.remove();
+      if ($("#checkoutButton")) $("#checkoutButton").hidden = false;
 
-    renderProducts();
-    renderCart();
+      renderProducts();
+      renderCart();
 
-    toast("Order " + order.id + " recorded.");
+      toast("Order " + localPreview.id + " confirmed.");
+    } catch (error) {
+      console.error("[Kapeng Barako] checkout failed", error);
+      const message = String(error?.message || "");
+      if (/sign in|authenticated|customer account/i.test(message)) {
+        toast("Please sign in to your customer account before checkout.");
+      } else if (/insufficient stock|no longer available/i.test(message)) {
+        toast("Stock changed. Please review your cart.");
+        renderProducts();
+        renderCart();
+      } else {
+        toast(message || "Order could not be placed. Please try again.");
+      }
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = "PLACE ORDER →";
+      }
+    }
   }
 
   function showTrackModal() {
