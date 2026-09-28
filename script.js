@@ -356,7 +356,9 @@
     const products = getProducts();
     const product = products.find(item => item.featured === true) || products[0];
     const card = $(".featured-card");
-    if (!card || !product) return;
+    if (!card) return;
+    card.hidden = !product;
+    if (!product) return;
     const name = $("#featuredProductName");
     const meta = $("#featuredProductMeta");
     const price = $("#featuredProductPrice");
