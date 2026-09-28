@@ -34,7 +34,7 @@
     </div>
     <nav class="sidebar-nav">
       <a href="#top">Home</a>
-      <a href="#story">Kwento</a>
+      <a href="#story">Story</a>
       <a href="#why">Why Barako</a>
       <a href="#products">Collection</a>
       <a href="#delivery">Delivery & Payment</a>
@@ -61,7 +61,7 @@
       </a>
 
       <nav class="desktop-nav" aria-label="Main navigation">
-        <a href="#story">Kwento</a>
+        <a href="#story">Story</a>
         <a href="#products">Collection</a>
         <a href="#delivery">Delivery</a>
         <a href="#brew-guide">Brew Guide</a>
@@ -436,9 +436,9 @@
           <figure><img src="images/gallery-01.svg" alt="Roasted Liberica beans"><figcaption>01 · ROAST</figcaption></figure>
           <figure><img src="images/gallery-02.svg" alt="Coffee farm"><figcaption>02 · FARM</figcaption></figure>
           <figure><img src="images/gallery-03.svg" alt="Coffee cup"><figcaption>03 · CUP</figcaption></figure>
-          <figure><img src="images/gallery-04.svg" alt="Green coffee beans"><figcaption>04 · ANI</figcaption></figure>
-          <figure><img src="images/gallery-05.svg" alt="Small batch roasting"><figcaption>05 · GAWA</figcaption></figure>
-          <figure><img src="images/gallery-06.svg" alt="Coffee ritual"><figcaption>06 · RITWAL</figcaption></figure>
+          <figure><img src="images/gallery-04.svg" alt="Green coffee beans"><figcaption>04 · HARVEST</figcaption></figure>
+          <figure><img src="images/gallery-05.svg" alt="Small batch roasting"><figcaption>05 · CRAFT</figcaption></figure>
+          <figure><img src="images/gallery-06.svg" alt="Coffee ritual"><figcaption>06 · RITUAL</figcaption></figure>
         </div>
       </div>
     </section>
@@ -451,7 +451,7 @@
         <a class="brand" href="#top"><img src="images/favicon.svg" alt=""><span><strong>Kapeng Barako</strong><small>Bold by Nature</small></span></a>
         <p>Locally inspired Liberica coffee with the character of Batangas.</p>
       </div>
-      <div><span class="eyebrow">CONTACT</span><a href="mailto:ILAG">ILAG</a><span>ILAG</span><span>ILAG</span></div>
+      <div><span class="eyebrow">CONTACT</span><a href="mailto:ILAG">Contact us</a><span>ILAG</span><span>ILAG</span></div>
       <div><span class="eyebrow">QUICK LINKS</span><a href="#products">Collection</a><a href="#brew-guide">Brew Guide</a><a href="#faq">FAQ</a></div>
       <div><span class="eyebrow">CONTROL</span><a href="#top">Back to top ↑</a></div>
     </div>
@@ -468,7 +468,7 @@
       </div>
       <div id="cartItems"></div>
       <div class="cart-total-row"><span>Total</span><strong id="cartTotal">₱0</strong></div>
-      <button class="button button-gold full" id="checkoutButton" type="button">MAG-CHECKOUT →</button>
+      <button class="button button-gold full" id="checkoutButton" type="button">CHECKOUT →</button>
     </aside>
   </div>
 
@@ -490,6 +490,21 @@
 
   <div class="tiny-toast" id="toast" role="status" aria-live="polite"></div>
 
+
+
+  <dialog id="brew-dialog" class="simple-dialog">
+    <div class="panel-header">
+      <div><span class="eyebrow">BREW GUIDE</span><h2>Three-minute Barako</h2></div>
+      <button class="close-button" type="button" data-close-dialog aria-label="Close brew guide">×</button>
+    </div>
+    <p>Use 15g of coffee with about 250ml of hot water. Brew for 3 minutes, then strain and serve.</p>
+    <div class="brew-dialog-steps">
+      <div><strong>01 · HEAT</strong><span>Prepare hot water and your brewing vessel.</span></div>
+      <div><strong>02 · BREW</strong><span>Add coffee and let it brew for 3 minutes.</span></div>
+      <div><strong>03 · SERVE</strong><span>Strain, pour, and enjoy while fresh.</span></div>
+    </div>
+    <button class="button button-gold full" id="brewDialogStart" type="button">START 3:00 TIMER →</button>
+  </dialog>
 
   <aside class="cookie-notice" id="cookieNotice" hidden aria-label="Privacy and cookies notice">
     <div class="cookie-copy">
