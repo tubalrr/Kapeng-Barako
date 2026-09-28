@@ -27,5 +27,5 @@
   .admin-topbar{padding-left:78px}.admin-view{padding:20px 14px 38px}.welcome{align-items:start;flex-direction:column}.metric-grid{grid-template-columns:repeat(2,1fr)}.status-grid{grid-template-columns:repeat(2,1fr)}.status-grid div:nth-child(2){border-right:0}.status-grid div{border-bottom:1px solid var(--border)}.view-head{align-items:start;flex-direction:column}
   .admin-brand button{display:block;width:34px;height:34px;border:1px solid #403122;background:#1A1007;color:var(--text);border-radius:50%}
 }
-@media(max-width:520px){.metric-grid{grid-template-columns:1fr}.chart-wrap{height:235px}.panel{padding:15px}.welcome{padding:22px}.welcome h2,.view-head h2{font-size:39px}.admin-topbar{min-height:72px}.admin-user{display:none}}
+@media(max-width:520px){.product-manager-grid{grid-template-columns:1fr}.product-manager-head{align-items:stretch;flex-direction:column}.product-manager-fields{grid-template-columns:1fr 1fr}.metric-grid{grid-template-columns:1fr}.chart-wrap{height:235px}.panel{padding:15px}.welcome{padding:22px}.welcome h2,.view-head h2{font-size:39px}.admin-topbar{min-height:72px}.admin-user{display:none}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
