@@ -46,6 +46,9 @@ exports.createOrder = onCall(async request => {
   const address = clean(data.address, 1000);
   const paymentMethod = clean(data.paymentMethod, 60);
   const gcashRef = clean(data.gcashRef, 80);
+  const fulfillment = clean(data.fulfillment, 80);
+  const voucher = clean(data.voucher, 80).toUpperCase();
+  const clientOrderId = clean(data.clientOrderId, 120);
 
   if (!address) throw new HttpsError("invalid-argument", "Delivery address is required.");
   if (!paymentMethod) throw new HttpsError("invalid-argument", "Payment method is required.");
@@ -65,35 +68,49 @@ exports.createOrder = onCall(async request => {
     /manila|quezon city|makati|pasig|taguig/i.test(address) ? Number(regional.manila ?? 150) :
     Number(regional.province ?? 220);
 
-  const wantedPromo = clean(data.voucher, 80).toUpperCase();
-  let discount = 0;
-  if (wantedPromo) {
-    const promoSnap = await db.collection("promos").where("code", "==", wantedPromo).limit(1).get();
-    if (!promoSnap.empty) {
-      const promo = promoSnap.docs[0].data() || {};
-      const minPacks = Number(promo.minPacks || 0);
-      if (promo.active !== false && cartQty >= minPacks) {
-        const value = Number(promo.value || 0);
-        discount = Math.min(subtotal, promo.type === "percent" ? subtotal * value / 100 : value);
-      }
-    }
-  }
-
-  const orderRef = db.collection("orders").doc();
+  const orderRef = clientOrderId
+    ? db.collection("orders").doc(clientOrderId)
+    : db.collection("orders").doc();
 
   const result = await db.runTransaction(async tx => {
+    const existing = await tx.get(orderRef);
+    if (existing.exists) {
+      const previous = existing.data() || {};
+      if (previous.customerUid && previous.customerUid !== request.auth.uid) {
+        throw new HttpsError("already-exists", "This order reference is already in use.");
+      }
+      return {
+        id: existing.id,
+        total: Number(previous.total || 0),
+        paymentStatus: String(previous.paymentStatus || ""),
+        reused: true
+      };
+    }
+
+    let promo = null;
+    if (voucher) {
+      const promoSnap = await tx.get(
+        db.collection("promos").where("code", "==", voucher).limit(1)
+      );
+      if (!promoSnap.empty) promo = promoSnap.docs[0].data() || {};
+    }
+
+    const productRefs = items.map(item => db.collection("products").doc(item.productId));
+    const productSnaps = await Promise.all(productRefs.map(ref => tx.get(ref)));
+
     let subtotal = 0;
     const orderItems = [];
 
-    for (const item of items) {
-      const productRef = db.collection("products").doc(item.productId);
-      const snap = await tx.get(productRef);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const productRef = productRefs[i];
+      const snap = productSnaps[i];
 
       if (!snap.exists) {
         throw new HttpsError("failed-precondition", "A product is no longer available.");
       }
 
-      const product = snap.data();
+      const product = snap.data() || {};
       const stock = Math.max(0, Number(product.stock || 0));
       const qty = item.qty;
 
@@ -123,27 +140,43 @@ exports.createOrder = onCall(async request => {
       });
     }
 
+    let discount = 0;
+    if (promo && promo.active !== false && cartQty >= Number(promo.minPacks || 0)) {
+      const value = Number(promo.value || 0);
+      discount = Math.min(
+        subtotal,
+        promo.type === "percent" ? subtotal * value / 100 : value
+      );
+    }
+
+    const total = Math.max(0, subtotal + shipping - discount);
+
     const order = {
       id: orderRef.id,
+      customerUid: request.auth.uid,
       customer,
       items: orderItems,
       subtotal,
       shippingFee: shipping,
       discount,
-      voucher: wantedPromo,
-      total: Math.max(0, subtotal + shipping - discount),
+      voucher,
+      total,
       address,
+      fulfillment,
       paymentMethod,
+      payment: paymentMethod,
       gcashRef: paymentMethod.toLowerCase() === "gcash" ? gcashRef : "",
       paymentStatus,
       status: "Pending",
+      statusUpdatedAt: FieldValue.serverTimestamp(),
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
-      source: "storefront"
+      source: "storefront",
+      clientOrderId: clientOrderId || orderRef.id
     };
 
     tx.set(orderRef, order);
-    return { id: orderRef.id, total: subtotal, paymentStatus };
+    return { id: orderRef.id, total, paymentStatus, reused: false };
   });
 
   return result;
