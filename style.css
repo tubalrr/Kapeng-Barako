@@ -376,3 +376,22 @@ body{font-size:16px}
   .storefront-ad{min-height:120px;padding:20px 15px}
   .storefront-ad strong{font-size:20px}
 }
+
+.storefront-ad-image{
+  display:block;
+  width:min(100%,720px);
+  max-height:260px;
+  margin:2px auto 5px;
+  object-fit:contain;
+  border-radius:14px;
+  border:1px solid rgba(200,169,81,.28);
+}
+.ads-preview-image{
+  display:block;
+  width:min(100%,520px);
+  max-height:220px;
+  margin:4px auto 6px;
+  object-fit:contain;
+  border-radius:14px;
+  border:1px solid rgba(200,169,81,.28);
+}
