@@ -685,11 +685,11 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       }).join("")+
       '</tbody></table>';
 
-    $("[data-status-id]").forEach(sel => {
+    $( "[data-status-id]" ).forEach(sel => {
       const o = os.find(x => String(x.id) === String(sel.dataset.statusId));
       if(o) sel.value = normalizeStatus(o.status);
     });
-    $("[data-payment-status]").forEach(sel => {
+    $( "[data-payment-status]" ).forEach(sel => {
       const o = os.find(x => String(x.id) === String(sel.dataset.paymentStatus));
       if(o) sel.value = getPaymentStatus(o);
     });
