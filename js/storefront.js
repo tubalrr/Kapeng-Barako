@@ -77,7 +77,7 @@
   let voucherApplied=null;
 
   const $=s=>document.querySelector(s);
-  const $=s=>[...document.querySelectorAll(s)];
+  const $$=s=>[...document.querySelectorAll(s)];
 
   function setupSidebarToggle(){
     const menu=$("#menu-button");
@@ -440,7 +440,7 @@
     $("#track-backdrop").onclick=()=>hideLayer("#track-layer");
     $("#track-form").addEventListener("submit",e=>{e.preventDefault();trackedOrderId=normalizeTrackId($("#track-order-id").value);renderTrackResult(findTrackedOrder(trackedOrderId));});
     $("#checkout-payment").addEventListener("change",renderPaymentHelp);
-    $("#checkout-form [name="address"]")?.addEventListener("input",syncCheckoutTotals);
+    $("#checkout-form [name=\"address\"]")?.addEventListener("input",syncCheckoutTotals);
     $("#voucher-code")?.addEventListener("input",syncCheckoutTotals);
     $("#payment-proof").addEventListener("change",()=>{
       const f=$("#payment-proof")?.files?.[0];
