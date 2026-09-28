@@ -1,717 +1,95 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="description" content="Kapeng Barako Admin Dashboard">
-  <title>Kapeng Barako — Admin Dashboard</title>
-  <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
-  <link rel="stylesheet" href="../../css/admin.css?v=20260928-mobile-drawer">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <style>
-    .sales-overview-box{
-      margin-top:18px;
-      padding:20px;
-      background:#221A0E;
-      border:1px solid #2A2116;
-      border-radius:16px;
-    }
-    .sales-overview-header{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:14px;
-    }
-    .sales-overview-header h3{
-      margin:4px 0 0;
-      color:#F5E9D3;
-      font-size:20px;
-      line-height:1.1;
-    }
-    .sales-overview-header p{
-      margin:5px 0 0;
-      color:rgba(245,233,211,.55);
-      font-size:11px;
-    }
-    .sales-chart-wrap{
-      position:relative;
-      width:100%;
-      height:280px;
-    }
-    .sales-chart-wrap canvas{
-      display:block;
-      width:100%!important;
-      height:100%!important;
-    }
-    @media(max-width:640px){
-      .sales-overview-box{padding:16px}
-      .sales-overview-header{align-items:flex-start;flex-direction:column;gap:4px}
-      .sales-chart-wrap{height:230px}
-    }
-  </style>
-
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Kapeng Barako — Admin</title>
+<link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
+<link rel="stylesheet" href="../../css/admin.css?v=kb-rebuild-1">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js" defer></script>
+<script src="../../js/admin-auth.js?v=kb-rebuild-1" defer></script>
 </head>
 <body>
-  <div class="app-shell admin-app-shell">
-    <aside class="sidebar admin-sidebar" id="sidebar">
-      <div class="brand-block">
-        <a class="brand" href="../../index.html" aria-label="Kapeng Barako storefront">
-          <img src="../../images/favicon.svg" alt="" class="brand-mark">
-          <span>
-            <strong>Kapeng Barako</strong>
-            <small>Admin Console</small>
-          </span>
-        </a>
+<button class="admin-menu" id="admin-menu" type="button" aria-label="Open admin menu" aria-expanded="false"><span></span><span></span><span></span></button>
+<div class="admin-overlay" id="admin-overlay"></div>
+<div class="admin-shell">
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-brand"><a href="../../index.html"><img src="../../images/favicon.svg" alt=""><span><b>Kapeng Barako</b><small>Admin Console</small></span></a><button id="admin-close" type="button" aria-label="Close menu">×</button></div>
+    <nav class="admin-nav">
+      <button class="active" data-view="overview"><span>01</span>Overview</button>
+      <button data-view="orders"><span>02</span>Orders</button>
+      <button data-view="inventory"><span>03</span>Inventory</button>
+      <button data-view="products"><span>04</span>Products</button>
+      <button data-view="customers"><span>05</span>Customers</button>
+      <button data-view="promos"><span>06</span>Promos</button>
+      <button data-view="content"><span>07</span>Content</button>
+    </nav>
+    <div class="admin-sidebar-foot"><a href="../../index.html">← Storefront</a><button id="logout" type="button">Logout</button></div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-topbar"><div><span class="eyebrow">KAPENG BARAKO</span><h1 id="view-title">Overview</h1></div><div class="admin-top-actions"><span class="admin-user" id="admin-user">admin</span></div></header>
+
+    <section class="admin-view active" id="view-overview" data-view-panel="overview">
+      <div class="welcome"><div><span class="eyebrow">OPERATIONS</span><h2>Run the Barako.</h2><p>Orders, roast stock, customers and revenue in one clean control room.</p></div><a class="admin-button gold" href="../../index.html#products">Open Storefront →</a></div>
+      <div class="metric-grid">
+        <article class="metric"><span>Order records</span><strong id="metric-orders">0</strong></article>
+        <article class="metric low-card" id="low-card"><span>Low-stock</span><strong id="metric-low">0</strong><small>≤ 5 packs</small></article>
+        <article class="metric"><span>Open tickets</span><strong id="metric-tickets">0</strong></article>
+        <article class="metric"><span>Revenue</span><strong id="metric-revenue">₱0</strong></article>
+        <article class="metric"><span>Today Sales</span><strong id="metric-today">₱0</strong></article>
+        <article class="metric"><span>This Week</span><strong id="metric-week">₱0</strong></article>
+        <article class="metric"><span>Customers</span><strong id="metric-customers">0</strong></article>
       </div>
-
-      <nav class="side-nav admin-navigation" aria-label="Admin navigation">
-        <button class="nav-item active" type="button" data-section="overview"><span>⌂</span>Overview</button>
-        <button class="nav-item" type="button" data-section="orders"><span>▦</span>Orders / OMS</button>
-        <button class="nav-item" type="button" data-section="customers"><span>♙</span>Customers</button>
-        <button class="nav-item" type="button" data-section="products"><span>◈</span>Products</button>
-        <button class="nav-item" type="button" data-section="gallery"><span>▧</span>Gallery</button>
-        <button class="nav-item" type="button" data-section="inventory"><span>◫</span>Inventory & Batches</button>
-        <button class="nav-item" type="button" data-section="financials"><span>₱</span>Financials</button>
-        <button class="nav-item" type="button" data-section="promos"><span>◇</span>Pricing & Promos</button>
-        <button class="nav-item" type="button" data-section="settings"><span>⚙</span>Store Settings</button>
-        <button class="nav-item" type="button" data-section="cms"><span>✎</span>Content & CMS</button>
-        <button class="nav-item" type="button" data-section="regional-shipping"><span>⌁</span>Shipping Fees</button>
-        <button class="nav-item" type="button" data-section="support"><span>?</span>Support Tickets</button>
-        <button class="nav-item" type="button" data-section="audit"><span>◷</span>Audit Log</button>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="system-status">
-          <span class="status-dot"></span>
-          <div>
-            <strong>Store data</strong>
-            <small id="sync-status">Local data sync</small>
-          </div>
-        </div>
-        <a class="store-link" href="../../index.html">← Back to storefront</a>
+      <div class="admin-grid-two">
+        <section class="panel chart-panel"><div class="panel-head"><div><span class="eyebrow">LAST 7 DAYS</span><h3>Sales</h3></div><span class="panel-note">Local order records</span></div><div class="chart-wrap"><canvas id="sales-chart"></canvas><div id="chart-fallback" class="chart-fallback" hidden></div></div></section>
+        <section class="panel"><div class="panel-head"><div><span class="eyebrow">FULFILLMENT</span><h3>Queue</h3></div></div><div id="fulfillment-queue" class="queue"></div></section>
       </div>
-    </aside>
+      <section class="panel"><div class="panel-head"><div><span class="eyebrow">ORDER FLOW</span><h3>Current status</h3></div></div><div class="status-grid"><div><b id="count-pending">0</b><span>Pending</span></div><div><b id="count-processing">0</b><span>Processing</span></div><div><b id="count-ready">0</b><span>Ready</span></div><div><b id="count-delivered">0</b><span>Delivered</span></div></div></section>
+    </section>
 
-  <button class="admin-menu-trigger mobile-only" type="button" data-action="open-menu" aria-label="Open admin menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
-  <button class="admin-menu-overlay" type="button" data-action="close-menu" aria-label="Close admin menu"></button>
+    <section class="admin-view" id="view-orders" data-view-panel="orders" hidden>
+      <div class="view-head"><div><span class="eyebrow">ORDER MANAGEMENT</span><h2>Orders</h2><p>Orders created on the storefront are stored in <code>kb_orders</code>.</p></div></div>
+      <div class="panel table-panel"><div id="orders-table"></div></div>
+    </section>
 
-    <main class="main admin-main">
-      <header class="topbar admin-topbar">
-        <div class="topbar-left">
-          <div>
-            <span class="eyebrow">Kapeng Barako</span>
-            <h1 id="page-heading">Overview</h1>
-          </div>
-        </div>
-        <div class="top-actions"><button class="btn secondary" type="button" data-action="logout">↪ Logout</button>
-          <button class="btn secondary" type="button" data-action="refresh">↻ Refresh</button>
-          <button class="btn primary" type="button" data-action="open-order">+ New Order</button>
-        </div>
-      </header>
+    <section class="admin-view" id="view-inventory" data-view-panel="inventory" hidden>
+      <div class="view-head"><div><span class="eyebrow">STOCK CONTROL</span><h2>Inventory</h2><p>Product packs are the live inventory source. Orders deduct automatically.</p></div></div>
+      <div class="inventory-note">Low-stock rule: <strong>5 packs or below</strong> turns red.</div>
+      <div class="panel table-panel"><div id="inventory-table"></div></div>
+    </section>
 
-      <section class="content admin-content">
-        <section class="admin-section active" id="section-overview" data-section-panel="overview">
-          <div class="hero-grid admin-overview-grid">
-            <div class="hero-card">
-              <div>
-                <span class="eyebrow">Operations control</span>
-                <h2>Run orders, roasting, inventory, and customer care from one place.</h2>
-                <p>No sample records are preloaded. Metrics below are calculated from actual stored orders and inventory entries.</p>
-              </div>
-              <div class="hero-actions">
-                <button class="btn primary" type="button" data-section-jump="orders">Open Orders</button>
-                <button class="btn ghost" type="button" data-section-jump="inventory">Manage Inventory</button>
-              </div>
-            </div>
-            <div class="status-card">
-              <div class="status-row"><span>Order records</span><strong id="metric-orders">0</strong></div>
-              <div class="status-row"><span>Low-stock items</span><strong id="metric-low-stock">0</strong></div>
-              <div class="status-row"><span>Open tickets</span><strong id="metric-tickets">0</strong></div>
-              <div class="status-row"><span>Revenue</span><strong id="metric-revenue">₱0</strong></div>
-            </div>
-          </div>
+    <section class="admin-view" id="view-products" data-view-panel="products" hidden>
+      <div class="view-head"><div><span class="eyebrow">CATALOG</span><h2>Products</h2></div><button id="seed-products" class="admin-button gold" type="button">Reset to 3 collection products</button></div>
+      <div class="panel table-panel"><div id="products-table"></div></div>
+    </section>
 
-          <div class="metric-grid admin-metric-grid">
-            <article class="metric-card"><span>Today Sales</span><strong id="metric-today-sales">₱0</strong><small>Revenue from today's orders</small></article>
-            <article class="metric-card"><span>This Week</span><strong id="metric-week-sales">₱0</strong><small>Revenue from this week</small></article>
-            <article class="metric-card"><span>Customers</span><strong id="metric-customers">0</strong><small>Unique recorded buyers</small></article>
-            <article class="metric-card"><span>Low Stock</span><strong id="metric-low-stock-top">0</strong><small>Items at or below threshold</small></article>
-          </div>
+    <section class="admin-view" id="view-customers" data-view-panel="customers" hidden>
+      <div class="view-head"><div><span class="eyebrow">CUSTOMER DIRECTORY</span><h2>Customers</h2></div></div>
+      <div class="panel table-panel"><div id="customers-table"></div></div>
+    </section>
 
-          <section class="sales-overview-box" aria-labelledby="sales-overview-title">
-            <div class="sales-overview-header">
-              <div>
-                <span class="eyebrow">SALES ANALYTICS</span>
-                <h3 id="sales-overview-title">Sales Overview</h3>
-                <p>Last 7 days</p>
-              </div>
-            </div>
-            <div class="sales-chart-wrap">
-              <canvas id="sales-overview-chart" aria-label="Sales Overview bar chart for the last 7 days" role="img"></canvas>
-            </div>
-          </section>
+    <section class="admin-view" id="view-promos" data-view-panel="promos" hidden>
+      <div class="view-head"><div><span class="eyebrow">PRICING</span><h2>Promo codes</h2><p>Create codes such as BARAKO10 for the storefront checkout.</p></div><button id="add-promo" class="admin-button gold" type="button">+ Add promo</button></div>
+      <div class="panel table-panel"><div id="promos-table"></div></div>
+    </section>
 
-          <div class="metric-grid">
-            <article class="metric-card"><span>Pending</span><strong id="metric-pending">0</strong><small>Orders awaiting verification</small></article>
-            <article class="metric-card"><span>Processing / Roasting</span><strong id="metric-processing">0</strong><small>Orders in production</small></article>
-            <article class="metric-card"><span>Ready to Ship</span><strong id="metric-ready">0</strong><small>Awaiting dispatch</small></article>
-            <article class="metric-card"><span>Delivered</span><strong id="metric-delivered">0</strong><small>Completed orders</small></article>
-          </div>
-
-          <div class="panel admin-panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Fulfillment queue</span><h3>Orders needing attention</h3></div>
-              <button class="text-btn" type="button" data-section-jump="orders">View all →</button>
-            </div>
-            <div id="overview-queue" class="mini-table"></div>
-          </div>
-        </section>
-
-        <section class="admin-section" id="section-orders" data-section-panel="orders" hidden>
-          <div class="section-tools">
-            <div>
-              <span class="eyebrow">Advanced Order Management System</span>
-              <h2>Orders / OMS</h2>
-              <p>Kanban or table view, status overrides, payment and courier tags, dispatch tools, and order history.</p>
-            </div>
-            <div class="tool-row">
-              <button class="seg-btn active" type="button" data-order-view="kanban">Kanban</button>
-              <button class="seg-btn" type="button" data-order-view="table">Table</button>
-              <button class="btn secondary" type="button" data-action="export-orders">Export CSV</button>
-            </div>
-          </div>
-          <div class="filters">
-            <input id="order-search" class="input" type="search" placeholder="Search order ID, customer, phone…">
-            <select id="order-payment-filter" class="input"><option value="">All payments</option><option>GCash</option><option>Cash on Delivery (COD)</option><option>Bank Transfer</option><option>Maya</option></select>
-            <select id="order-courier-filter" class="input"><option value="">All fulfillment</option><option>Lalamove</option><option>J&T</option><option>LBC</option><option>QC Meetup</option></select>
-            <select id="order-status-filter" class="input"><option value="">All statuses</option></select>
-          </div>
-          <div id="orders-kanban" class="kanban"></div>
-          <div id="orders-table" class="table-wrap" hidden></div>
-          <div class="panel-note">Drag a card between status columns to perform a manual status override. Each override is logged.</div>
-        </section>
-
-        <section class="admin-section" id="section-gallery" data-section-panel="gallery" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Visual Content</span><h2>Gallery</h2><p>Exactly 6 gallery slots. Keep image files inside <code>/images</code> and replace the paths with the buyer’s real high-resolution photos before delivery.</p></div>
-            <div class="tool-row"><button class="btn secondary" type="button" data-action="gallery-reset">Reset placeholders</button><button class="btn primary" type="button" data-action="save-gallery">Save gallery</button></div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Local assets</span><h3>Six image slots</h3></div><span class="panel-note">No external image URLs are used.</span></div>
-            <div id="gallery-editor" class="gallery-editor"></div>
-          </div>
-          <div class="panel-note">Developer note: these are temporary local placeholders. Replace the six files in <code>/images</code> or change each local path above. The storefront reads the saved gallery configuration automatically.</div>
-        </section>
-
-        <section class="admin-section" id="section-customers" data-section-panel="customers" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Customer Directory</span><h2>Customers</h2><p>Search real buyers from stored orders, including order frequency, total spend, phone, email, and delivery location.</p></div>
-            <div class="tool-row"><button class="btn secondary" type="button" data-action="export-customers">Export CSV</button></div>
-          </div>
-          <div class="metric-grid compact">
-            <article class="metric-card"><span>Unique customers</span><strong id="cust-total">0</strong><small>Distinct recorded buyers</small></article>
-            <article class="metric-card"><span>Repeat buyers</span><strong id="cust-repeat">0</strong><small>2+ recorded orders</small></article>
-            <article class="metric-card"><span>Top location</span><strong id="cust-top-location">—</strong><small>Most common delivery area</small></article>
-            <article class="metric-card"><span>Customer revenue</span><strong id="cust-revenue">₱0</strong><small>Total recorded order value</small></article>
-          </div>
-          <div class="filters"><input id="customer-search" class="input" type="search" placeholder="Search name, phone, email, address…"></div>
-          <div class="panel"><div id="customers-table" class="table-wrap"></div></div>
-        </section>
-
-        <section class="admin-section" id="section-products" data-section-panel="products" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Catalog Control</span><h2>Products</h2><p>Manage the products displayed on the storefront. Saved catalog data is shared through the site storage adapter.</p></div>
-            <button class="btn primary" type="button" data-action="open-product">+ Add product</button>
-          </div>
-          <div class="panel"><div id="products-table" class="table-wrap"></div></div>
-        </section>
-
-        <section class="admin-section" id="section-inventory" data-section-panel="inventory" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Batch & Inventory Control Hub</span><h2>Inventory & batches</h2><p>Track green beans, roast batches, shelf life, packaging, thresholds, and coverage.</p></div>
-            <button class="btn primary" type="button" data-action="open-inventory">+ Add inventory item</button>
-          </div>
-          <div class="metric-grid compact">
-            <article class="metric-card"><span>Total stock units</span><strong id="inv-total">0</strong><small>Across all inventory records</small></article>
-            <article class="metric-card"><span>Green bean stock</span><strong id="inv-green">0</strong><small>Units recorded as beans</small></article>
-            <article class="metric-card"><span>Packaging stock</span><strong id="inv-pack">0</strong><small>Units recorded as packaging</small></article>
-            <article class="metric-card"><span>At / below threshold</span><strong id="inv-alerts">0</strong><small>Restock attention needed</small></article>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Stock control</span><h3>Inventory ledger</h3></div><div class="tool-row"><button class="seg-btn active" data-inv-filter="" type="button">All</button><button class="seg-btn" data-inv-filter="beans" type="button">Green beans</button><button class="seg-btn" data-inv-filter="packaging" type="button">Packaging</button></div></div>
-            <div id="inventory-table" class="table-wrap"></div>
-          </div>
-        </section>
-
-        <section class="admin-section" id="section-financials" data-section-panel="financials" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Financials & Sales Analytics</span><h2>Financial control</h2><p>Channel revenue, COGS, shipping subsidies, affiliate commissions, profit, and reports.</p></div>
-            <div class="tool-row"><button class="btn secondary" type="button" data-action="export-financials">Export CSV</button><button class="btn primary" type="button" data-action="print-report">Print / PDF</button></div>
-          </div>
-          <div class="metric-grid">
-            <article class="metric-card"><span>Revenue</span><strong id="fin-revenue">₱0</strong><small>From stored orders</small></article>
-            <article class="metric-card"><span>COGS</span><strong id="fin-cogs">₱0</strong><small>Entered against orders</small></article>
-            <article class="metric-card"><span>Shipping subsidy</span><strong id="fin-shipping">₱0</strong><small>Entered against orders</small></article>
-            <article class="metric-card"><span>Net after tracked costs</span><strong id="fin-profit">₱0</strong><small>Revenue minus tracked costs</small></article>
-          </div>
-          <div class="split-grid">
-            <div class="panel"><div class="panel-head"><div><span class="eyebrow">Revenue by channel</span><h3>Payment ledger</h3></div></div><div id="payment-ledger" class="ledger-list"></div></div>
-            <div class="panel"><div class="panel-head"><div><span class="eyebrow">Margin</span><h3>Profitability</h3></div></div><div id="profit-breakdown" class="ledger-list"></div></div>
-          </div>
-          <div class="panel"><div class="panel-head"><div><span class="eyebrow">Accounting</span><h3>Order cost ledger</h3></div></div><div id="finance-table" class="table-wrap"></div></div>
-        </section>
-
-        <section class="admin-section" id="section-promos" data-section-panel="promos" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Dynamic Pricing & Promo Engine</span><h2>Pricing & promos</h2><p>Configure discount tiers, voucher codes, free-shipping rules, and customer segments.</p></div>
-            <button class="btn primary" type="button" data-action="open-promo">+ New promo rule</button>
-          </div>
-          <div class="split-grid">
-            <div class="panel">
-              <div class="panel-head"><div><span class="eyebrow">Automation</span><h3>Shipping rule</h3></div><label class="switch"><input type="checkbox" id="free-ship-toggle"><span></span></label></div>
-              <div class="callout">
-                <strong>Free shipping when you buy 2 packs or more</strong>
-                <span>Toggle the storefront rule and adjust the minimum pack count below.</span>
-              </div>
-              <div class="form-grid compact-form">
-                <label>Minimum packs<input id="free-ship-min" class="input" type="number" min="1" step="1" value="2"></label>
-                <label>Eligible fulfillment
-                  <select id="free-ship-fulfillment" class="input"><option value="all">All eligible delivery methods</option><option>Lalamove</option><option>J&T</option><option>LBC</option></select>
-                </label>
-              </div>
-              <button class="btn primary" type="button" data-action="save-free-ship">Save rule</button>
-            </div>
-            <div class="panel">
-              <div class="panel-head"><div><span class="eyebrow">Customer segmentation</span><h3>Loyalty targeting</h3></div></div>
-              <div class="segment-grid">
-                <button class="segment-card" type="button" data-segment="all"><strong>All customers</strong><span>All recorded customers</span></button>
-                <button class="segment-card" type="button" data-segment="repeat"><strong>Repeat buyers</strong><span>2+ completed orders</span></button>
-                <button class="segment-card" type="button" data-segment="pending"><strong>Needs follow-up</strong><span>Orders still pending</span></button>
-              </div>
-            </div>
-          </div>
-          <div class="panel"><div class="panel-head"><div><span class="eyebrow">Voucher engine</span><h3>Promo rules</h3></div></div><div id="promos-table" class="table-wrap"></div></div>
-        </section>
-
-        <section class="admin-section" id="section-settings" data-section-panel="settings" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Store Controls</span><h2>Store Settings</h2><p>Control checkout payment methods, fulfillment methods, and customer-facing store rules.</p></div>
-            <button class="btn primary" type="button" data-action="save-settings">Save settings</button>
-          </div>
-          <div class="split-grid">
-            <div class="panel">
-              <div class="panel-head"><div><span class="eyebrow">Checkout</span><h3>Payment methods</h3></div></div>
-              <label class="check-card"><input type="checkbox" class="setting-payment" value="GCash"><span><strong>GCash</strong><small>Show GCash in checkout</small></span></label>
-              <label class="check-card"><input type="checkbox" class="setting-payment" value="Cash on Delivery (COD)"><span><strong>Cash on Delivery (COD)</strong><small>Show COD in checkout</small></span></label>
-              <label class="check-card"><input type="checkbox" class="setting-payment" value="Bank Transfer"><span><strong>Bank Transfer</strong><small>Show bank transfer in checkout</small></span></label>
-              <label class="check-card"><input type="checkbox" class="setting-payment" value="Maya"><span><strong>Maya</strong><small>Optional additional payment method</small></span></label>
-            </div>
-            <div class="panel">
-              <div class="panel-head"><div><span class="eyebrow">Fulfillment</span><h3>Delivery options</h3></div></div>
-              <label class="check-card"><input type="checkbox" class="setting-fulfillment" value="Lalamove"><span><strong>Lalamove</strong><small>Local courier option</small></span></label>
-              <label class="check-card"><input type="checkbox" class="setting-fulfillment" value="J&T"><span><strong>J&T</strong><small>Parcel shipping option</small></span></label>
-              <label class="check-card"><input type="checkbox" class="setting-fulfillment" value="LBC"><span><strong>LBC</strong><small>Parcel shipping option</small></span></label>
-              <label class="check-card"><input type="checkbox" class="setting-fulfillment" value="QC Meetup"><span><strong>Meetup — Quezon City</strong><small>Local meetup option</small></span></label>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Storefront</span><h3>Display rules</h3></div></div>
-            <div class="form-grid">
-              <label>Shipping fee note<textarea id="settings-shipping-note" class="textarea" rows="3"></textarea></label>
-              <label>Order confirmation note<textarea id="settings-order-note" class="textarea" rows="3"></textarea></label>
-              <label>GCash instructions<textarea id="settings-gcash-instructions" class="textarea" rows="3" placeholder="GCash name / number / QR instructions"></textarea></label>
-              <label>Bank transfer instructions<textarea id="settings-bank-instructions" class="textarea" rows="3" placeholder="Bank name / account name / account number / transfer steps"></textarea></label>
-              <label>Business email<input id="settings-email" class="input" type="email" placeholder="ILAG"></label>
-              <label>Business phone<input id="settings-phone" class="input" type="text" placeholder="ILAG"></label>
-              <label>Business location<input id="settings-location" class="input" type="text" placeholder="ILAG"></label>
-              <label>Facebook URL<input id="settings-facebook" class="input" type="url" placeholder="ILAG"></label>
-              <label>Instagram URL<input id="settings-instagram" class="input" type="url" placeholder="ILAG"></label>
-              <label>TikTok URL<input id="settings-tiktok" class="input" type="url" placeholder="ILAG"></label>
-              <label>Footer tagline<input id="settings-tagline" class="input" type="text" placeholder="Gawa sa Batangas"></label>
-            </div>
-          </div>
-        </section>
-
-        <section class="admin-section" id="section-regional-shipping" data-section-panel="regional-shipping" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Shipping Configuration</span><h2>Regional Shipping Fees</h2><p>Set local, Metro Manila, and provincial delivery rates. These rules are stored in the same storefront adapter.</p></div>
-            <button class="btn primary" type="button" data-action="save-regional-shipping">Save shipping rules</button>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Delivery zones</span><h3>Fee rules</h3></div></div>
-            <div class="shipping-rule-grid">
-              <label><strong>Batangas / Local</strong><span>Local flat rate</span><input id="ship-batangas" class="input" type="number" min="0" step="1"></label>
-              <label><strong>Metro Manila</strong><span>Standard flat rate</span><input id="ship-manila" class="input" type="number" min="0" step="1"></label>
-              <label><strong>Other Provinces</strong><span>Standard provincial rate</span><input id="ship-province" class="input" type="number" min="0" step="1"></label>
-              <label><strong>Free Shipping Minimum</strong><span>Order value threshold</span><input id="ship-free-min" class="input" type="number" min="0" step="1"></label>
-            </div>
-            <div class="callout"><strong>Batangas local option</strong><span>Set ₱0 if you want local Batangas delivery to be free. These settings are configuration data; connect them to a server-side checkout before production use.</span></div>
-          </div>
-        </section>
-
-        <section class="admin-section" id="section-cms" data-section-panel="cms" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Content & Customer Support CMS</span><h2>Content editor</h2><p>Edit the story, FAQ, and delivery policy. Save to the configured content store.</p></div>
-            <div class="tool-row"><button class="btn secondary" type="button" data-action="cms-export">Export JSON</button><button class="btn primary" type="button" data-action="cms-save">Save content</button></div>
-          </div>
-          <div class="panel cms-panel">
-            <div class="panel-subhead"><span>Hero</span></div>
-            <div class="form-grid">
-              <label>Eyebrow<input id="cms-hero-eyebrow" class="input"></label>
-              <label>Hero description<input id="cms-hero-description" class="input"></label>
-              <label class="full">Hero title<textarea id="cms-hero-title" class="textarea" rows="3"></textarea></label>
-            </div>
-            <div class="panel-subhead"><span>Storytelling / KWENTO</span></div>
-            <label>Story<textarea id="cms-story" class="textarea" rows="6"></textarea></label>
-            <div class="panel-subhead"><span>Exactly 3 benefits</span></div>
-            <div id="benefit-editor" class="faq-editor"></div>
-            <div class="panel-subhead"><span>How to Brew — exactly 3 steps</span></div>
-            <div id="brew-editor" class="faq-editor"></div>
-            <div class="panel-subhead"><span>Announcements / Fresh Roast Updates</span></div>
-            <div class="form-grid">
-              <label>Announcement title<input id="cms-announcement-title" class="input" placeholder="Bagong ani na!"></label>
-              <label>Date<input id="cms-announcement-date" class="input" type="date"></label>
-              <label class="full">Announcement body<textarea id="cms-announcement-body" class="textarea" rows="4" placeholder="Latest approved harvest, roast, or store announcement"></textarea></label>
-            </div>
-            <label>Delivery policy<textarea id="cms-delivery" class="textarea" rows="6"></textarea></label>
-            <div class="panel-subhead"><span>FAQ items</span><button class="text-btn" type="button" data-action="add-faq">+ Add FAQ</button></div>
-            <div id="faq-editor" class="faq-editor"></div>
-          </div>
-          <div class="panel-note">The default storage adapter is browser-local. Cross-device, multi-admin publishing requires connecting the adapter to your authenticated backend.</div>
-        </section>
-
-        <section class="admin-section" id="section-support" data-section-panel="support" hidden>
-          <div class="section-tools">
-            <div><span class="eyebrow">Customer Support</span><h2>Tickets</h2><p>Link inquiries to order IDs and keep resolution history in one place.</p></div>
-            <button class="btn primary" type="button" data-action="open-ticket">+ New ticket</button>
-          </div>
-          <div class="filters">
-            <input id="ticket-search" class="input" type="search" placeholder="Search ticket, order ID, customer…">
-            <select id="ticket-status-filter" class="input"><option value="">All ticket statuses</option><option>Open</option><option>In progress</option><option>Resolved</option><option>Closed</option></select>
-          </div>
-          <div class="panel"><div id="tickets-table" class="table-wrap"></div></div>
-        </section>
-
-        <section class="admin-section" id="section-audit" data-section-panel="audit" hidden>
-          <div class="section-tools"><div><span class="eyebrow">Controls</span><h2>Audit log</h2><p>Manual status changes, inventory edits, promo changes, and other admin actions.</p></div><button class="btn secondary" type="button" data-action="export-audit">Export CSV</button></div>
-          <div class="panel"><div id="audit-table" class="table-wrap"></div></div>
-        </section>
-      </section>
-    </main>
-  </div>
-
-  <dialog id="order-dialog" class="modal">
-    <form method="dialog" id="order-form" class="modal-card">
-      <button type="button" class="modal-close" data-close-dialog>×</button>
-      <div><span class="eyebrow">Order record</span><h2 id="order-modal-title">New order</h2></div>
-      <input type="hidden" id="order-edit-id">
-      <div class="form-grid">
-        <label>Customer name<input class="input" id="order-name" required></label>
-        <label>Phone<input class="input" id="order-phone" required></label>
-        <label>Email<input class="input" id="order-email" type="email" placeholder="ILAG"></label>
-        <label class="full">Delivery address<textarea class="textarea" id="order-address" rows="3" required></textarea></label>
-        <label>Payment<select class="input" id="order-payment"><option>GCash</option><option>Cash on Delivery (COD)</option><option>Bank Transfer</option><option>Maya</option></select></label>
-        <label>Fulfillment<select class="input" id="order-fulfillment"><option>Lalamove</option><option>J&T</option><option>LBC</option><option>QC Meetup</option></select></label>
-        <label>Status<select class="input" id="order-status"></select></label>
-        <label>COGS<input class="input" id="order-cogs" type="number" min="0" step="0.01" value="0"></label>
-        <label>Shipping subsidy<input class="input" id="order-shipping" type="number" min="0" step="0.01" value="0"></label>
-        <label>Affiliate commission<input class="input" id="order-affiliate" type="number" min="0" step="0.01" value="0"></label>
-         
-        <label>Order total<input class="input" id="order-total" type="number" min="0" step="0.01" value="0"></label>
+    <section class="admin-view" id="view-content" data-view-panel="content" hidden>
+      <div class="view-head"><div><span class="eyebrow">CONTENT</span><h2>Story & announcements</h2><p>Safe place to update approved contact, announcement and social-proof content.</p></div><button id="save-content" class="admin-button gold" type="button">Save content</button></div>
+      <div class="panel form-panel">
+        <label>Fresh roast announcement<input id="content-announcement" value="Bagong ani na!"></label>
+        <label>Announcement body<textarea id="content-body" rows="4">Add the latest approved harvest or roast update.</textarea></label>
+        <label>Facebook URL<input id="content-facebook" placeholder="https://facebook.com/..."></label>
+        <label>Email<input id="content-email" value="ILAG"></label>
+        <label>Phone<input id="content-phone" value="ILAG"></label>
+        <label>Location<input id="content-location" value="ILAG"></label>
+        <div class="content-note">Real customer screenshots should be added as approved brand assets; no fabricated testimonials are generated.</div>
       </div>
-      <label>Order items (one line per item: Name × Qty)<textarea class="textarea" id="order-items" rows="5" placeholder="Barako Strong × 1"></textarea></label>
-      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save order</button></div>
-    </form>
-  </dialog>
+    </section>
+  </main>
+</div>
 
-  <dialog id="product-dialog" class="modal">
-    <form method="dialog" id="product-form" class="modal-card">
-      <button type="button" class="modal-close" data-close-dialog>×</button>
-      <div><span class="eyebrow">Catalog item</span><h2>Product</h2></div>
-      <input type="hidden" id="product-edit-id">
-      <div class="form-grid">
-        <label>Name<input class="input" id="product-name" required></label>
-        <label>Price<input class="input" id="product-price" type="number" min="0" step="0.01" required></label>
-        <label>Weight / pack size<input class="input" id="product-weight" placeholder="250g" required></label>
-        <label>Visual emoji<input class="input" id="product-emoji" placeholder="☕️"></label>
-        <label class="full">Description<input class="input" id="product-note" required></label>
-        <label class="full">Variants JSON<textarea class="textarea" id="product-variants" rows="4" placeholder='[{"weight":"250g","price":189}]'></textarea></label>
-        <label class="full">Grinds — one per line<textarea class="textarea" id="product-grinds" rows="3" placeholder="Whole Bean&#10;Coarse&#10;Medium&#10;Fine"></textarea></label>
-      </div>
-      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save product</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="inventory-dialog" class="modal">
-    <form method="dialog" id="inventory-form" class="modal-card">
-      <button type="button" class="modal-close" data-close-dialog>×</button>
-      <div><span class="eyebrow">Inventory record</span><h2 id="inventory-modal-title">Add inventory item</h2></div>
-      <input type="hidden" id="inv-edit-id">
-      <div class="form-grid">
-        <label>Item name<input class="input" id="inv-name" required></label>
-        <label>Category<select class="input" id="inv-category"><option value="beans">Green beans</option><option value="packaging">Packaging</option></select></label>
-        <label>SKU / batch number<input class="input" id="inv-sku"></label>
-        <label>Unit<input class="input" id="inv-unit" placeholder="kg / pcs / packs"></label>
-        <label>Current stock<input class="input" id="inv-stock" type="number" min="0" step="0.01" value="0"></label>
-        <label>Low-stock threshold<input class="input" id="inv-threshold" type="number" min="0" step="0.01" value="0"></label>
-        <label>Daily usage forecast<input class="input" id="inv-usage" type="number" min="0" step="0.01" value="0"></label>
-        <label>Roast date<input class="input" id="inv-roast" type="date"></label>
-        <label>Expiry date<input class="input" id="inv-expiry" type="date"></label>
-      </div>
-      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save item</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="promo-dialog" class="modal">
-    <form method="dialog" id="promo-form" class="modal-card">
-      <button type="button" class="modal-close" data-close-dialog>×</button>
-      <div><span class="eyebrow">Promo rule</span><h2>Configure voucher</h2></div>
-      <input type="hidden" id="promo-edit-id">
-      <div class="form-grid">
-        <label>Rule name<input class="input" id="promo-name" required></label>
-        <label>Voucher code<input class="input" id="promo-code" placeholder="CLIENT-CODE"></label>
-        <label>Discount type<select class="input" id="promo-type"><option value="percent">Percentage</option><option value="flat">Fixed amount</option><option value="free-shipping">Free shipping</option></select></label>
-        <label>Discount value<input class="input" id="promo-value" type="number" min="0" step="0.01" value="0"></label>
-        <label>Minimum packs<input class="input" id="promo-min-packs" type="number" min="0" step="1" value="0"></label>
-        <label>Audience<select class="input" id="promo-audience"><option value="all">All customers</option><option value="repeat">Repeat buyers</option><option value="pending">Needs follow-up</option></select></label>
-      </div>
-      <label class="checkbox-line"><input type="checkbox" id="promo-active" checked> Active</label>
-      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save promo</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="ticket-dialog" class="modal">
-    <form method="dialog" class="modal-card" id="ticket-form">
-      <button type="button" class="modal-close" data-close-dialog>×</button>
-      <div><span class="eyebrow">Customer inquiry</span><h2>New ticket</h2></div>
-      <div class="form-grid">
-        <label>Customer name<input class="input" id="ticket-name"></label>
-        <label>Order ID<input class="input" id="ticket-order"></label>
-        <label>Contact<input class="input" id="ticket-contact"></label>
-        <label>Status<select class="input" id="ticket-status"><option>Open</option><option>In progress</option><option>Resolved</option><option>Closed</option></select></label>
-        <label class="full">Inquiry<textarea class="textarea" id="ticket-message" rows="5" required></textarea></label>
-        <label class="full">Resolution notes<textarea class="textarea" id="ticket-notes" rows="4"></textarea></label>
-      </div>
-      <div class="modal-actions"><button type="button" class="btn secondary" data-close-dialog>Cancel</button><button class="btn primary" type="submit">Save ticket</button></div>
-    </form>
-  </dialog>
-
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="../../js/admin-auth.js?v=20260928-auth" defer></script>
-  <script src="../../js/admin.js?v=20260928-inventory-3" defer></script>
-  <script>
-  (() => {
-    const body=document.body;
-    const trigger=document.querySelector(".admin-menu-trigger");
-    const overlay=document.querySelector(".admin-menu-overlay");
-    const sidebar=document.querySelector(".admin-sidebar");
-    if(!trigger||!overlay||!sidebar)return;
-    const setMenu=open=>{
-      body.classList.toggle("menu-open",open);
-      body.style.overflow=open?"hidden":"";
-      trigger.setAttribute("aria-expanded",String(open));
-      trigger.setAttribute("aria-label",open?"Close admin menu":"Open admin menu");
-    };
-    trigger.addEventListener("click",()=>setMenu(!body.classList.contains("menu-open")));
-    overlay.addEventListener("click",()=>setMenu(false));
-    sidebar.querySelectorAll("button.nav-item, a").forEach(el=>{
-      el.addEventListener("click",()=>{ if(window.innerWidth<=900)setMenu(false); });
-    });
-    document.addEventListener("keydown",e=>{if(e.key==="Escape")setMenu(false);});
-  })();
-  </script>
-</body>
-</html>
-<script>
-(() => {
-  "use strict";
-
-  const SAMPLE_SALES = [1200, 1900, 800, 2100, 1600, 2400, 1800];
-  let salesChart = null;
-
-  const phpMoney = value => "₱" + Number(value || 0).toLocaleString("en-PH", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
-
-  function weekStartMonday(baseDate = new Date()) {
-    const d = new Date(baseDate);
-    d.setHours(0,0,0,0);
-    const day = d.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    d.setDate(d.getDate() + diff);
-    return d;
-  }
-
-  function dayKey(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const d = String(date.getDate()).padStart(2, "0");
-    return y + "-" + m + "-" + d;
-  }
-
-  function readOrders() {
-    try {
-      const primary = JSON.parse(localStorage.getItem("kb_orders") || "[]");
-      const list = Array.isArray(primary) ? primary : [];
-      const last = JSON.parse(localStorage.getItem("kb_last_order") || "null");
-      if (last && last.id && !list.some(o => String(o?.id) === String(last.id))) {
-        list.unshift(last);
-      }
-      return list;
-    } catch {
-      return [];
-    }
-  }
-
-  function buildSalesData() {
-    const start = weekStartMonday();
-    const totals = Array(7).fill(0);
-    const orders = readOrders();
-
-    if (!orders.length) {
-      return SAMPLE_SALES.slice();
-    }
-
-    const validDays = new Set();
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      validDays.add(dayKey(d));
-    }
-
-    orders.forEach(order => {
-      const date = new Date(order?.createdAt || order?.date || "");
-      if (Number.isNaN(date.getTime())) return;
-
-      const key = dayKey(date);
-      if (!validDays.has(key)) return;
-
-      const diff = Math.round((new Date(key + "T00:00:00").getTime() - start.getTime()) / 86400000);
-      if (diff >= 0 && diff < 7) {
-        totals[diff] += Number(order?.total || order?.amount || 0);
-      }
-    });
-
-    return totals;
-  }
-
-  function buildLabels() {
-    const start = weekStartMonday();
-    return Array.from({length:7}, (_, i) => {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      return d.toLocaleDateString("en-US", {weekday:"short"});
-    });
-  }
-
-  function renderSalesOverview() {
-    const canvas = document.getElementById("sales-overview-chart");
-    if (!canvas || typeof Chart === "undefined") return;
-
-    const ctx = canvas.getContext("2d");
-    const data = buildSalesData();
-    const labels = buildLabels();
-
-    if (salesChart) {
-      salesChart.destroy();
-    }
-
-    salesChart = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels,
-        datasets: [{
-          label: "Sales",
-          data,
-          backgroundColor: "#C8A951",
-          borderColor: "#C8A951",
-          borderWidth: 0,
-          borderRadius: 8,
-          barThickness: 18,
-          maxBarThickness: 18,
-          categoryPercentage: 0.72
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-          duration: 800,
-          easing: "easeOutQuart"
-        },
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            callbacks: {
-              label: context => " " + phpMoney(context.raw)
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false
-            },
-            border: {
-              color: "#2A2116"
-            },
-            ticks: {
-              color: "#F5E9D3",
-              font: {
-                size: 10
-              }
-            }
-          },
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: "rgba(245,233,211,.08)"
-            },
-            border: {
-              display: false
-            },
-            ticks: {
-              color: "#F5E9D3",
-              font: {
-                size: 10
-              },
-              callback: value => phpMoney(value)
-            }
-          }
-        }
-      }
-    });
-  }
-
-  window.refreshSalesOverview = renderSalesOverview;
-
-  function initSalesOverview() {
-    renderSalesOverview();
-
-    window.addEventListener("storage", event => {
-      if (["kb_orders", "kb_last_order"].includes(event.key)) {
-        renderSalesOverview();
-      }
-    });
-
-    document.addEventListener("click", event => {
-      if (event.target.closest('[data-action="refresh"]')) {
-        window.setTimeout(renderSalesOverview, 50);
-      }
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initSalesOverview, {once:true});
-  } else {
-    initSalesOverview();
-  }
-})();
-</script>
+<dialog id="promo-dialog"><form method="dialog" id="promo-form"><button class="dialog-close" type="button" data-dialog-close>×</button><span class="eyebrow">PROMO RULE</span><h2>New promo</h2><label>Name<input id="promo-name" required></label><label>Code<input id="promo-code" required></label><label>Type<select id="promo-type"><option value="percent">Percent</option><option value="fixed">Fixed</option></select></label><label>Value<input id="promo-value" type="number" min="0" required></label><label>Minimum packs<input id="promo-min" type="number" min="0" value="0"></label><label>Active<input id="promo-active" type="checkbox" checked></label><div class="dialog-actions"><button class="admin-button outline" type="button" data-dialog-close>Cancel</button><button class="admin-button gold" type="submit">Save</button></div></form></dialog>
+<div id="admin-toast" class="admin-toast"></div>
+<script src="../../js/admin.js?v=kb-rebuild-1" defer></script>
+</body></html>
