@@ -108,8 +108,6 @@
 
   function updateOrderStatus(id,status){const list=read(ORDERS_KEY,[]);const idx=list.findIndex(o=>String(o.id)===String(id));if(idx<0)return;list[idx]={...list[idx],status,statusUpdatedAt:new Date().toISOString()};write(ORDERS_KEY,list);toast("Order "+id+" → "+status);renderOverview();renderOrders()}
 
-  initOrderSearch();
-
   function renderProducts(){
     refreshData();
     const root=$("#products-table");
@@ -277,7 +275,8 @@
     if(window.KBAdminAuth&&!window.KBAdminAuth.guard())return;
     $("#admin-user").textContent=read("kb_admin_session",{})?.email||"admin";
     $("#admin-menu")?.addEventListener("click",toggleMenu);$("#admin-close")?.addEventListener("click",closeMenu);$("#admin-overlay")?.addEventListener("click",closeMenu);$("#logout")?.addEventListener("click",()=>window.KBAdminAuth?.logout());
-    $$(".admin-nav button").forEach(b=>b.addEventListener("click",()=>openView(b.dataset.view)));
+    $(".admin-nav button").forEach(b=>b.addEventListener("click",()=>openView(b.dataset.view)));
+    initOrderSearch();
     $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
     renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();
     window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos()}});
