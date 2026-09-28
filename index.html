@@ -35,9 +35,15 @@
 </head>
 <body>
   <!-- HEADER -->
-  <div class="top-strip">
+  <div class="top-strip" id="kbAnnouncementBar" role="region" aria-label="Store announcement">
     <div class="container top-strip-inner">
-      <span class="announcement-text">FREE DELIVERY IN BATANGAS <b>|</b> GCASH / COD</span>
+      <div class="kb-announcement-marquee" aria-label="Store announcement">
+        <div class="kb-announcement-track">
+          <span>Free delivery in Batangas • GCash / COD • Fresh roast daily • 500+ orders delivered</span>
+          <span aria-hidden="true">Free delivery in Batangas • GCash / COD • Fresh roast daily • 500+ orders delivered</span>
+        </div>
+      </div>
+      <button class="kb-announcement-close" id="kbAnnouncementClose" type="button" aria-label="Close announcement">×</button>
     </div>
   </div>
 
@@ -1232,18 +1238,18 @@
         }
       </style>
 
-      <div id="kb-mobile-sticky-cart" aria-label="Sticky cart" aria-live="polite">
-        <div class="kb-sticky-cart-info">
-          <span class="kb-sticky-cart-item">Your cart is empty</span>
-          <span class="kb-sticky-cart-price"></span>
+      <div id="kb-mobile-sticky-cart" aria-label="Sticky cart" aria-live="polite" aria-hidden="true">
+        <div class="kb-sticky-cart-left">
+          <img id="kb-sticky-cart-thumb" src="images/gallery-03.svg" alt="Kapeng Barako coffee">
+          <div class="kb-sticky-cart-info">
+            <strong id="kb-sticky-cart-name" class="kb-sticky-cart-item">Barako Coffee</strong>
+            <span id="kb-sticky-cart-qty" class="kb-sticky-cart-qty">Qty 1</span>
+          </div>
         </div>
-        <button
-          type="button"
-          class="kb-sticky-cart-checkout"
-          aria-label="Checkout"
-        >
-          Checkout →
-        </button>
+        <div class="kb-sticky-cart-right">
+          <strong id="kb-sticky-cart-price" class="kb-sticky-cart-price">₱0</strong>
+          <button type="button" class="kb-sticky-cart-checkout" aria-label="Checkout">Checkout →</button>
+        </div>
       </div>
 
       <div id="kb-products-toast" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -1442,6 +1448,373 @@
         })();
       </script>
     </section>
+      <script>
+        (() => {
+          "use strict";
+
+          const PRODUCT_GRID = document.getElementById("productGrid");
+          const CART_KEY = "kb_cart";
+          const PRODUCTS_KEY = "kb_rebuild_products";
+
+          const read = (key, fallback) => {
+            try {
+              const value = JSON.parse(localStorage.getItem(key) || "null");
+              return value ?? fallback;
+            } catch {
+              return fallback;
+            }
+          };
+
+          const getCart = () => {
+            const value = read(CART_KEY, []);
+            return Array.isArray(value) ? value : [];
+          };
+
+          const getProducts = () => {
+            const value = read(PRODUCTS_KEY, []);
+            return Array.isArray(value) && value.length
+              ? value
+              : [
+                  {id:"KB250",name:"Barako Strong",size:"250g",price:350,stock:7,roast:"Dark",grind:"Whole"},
+                  {id:"KB500",name:"Barako Classic",size:"500g",price:620,stock:7,roast:"Medium",grind:"Whole"}
+                ];
+          };
+
+          const money = value =>
+            "₱" + Number(value || 0).toLocaleString("en-PH", {maximumFractionDigits:0});
+
+          function updateHeaderCount() {
+            const cart = getCart();
+            const count = cart.reduce(
+              (sum,item) => sum + Math.max(1,Number(item.qty || item.quantity || 1)),
+              0
+            );
+
+            document.querySelectorAll("#cartCount,#heroCartCount").forEach(el => {
+              el.textContent = count;
+            });
+          }
+
+          /* =========================
+             ANNOUNCEMENT
+             ========================= */
+
+          const announcement = document.getElementById("kbAnnouncementBar");
+          const announcementClose = document.getElementById("kbAnnouncementClose");
+
+          announcementClose?.addEventListener("click", () => {
+            announcement?.classList.add("is-closed");
+            document.body.classList.remove("kb-announcement-visible");
+            try {
+              sessionStorage.setItem("kb_announcement_closed","1");
+            } catch {}
+          });
+
+          try {
+            if (sessionStorage.getItem("kb_announcement_closed") === "1") {
+              announcement?.classList.add("is-closed");
+              document.body.classList.remove("kb-announcement-visible");
+            }
+          } catch {}
+
+          document.body.classList.add("kb-announcement-visible");
+
+          /* =========================
+             BUNDLE CARD
+             ========================= */
+
+          function selectedBundle(group) {
+            const active = document.querySelector(
+              "#kb-starter-bundle " + group + " .kb-bundle-pill.active"
+            );
+            return active?.dataset.value || active?.textContent.trim() || "";
+          }
+
+          function updateBundleCard() {
+            const card = document.getElementById("kb-starter-bundle");
+            if (!card) return;
+
+            const products = getProducts();
+            const strong = products.find(item => String(item.id) === "KB250");
+            const classic = products.find(item => String(item.id) === "KB500");
+
+            const strongStock = Math.max(0, Number(strong?.stock || 0));
+            const classicStock = Math.max(0, Number(classic?.stock || 0));
+            const available = Math.min(strongStock, classicStock);
+
+            const stock = card.querySelector(".kb-bundle-stock");
+            const note = card.querySelector(".kb-bundle-roast-note");
+            const button = card.querySelector(".kb-bundle-add");
+
+            if (!strong || !classic || available <= 0) {
+              if (stock) {
+                stock.className = "kb-bundle-stock low";
+                stock.innerHTML = '<span class="kb-bundle-stock-dot"></span><span>SOLD OUT</span>';
+              }
+              if (note) note.textContent = "";
+              if (button) {
+                button.disabled = true;
+                button.textContent = "SOLD OUT";
+              }
+              return;
+            }
+
+            if (stock) {
+              stock.className = "kb-bundle-stock" + (available <= 5 ? " low" : "");
+              stock.innerHTML =
+                (available <= 5 ? '<span class="kb-bundle-stock-dot"></span>' : "") +
+                "<span>" + available + " bundle set" + (available === 1 ? "" : "s") + " available</span>";
+            }
+
+            if (note) {
+              note.textContent = available <= 3 ? "Roast tomorrow 6AM" : "";
+            }
+
+            if (button) {
+              button.disabled = false;
+              button.textContent = "ADD BUNDLE TO CART →";
+            }
+          }
+
+          function ensureBundleCard() {
+            if (!PRODUCT_GRID || document.getElementById("kb-starter-bundle")) return;
+
+            const card = document.createElement("article");
+            card.id = "kb-starter-bundle";
+            card.className = "product-card kb-bundle-card";
+
+            card.innerHTML = '
+              <span class="kb-bundle-save">SAVE ₱100</span>
+              <div class="kb-bundle-image">
+                <div class="kb-bundle-cups" aria-hidden="true">
+                  <span class="kb-mini-cup">250g</span>
+                  <span class="kb-plus">+</span>
+                  <span class="kb-mini-cup">500g</span>
+                </div>
+              </div>
+              <div class="kb-bundle-copy">
+                <h3>Barako Starter Bundle</h3>
+                <p>Includes 250g Strong + 500g Classic</p>
+                <div class="kb-bundle-price"><strong>₱870</strong><del>₱970</del></div>
+                <div class="kb-bundle-stock"><span>Checking stock...</span></div>
+                <div class="kb-bundle-roast-note"></div>
+              </div>
+              <div class="selector-block">
+                <span>ROAST</span>
+                <div class="kb-bundle-pills" data-bundle-roast>
+                  <button type="button" class="kb-bundle-pill" data-value="Light">Light</button>
+                  <button type="button" class="kb-bundle-pill active" data-value="Medium">Medium</button>
+                  <button type="button" class="kb-bundle-pill" data-value="Dark">Dark</button>
+                </div>
+              </div>
+              <div class="selector-block">
+                <span>GRIND</span>
+                <div class="kb-bundle-pills" data-bundle-grind>
+                  <button type="button" class="kb-bundle-pill active" data-value="Whole">Whole</button>
+                  <button type="button" class="kb-bundle-pill" data-value="Coarse">Coarse</button>
+                  <button type="button" class="kb-bundle-pill" data-value="Fine">Fine</button>
+                </div>
+              </div>
+              <button type="button" class="kb-bundle-add">ADD BUNDLE TO CART →</button>
+            ';
+            PRODUCT_GRID.appendChild(card);
+
+            card.querySelectorAll(".kb-bundle-pill").forEach(button => {
+              button.addEventListener("click", () => {
+                const group = button.closest(".kb-bundle-pills");
+                group?.querySelectorAll(".kb-bundle-pill").forEach(item => {
+                  item.classList.toggle("active", item === button);
+                });
+              });
+            });
+
+            card.querySelector(".kb-bundle-add")?.addEventListener("click", () => {
+              const products = getProducts();
+              const strong = products.find(item => String(item.id) === "KB250");
+              const classic = products.find(item => String(item.id) === "KB500");
+
+              if (!strong || !classic) {
+                updateBundleCard();
+                return;
+              }
+
+              if (Number(strong.stock || 0) < 1 || Number(classic.stock || 0) < 1) {
+                updateBundleCard();
+                return;
+              }
+
+              const roast = selectedBundle("[data-bundle-roast]") || "Medium";
+              const grind = selectedBundle("[data-bundle-grind]") || "Whole";
+              const bundleId = "BARAKO-STARTER-" + Date.now().toString(36).toUpperCase();
+              const cart = getCart();
+
+              cart.push({
+                id: "KB250",
+                name: strong.name || "Barako Strong",
+                size: strong.size || "250g",
+                price: Number(strong.price || 0),
+                roast,
+                grind,
+                qty: 1,
+                bundleId
+              });
+
+              cart.push({
+                id: "KB500",
+                name: classic.name || "Barako Classic",
+                size: classic.size || "500g",
+                price: Number(classic.price || 0),
+                roast,
+                grind,
+                qty: 1,
+                bundleId
+              });
+
+              localStorage.setItem(CART_KEY,JSON.stringify(cart));
+              updateHeaderCount();
+              updateStickyCart();
+
+              const openCart = document.getElementById("openCart");
+              openCart?.click();
+            });
+
+            updateBundleCard();
+          }
+
+          /* =========================
+             TRUST BADGES
+             ========================= */
+
+          function ensureTrustBadges() {
+            if (!PRODUCT_GRID || document.getElementById("kb-trust-badges")) return;
+
+            const trust = document.createElement("div");
+            trust.id = "kb-trust-badges";
+            trust.setAttribute("aria-label","Trust badges");
+
+            trust.innerHTML = '
+              <div class="kb-trust-grid">
+                <div class="kb-trust-item">
+                  <span class="kb-trust-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M3 10h18"></path><path d="M7 15h4"></path></svg>
+                  </span>
+                  <span class="kb-trust-text">GCash Verified</span>
+                </div>
+                <div class="kb-trust-item">
+                  <span class="kb-trust-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8"></path><path d="M8 11h8"></path><path d="M8 15h5"></path></svg>
+                  </span>
+                  <span class="kb-trust-text">COD Available</span>
+                </div>
+                <div class="kb-trust-item">
+                  <span class="kb-trust-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3c3 3 5 5.8 5 9a5 5 0 0 1-10 0c0-3.2 2-6 5-9Z"></path><path d="M9.5 13.5c.4 1.3 1.2 2 2.5 2"></path></svg>
+                  </span>
+                  <span class="kb-trust-text">Fresh Roast Daily</span>
+                </div>
+                <div class="kb-trust-item">
+                  <span class="kb-trust-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 21s7-5.2 7-11A7 7 0 0 0 5 10c0 5.8 7 11 7 11Z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
+                  </span>
+                  <span class="kb-trust-text">Lipa Batangas Origin</span>
+                </div>
+              </div>
+            ';
+
+            PRODUCT_GRID.insertAdjacentElement("afterend",trust);
+          }
+
+          /* =========================
+             STICKY CART
+             ========================= */
+
+          function updateStickyCart() {
+            const bar = document.getElementById("kb-mobile-sticky-cart");
+            if (!bar) return;
+
+            const cart = getCart();
+
+            if (!cart.length) {
+              bar.classList.remove("is-visible");
+              bar.setAttribute("aria-hidden","true");
+              return;
+            }
+
+            const item = cart[0];
+            const thumb = document.getElementById("kb-sticky-cart-thumb");
+            const name = document.getElementById("kb-sticky-cart-name");
+            const qty = document.getElementById("kb-sticky-cart-qty");
+            const price = document.getElementById("kb-sticky-cart-price");
+
+            const totalQty = cart.reduce(
+              (sum,line) => sum + Math.max(1,Number(line.qty || 1)),
+              0
+            );
+
+            const total = cart.reduce(
+              (sum,line) => sum + Number(line.price || 0) * Math.max(1,Number(line.qty || 1)),
+              0
+            );
+
+            const bundleIds = new Set(
+              cart.filter(line => line.bundleId).map(line => String(line.bundleId))
+            );
+
+            let discount = 0;
+            bundleIds.forEach(id => {
+              const complete = cart.some(line => String(line.bundleId || "") === id && String(line.id) === "KB250") &&
+                cart.some(line => String(line.bundleId || "") === id && String(line.id) === "KB500");
+              if (complete) discount += 100;
+            });
+
+            if (thumb) thumb.src = "images/gallery-03.svg";
+            if (name) name.textContent = item.name || "Barako Coffee";
+            if (qty) qty.textContent = "Qty " + totalQty;
+            if (price) price.textContent = money(total - discount);
+
+            bar.classList.add("is-visible");
+            bar.setAttribute("aria-hidden","false");
+          }
+
+          document.querySelector(".kb-sticky-cart-checkout")?.addEventListener("click",() => {
+            document.getElementById("openCart")?.click();
+            window.setTimeout(() => {
+              document.getElementById("checkoutButton")?.click();
+            },120);
+          });
+
+          document.addEventListener("click",event => {
+            if (event.target.closest("[data-add-to-cart],[data-plus],[data-minus],[data-remove]")) {
+              window.setTimeout(() => {
+                updateStickyCart();
+                updateBundleCard();
+              },120);
+            }
+          },true);
+
+          window.addEventListener("storage",event => {
+            if (event.key === CART_KEY || event.key === PRODUCTS_KEY) {
+              updateHeaderCount();
+              updateStickyCart();
+              updateBundleCard();
+            }
+          });
+
+          function startPremiumAddon(){
+            ensureBundleCard();
+            ensureTrustBadges();
+            updateHeaderCount();
+            updateStickyCart();
+            updateBundleCard();
+          }
+
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded",startPremiumAddon,{once:true});
+          } else {
+            startPremiumAddon();
+          }
+        })();
+      </script>
 
     <!-- ORIGIN STORY -->
     <section class="section-dark section-space origin-story-section" id="farm-story">
@@ -1983,6 +2356,6 @@ on>04 · HARVEST</figcaption></figure>
     </div>
   </aside>
 
-  <script src="script.js?v=kb-production-30"></script>
+  <script src="script.js?v=kb-production-31"></script>
 </body>
 </html>
