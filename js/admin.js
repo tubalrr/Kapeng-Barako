@@ -12,7 +12,7 @@
   const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
   const money=n=>"₱"+Number(n||0).toLocaleString("en-PH");
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  let products=read(PRODUCTS_KEY,null);if(!Array.isArray(products)||!products.length){products=DEFAULT_PRODUCTS.map(x=>({...x}));write(PRODUCTS_KEY,products)}
+  let products=read(PRODUCTS_KEY,[]);if(!Array.isArray(products))products=[];
   let orders=Array.isArray(read(ORDERS_KEY,[]))?read(ORDERS_KEY,[]):[];
   let promos=Array.isArray(read(PROMOS_KEY,[]))?read(PROMOS_KEY,[]):[];
 
@@ -203,7 +203,7 @@
     renderOverview();
   }
 
-  function seedProducts(){write(PRODUCTS_KEY,DEFAULT_PRODUCTS.map(x=>({...x})));toast("Collection reset to 3 products.");renderOverview();renderProducts()}
+
   function addPromo(e){
     e.preventDefault();
     const payload={id:"P-"+Date.now(),name:$("#promo-name").value.trim(),code:$("#promo-code").value.trim().toUpperCase(),type:$("#promo-type").value,value:Number($("#promo-value").value||0),minPacks:Number($("#promo-min").value||0),active:$("#promo-active").checked};
@@ -225,7 +225,7 @@
     $("#admin-user").textContent=read("kb_admin_session",{})?.email||"admin";
     $("#admin-menu")?.addEventListener("click",toggleMenu);$("#admin-close")?.addEventListener("click",closeMenu);$("#admin-overlay")?.addEventListener("click",closeMenu);$("#logout")?.addEventListener("click",()=>window.KBAdminAuth?.logout());
     $$(".admin-nav button").forEach(b=>b.addEventListener("click",()=>openView(b.dataset.view)));
-    $("#seed-products")?.addEventListener("click",seedProducts);$("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
+    $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
     renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();
     window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos()}});
   }
