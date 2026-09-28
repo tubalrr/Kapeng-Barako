@@ -30,6 +30,37 @@ function normalizeItems(items) {
   }));
 }
 
+// Passwordless admin identity bootstrap.
+// Only this explicitly approved admin email can be promoted after
+// Firebase has verified ownership through the email-link flow.
+const ADMIN_BOOTSTRAP_EMAILS = new Set([
+  "vracelle2@gmail.com"
+]);
+
+exports.bootstrapAdminFromEmail = onCall(async request => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Admin authentication required.");
+  }
+
+  const email = clean(request.auth.token.email, 200).toLowerCase();
+  if (!email || !ADMIN_BOOTSTRAP_EMAILS.has(email)) {
+    throw new HttpsError(
+      "permission-denied",
+      "This email is not authorized for the Kapeng Barako Admin Console."
+    );
+  }
+
+  const adminRef = db.collection("admins").doc(request.auth.uid);
+  await adminRef.set({
+    active: true,
+    role: "admin",
+    email,
+    updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  return { uid: request.auth.uid, email, role: "admin" };
+});
+
 exports.createOrder = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Please sign in before checkout.");
