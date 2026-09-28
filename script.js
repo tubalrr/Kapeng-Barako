@@ -314,7 +314,7 @@
 
   function renderGallery() {
     const items = getGallery();
-    const figures = $("#mainGalleryGrid [data-gallery-slot]");
+    const figures = Array.from(document.querySelectorAll("#mainGalleryGrid [data-gallery-slot]"));
     figures.forEach((figure, index) => {
       const item = items[index] || {};
       const image = $("img", figure);
