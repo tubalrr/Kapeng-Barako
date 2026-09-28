@@ -199,11 +199,11 @@
       businessName: "", email: "", phone: "", location: "", facebook: "", messenger: "", hours: "",
       ...(read("kb_settings", {}) || {})
     };
-    $("[data-kb-business-name]").forEach(el => el.textContent = settings.businessName || "Kapeng Barako");
-    $("[data-kb-email]").forEach(el => el.textContent = settings.email || "Contact email not configured");
-    $("[data-kb-phone]").forEach(el => el.textContent = settings.phone || "Phone not configured");
-    $("[data-kb-location]").forEach(el => el.textContent = settings.location || "Location not configured");
-    $("[data-kb-hours]").forEach(el => { el.textContent = settings.hours || ""; el.hidden = !settings.hours; });
+    $$("[data-kb-business-name]").forEach(el => el.textContent = settings.businessName || "Kapeng Barako");
+    $$("[data-kb-email]").forEach(el => el.textContent = settings.email || "Contact email not configured");
+    $$("[data-kb-phone]").forEach(el => el.textContent = settings.phone || "Phone not configured");
+    $$("[data-kb-location]").forEach(el => el.textContent = settings.location || "Location not configured");
+    $$("[data-kb-hours]").forEach(el => { el.textContent = settings.hours || ""; el.hidden = !settings.hours; });
 
     const emailLink = $("[data-kb-email-link]");
     if (emailLink) emailLink.href = settings.email ? "mailto:" + settings.email : "pages/contact.html";
