@@ -1737,6 +1737,7 @@
             if (!cart.length) {
               bar.classList.remove("is-visible");
               bar.setAttribute("aria-hidden","true");
+              document.body.classList.remove("kb-has-sticky-cart");
               return;
             }
 
@@ -1774,6 +1775,7 @@
 
             bar.classList.add("is-visible");
             bar.setAttribute("aria-hidden","false");
+            document.body.classList.add("kb-has-sticky-cart");
           }
 
           document.querySelector(".kb-sticky-cart-checkout")?.addEventListener("click",() => {
@@ -2356,6 +2358,6 @@ on>04 · HARVEST</figcaption></figure>
     </div>
   </aside>
 
-  <script src="script.js?v=kb-production-31"></script>
+  <script src="script.js?v=kb-production-32"></script>
 </body>
 </html>
