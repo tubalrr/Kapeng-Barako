@@ -237,10 +237,20 @@
   function renderPaymentHelp(){
     const method=$("#checkout-payment")?.value||"";
     const help=$("#payment-instructions"), ref=$("#payment-reference-wrap"), proof=$("#payment-proof-wrap"), proofInput=$("#payment-proof");
+    const qrWrap=$("#gcash-qr-wrap"), qr=$("#gcash-qr");
     if(!help)return;
+    if(qrWrap)qrWrap.hidden=true;
+    if(qr)qr.removeAttribute("src");
+
     if(method==="GCash"){
       help.innerHTML="<strong>GCash:</strong> "+esc(settings.gcashInstructions||"Add the store’s GCash payment instructions in Admin → Store Settings.");
       ref.hidden=false;proof.hidden=false;
+
+      const qrSource=String(settings.gcashQr||settings.gcashQR||"").trim();
+      if(qrWrap&&qr&&qrSource){
+        qr.src=qrSource;
+        qrWrap.hidden=false;
+      }
     }else if(method==="Bank Transfer"){
       help.innerHTML="<strong>Bank Transfer:</strong> "+esc(settings.bankTransferInstructions||"Add the store’s bank details in Admin → Store Settings.");
       ref.hidden=false;proof.hidden=false;
