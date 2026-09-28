@@ -163,3 +163,29 @@ a{text-decoration:none;color:inherit}
   .demo-remove-card{align-items:flex-start;flex-direction:column}
   .demo-remove-card .small-btn{width:100%}
 }
+
+
+/* NAME READABILITY — KEEP CUSTOMER NAMES CLEAR AT ALL SIZES */
+.account-profile-chip{flex-shrink:0;max-width:min(260px,42vw)}
+.account-profile-chip>span:last-child{min-width:72px}
+.account-profile-chip strong{font-size:12px;font-weight:900;line-height:1.2;letter-spacing:0;white-space:normal;overflow:visible;text-overflow:clip}
+.account-profile-chip small{font-size:9px;line-height:1.2;white-space:nowrap}
+.profile-summary-copy>strong{font-size:clamp(19px,2.4vw,24px);font-weight:900;line-height:1.12;letter-spacing:-.01em;white-space:normal;overflow:visible}
+.profile-meta strong{font-size:13px;font-weight:900;line-height:1.25;white-space:normal;overflow:visible;text-overflow:clip}
+.address-card h3{font-size:15px;font-weight:900;line-height:1.25;white-space:normal;overflow:visible;text-overflow:clip}
+.order-id{font-size:14px;font-weight:900;line-height:1.25;white-space:normal;overflow:visible}
+.order-item span{font-size:13px;line-height:1.35;white-space:normal;overflow:visible}
+.demo-box strong,.demo-remove-card strong{font-size:13px;font-weight:900;line-height:1.25}
+.demo-box span,.demo-box small,.demo-remove-card span{font-size:10px;line-height:1.45}
+@media(max-width:620px){
+  .account-profile-chip{max-width:190px;padding-right:9px}
+  .account-profile-chip>span:last-child{display:grid;min-width:78px}
+  .account-profile-chip strong{font-size:11px;line-height:1.15;max-width:112px}
+  .account-profile-chip small{font-size:8px}
+  .profile-summary-copy>strong{font-size:20px}
+}
+@media(max-width:430px){
+  .account-profile-chip{max-width:150px}
+  .account-profile-chip strong{font-size:10.5px;max-width:92px}
+  .account-profile-chip small{display:none}
+}
