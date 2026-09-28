@@ -68,23 +68,49 @@ function renderCart(){
 }
 
 function renderProducts(){
-  getProducts().forEach(p=>{
-    const card=document.querySelector('[data-product-id="'+CSS.escape(String(p.id))+'"]');
-    if(!card) return;
-    const stock=Math.max(0,Number(p.stock||0));
-    const badge=card.querySelector("[data-stock-badge]");
-    const button=card.querySelector("[data-add-to-cart]");
-    if(badge){
-      badge.textContent=stock ? (stock<=5 ? "⚡ Humigit-kumulang "+stock+" packs left" : "⚡ "+stock+" packs left") : "SOLD OUT";
-      badge.classList.toggle("urgent",stock>0 && stock<=5);
-    }
-    if(button){
-      button.disabled=stock<=0;
-      button.textContent=stock<=0 ? "SOLD OUT" : "ADD TO CART →";
-    }
-  });
-}
+  const products=getProducts();
+  const grid=$("#productGrid");
+  if(grid){
+    products.forEach(p=>{
+      let card=grid.querySelector('[data-product-id="'+CSS.escape(String(p.id))+'"]');
+      if(!card){
+        card=document.createElement("article");
+        card.className="product-card";
+        card.dataset.productId=p.id;
+        card.innerHTML=
+          '<div class="product-image product-image-generic">'+
+            '<span class="stock-badge" data-stock-badge="'+esc(p.id)+'"></span>'+
+            '<span class="image-size">'+esc(p.size||"")+'</span>'+
+            '<div class="bean-cluster bean-cluster-large"><i></i><i></i><i></i><i></i></div>'+
+          '</div>'+
+          '<div class="product-content">'+
+            '<div class="product-title-line">'+
+              '<div><span class="product-badge">'+esc(p.badge||"NEW")+'</span><h3>'+esc(p.name)+'</h3><p>'+esc(p.note||"Fresh Kapeng Barako.")+'</p></div>'+
+              '<strong class="product-price" data-price="'+esc(p.id)+'"></strong>'+
+            '</div>'+
+            '<div class="selector-block"><span>ROAST</span><div class="pills" data-roast-group="'+esc(p.id)+'"><button type="button" class="pill '+(p.roast==="Light"?"active":"")+'">Light</button><button type="button" class="pill '+(p.roast==="Medium"?"active":"")+'">Medium</button><button type="button" class="pill '+(p.roast==="Dark"?"active":"")+'">Dark</button></div></div>'+
+            '<div class="selector-block"><span>GRIND</span><div class="pills" data-grind-group="'+esc(p.id)+'"><button type="button" class="pill '+(p.grind==="Whole"?"active":"")+'">Whole</button><button type="button" class="pill '+(p.grind==="Coarse"?"active":"")+'">Coarse</button><button type="button" class="pill '+(p.grind==="Fine"?"active":"")+'">Fine</button></div></div>'+
+            '<button class="button button-gold add-to-cart" type="button" data-add-to-cart="'+esc(p.id)+'">ADD TO CART →</button>'+
+          '</div>';
+        grid.appendChild(card);
+      }
 
+      const stock=Math.max(0,Number(p.stock||0));
+      const badge=card.querySelector("[data-stock-badge]");
+      const button=card.querySelector("[data-add-to-cart]");
+      const price=card.querySelector("[data-price]");
+      if(price) price.textContent=money(p.price);
+      if(badge){
+        badge.textContent=stock ? (stock<=5 ? "⚡ Only "+stock+" packs left" : "⚡ "+stock+" packs left") : "SOLD OUT";
+        badge.classList.toggle("urgent",stock>0 && stock<=5);
+      }
+      if(button){
+        button.disabled=stock<=0;
+        button.textContent=stock<=0 ? "SOLD OUT" : "ADD TO CART →";
+      }
+    });
+  }
+}
 function selected(card,attr,fallback){
   const active=card?.querySelector("["+attr+"] .pill.active");
   return active ? active.textContent.trim() : fallback;
