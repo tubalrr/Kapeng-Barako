@@ -283,7 +283,7 @@
   function openView(view){
     $$(".admin-nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
     $$("[data-view-panel]").forEach(p=>{p.hidden=p.dataset.viewPanel!==view;p.classList.toggle("active",p.dataset.viewPanel===view)});
-    $("#view-title").textContent={overview:"Overview",orders:"Orders",inventory:"Inventory",products:"Products",customers:"Customers",promos:"Promos",content:"Content"}[view]||"Overview";
+    $("#view-title").textContent={overview:"Overview",orders:"Orders",inventory:"Inventory",products:"Products",customers:"Customers",promos:"Promos",content:"Content",gallery:"Gallery"}[view]||"Overview";
     closeMenu();
     if(view==="overview")renderOverview();if(view==="orders")renderOrders();if(view==="inventory")renderInventorySummary();if(view==="products")renderProducts();if(view==="customers")renderCustomers();if(view==="promos")renderPromos();if(view==="content")renderContent();if(view==="gallery")renderGallery();
   }
