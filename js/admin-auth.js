@@ -1,95 +1,115 @@
 (() => {
   "use strict";
 
-  const SESSION_KEY = "kb_admin_session";
-  const USER_KEY = "kb_admin_user";
-  const SESSION_MS = 8 * 60 * 60 * 1000;
-  const SEED_EMAIL = "admin@kapengbarako.com";
-  const SEED_PASSWORD = "barako123";
+  const SESSION_KEY = "kb_admin_firebase";
+  let firebase = null;
+  let auth = null;
+  let db = null;
+  let initPromise = null;
 
-  const safeParse = (value, fallback = null) => {
-    try { return JSON.parse(value); } catch { return fallback; }
-  };
+  async function init() {
+    if (initPromise) return initPromise;
+    initPromise = (async () => {
+      const configModule = await import("./firebase-config.js");
+      if (!configModule.isFirebaseConfigured) {
+        const error = new Error("Firebase is not configured. Add the Firebase Web App config in js/firebase-config.js.");
+        error.code = "FIREBASE_NOT_CONFIGURED";
+        throw error;
+      }
 
-  async function sha256(text) {
-    if (!window.crypto?.subtle) return btoa(unescape(encodeURIComponent(text)));
-    const data = new TextEncoder().encode(text);
-    const hash = await crypto.subtle.digest("SHA-256", data);
-    return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
+      const [appMod, authMod, firestoreMod] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js"),
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js")
+      ]);
+
+      firebase = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(configModule.firebaseConfig);
+      auth = authMod.getAuth(firebase);
+      db = firestoreMod.getFirestore(firebase);
+      return { firebase, auth, db, authMod, firestoreMod };
+    })();
+    return initPromise;
   }
 
-  async function seedUser() {
-    const existing = safeParse(localStorage.getItem(USER_KEY));
-    if (existing?.email && existing?.passwordHash && existing.role === "admin") return existing;
-    const user = {
-      email: SEED_EMAIL,
-      passwordHash: await sha256(SEED_PASSWORD),
-      role: "admin",
-      active: true,
-      seededAt: new Date().toISOString()
-    };
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-    return user;
+  async function currentUser() {
+    const { auth: currentAuth, authMod } = await init();
+    if (currentAuth.currentUser) return currentAuth.currentUser;
+    return new Promise(resolve => {
+      let settled = false;
+      const unsubscribe = authMod.onAuthStateChanged(currentAuth, user => {
+        if (settled) return;
+        settled = true;
+        unsubscribe();
+        resolve(user || null);
+      });
+    });
   }
 
-  function getSession() {
-    const session = safeParse(localStorage.getItem(SESSION_KEY));
-    if (!session?.token || !session.expiresAt || Date.now() >= Number(session.expiresAt)) {
-      localStorage.removeItem(SESSION_KEY);
+  async function verifyAdmin(user) {
+    if (!user) return null;
+    const { db: currentDb, firestoreMod } = await init();
+    const snap = await firestoreMod.getDoc(firestoreMod.doc(currentDb, "admins", user.uid));
+    if (!snap.exists() || snap.data()?.active !== true) return null;
+    return { uid: user.uid, email: user.email || "", ...snap.data() };
+  }
+
+  function rememberAdmin(admin) {
+    if (!admin) localStorage.removeItem(SESSION_KEY);
+    else localStorage.setItem(SESSION_KEY, JSON.stringify({
+      uid: admin.uid,
+      email: admin.email || "",
+      verifiedAt: new Date().toISOString()
+    }));
+  }
+
+  async function authenticate(email, password) {
+    const { auth: currentAuth, authMod } = await init();
+    const normalized = String(email || "").trim().toLowerCase();
+    if (!normalized || !password) throw new Error("Enter your admin email and password.");
+
+    try {
+      const credential = await authMod.signInWithEmailAndPassword(currentAuth, normalized, String(password));
+      const admin = await verifyAdmin(credential.user);
+      if (!admin) {
+        await authMod.signOut(currentAuth);
+        throw new Error("This account is not authorized for the Kapeng Barako Admin Console.");
+      }
+      rememberAdmin(admin);
+      return admin;
+    } catch (error) {
+      rememberAdmin(null);
+      if (["auth/invalid-credential","auth/invalid-login-credentials","auth/user-not-found","auth/wrong-password"].includes(error?.code)) {
+        throw new Error("Invalid admin email or password.");
+      }
+      throw error;
+    }
+  }
+
+  async function restore() {
+    const user = await currentUser();
+    const admin = await verifyAdmin(user);
+    if (!admin) {
+      rememberAdmin(null);
       return null;
     }
-    return session;
+    rememberAdmin(admin);
+    return admin;
   }
 
-  function isAdmin() {
-    const session = getSession();
-    return Boolean(session?.role === "admin" && session?.email);
-  }
-
-  function clearSession() {
-    localStorage.removeItem(SESSION_KEY);
-  }
-
-  function loginUrl() {
-    return location.pathname.includes("/pages/admin/") ? "./login.html" : "pages/admin/login.html";
-  }
-
-  // Protect the dashboard before admin.js initializes.
-  if (location.pathname.endsWith("/pages/admin/index.html")) {
-    if (!isAdmin()) location.replace("./login.html");
-  }
-
-  window.KBAdminAuth = {
-    SESSION_KEY, USER_KEY,
-    seedUser, getSession, isAdmin, clearSession,
-    async authenticate(email, password) {
-      const user = await seedUser();
-      const normalized = String(email || "").trim().toLowerCase();
-      if (!user.active || normalized !== user.email.toLowerCase()) return false;
-      const passwordHash = await sha256(String(password || ""));
-      return passwordHash === user.passwordHash;
-    },
-    startSession(email) {
-      const session = {
-        token: (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now()).replace(/-/g, ""),
-        email: String(email).trim().toLowerCase(),
-        role: "admin",
-        issuedAt: Date.now(),
-        expiresAt: Date.now() + SESSION_MS
-      };
-      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-      return session;
-    },
-    logout() {
-      clearSession();
-      if (!location.pathname.endsWith("/pages/admin/login.html")) location.replace(loginUrl());
-    },
-    guard() {
-      if (location.pathname.endsWith("/pages/admin/index.html") && !isAdmin()) {
-        location.replace("./login.html");
-        return false;
-      }
-      return true;
+  async function requireAdmin() {
+    try {
+      return await restore();
+    } catch (error) {
+      rememberAdmin(null);
+      throw error;
     }
-  };
+  }
+
+  async function logout() {
+    const { auth: currentAuth, authMod } = await init();
+    await authMod.signOut(currentAuth);
+    rememberAdmin(null);
+  }
+
+  window.KBAdminAuth = { SESSION_KEY, init, authenticate, restore, requireAdmin, logout, verifyAdmin };
 })();
