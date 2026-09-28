@@ -1016,3 +1016,19 @@ body > footer{
   .sidebar-toggle{left:8px!important;top:8px!important;width:39px!important;height:39px!important}
   .sidebar-toggle span{width:17px}
 }
+
+/* FORCE VISIBLE SIDEBAR HAMBURGER */
+body > .site-header > .sidebar-toggle{
+  position:fixed!important;
+  display:flex!important;
+  left:14px!important;
+  top:14px!important;
+  z-index:99999!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+body > .site-header > .sidebar-toggle span{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
