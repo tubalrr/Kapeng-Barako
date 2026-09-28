@@ -22,7 +22,7 @@
       <button data-view="products"><span>04</span>Products</button>
       <button data-view="customers"><span>05</span>Customers</button>
       <button data-view="promos"><span>06</span>Promos</button>
-      <button data-view="content"><span>07</span>Content</button>
+      <button data-view="content"><span>07</span>Content</button><button data-view="gallery"><span>08</span>Gallery</button>
     </nav>
     <div class="admin-sidebar-foot"><a href="../../index.html">← Storefront</a><button id="logout" type="button">Logout</button></div>
   </aside>
@@ -73,6 +73,11 @@
     <section class="admin-view" id="view-promos" data-view-panel="promos" hidden>
       <div class="view-head"><div><span class="eyebrow">PRICING</span><h2>Promo codes</h2><p>Create codes such as BARAKO10 for the storefront checkout.</p></div><button id="add-promo" class="admin-button gold" type="button">+ Add promo</button></div>
       <div class="panel table-panel"><div id="promos-table"></div></div>
+    </section>
+
+    <section class="admin-view" id="view-gallery" data-view-panel="gallery" hidden>
+      <div class="view-head"><div><span class="eyebrow">VISUAL CATALOG</span><h2>Gallery Manager</h2><p>Replace the six main-site gallery photos with your real product, farm, roast, or coffee photos.</p></div></div>
+      <div class="panel table-panel"><div id="gallery-table"></div></div>
     </section>
 
     <section class="admin-view" id="view-content" data-view-panel="content" hidden>
