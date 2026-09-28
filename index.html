@@ -190,97 +190,440 @@
     </section>
 
     <!-- COLLECTION -->
-    <section class="section-dark section-space" id="products">
-      <div class="container">
-        <div class="section-heading-row">
-          <div>
-            <span class="eyebrow">COLLECTION</span>
-            <h2>Choose your<br><em>daily Barako.</em></h2>
-          </div>
-          <span class="section-number">03</span>
-        </div>
+    <section id="products" class="kb-collection-section">
+      <style>
+        #products.kb-collection-section {
+          background: #1A1207;
+          color: #F5E9D3;
+          padding: 80px 24px;
+          box-sizing: border-box;
+          overflow: hidden;
+        }
 
-        <div class="collection-grid" id="productGrid">
-          <article class="product-card" data-product-id="KB250">
-            <div class="product-image product-image-250">
-              <span class="stock-badge" data-stock-badge="KB250">⚡ 7 packs left</span>
+        #products.kb-collection-section > .kb-collection-inner {
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        #products.kb-collection-section .kb-eyebrow {
+          margin: 0;
+          color: #C8A951;
+          letter-spacing: 3px;
+          font-size: 12px;
+          line-height: 1.2;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        #products.kb-collection-section .kb-collection-title {
+          margin: 12px 0;
+          max-width: 980px;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 56px;
+          font-weight: 500;
+          line-height: 0.9;
+          letter-spacing: -1.5px;
+          color: #F5E9D3;
+        }
+
+        #products.kb-collection-section .kb-collection-subtitle {
+          margin: 0;
+          color: #B8A998;
+          font-size: 15px;
+          line-height: 1.6;
+        }
+
+        #products.kb-collection-section #productGrid.kb-collection-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 24px;
+          margin-top: 48px;
+        }
+
+        #products.kb-collection-section .product-card.kb-product-card {
+          min-width: 0;
+          overflow: hidden;
+          background: #221A0E;
+          border: 1px solid #2A2116;
+          border-radius: 20px;
+          padding: 24px;
+          box-sizing: border-box;
+          transition:
+            transform 0.35s cubic-bezier(.22, 1, .36, 1),
+            border-color 0.35s cubic-bezier(.22, 1, .36, 1),
+            box-shadow 0.35s cubic-bezier(.22, 1, .36, 1);
+        }
+
+        #products.kb-collection-section .product-card.kb-product-card:hover {
+          transform: translateY(-8px);
+          border-color: #C8A951;
+          box-shadow: 0 18px 42px rgba(0, 0, 0, 0.26);
+        }
+
+        #products.kb-collection-section .kb-product-image {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 1 / 1;
+          margin: 0 0 22px;
+          border-radius: 12px;
+          background: #2A2116;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        #products.kb-collection-section .kb-image-placeholder {
+          color: #8F806D;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 22px;
+          line-height: 1.1;
+          letter-spacing: 2px;
+          text-align: center;
+          opacity: 0.88;
+        }
+
+        #products.kb-collection-section .stock-badge {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          z-index: 2;
+          padding: 7px 10px;
+          border: 1px solid rgba(200, 169, 81, 0.55);
+          border-radius: 999px;
+          background: rgba(26, 18, 7, 0.82);
+          color: #F5E9D3;
+          font-size: 11px;
+          line-height: 1;
+          letter-spacing: 0.2px;
+          backdrop-filter: none;
+        }
+
+        #products.kb-collection-section .stock-badge.urgent {
+          color: #F5E9D3;
+          border-color: #C8A951;
+        }
+
+        #products.kb-collection-section .image-size {
+          position: absolute;
+          left: 50%;
+          bottom: 22px;
+          transform: translateX(-50%);
+          color: #C8A951;
+          font-size: 12px;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          font-weight: 700;
+        }
+
+        #products.kb-collection-section .product-content {
+          display: block;
+        }
+
+        #products.kb-collection-section .product-title-line {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 14px;
+          margin-bottom: 22px;
+        }
+
+        #products.kb-collection-section .product-title-line > div {
+          min-width: 0;
+        }
+
+        #products.kb-collection-section .product-badge {
+          display: inline-flex;
+          align-items: center;
+          margin-bottom: 8px;
+          padding: 5px 9px;
+          border: 1px solid #C8A951;
+          border-radius: 999px;
+          color: #C8A951;
+          background: transparent;
+          font-size: 10px;
+          line-height: 1;
+          font-weight: 700;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+        }
+
+        #products.kb-collection-section .product-title-line h3 {
+          margin: 0;
+          color: #F5E9D3;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 20px;
+          line-height: 1.15;
+          font-weight: 600;
+        }
+
+        #products.kb-collection-section .product-title-line p {
+          margin: 8px 0 0;
+          color: #B8A998;
+          font-size: 12px;
+          line-height: 1.45;
+        }
+
+        #products.kb-collection-section .product-price {
+          flex: 0 0 auto;
+          color: #C8A951;
+          font-size: 22px;
+          line-height: 1;
+          font-weight: 800;
+          white-space: nowrap;
+          padding-top: 2px;
+        }
+
+        #products.kb-collection-section .selector-block {
+          margin-top: 16px;
+        }
+
+        #products.kb-collection-section .selector-block > span {
+          display: block;
+          margin-bottom: 9px;
+          color: #B8A998;
+          font-size: 11px;
+          line-height: 1;
+          font-weight: 700;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+        }
+
+        #products.kb-collection-section .pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        #products.kb-collection-section .pills .pill {
+          appearance: none;
+          border: 1px solid #2A2116;
+          background: transparent;
+          color: #B8A998;
+          border-radius: 999px;
+          padding: 9px 13px;
+          min-height: 34px;
+          font: inherit;
+          font-size: 12px;
+          line-height: 1;
+          cursor: pointer;
+          transition:
+            color 0.2s ease,
+            border-color 0.2s ease,
+            background 0.2s ease,
+            transform 0.2s ease;
+        }
+
+        #products.kb-collection-section .pills .pill:hover {
+          color: #F5E9D3;
+          border-color: #C8A951;
+        }
+
+        #products.kb-collection-section .pills .pill.active {
+          color: #1A1207;
+          background: #C8A951;
+          border-color: #C8A951;
+          font-weight: 800;
+        }
+
+        #products.kb-collection-section .button.add-to-cart {
+          width: 100%;
+          margin-top: 22px;
+          min-height: 48px;
+          border: 0;
+          border-radius: 999px;
+          background: #C8A951;
+          color: #1A1207;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          cursor: pointer;
+          transition:
+            transform 0.35s cubic-bezier(.22, 1, .36, 1),
+            filter 0.25s ease,
+            opacity 0.25s ease;
+        }
+
+        #products.kb-collection-section .button.add-to-cart:hover {
+          transform: scale(1.02);
+          filter: brightness(1.05);
+        }
+
+        #products.kb-collection-section .button.add-to-cart:active {
+          transform: scale(0.99);
+        }
+
+        #products.kb-collection-section .button.add-to-cart:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+          transform: none;
+          filter: none;
+        }
+
+        @media (max-width: 980px) {
+          #products.kb-collection-section #productGrid.kb-collection-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 600px) {
+          #products.kb-collection-section {
+            padding: 60px 16px;
+          }
+
+          #products.kb-collection-section .kb-collection-title {
+            font-size: 42px;
+            letter-spacing: -1px;
+          }
+
+          #products.kb-collection-section .product-card.kb-product-card {
+            padding: 18px;
+          }
+
+          #products.kb-collection-section .product-title-line {
+            gap: 10px;
+          }
+        }
+      </style>
+
+      <div class="kb-collection-inner">
+        <p class="kb-eyebrow">THE COLLECTION</p>
+
+        <h2 class="kb-collection-title">Barako, in its pure form.</h2>
+
+        <p class="kb-collection-subtitle">
+          Choose your roast format, grind, and make it yours.
+        </p>
+
+        <div id="productGrid" class="kb-collection-grid">
+
+          <!-- BARAKO STRONG -->
+          <article class="product-card kb-product-card" data-product-id="KB250">
+            <div class="product-image kb-product-image product-image-250">
+              <span class="stock-badge" data-stock-badge="KB250">7 packs left</span>
               <span class="image-size">250g</span>
-              <div class="bean-cluster"><i></i><i></i><i></i><i></i></div>
+              <span class="kb-image-placeholder" aria-hidden="true">BARAKO<br>STRONG</span>
             </div>
+
             <div class="product-content">
               <div class="product-title-line">
-                <div><span class="product-badge">BEST SELLER</span><h3>Barako 250g</h3><p>Bold, aromatic, unmistakably Barako.</p></div>
+                <div>
+                  <span class="product-badge">DARK ROAST</span>
+                  <h3>Barako Strong</h3>
+                  <p>Dark Roast • 250g</p>
+                </div>
                 <strong class="product-price" data-price="KB250">₱350</strong>
               </div>
+
               <div class="selector-block">
                 <span>ROAST</span>
                 <div class="pills" data-roast-group="KB250">
-                  <button type="button" class="pill">Light</button><button type="button" class="pill">Medium</button><button type="button" class="pill active">Dark</button>
+                  <button type="button" class="pill">Light</button>
+                  <button type="button" class="pill">Medium</button>
+                  <button type="button" class="pill active">Dark</button>
                 </div>
               </div>
+
               <div class="selector-block">
                 <span>GRIND</span>
                 <div class="pills" data-grind-group="KB250">
-                  <button type="button" class="pill active">Whole</button><button type="button" class="pill">Coarse</button><button type="button" class="pill">Fine</button>
+                  <button type="button" class="pill active">Whole</button>
+                  <button type="button" class="pill">Coarse</button>
+                  <button type="button" class="pill">Fine</button>
                 </div>
               </div>
-              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB250">ADD TO CART →</button>
+
+              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB250">
+                ADD TO CART →
+              </button>
             </div>
           </article>
 
-          <article class="product-card" data-product-id="KB500">
-            <div class="product-image product-image-500">
-              <span class="stock-badge" data-stock-badge="KB500">⚡ 7 packs left</span>
+          <!-- BARAKO CLASSIC -->
+          <article class="product-card kb-product-card" data-product-id="KB500">
+            <div class="product-image kb-product-image product-image-500">
+              <span class="stock-badge" data-stock-badge="KB500">12 packs left</span>
               <span class="image-size">500g</span>
-              <div class="bean-cluster bean-cluster-large"><i></i><i></i><i></i><i></i></div>
+              <span class="kb-image-placeholder" aria-hidden="true">BARAKO<br>CLASSIC</span>
             </div>
+
             <div class="product-content">
               <div class="product-title-line">
-                <div><span class="product-badge">FRESH ROAST</span><h3>Barako 500g</h3><p>More coffee for the serious daily cup.</p></div>
+                <div>
+                  <span class="product-badge">MEDIUM ROAST</span>
+                  <h3>Barako Classic</h3>
+                  <p>Medium Roast • 500g</p>
+                </div>
                 <strong class="product-price" data-price="KB500">₱620</strong>
               </div>
+
               <div class="selector-block">
                 <span>ROAST</span>
                 <div class="pills" data-roast-group="KB500">
-                  <button type="button" class="pill">Light</button><button type="button" class="pill active">Medium</button><button type="button" class="pill">Dark</button>
+                  <button type="button" class="pill">Light</button>
+                  <button type="button" class="pill active">Medium</button>
+                  <button type="button" class="pill">Dark</button>
                 </div>
               </div>
+
               <div class="selector-block">
                 <span>GRIND</span>
                 <div class="pills" data-grind-group="KB500">
-                  <button type="button" class="pill active">Whole</button><button type="button" class="pill">Coarse</button><button type="button" class="pill">Fine</button>
+                  <button type="button" class="pill active">Whole</button>
+                  <button type="button" class="pill">Coarse</button>
+                  <button type="button" class="pill">Fine</button>
                 </div>
               </div>
-              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB500">ADD TO CART →</button>
+
+              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB500">
+                ADD TO CART →
+              </button>
             </div>
           </article>
 
-          <article class="product-card" data-product-id="KB1K">
-            <div class="product-image product-image-1k">
-              <span class="stock-badge" data-stock-badge="KB1K">⚡ 7 packs left</span>
+          <!-- BARAKO RESERVE -->
+          <article class="product-card kb-product-card" data-product-id="KB1K">
+            <div class="product-image kb-product-image product-image-1k">
+              <span class="stock-badge" data-stock-badge="KB1K">3 packs left</span>
               <span class="image-size">1kg</span>
-              <div class="bean-cluster bean-cluster-xl"><i></i><i></i><i></i><i></i></div>
+              <span class="kb-image-placeholder" aria-hidden="true">BARAKO<br>RESERVE</span>
             </div>
+
             <div class="product-content">
               <div class="product-title-line">
-                <div><span class="product-badge">VALUE</span><h3>Barako 1kg</h3><p>The full ritual, ready for the week.</p></div>
+                <div>
+                  <span class="product-badge">SIGNATURE</span>
+                  <h3>Barako Reserve</h3>
+                  <p>Signature • 1kg</p>
+                </div>
                 <strong class="product-price" data-price="KB1K">₱1,150</strong>
               </div>
+
               <div class="selector-block">
                 <span>ROAST</span>
                 <div class="pills" data-roast-group="KB1K">
-                  <button type="button" class="pill">Light</button><button type="button" class="pill">Medium</button><button type="button" class="pill active">Dark</button>
+                  <button type="button" class="pill">Light</button>
+                  <button type="button" class="pill">Medium</button>
+                  <button type="button" class="pill active">Dark</button>
                 </div>
               </div>
+
               <div class="selector-block">
                 <span>GRIND</span>
                 <div class="pills" data-grind-group="KB1K">
-                  <button type="button" class="pill active">Whole</button><button type="button" class="pill">Coarse</button><button type="button" class="pill">Fine</button>
+                  <button type="button" class="pill active">Whole</button>
+                  <button type="button" class="pill">Coarse</button>
+                  <button type="button" class="pill">Fine</button>
                 </div>
               </div>
-              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB1K">ADD TO CART →</button>
+
+              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB1K">
+                ADD TO CART →
+              </button>
             </div>
           </article>
+
         </div>
       </div>
     </section>
