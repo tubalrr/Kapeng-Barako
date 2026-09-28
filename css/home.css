@@ -1624,3 +1624,88 @@ body.sidebar-open .site-header > .sidebar-toggle span{
 .site-header > .sidebar-toggle{
   z-index:2147483000!important;
 }
+
+
+/* =========================================================
+   TUBAL HUB MATCH — external hamburger drawer trigger
+   The trigger is OUTSIDE the sidebar, so it never disappears
+   when the pointer enters the sidebar.
+   ========================================================= */
+body > .sidebar-toggle{
+  position:fixed!important;
+  left:16px!important;
+  top:16px!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:48px!important;
+  height:48px!important;
+  min-width:48px!important;
+  min-height:48px!important;
+  padding:0!important;
+  margin:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  z-index:2147483000!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  border:1px solid rgba(200,169,81,.28)!important;
+  border-radius:14px!important;
+  background:rgba(26,18,7,.92)!important;
+  color:var(--gold-2)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.28)!important;
+  transform:none!important;
+}
+
+body > .sidebar-toggle span{
+  display:block!important;
+  width:21px!important;
+  height:2px!important;
+  min-width:21px!important;
+  min-height:2px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:999px!important;
+  background:currentColor!important;
+  opacity:1!important;
+  transform:none!important;
+}
+
+body > .sidebar-toggle:hover{
+  transform:translateY(-1px)!important;
+  border-color:rgba(200,169,81,.55)!important;
+  background:rgba(45,28,13,.96)!important;
+}
+
+/* Open state: keep the same 3-dash icon, exactly like requested. */
+body > .sidebar-toggle[aria-expanded="true"] span,
+body > .sidebar-toggle[aria-expanded="false"] span{
+  transform:none!important;
+  opacity:1!important;
+}
+
+/* The sidebar itself is the drawer; the hamburger remains independent. */
+body > .site-header{
+  transform:translateX(-105%)!important;
+  transition:transform .30s cubic-bezier(.16,1,.3,1)!important;
+}
+body.sidebar-open > .site-header{
+  transform:translateX(0)!important;
+}
+
+body > main,
+body > footer{
+  margin-left:0!important;
+}
+body.sidebar-open > main,
+body.sidebar-open > footer{
+  margin-left:var(--sidebar-width)!important;
+}
+
+/* Prevent old hover rules from changing drawer state. */
+body > .site-header:hover{
+  width:var(--sidebar-width)!important;
+}
