@@ -244,3 +244,60 @@ img{display:block;max-width:100%}
 .account-button:hover{background:#24190D;border-color:var(--gold);color:var(--gold2);transform:translateY(-1px)}
 @media(max-width:720px){.account-button{padding:0 11px}.nav-actions{gap:6px}}
 @media(max-width:520px){.account-button{font-size:7px;padding:0 10px}}
+
+
+/* GLOBAL READABILITY — KEEP ALL STOREFRONT TEXT CLEAR */
+body{font-size:16px}
+.top-strip{font-size:11px;line-height:1.2}
+.brand small{font-size:10px}
+.desktop-nav{font-size:11px}
+.cart-button,.account-button{font-size:10px}
+.eyebrow{font-size:10px}
+.button{font-size:11px;line-height:1.2}
+.hero-meta-grid span{font-size:9px}
+.hero-meta-grid strong{font-size:11px;line-height:1.35}
+.section-number{font-size:10px}
+.lead{font-size:18px}
+.muted{font-size:13px}
+.story-tags span{font-size:10px}
+.reason-number{font-size:10px}
+.reason-card p{font-size:13px;line-height:1.7}
+.image-size,.stock-badge{font-size:10px}
+.product-badge,.mini-label{font-size:10px}
+.product-title-line p{font-size:12px;line-height:1.55}
+.selector-block>span{font-size:10px}
+.pill{font-size:10px}
+.shipping-callout strong,.shipping-callout span{font-size:11px}
+.tag-list span{font-size:10px}
+.info-note{font-size:11px}
+.feature-card p{font-size:13px;line-height:1.75}
+.switch-row{font-size:11px}
+.feature-card label,.checkout-form label,.track-form label{font-size:10px}
+.farm-facts span{font-size:10px}
+.review-slot>span{font-size:10px}
+.review-slot p{font-size:12px}
+.video-button{font-size:10px}
+.brew-steps article>span{font-size:10px}
+.brew-steps p{font-size:12px}
+.tips-grid article>span{font-size:10px}
+.tips-grid p{font-size:12px}
+.ritual-banner span,.ritual-banner strong{font-size:10px}
+.faq-list p{font-size:12px}
+.gallery-grid figcaption{font-size:10px}
+.footer-grid p{font-size:12px}
+.footer-grid>div>a,.footer-grid>div>span:not(.eyebrow){font-size:11px}
+.footer-bottom{font-size:9px}
+.featured-top{font-size:10px}
+.featured-bottom small{font-size:11px}
+.cart-item small{font-size:10px}
+.cart-price{font-size:13px}
+@media(max-width:720px){
+  body{font-size:15px}
+  .desktop-nav{font-size:10px}
+  .button{font-size:11px}
+  .hero-description{font-size:15px;line-height:1.75}
+  .hero-meta-grid span{font-size:9px}
+  .hero-meta-grid strong{font-size:11px}
+  .product-title-line p{font-size:12px}
+  .reason-card p,.feature-card p,.brew-steps p,.tips-grid p,.review-slot p,.footer-grid p{font-size:12px}
+}
