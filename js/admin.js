@@ -87,7 +87,7 @@
     if(!filtered.length){root.innerHTML='<div class="empty">No orders found for “'+esc(orderSearch)+'”.</div>';return}
     root.innerHTML='<table class="data-table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th>Update</th></tr></thead><tbody>'+
       filtered.map(o=>'<tr><td><strong>'+esc(o.id)+'</strong><br><span class="panel-note">'+new Date(o.createdAt||Date.now()).toLocaleString("en-PH",{dateStyle:"medium"})+'</span></td><td>'+esc(o.customer?.name||"Customer")+'<br><span class="panel-note">'+esc(o.customer?.address||"")+'</span></td><td>'+money(o.total)+'</td><td>'+esc(o.payment||"—")+'</td><td><span class="badge">'+esc(o.status||"Pending")+'</span></td><td><select class="status-select" data-order-status="'+esc(o.id)+'"><option>Pending</option><option>Verified Payment</option><option>Processing/Roasting</option><option>Ready to Ship</option><option>Dispatched</option><option>Delivered</option><option>Cancelled</option></select></td></tr>').join("")+'</tbody></table>';
-    $("[data-order-status]").forEach(s=>{const o=orders.find(x=>String(x.id)===String(s.dataset.orderStatus));if(o)s.value=o.status;s.addEventListener("change",()=>updateOrderStatus(s.dataset.orderStatus,s.value))});
+    $$("[data-order-status]").forEach(s=>{const o=orders.find(x=>String(x.id)===String(s.dataset.orderStatus));if(o)s.value=o.status;s.addEventListener("change",()=>updateOrderStatus(s.dataset.orderStatus,s.value))});
   }
   function initOrderSearch(){
     const input=$("#order-search"), clear=$("#clear-order-search");
@@ -113,7 +113,7 @@
     const root=$("#gallery-table");
     const items=Array.from({length:6},(_,i)=>gallery[i]||{slot:i+1,title:"",image:"",alt:""});
     root.innerHTML='<div class="gallery-manager-grid">'+items.map((g,i)=>'<article class="gallery-manager-card"><div class="gallery-preview">'+(g.image?'<img src="'+esc(g.image)+'" alt="'+esc(g.alt||"")+'">':'<span>PHOTO '+String(i+1).padStart(2,"0")+'</span>')+'</div><label>Photo '+(i+1)+' title<input data-gallery-title="'+i+'" value="'+esc(g.title||"")+'" placeholder="e.g. Roasted Liberica"></label><label>Image URL<input data-gallery-image="'+i+'" value="'+esc(g.image||"")+'" placeholder="https://.../image.jpg"></label><label>Alt text<input data-gallery-alt="'+i+'" value="'+esc(g.alt||"")+'" placeholder="Describe the real photo"></label><button class="admin-button gold" type="button" data-gallery-save="'+i+'">Save Photo '+(i+1)+'</button></article>').join("")+'</div>';
-    $("[data-gallery-save]").forEach(btn=>btn.addEventListener("click",()=>saveGallery(Number(btn.dataset.gallerySave))));
+    $$("[data-gallery-save]").forEach(btn=>btn.addEventListener("click",()=>saveGallery(Number(btn.dataset.gallerySave))));
   }
   function saveGallery(index){
     const image=document.querySelector('[data-gallery-image="'+index+'"]')?.value.trim()||"";
@@ -159,8 +159,8 @@
       }).join("")+
       '</div>';
 
-    $("[data-product-save]").forEach(btn=>btn.addEventListener("click",()=>saveProduct(btn.dataset.productSave)));
-    $("[data-product-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteProduct(btn.dataset.productDelete)));
+    $$("[data-product-save]").forEach(btn=>btn.addEventListener("click",()=>saveProduct(btn.dataset.productSave)));
+    $$("[data-product-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteProduct(btn.dataset.productDelete)));
     $("#save-all-products")?.addEventListener("click",saveAllProducts);
   }
 
@@ -281,7 +281,7 @@
   }
 
   function openView(view){
-    $$(".admin-nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+    $$$(".admin-nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
     $$("[data-view-panel]").forEach(p=>{p.hidden=p.dataset.viewPanel!==view;p.classList.toggle("active",p.dataset.viewPanel===view)});
     $("#view-title").textContent={overview:"Overview",orders:"Orders",inventory:"Inventory",products:"Products",customers:"Customers",promos:"Promos",content:"Content",gallery:"Gallery"}[view]||"Overview";
     closeMenu();
@@ -293,9 +293,9 @@
     if(window.KBAdminAuth&&!window.KBAdminAuth.guard())return;
     $("#admin-user").textContent=read("kb_admin_session",{})?.email||"admin";
     $("#admin-menu")?.addEventListener("click",toggleMenu);$("#admin-close")?.addEventListener("click",closeMenu);$("#admin-overlay")?.addEventListener("click",closeMenu);$("#logout")?.addEventListener("click",()=>window.KBAdminAuth?.logout());
-    $(".admin-nav button").forEach(b=>b.addEventListener("click",()=>openView(b.dataset.view)));
+    $$(".admin-nav button").forEach(b=>b.addEventListener("click",()=>openView(b.dataset.view)));
     initOrderSearch();
-    $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
+    $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
     renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();
     window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderGallery()}});
   }
