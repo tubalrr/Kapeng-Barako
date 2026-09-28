@@ -333,7 +333,7 @@
     });
   }
 
-  function getNextRoastLabel() {
+  function getNextRoastTarget() {
     const now = new Date();
     const roast = new Date(now);
     roast.setHours(6, 0, 0, 0);
@@ -342,12 +342,31 @@
       roast.setDate(roast.getDate() + 1);
     }
 
+    return roast;
+  }
+
+  function getNextRoastLabel() {
+    const now = new Date();
+    const roast = getNextRoastTarget();
+
     const isTomorrow =
       roast.getDate() !== now.getDate() ||
       roast.getMonth() !== now.getMonth() ||
       roast.getFullYear() !== now.getFullYear();
 
     return "Roast " + (isTomorrow ? "tomorrow" : "today") + " 6AM";
+  }
+
+  function getNextRoastCountdown() {
+    const now = new Date();
+    const roast = getNextRoastTarget();
+    const diff = Math.max(0, roast.getTime() - now.getTime());
+
+    const totalMinutes = Math.max(0, Math.floor(diff / 60000));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return getNextRoastLabel() + " • " + hours + "h " + String(minutes).padStart(2, "0") + "m";
   }
 
   function syncProductCard(card, product) {
@@ -358,6 +377,7 @@
     const size = $(".image-size", card);
     const price = $("[data-price]", card);
     const stockBadge = $("[data-stock-badge]", card);
+    const lowStockTimer = $("[data-low-stock-timer]", card);
     const addButton = $("[data-add-to-cart]", card);
 
     if (name) name.textContent = product.name || "Barako Coffee";
@@ -380,8 +400,7 @@
     if (stockBadge) {
       if (stock > 0) {
         if (stock <= 5) {
-          stockBadge.textContent =
-            "⚡ " + stock + " packs left • " + getNextRoastLabel();
+          stockBadge.textContent = "⚡ " + stock + " packs left";
           stockBadge.setAttribute(
             "aria-label",
             stock + " packs left. " + getNextRoastLabel() + "."
@@ -395,6 +414,16 @@
         stockBadge.setAttribute("aria-label", "Sold out.");
       }
       stockBadge.classList.toggle("urgent", stock > 0 && stock <= 5);
+    }
+
+    if (lowStockTimer) {
+      if (stock > 0 && stock <= 5) {
+        lowStockTimer.hidden = false;
+        lowStockTimer.textContent = getNextRoastCountdown();
+      } else {
+        lowStockTimer.hidden = true;
+        lowStockTimer.textContent = "";
+      }
     }
 
     if (addButton) {
@@ -439,6 +468,7 @@
         card.innerHTML =
           '<div class="product-image product-image-generic">' +
             '<span class="stock-badge" data-stock-badge="' + esc(product.id) + '"></span>' +
+            '<span class="low-stock-timer" data-low-stock-timer hidden></span>' +
             '<span class="image-size"></span>' +
             '<div class="bean-cluster bean-cluster-large"><i></i><i></i><i></i><i></i></div>' +
           '</div>' +
