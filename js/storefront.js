@@ -355,8 +355,9 @@
     $$("[data-close-dialog]").forEach(x=>x.onclick=()=>x.closest("dialog")?.close());
     $("#checkout-form").addEventListener("submit",submitOrder);
     $("#menu-button").onclick=()=>{
-      const nav=$("#mobile-nav"),open=nav.style.display==="block";
-      nav.style.display=open?"none":"block";$("#menu-button").setAttribute("aria-expanded",String(!open));
+      const collapsed=document.body.classList.toggle("sidebar-collapsed");
+      $("#menu-button").setAttribute("aria-expanded",String(!collapsed));
+      $("#menu-button").setAttribute("aria-label",collapsed?"Open sidebar":"Close sidebar");
     };
     $$("#mobile-nav a").forEach(a=>a.onclick=()=>{$("#mobile-nav").style.display="none";$("#menu-button").setAttribute("aria-expanded","false")});
     document.addEventListener("click",e=>{
