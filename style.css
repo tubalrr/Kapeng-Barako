@@ -868,3 +868,55 @@ body{font-size:16px}
   .premium-faq-list summary{font-size:18px;min-height:64px}
   .premium-faq-list p{padding-right:0;font-size:12px}
 }
+
+/* FOOTER SOCIAL BRAND ICONS */
+.footer-social-block{
+  display:grid!important;
+  align-content:start;
+  gap:8px;
+}
+.footer-social-link{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  width:max-content;
+  color:#958774;
+  font-size:11px;
+  line-height:1.5;
+  transition:color .2s ease,transform .2s ease;
+}
+.footer-social-link:hover{
+  color:var(--gold2);
+  transform:translateX(2px);
+}
+.footer-social-icon{
+  width:27px;
+  height:27px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(200,169,81,.25);
+  border-radius:8px;
+  background:#1C1208;
+  color:#D9CCB9;
+}
+.footer-social-icon svg{
+  width:16px;
+  height:16px;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.footer-social-icon .social-dot{
+  fill:currentColor;
+  stroke:none;
+}
+.footer-social-link:hover .footer-social-icon{
+  color:var(--gold2);
+  border-color:rgba(200,169,81,.55);
+}
+@media(max-width:720px){
+  .footer-social-link{font-size:12px}
+  .footer-social-icon{width:30px;height:30px}
+  .footer-social-icon svg{width:17px;height:17px}
+}
