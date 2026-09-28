@@ -929,6 +929,14 @@
     if(action==="export-audit") exportAudit();
     if(action==="open-menu") document.body.classList.add("menu-open");
     if(action==="close-menu") document.body.classList.remove("menu-open");
+    if(action==="logout"){
+      try{
+        sessionStorage.removeItem("kb_admin_session");
+        localStorage.removeItem("kb_admin_session");
+        localStorage.removeItem("kb_admin_remember");
+      }catch{}
+      window.location.replace("../index.html");
+    }
   });
 
   ["order-search","order-payment-filter","order-courier-filter","order-status-filter"].forEach(id=>$("#"+id)?.addEventListener("input",renderOrders));
