@@ -149,6 +149,14 @@
 
   function renderSettings(){
     const s={...DEFAULT_SETTINGS,...read(SETTINGS_KEY,{})};
+    const cms=read("kb_cms",{});
+    const ann=cms?.announcement||{};
+    const annRoot=$("#announcement");
+    if(annRoot){
+      annRoot.querySelector("h3").textContent=ann.title||"Bagong ani na!";
+      annRoot.querySelector("p").textContent=ann.body||"Latest approved roast or harvest announcement.";
+      annRoot.querySelector("small").textContent=ann.date||"";
+    }
     $$("[data-contact]").forEach(el=>{const key=el.dataset.contact;el.textContent=s[key]||"ILAG";if(key==="email")el.href="mailto:"+(s[key]||"ILAG")});
     $$("[data-social]").forEach(el=>{const url=String(s[el.dataset.social]||"");if(/^https?:\/\//i.test(url))el.href=url;else{el.removeAttribute("href");el.style.opacity=".55";el.style.pointerEvents="none"}});
     $("#payment-help").textContent=s.gcashInstructions||DEFAULT_SETTINGS.gcashInstructions;
