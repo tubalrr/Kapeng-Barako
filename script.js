@@ -357,12 +357,33 @@ function setupControls(){
   $$("[data-close-dialog]").forEach(x=>x.addEventListener("click",()=>x.closest("dialog")?.close()));
 }
 
+function setupPrivacyNotice(){
+  const notice=$("#cookieNotice");
+  const ok=$("#cookieOk");
+  if(!notice||!ok) return;
+
+  let consent="";
+  try{ consent=localStorage.getItem("kb_cookie_consent")||""; }catch{}
+
+  if(consent==="acknowledged"){
+    notice.hidden=true;
+    return;
+  }
+
+  notice.hidden=false;
+  ok.addEventListener("click",()=>{
+    try{localStorage.setItem("kb_cookie_consent","acknowledged");}catch{}
+    notice.hidden=true;
+  });
+}
+
 function init(){
   renderProducts();
   renderCart();
   setupMenu();
   setupTimer();
   setupControls();
+  setupPrivacyNotice();
   window.addEventListener("storage",e=>{
     if([CART_KEY,ORDER_KEY,PRODUCT_KEY].includes(e.key)){
       cart=read(CART_KEY,[]);
