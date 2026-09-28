@@ -449,14 +449,6 @@
     $("#brew-play").onclick=()=>$("#brew-dialog").showModal();
     $$("[data-close-dialog]").forEach(x=>x.onclick=()=>x.closest("dialog")?.close());
     $("#checkout-form").addEventListener("submit",submitOrder);
-    const setSidebarOpen=(open)=>{
-      document.body.classList.toggle("sidebar-open",open);
-      $("#menu-button").setAttribute("aria-expanded",String(open));
-      $("#menu-button").setAttribute("aria-label",open?"Close menu":"Open menu");
-      document.body.style.overflow=open?"hidden":"";
-    };
-    $("#menu-button").onclick=()=>setSidebarOpen(!document.body.classList.contains("sidebar-open"));
-    $$("#mobile-nav a").forEach(a=>a.onclick=()=>{$("#mobile-nav").style.display="none";setSidebarOpen(false)});
     document.addEventListener("click",e=>{
       const v=e.target.closest("[data-variant]");
       if(v){
@@ -482,7 +474,7 @@
   }
 
   function init(){
-    renderContent();renderHero();renderProducts();syncUi();bind();
+    setupSidebarToggle();renderContent();renderHero();renderProducts();syncUi();bind();
     window.addEventListener("storage",e=>{
       if(["kb_products","kb_settings","kb_cms","kb_gallery","kb_shipping_rule"].includes(e.key))window.location.reload();
       if(e.key==="kb_orders"||e.key==="kb_last_order")refreshTrackedOrder();
