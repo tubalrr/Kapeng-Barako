@@ -407,9 +407,35 @@
     const list=Array.isArray(current)?current:[];
     localStorage.setItem("kb_orders",JSON.stringify([order,...list.filter(x=>x?.id!==order.id)]));
     localStorage.setItem("kb_last_order",JSON.stringify(order));
+    deductOrderedStock(order.items);
     cart=[];saveCart();syncUi();
     $("#checkout-form").hidden=true;$("#order-success").hidden=false;
     setText("#success-text","Order "+order.id+" has been recorded. The store will confirm payment and fulfillment details using the contact information provided.");
+  }
+
+  function deductOrderedStock(items){
+    const list=read("kb_products",products).map(p=>({...p}));
+    const inventoryKey="kb_inventory";
+    let inventory=read(inventoryKey,[]);
+    const changes=[];
+    (Array.isArray(items)?items:[]).forEach(item=>{
+      const qty=Math.max(0,Number(item.qty||0));
+      if(!qty)return;
+      const p=list.find(x=>String(x.id)===String(item.id)) ||
+              list.find(x=>String(x.name).trim().toLowerCase()===String(item.name||"").trim().toLowerCase());
+      if(!p)return;
+      const before=Math.max(0,Number(p.stock||0));
+      const after=Math.max(0,before-qty);
+      p.stock=after;
+      const inv=Array.isArray(inventory)?inventory.find(x=>String(x.sourceProductId)===String(p.id)):null;
+      if(inv)inv.stock=after;
+      changes.push(p.name+": "+before+" → "+after);
+    });
+    if(changes.length){
+      localStorage.setItem("kb_products",JSON.stringify(list));
+      if(Array.isArray(inventory))localStorage.setItem(inventoryKey,JSON.stringify(inventory));
+    }
+    return changes;
   }
 
   function toast(message){
