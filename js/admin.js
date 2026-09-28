@@ -88,7 +88,7 @@
           const priceText=card.querySelector(".product-price")?.textContent||"";
           const price=Number(priceText.replace(/[^0-9.]/g,""))||0;
           const stockText=card.querySelector("[data-stock-badge]")?.textContent||"";
-          const stockMatch=stockText.match(/(\\d+)\\s*packs?/i);
+          const stockMatch=stockText.match(/(\d+)\s*packs?/i);
           const stock=stockMatch?Number(stockMatch[1]):0;
           const badge=card.querySelector(".product-badge")?.textContent.trim()||"";
           const note=card.querySelector(".product-title-line p")?.textContent.trim()||"";
