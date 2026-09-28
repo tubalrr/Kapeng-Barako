@@ -960,3 +960,59 @@ body > footer .site-container{
   body > main .site-container,
   body > footer .site-container{width:calc(100% - 20px)}
 }
+
+
+/* SIDEBAR HAMBURGER — overlays the brand/logo */
+.sidebar-toggle{
+  position:fixed!important;
+  left:12px!important;
+  top:12px!important;
+  z-index:1200!important;
+  width:42px!important;
+  height:42px!important;
+  padding:0!important;
+  border:1px solid rgba(200,169,81,.38)!important;
+  border-radius:11px!important;
+  background:rgba(26,18,7,.94)!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.38)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+}
+.sidebar-toggle span{
+  display:block;
+  width:19px;
+  height:2px;
+  border-radius:2px;
+  background:var(--gold-2);
+  transition:.22s;
+}
+.sidebar-toggle:hover{
+  background:#33200f!important;
+  border-color:var(--gold)!important;
+}
+.sidebar-toggle[aria-expanded="false"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.sidebar-toggle[aria-expanded="false"] span:nth-child(2){opacity:0}
+.sidebar-toggle[aria-expanded="false"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+body.sidebar-collapsed .site-header{
+  transform:translateX(calc(-1 * var(--sidebar-width)));
+}
+body.sidebar-collapsed > main,
+body.sidebar-collapsed > footer{
+  margin-left:0!important;
+}
+.site-header{
+  transition:transform .28s ease!important;
+}
+body > main,
+body > footer{
+  transition:margin-left .28s ease!important;
+}
+
+@media(max-width:560px){
+  .sidebar-toggle{left:8px!important;top:8px!important;width:39px!important;height:39px!important}
+  .sidebar-toggle span{width:17px}
+}
