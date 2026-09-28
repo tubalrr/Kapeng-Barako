@@ -351,8 +351,19 @@
     }).join("");
   }
 
+  const currentProductStock=p=>{
+    const raw=read("kb_products",products);
+    const list=Array.isArray(raw)?raw:products;
+    const live=list.find(x=>String(x.id)===String(p.id))||p;
+    return Math.max(0,Number(live.stock||0));
+  };
+
   function addProduct(p,variant,grind){
     const existing=cart.find(i=>String(i.id)===String(p.id)&&i.weight===variant.weight&&i.grind===grind);
+    const requested=(existing?.qty||0)+1;
+    const available=currentProductStock(p);
+    if(available<=0){toast("Out of stock.");return}
+    if(requested>available){toast("Only "+available+" pack(s) left for "+p.name+".");return}
     if(existing)existing.qty+=1;
     else cart.push({id:p.id,name:p.name,price:Number(variant.price||0),weight:variant.weight,grind,qty:1,emoji:p.emoji||"☕",bg:p.bg||"#F1E6D3"});
     saveCart();syncUi();
@@ -373,6 +384,16 @@
   function submitOrder(e){
     e.preventDefault();
     if(!cart.length){toast("Your cart is empty.");return}
+    const liveProducts=read("kb_products",products);
+    const shortages=(Array.isArray(cart)?cart:[]).map(item=>{
+      const p=(Array.isArray(liveProducts)?liveProducts:products).find(x=>String(x.id)===String(item.id));
+      const stock=Math.max(0,Number(p?.stock||0));
+      return p&&Number(item.qty||0)>stock?{name:p.name,qty:Number(item.qty||0),stock}:null;
+    }).filter(Boolean);
+    if(shortages.length){
+      toast(shortages[0].name+" only has "+shortages[0].stock+" pack(s) left.");
+      return;
+    }
     const fd=new FormData(e.currentTarget);
     const address=String(fd.get("address")||"").trim();
     const voucher=String(fd.get("voucher")||"").trim().toUpperCase();
@@ -491,7 +512,14 @@
       const add=e.target.closest("[data-add]");
       if(add){const p=productById(add.dataset.add);const c=choiceFor(p);addProduct(p,c.variant,c.grind);return}
       const plus=e.target.closest("[data-qty-plus]");
-      if(plus){cart[Number(plus.dataset.qtyPlus)].qty+=1;saveCart();syncUi();return}
+      if(plus){
+        const item=cart[Number(plus.dataset.qtyPlus)];
+        const p=item&&productById(item.id);
+        const available=p?currentProductStock(p):0;
+        if(item && item.qty<available)item.qty+=1;
+        else toast(p?"Only "+available+" pack(s) available.":"Product unavailable.");
+        saveCart();syncUi();return
+      }
       const minus=e.target.closest("[data-qty-minus]");
       if(minus){const i=Number(minus.dataset.qtyMinus);if(cart[i].qty>1)cart[i].qty-=1;else cart.splice(i,1);saveCart();syncUi();return}
       const rem=e.target.closest("[data-remove]");
