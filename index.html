@@ -729,6 +729,128 @@
         </div>
       </div>
 
+      <style>
+        /* MOBILE STICKY CART — scoped to #products */
+        #products #kb-mobile-sticky-cart {
+          display: none;
+        }
+
+        @media (max-width: 700px) {
+          #products #kb-mobile-sticky-cart {
+            position: fixed;
+            left: 12px;
+            right: 12px;
+            bottom: calc(12px + env(safe-area-inset-bottom));
+            z-index: 9998;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+
+            min-height: 58px;
+            padding: 9px 10px 9px 14px;
+
+            background: #221A0E;
+            border: 1px solid #2A2116;
+            border-radius: 16px;
+
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.38);
+
+            opacity: 0;
+            transform: translateY(18px);
+            pointer-events: none;
+
+            transition:
+              opacity 0.28s ease,
+              transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+
+          #products #kb-mobile-sticky-cart.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+          }
+
+          #products .kb-sticky-cart-info {
+            min-width: 0;
+            overflow: hidden;
+          }
+
+          #products .kb-sticky-cart-item {
+            display: block;
+            overflow: hidden;
+            color: #F5E9D3;
+            font-size: 12px;
+            line-height: 1.25;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          #products .kb-sticky-cart-price {
+            display: block;
+            margin-top: 3px;
+            color: #C8A951;
+            font-size: 13px;
+            line-height: 1;
+            font-weight: 800;
+          }
+
+          #products .kb-sticky-cart-checkout {
+            flex: 0 0 auto;
+            border: 0;
+            border-radius: 999px;
+            background: #C8A951;
+            color: #1A1207;
+            padding: 11px 15px;
+            min-height: 40px;
+            font: inherit;
+            font-size: 11px;
+            line-height: 1;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+          }
+
+          #products .kb-sticky-cart-checkout:hover {
+            transform: scale(1.02);
+            filter: brightness(1.05);
+          }
+
+          #products .kb-sticky-cart-checkout:active {
+            transform: scale(0.98);
+          }
+
+          body {
+            scroll-padding-bottom: 92px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          #products #kb-mobile-sticky-cart,
+          #products .kb-sticky-cart-checkout {
+            transition: none;
+          }
+        }
+      </style>
+
+      <div id="kb-mobile-sticky-cart" aria-label="Sticky cart" aria-live="polite">
+        <div class="kb-sticky-cart-info">
+          <span class="kb-sticky-cart-item">Your cart is empty</span>
+          <span class="kb-sticky-cart-price"></span>
+        </div>
+        <button
+          type="button"
+          class="kb-sticky-cart-checkout"
+          aria-label="Checkout"
+        >
+          Checkout →
+        </button>
+      </div>
+
       <div id="kb-products-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
       <script>
@@ -1030,7 +1152,130 @@
       </div>
     </section>
 
-    <!-- DELIVERY & PAYMENT -->
+      <script>
+        (() => {
+          "use strict";
+
+          const sticky = document.getElementById("kb-mobile-sticky-cart");
+          if (!sticky) return;
+
+          const itemEl = sticky.querySelector(".kb-sticky-cart-item");
+          const priceEl = sticky.querySelector(".kb-sticky-cart-price");
+          const checkoutButton = sticky.querySelector(".kb-sticky-cart-checkout");
+
+          const CART_KEY = "kb_cart";
+
+          const readCart = () => {
+            try {
+              const value = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+              return Array.isArray(value) ? value : [];
+            } catch {
+              return [];
+            }
+          };
+
+          const formatMoney = (value) => {
+            return "₱" + Number(value || 0).toLocaleString("en-PH");
+          };
+
+          const isMobile = () =>
+            window.matchMedia("(max-width: 700px)").matches;
+
+          const renderStickyCart = () => {
+            if (!isMobile()) {
+              sticky.classList.remove("is-visible");
+              return;
+            }
+
+            const cart = readCart();
+
+            if (!cart.length) {
+              sticky.classList.remove("is-visible");
+              return;
+            }
+
+            const item = cart[cart.length - 1];
+            const qty = Math.max(1, Number(item.qty ?? item.quantity ?? 1));
+            const name = String(item.name || "Barako Coffee").trim();
+            const size = String(item.size || "").trim();
+            const label = size ? name + " " + size : name;
+            const total = Number(item.price || 0) * qty;
+
+            itemEl.textContent = label;
+            priceEl.textContent = formatMoney(total) + (qty > 1 ? " × " + qty : "");
+
+            if (window.scrollY > 180) {
+              sticky.classList.add("is-visible");
+            } else {
+              sticky.classList.remove("is-visible");
+            }
+          };
+
+          const refreshAfterCartChange = () => {
+            setTimeout(renderStickyCart, 0);
+            setTimeout(renderStickyCart, 80);
+          };
+
+          let ticking = false;
+
+          window.addEventListener("scroll", () => {
+            if (ticking) return;
+
+            ticking = true;
+
+            window.requestAnimationFrame(() => {
+              renderStickyCart();
+              ticking = false;
+            });
+          }, { passive: true });
+
+          window.addEventListener("resize", renderStickyCart);
+
+          window.addEventListener("storage", (event) => {
+            if (event.key === CART_KEY || event.key === null) {
+              renderStickyCart();
+            }
+          });
+
+          /*
+            Existing storefront JS owns [data-add-to-cart].
+            We only observe the click and refresh after it has completed,
+            preventing a second cart insertion.
+          */
+          document.querySelectorAll("#products [data-add-to-cart]").forEach((button) => {
+            button.addEventListener("click", refreshAfterCartChange);
+          });
+
+          checkoutButton?.addEventListener("click", () => {
+            const openCart = document.getElementById("openCart");
+
+            if (openCart) {
+              openCart.click();
+
+              setTimeout(() => {
+                const checkout = document.getElementById("checkoutButton");
+                if (checkout && !checkout.disabled) {
+                  checkout.click();
+                }
+              }, 40);
+
+              return;
+            }
+
+            /*
+              Fallback for builds without the existing header cart button.
+            */
+            const cartModal = document.getElementById("cartModal");
+            if (cartModal) {
+              cartModal.hidden = false;
+            }
+          });
+
+          renderStickyCart();
+        })();
+      </script>
+
+    </section>\n    <!-- DELIVERY & PAYMENT -->
     <section class="section-dark section-space" id="delivery">
       <div class="container delivery-layout">
         <div>
