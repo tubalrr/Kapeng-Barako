@@ -256,7 +256,7 @@
       const c=choiceFor(p), low=Number(p.stock||0)<=5;
       const variants=p.variants.map(v=>'<button type="button" class="variant-btn '+(v.weight===c.variant.weight?"active":"")+'" data-variant="'+esc(p.id)+'" data-weight="'+esc(v.weight)+'">'+esc(v.weight)+'</button>').join("");
       const grinds=p.grinds.map(g=>'<option value="'+esc(g)+'" '+(g===c.grind?"selected":"")+'>'+esc(g)+'</option>').join("");
-      return '<article class="product-card">'+
+      return '<article class="product-card" data-product-id="'+esc(p.id)+'">'+
         '<div class="product-art product-art-premium product-art-'+((Number(p.id)||1)%4||4)+'"><span class="stock-pill '+(low?"low urgent":"")+'">'+(Number(p.stock||0)>0?esc(low?"⚡ Only "+Number(p.stock)+" stock"+(Number(p.stock)===1?"":"s")+" left!":"In stock"):"Out of stock")+'</span><span class="product-price">'+money(c.variant.price)+'</span></div>'+
         '<div class="product-body"><div class="product-title-row"><h3>'+esc(p.name)+'</h3><span class="tag">'+esc(p.roast||"Fresh roast")+'</span></div>'+
         '<p>'+esc(p.note||"")+'</p><span class="product-label">Weight</span><div class="variant-row">'+variants+'</div>'+
