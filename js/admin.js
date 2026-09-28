@@ -297,7 +297,7 @@
     initOrderSearch();
     $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
     renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();
-    window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos()}});
+    window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderGallery()}});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
