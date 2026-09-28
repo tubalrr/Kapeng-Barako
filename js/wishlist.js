@@ -1,6 +1,3 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, deleteDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 import { firebaseConfig, isFirebaseConfigured } from "./firebase-config.js";
 
 let auth=null,db=null,user=null;
@@ -8,20 +5,30 @@ const saved=new Set();
 let attachQueued=false;
 
 if(isFirebaseConfigured){
-  const app=initializeApp(firebaseConfig);
-  auth=getAuth(app);
-  db=getFirestore(app);
-  onAuthStateChanged(auth,async u=>{
-    user=u||null;
-    saved.clear();
-    if(user){
-      try{
-        const snap=await getDocs(collection(db,"users",user.uid,"wishlist"));
-        snap.forEach(d=>saved.add(d.id));
-      }catch{}
-    }
-    scheduleAttach();
-  });
+  Promise.all([
+    import("https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js"),
+    import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js")
+  ]).then(async ([appMod,authMod,fsMod])=>{
+    const {initializeApp}=appMod;
+    const {getAuth,onAuthStateChanged}=authMod;
+    const {getFirestore,doc,setDoc,deleteDoc,collection,getDocs,serverTimestamp}=fsMod;
+    const app=initializeApp(firebaseConfig);
+    auth=getAuth(app);
+    db=getFirestore(app);
+    onAuthStateChanged(auth,async u=>{
+      user=u||null;
+      saved.clear();
+      if(user){
+        try{
+          const snap=await getDocs(collection(db,"users",user.uid,"wishlist"));
+          snap.forEach(d=>saved.add(d.id));
+        }catch{}
+      }
+      scheduleAttach();
+    });
+    window.__kbWishlistFns={doc,setDoc,deleteDoc,serverTimestamp};
+  }).catch(()=>scheduleAttach());
 }
 
 function cardKey(card){
@@ -90,12 +97,14 @@ async function toggle(card,button){
   try{
     button.disabled=true;
     if(saved.has(key)){
-      await deleteDoc(doc(db,"users",user.uid,"wishlist",key));
+      const f=window.__kbWishlistFns; if(!f) throw new Error("Wishlist backend unavailable");
+      await f.deleteDoc(f.doc(db,"users",user.uid,"wishlist",key));
       saved.delete(key);
     }else{
-      await setDoc(
-        doc(db,"users",user.uid,"wishlist",key),
-        {productId:id,name,weight,grind,createdAt:serverTimestamp()},
+      const f=window.__kbWishlistFns; if(!f) throw new Error("Wishlist backend unavailable");
+      await f.setDoc(
+        f.doc(db,"users",user.uid,"wishlist",key),
+        {productId:id,name,weight,grind,createdAt:f.serverTimestamp()},
         {merge:true}
       );
       saved.add(key);
