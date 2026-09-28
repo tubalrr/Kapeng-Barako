@@ -227,9 +227,68 @@
       (!status || o.status === status);
   }
 
+  function syncProductInventory() {
+    const productList = Array.isArray(products) ? products : [];
+    const current = Array.isArray(inventory) ? inventory.slice() : read(KEY.inventory, []);
+    let changed = false;
+    productList.forEach(p => {
+      const id = "PROD-" + String(p.id);
+      const idx = current.findIndex(i => i.sourceProductId && String(i.sourceProductId) === String(p.id));
+      const stock = Math.max(0, Number(p.stock || 0));
+      if (idx < 0) {
+        current.unshift({
+          id, sourceProductId:p.id, name:p.name, category:"packaging",
+          sku:"PROD-"+String(p.id), unit:"packs", stock,
+          threshold:5, usage:0, roast:"", expiry:"", linkedProduct:true
+        });
+        changed = true;
+      } else {
+        const item = current[idx];
+        const next = {...item, name:p.name, unit:"packs", stock, threshold:Number(item.threshold || 5), linkedProduct:true};
+        if (JSON.stringify(item) !== JSON.stringify(next)) {
+          current[idx] = next;
+          changed = true;
+        }
+      }
+    });
+    if (changed) {
+      inventory = current;
+      saveInventory();
+    } else {
+      inventory = current;
+    }
+  }
+
+  function decrementStockForOrder(order) {
+    const items = Array.isArray(order?.items) ? order.items : [];
+    if (!items.length) return;
+    const productList = Array.isArray(products) ? products : [];
+    const invList = Array.isArray(inventory) ? inventory.slice() : read(KEY.inventory, []);
+    const deductions = [];
+    items.forEach(item => {
+      const qty = Math.max(0, Number(item.qty || 0));
+      if (!qty) return;
+      const p = productList.find(x => String(x.id) === String(item.id)) ||
+                productList.find(x => String(x.name).trim().toLowerCase() === String(item.name || "").trim().toLowerCase());
+      if (!p) return;
+      const before = Math.max(0, Number(p.stock || 0));
+      const after = Math.max(0, before - qty);
+      p.stock = after;
+      const inv = invList.find(x => String(x.sourceProductId) === String(p.id));
+      if (inv) inv.stock = after;
+      deductions.push(p.name + ": " + before + " → " + after);
+    });
+    if (!deductions.length) return;
+    write(KEY.products, productList);
+    inventory = invList;
+    write(KEY.inventory, invList);
+    log("Stock automatically deducted","inventory",order.id,deductions.join(" | "));
+  }
+
   function renderOverview() {
     orders = getOrders();
     inventory = read(KEY.inventory, []);
+    syncProductInventory();
     tickets = read(KEY.tickets, []);
     const revenue = orders.reduce((s,o) => s + o.total, 0);
     const now = new Date();
@@ -238,7 +297,8 @@
     const todaySales = orders.filter(o => new Date(o.createdAt || 0).getTime() >= startToday).reduce((s,o) => s + Number(o.total || 0), 0);
     const weekSales = orders.filter(o => new Date(o.createdAt || 0).getTime() >= startWeek).reduce((s,o) => s + Number(o.total || 0), 0);
     const customerMap = buildCustomers(orders);
-    const low = inventory.filter(i => Number(i.stock || 0) <= Number(i.threshold || 0) && Number(i.threshold || 0) > 0).length;
+    const productLow = products.filter(p => Number(p.stock || 0) <= 5);
+    const low = productLow.length;
     const openTickets = tickets.filter(t => !["Resolved","Closed"].includes(t.status)).length;
     $("#metric-orders").textContent = orders.length;
     $("#metric-low-stock").textContent = low;
@@ -406,7 +466,9 @@
       orders[existingIndex] = normalizeOrder(payload);
       log("Order updated","order",id,prev.status+"; payment="+prev.payment+"; fulfillment="+prev.fulfillment);
     } else {
-      orders.unshift(normalizeOrder(payload));
+      const newOrder=normalizeOrder(payload);
+      orders.unshift(newOrder);
+      decrementStockForOrder(newOrder);
       log("Order created","order",payload.id,"Created from admin console");
     }
     saveOrders();
@@ -615,7 +677,18 @@
     const payload={id:id||uid("INV"),name:$("#inv-name").value.trim(),category:$("#inv-category").value,sku:$("#inv-sku").value.trim(),unit:$("#inv-unit").value.trim(),stock:Number($("#inv-stock").value||0),threshold:Number($("#inv-threshold").value||0),usage:Number($("#inv-usage").value||0),roast:$("#inv-roast").value,expiry:$("#inv-expiry").value};
     if(!payload.name){toast("Item name is required.");return;}
     const idx=inventory.findIndex(i=>i.id===id);
-    if(idx>=0){inventory[idx]=payload;log("Inventory updated","inventory",id,payload.name);}else{inventory.unshift(payload);log("Inventory created","inventory",payload.id,payload.name);}
+    if(idx>=0){
+      const previous=inventory[idx];
+      inventory[idx]=payload;
+      if(previous?.sourceProductId){
+        const p=products.find(x=>String(x.id)===String(previous.sourceProductId));
+        if(p){p.stock=Math.max(0,payload.stock);saveProducts();}
+      }
+      log("Inventory updated","inventory",id,payload.name);
+    }else{
+      inventory.unshift(payload);
+      log("Inventory created","inventory",payload.id,payload.name);
+    }
     saveInventory();$("#inventory-dialog").close();toast("Inventory saved");renderInventory();renderOverview();renderAudit();
   }
 
