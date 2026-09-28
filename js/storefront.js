@@ -294,18 +294,8 @@
     }
   }
   function brandAsset(name,type){
-    const key=String(name||"").toLowerCase();
-    const map={
-      "facebook":"facebook",
-      "instagram":"instagram",
-      "tiktok":"tiktok",
-      "gcash":"gcash",
-      "lalamove":"lalamove",
-      "j&t":"jtexpress",
-      "lbc":"lbcexpress"
-    };
-    const slug=map[key];
-    return slug?'https://cdn.simpleicons.org/'+slug:'';
+    // Keep the storefront self-contained: no external icon CDN required.
+    return "";
   }
   function brandTag(name,type){
     const label=name==="QC Meetup"?"Meetup — Quezon City":name;
