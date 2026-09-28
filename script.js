@@ -7,9 +7,9 @@ const PRODUCT_KEY = "kb_rebuild_products";
 const GALLERY_KEY = "kb_gallery";
 
 const DEFAULT_PRODUCTS = [
-  {id:"KB250",name:"Barako 250g",size:"250g",price:350,stock:7},
-  {id:"KB500",name:"Barako 500g",size:"500g",price:620,stock:7},
-  {id:"KB1K",name:"Barako 1kg",size:"1kg",price:1150,stock:7}
+  {id:"KB250",name:"Barako 250g",size:"250g",price:350,stock:7,badge:"BEST SELLER",note:"Bold, aromatic, unmistakably Barako.",roast:"Dark",grind:"Whole"},
+  {id:"KB500",name:"Barako 500g",size:"500g",price:620,stock:7,badge:"FRESH ROAST",note:"More coffee for the serious daily cup.",roast:"Medium",grind:"Whole"},
+  {id:"KB1K",name:"Barako 1kg",size:"1kg",price:1150,stock:7,badge:"VALUE",note:"The full ritual, ready for the week.",roast:"Dark",grind:"Whole"}
 ];
 
 const $ = s => document.querySelector(s);
@@ -346,10 +346,24 @@ function setupControls(){
   $("#openCart")?.addEventListener("click",()=>setModal("#cartModal",true));
   $("#heroCartButton")?.addEventListener("click",()=>setModal("#cartModal",true));
   $("#heroTrackButton")?.addEventListener("click",()=>setModal("#trackModal",true));
-  $("#checkoutButton")?.addEventListener("click",checkoutBox);
+  $("#checkoutButton")?.addEventListener("click",()=>{
+    if(!cart.length){toast("Your cart is empty.");return;}
+    checkoutBox();
+  });
   $$("[data-close-cart]").forEach(x=>x.addEventListener("click",()=>setModal("#cartModal",false)));
   $$("[data-close-track]").forEach(x=>x.addEventListener("click",()=>setModal("#trackModal",false)));
   $("#trackForm")?.addEventListener("submit",trackOrder);
+  $("[data-back-top]").forEach(a=>a.addEventListener("click",e=>{
+    e.preventDefault();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }));
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape"){
+      setModal("#cartModal",false);
+      setModal("#trackModal",false);
+      $("#brew-dialog")?.close();
+    }
+  });
 
   document.addEventListener("click",event=>{
     const add=event.target.closest("[data-add-to-cart]");
@@ -370,12 +384,16 @@ function setupControls(){
   $("#wholesaleToggle")?.addEventListener("change",e=>$("#wholesaleForm").hidden=!e.target.checked);
   $("#wholesaleRequest")?.addEventListener("click",()=>{
     const kg=Math.max(10,Number($("#wholesaleKg").value||10));
-    write("kb_wholesale_request",{kg,roast:$("#wholesaleRoast").value,createdAt:new Date().toISOString()});
-    toast("Wholesale inquiry saved.");
+    const request={id:"WQ-"+Date.now().toString(36).toUpperCase(),kg,roast:$("#wholesaleRoast").value,status:"New",createdAt:new Date().toISOString()};
+    const list=read("kb_wholesale_requests",[]);
+    write("kb_wholesale_requests",[request,...(Array.isArray(list)?list:[])]);
+    write("kb_wholesale_request",request);
+    toast("Wholesale quote request saved.");
   });
   $("#subscriptionSave")?.addEventListener("click",()=>{
-    write("kb_subscription_preference",{product:$("#subscriptionProduct").value,day:$("#subscriptionDay").value,createdAt:new Date().toISOString()});
-    toast("Auto-delivery preference saved.");
+    const preference={id:"SUB-"+Date.now().toString(36).toUpperCase(),product:$("#subscriptionProduct").value,day:$("#subscriptionDay").value,active:true,createdAt:new Date().toISOString()};
+    write("kb_subscription_preference",preference);
+    toast("Delivery preference saved.");
   });
   $("#brewVideoButton")?.addEventListener("click",()=>{
     const dialog=$("#brew-dialog");
@@ -412,16 +430,17 @@ function setupPrivacyNotice(){
 
 function init(){
   renderProducts();
+  renderGallery();
   renderCart();
   setupMenu();
   setupTimer();
   setupControls();
   setupPrivacyNotice();
   window.addEventListener("storage",e=>{
-    if([CART_KEY,ORDER_KEY,PRODUCT_KEY].includes(e.key)){
+    if([CART_KEY,ORDER_KEY,PRODUCT_KEY,GALLERY_KEY].includes(e.key)){
       cart=read(CART_KEY,[]);
       renderProducts();
-renderGallery();
+      renderGallery();
       renderCart();
     }
   });
