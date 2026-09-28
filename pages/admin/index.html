@@ -848,7 +848,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   function loadContact(){
     const s={...(read(SETTINGS_KEY,{})||{})};
-    const map={business:"extraContactBusiness",email:"extraContactEmail",phone:"extraContactPhone",hours:"extraContactHours",location:"extraContactLocation",facebook:"extraContactFacebook",messenger:"extraContactMessenger"};
+    const map={businessName:"extraContactBusiness",email:"extraContactEmail",phone:"extraContactPhone",hours:"extraContactHours",location:"extraContactLocation",facebook:"extraContactFacebook",messenger:"extraContactMessenger"};
     Object.entries(map).forEach(([key,id])=>{const el=document.getElementById(id);if(el)el.value=String(s[key]||"")});
   }
   function saveContact(){
