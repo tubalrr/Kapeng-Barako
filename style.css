@@ -1762,3 +1762,38 @@ section,
   .cup-illustration .steam-b{left:50%;height:68px;}
   .cup-illustration .steam-c{left:54%;height:54px;}
 }
+
+/* FINAL CUP/STEAM GEOMETRY — USE CUP CENTER, NOT ILLUSTRATION PERCENTAGE */
+.cup-illustration .steam{
+  left:50%;
+  bottom:196px;
+  width:0;
+  height:64px;
+  transform:translateX(-50%);
+  transform-origin:bottom center;
+  z-index:6;
+}
+.cup-illustration .steam-a{
+  margin-left:-15px;
+}
+.cup-illustration .steam-b{
+  margin-left:0;
+  height:78px;
+  animation-delay:.6s;
+}
+.cup-illustration .steam-c{
+  margin-left:15px;
+  height:60px;
+  animation-delay:1.1s;
+}
+
+@media(max-width:720px){
+  .cup-illustration .steam{
+    left:50%;
+    bottom:164px;
+    transform:translateX(-50%);
+  }
+  .cup-illustration .steam-a{margin-left:-13px;}
+  .cup-illustration .steam-b{margin-left:0;height:68px;}
+  .cup-illustration .steam-c{margin-left:13px;height:54px;}
+}
