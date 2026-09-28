@@ -2044,3 +2044,171 @@ body > .site-header:hover{
   .kb-farm-facts div:last-child{border-bottom:0}
   .kb-timer>strong{font-size:56px}
 }
+
+
+/* =========================================================
+   RESPONSIVE LAYOUT REFACTOR
+   Semantic container sizing + stable desktop/mobile grids.
+   Existing classes remain intact for JS compatibility.
+   ========================================================= */
+:root{
+  --kb-content-max:1240px;
+  --kb-content-gutter:clamp(14px,2.4vw,40px);
+  --kb-section-space:clamp(72px,8vw,112px);
+  --kb-card-gap:clamp(12px,1.5vw,18px);
+}
+
+html{overflow-x:hidden}
+body{overflow-x:hidden}
+.storefront-main{min-width:0}
+.site-container{
+  width:min(var(--kb-content-max),calc(100% - (var(--kb-content-gutter) * 2)));
+  margin-inline:auto;
+}
+.section-pad{padding-block:var(--kb-section-space)}
+.hero-container,
+.story-container,
+.delivery-container,
+.brew-container,
+.faq-container,
+.gallery-container,
+.contact-container,
+.footer-wrapper{min-width:0}
+.hero-grid,
+.story-grid,
+.brew-grid,
+.faq-grid,
+.contact-grid{min-width:0}
+.hero-grid > *,
+.story-grid > *,
+.brew-grid > *,
+.faq-grid > *,
+.contact-grid > *{min-width:0}
+
+.product-card-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  align-items:stretch;
+  gap:var(--kb-card-gap);
+}
+.product-card-wrapper{min-width:0}
+.product-card{
+  min-width:0;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+.product-body{display:flex;flex:1;flex-direction:column;min-width:0}
+.product-foot{margin-top:auto;padding-top:13px}
+.product-title-row{min-width:0}
+.product-title-row h3{min-width:0;overflow-wrap:anywhere}
+.product-title-row .tag{max-width:48%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-art{width:100%;min-width:0}
+
+.benefit-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.gallery-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.delivery-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+.section-heading-row > *{min-width:0}
+.section-heading-row .button{flex:0 0 auto}
+
+.delivery-card-wrapper{min-width:0}
+.info-block{min-width:0}
+.info-block p,.info-block strong{overflow-wrap:anywhere}
+
+.footer-wrapper{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+
+.nav-account-link,.mobile-account-link{white-space:nowrap}
+
+/* Sidebar storefront: reserve space only when it is actually open. */
+@media (width <= 1080px){
+  .product-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .benefit-card-grid{grid-template-columns:1fr}
+  .delivery-grid{grid-template-columns:1fr}
+  .hero-grid{grid-template-columns:minmax(0,1fr) minmax(300px,.78fr);gap:clamp(24px,4vw,42px)}
+  .story-grid,.faq-grid{gap:clamp(32px,5vw,58px)}
+}
+
+@media (width <= 840px){
+  :root{
+    --kb-content-gutter:18px;
+    --kb-section-space:78px;
+  }
+  .hero-grid,
+  .story-grid,
+  .brew-grid,
+  .faq-grid,
+  .contact-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .hero-copy,.story-copy{max-width:none}
+  .hero-feature{max-width:680px}
+  .section-heading-row{align-items:flex-start}
+  .footer-wrapper{grid-template-columns:1fr;text-align:center}
+  .footer-copy{text-align:center}
+  .footer-brand{justify-content:center}
+  .footer-socials{justify-content:center}
+}
+
+@media (width <= 620px){
+  :root{
+    --kb-content-gutter:12px;
+    --kb-section-space:64px;
+    --kb-card-gap:12px;
+  }
+  .site-container{
+    width:calc(100% - 24px);
+  }
+  .hero-grid{gap:28px}
+  .hero-feature{border-radius:22px}
+  .hero-feature:before{inset:10px;border-radius:17px}
+  .hero h1{overflow-wrap:anywhere}
+  .hero-actions{width:100%}
+  .hero-actions .button{width:100%}
+  .benefit-card{min-height:0;padding:24px 21px 27px}
+  .product-card-grid{grid-template-columns:minmax(0,1fr)}
+  .product-card{border-radius:19px;padding:10px}
+  .product-art{border-radius:15px}
+  .product-body{padding:14px 3px 3px}
+  .product-title-row{align-items:flex-start}
+  .product-title-row .tag{max-width:44%}
+  .variant-row{gap:5px}
+  .variant-btn{padding:7px 8px}
+  .product-foot{align-items:center}
+  .add-product{min-height:40px;padding-inline:12px}
+  .delivery-card{border-radius:21px}
+  .delivery-head{padding:27px 21px}
+  .info-block{padding:21px}
+  .gallery-card-grid{grid-template-columns:minmax(0,1fr)}
+  .contact-card{padding:22px}
+  .cart-drawer{width:100%;max-width:100vw}
+  .checkout-modal,.track-modal{max-width:calc(100vw - 16px)}
+  .track-result-head{flex-wrap:wrap}
+  .track-status-chip{max-width:100%;white-space:normal}
+  .nav-account-link{display:none}
+}
+
+/* Avoid text/card collisions in very narrow phones. */
+@media (width <= 380px){
+  .site-container{width:calc(100% - 20px)}
+  .brand-copy small{display:none}
+  .product-title-row{display:grid;grid-template-columns:1fr}
+  .product-title-row .tag{max-width:max-content}
+  .product-foot{display:grid;grid-template-columns:1fr}
+  .add-product{width:100%}
+  .section-heading-row h2,
+  .story-grid h2,
+  .delivery-head h2,
+  .brew-copy h2,
+  .faq-grid h2,
+  .contact-grid h2{font-size:clamp(34px,11vw,48px)}
+}
+
+/* Reduced-motion users should not get layout animation effects. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+  }
+}
