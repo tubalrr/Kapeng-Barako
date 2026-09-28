@@ -90,8 +90,7 @@ function renderAuth(){
 <p class="sub">${login?"Sign in to manage your Kapeng Barako orders.":"Use your real contact details for delivery and account recovery."}</p>
 <div id="auth-msg"></div>
 <button class="google-btn" id="google-btn" type="button"><span class="google-mark">G</span> Continue with Google</button>
-<div class="demo-box"><div><strong>Demo Customer</strong><span>Preview the customer profile without connecting Firebase.</span><small>Demo data is saved only in this browser and can be removed from the Profile page.</small></div><button class="account-btn gold demo-btn" id="demo-btn" type="button">OPEN DEMO ACCOUNT</button></div>
-<div class="divider">or continue with email</div>
+<div class="divider">Continue with your real account</div>
 <form class="auth-form" id="auth-form">
 ${login?"":`<div class="field"><label>Full Name</label><input name="name" autocomplete="name" required></div>
 <div class="field"><label>Phone Number</label><input name="phone" type="tel" autocomplete="tel" required></div>`}
@@ -178,6 +177,18 @@ async function forgotPassword(){
   catch(err){msg(friendlyError(err),"error")}
 }
 
+function getLocalCustomerOrders(email){
+  try{
+    const list=JSON.parse(localStorage.getItem("kb_orders")||"[]");
+    if(!Array.isArray(list))return [];
+    const wanted=String(email||"").trim().toLowerCase();
+    if(!wanted)return [];
+    return list
+      .filter(order=>String(order?.customer?.email||"").trim().toLowerCase()===wanted)
+      .map(order=>({...order,source:"storefront"}));
+  }catch{return []}
+}
+
 async function loadAccount(){
   if(isDemoAccount()){const data=getDemoData();state.profile=data.profile||{};state.orders=data.orders||[];state.addresses=data.addresses||[];state.wishlist=data.wishlist||[];return}
   const uid=state.user.uid;
@@ -188,7 +199,15 @@ async function loadAccount(){
     getDocs(collection(db,"users",uid,"wishlist")).catch(()=>({docs:[]}))
   ]);
   state.profile=profileSnap.exists()?profileSnap.data():{fullName:state.user.displayName||"",email:state.user.email||"",phone:state.user.phoneNumber||"",provider:state.user.providerData?.[0]?.providerId||""};
-  state.orders=ordersSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const firestoreOrders=ordersSnap.docs.map(d=>({id:d.id,...d.data(),source:"firestore"}));
+  const localOrders=getLocalCustomerOrders(state.user.email||state.profile.email);
+  const merged=new Map(firestoreOrders.map(order=>[String(order.id),order]));
+  localOrders.forEach(order=>{if(!merged.has(String(order.id)))merged.set(String(order.id),order)});
+  state.orders=[...merged.values()].sort((a,b)=>{
+    const ta=a.createdAt?.toDate?a.createdAt.toDate().getTime():new Date(a.createdAt||0).getTime();
+    const tb=b.createdAt?.toDate?b.createdAt.toDate().getTime():new Date(b.createdAt||0).getTime();
+    return tb-ta;
+  });
   state.addresses=addrSnap.docs.map(d=>({id:d.id,...d.data()}));
   state.wishlist=wishSnap.docs.map(d=>({id:d.id,...d.data()}));
 }
@@ -302,7 +321,6 @@ function profileView(){
   <button class="account-btn primary" type="submit">Save Profile</button>
   <div id="profile-msg"></div>
 </form>
-${isDemoAccount()?`<div class="demo-remove-card"><div><strong>Demo account</strong><span>This is sample customer data for testing. You can remove it before using the account.</span></div><button class="small-btn danger-outline" id="remove-demo-account" type="button">REMOVE DEMO ACCOUNT</button></div>`:""}
 `;
 }
 
