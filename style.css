@@ -960,3 +960,52 @@ body{font-size:16px}
   .trust-logo-box{width:68px;height:44px}
   .gcash-logo{width:62px}
 }
+
+/* PAYMENT BRAND ROW — DELIVERY SECTION */
+.payment-brand-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:10px;
+}
+.payment-brand{
+  min-height:46px;
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  padding:6px 10px;
+  border:1px solid #3A2D20;
+  border-radius:12px;
+  background:#1A1007;
+  color:#C7B9A6;
+  font-size:10px;
+  font-weight:700;
+}
+.payment-brand.gcash-brand{
+  background:#fff;
+  border-color:#ddd7cf;
+  padding:7px 11px;
+}
+.payment-brand.gcash-brand img{
+  display:block;
+  width:68px;
+  height:24px;
+  object-fit:contain;
+}
+.payment-brand-mark{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(200,169,81,.30);
+  border-radius:8px;
+  color:var(--gold2);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.05em;
+}
+@media(max-width:720px){
+  .payment-brand-list{gap:8px}
+  .payment-brand{min-height:44px;font-size:10px}
+  .payment-brand.gcash-brand img{width:62px}
+}
