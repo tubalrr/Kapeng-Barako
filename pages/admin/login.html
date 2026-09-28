@@ -1,56 +1,30 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <title>Kapeng Barako — Admin Login</title>
 <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
-<link rel="stylesheet" href="../../css/admin-login.css">
-<script src="../../js/admin-auth.js" defer></script>
+<link rel="stylesheet" href="../../css/admin-login.css?v=kb-rebuild-1">
+<script src="../../js/admin-auth.js?v=kb-rebuild-2" defer></script>
 </head>
 <body>
 <main class="login-shell">
-  <section class="login-brand">
-    <img class="mark" src="../../images/favicon.svg" alt="Kapeng Barako">
-    <span class="eyebrow">RESTRICTED ADMIN PORTAL</span>
-    <h1>Run the<br><em>Barako.</em></h1>
-    <p>Inventory, orders, customers, financials, promos, CMS, shipping and support—kept behind the admin gate.</p>
-    <div class="login-points"><div class="login-point"><b>01</b> Browser session expires automatically.</div><div class="login-point"><b>02</b> No public administrator registration.</div><div class="login-point"><b>03</b> Logout removes the active local session.</div></div>
-  </section>
-  <section class="login-card">
-    <span class="eyebrow">ADMIN ACCESS</span>
-    <h2>Sign in</h2><p class="sub">Authorized store administrators only.</p>
-    <form class="form" id="admin-login-form" novalidate>
-      <label class="field">Email<input id="admin-email" type="email" autocomplete="username" value="admin@kapengbarako.com" required></label>
-      <label class="field">Password<input id="admin-password" type="password" autocomplete="current-password" value="barako123" required></label>
-      <div class="error" id="login-error" role="alert" aria-live="polite"></div>
-      <button class="btn primary" id="admin-login-submit" type="submit">Enter Admin Console →</button>
-    </form>
-    <div class="login-note"><strong>Seed account:</strong> <code>admin@kapengbarako.com</code> · <code>barako123</code><br>Change this seed before any real production deployment. A localStorage gate is a client-side control, not a server-side security boundary.</div>
-    <a class="back" href="../../index.html">← Back to Kapeng Barako</a>
-  </section>
+  <section class="login-brand"><img class="brand-mark" src="../../images/favicon.svg" alt="Kapeng Barako"><span class="eyebrow">RESTRICTED ADMIN PORTAL</span><h1>Run the<br><em>Barako.</em></h1><p>Orders, stock, customers and sales—inside the Kapeng Barako control room.</p><div class="login-rule"><span>LOCAL ADMIN SESSION</span><b>8 HOURS</b></div></section>
+  <section class="login-card"><span class="eyebrow">ADMIN ACCESS</span><h2>Sign in.</h2><p>Authorized store administrators only.</p><form id="admin-login-form"><label>Email<input id="admin-email" type="email" value="admin@kapengbarako.com" autocomplete="username" required></label><label>Password<input id="admin-password" type="password" value="barako123" autocomplete="current-password" required></label><div id="login-error" class="error" role="alert"></div><button id="login-submit" class="login-button" type="submit">ENTER CONSOLE →</button></form><div class="seed-note"><strong>Default seed</strong><code>admin@kapengbarako.com</code><code>barako123</code><small>Client-side localStorage gate only. Replace this seed and add a server-side auth layer before live production.</small></div><a class="back-link" href="../../index.html">← Back to storefront</a></section>
 </main>
 <script>
-document.addEventListener("DOMContentLoaded", async () => {
-  if (window.KBAdminAuth?.getSession()) { location.replace("./index.html"); return; }
+document.addEventListener("DOMContentLoaded",async()=>{
+  if(window.KBAdminAuth?.getSession()){location.replace("./index.html");return}
   await window.KBAdminAuth?.seedUser();
-  document.querySelector("#admin-login-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email=document.querySelector("#admin-email").value;
-    const password=document.querySelector("#admin-password").value;
-    const error=document.querySelector("#login-error");
-    const button=document.querySelector("#admin-login-submit");
-    button.disabled=true; button.textContent="Checking…"; error.textContent="";
+  const form=document.querySelector("#admin-login-form"),btn=document.querySelector("#login-submit"),err=document.querySelector("#login-error");
+  form.addEventListener("submit",async e=>{
+    e.preventDefault();err.textContent="";btn.disabled=true;btn.textContent="CHECKING…";
     try{
-      const ok=await window.KBAdminAuth.authenticate(email,password);
-      if(!ok){ error.textContent="Invalid admin credentials."; return; }
-      window.KBAdminAuth.startSession(email);
-      location.replace("./index.html");
-    }catch(err){ error.textContent="Unable to start the admin session. Try again."; }
-    finally{ button.disabled=false; button.textContent="Enter Admin Console →"; }
+      const ok=await window.KBAdminAuth.authenticate(document.querySelector("#admin-email").value,document.querySelector("#admin-password").value);
+      if(!ok){err.textContent="Invalid admin credentials.";return}
+      window.KBAdminAuth.startSession(document.querySelector("#admin-email").value);location.replace("./index.html");
+    }catch{err.textContent="Could not start the admin session."}finally{btn.disabled=false;btn.textContent="ENTER CONSOLE →"}
   });
 });
 </script>
-</body>
-</html>
+</body></html>
