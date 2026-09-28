@@ -9,20 +9,34 @@
 </head>
 <body>
 <main class="login-shell">
-  <section class="login-brand"><img class="brand-mark" src="../../images/favicon.svg" alt="Kapeng Barako"><span class="eyebrow">RESTRICTED ADMIN PORTAL</span><h1>Run the<br><em>Barako.</em></h1><p>Orders, stock, customers and sales—inside the Kapeng Barako control room.</p><div class="login-rule"><span>LOCAL ADMIN SESSION</span><b>8 HOURS</b></div></section>
+  <section class="login-brand"><img class="brand-mark" src="../../images/favicon.svg" alt="Kapeng Barako"><span class="eyebrow">RESTRICTED ADMIN PORTAL</span><h1>Run the<br><em>Barako.</em></h1><p>Orders, stock, customers and sales—inside the Kapeng Barako control room.</p><div class="login-rule"><span>FIREBASE ADMIN SESSION</span><b>8 HOURS</b></div></section>
   <section class="login-card"><span class="eyebrow">ADMIN ACCESS</span><h2>Sign in.</h2><p>Authorized store administrators only.</p><form id="admin-login-form"><label>Email<input id="admin-email" type="email" placeholder="admin@example.com" autocomplete="username" required></label><label>Password<input id="admin-password" type="password" placeholder="Firebase password" autocomplete="current-password" required></label><div id="login-error" class="error" role="alert"></div><button id="login-submit" class="login-button" type="submit">ENTER CONSOLE →</button></form><div class="seed-note"><strong>Firebase Admin</strong><small>Sign in with a Firebase Authentication account that has an active <code>/admins/{uid}</code> document. No admin password is stored in this website.</small></div><a class="back-link" href="../../index.html">← Back to storefront</a></section>
 </main>
 <script>
 document.addEventListener("DOMContentLoaded",async()=>{
-  const form=document.querySelector("#admin-login-form"),btn=document.querySelector("#login-submit"),err=document.querySelector("#login-error");
+  const form=document.querySelector("#admin-login-form");
+  const btn=document.querySelector("#login-submit");
+  const err=document.querySelector("#login-error");
+
+  const params=new URLSearchParams(location.search);
+  if(params.get("reason")==="expired"){
+    err.textContent="Your admin session expired. Please sign in again.";
+  }
+
   try{
     const admin=await window.KBAdminAuth.restore();
     if(admin){location.replace("./index.html");return}
   }catch(error){
-    if(error?.code==="FIREBASE_NOT_CONFIGURED") err.textContent="Firebase is not configured yet. Complete docs/FIREBASE_SETUP.md.";
+    if(error?.code==="FIREBASE_NOT_CONFIGURED"){
+      err.textContent="Firebase is not configured yet. Complete docs/FIREBASE_SETUP.md.";
+    }
   }
+
   form.addEventListener("submit",async e=>{
-    e.preventDefault();err.textContent="";btn.disabled=true;btn.textContent="CHECKING…";
+    e.preventDefault();
+    err.textContent="";
+    btn.disabled=true;
+    btn.textContent="CHECKING…";
     try{
       await window.KBAdminAuth.authenticate(
         document.querySelector("#admin-email").value,
@@ -31,7 +45,10 @@ document.addEventListener("DOMContentLoaded",async()=>{
       location.replace("./index.html");
     }catch(error){
       err.textContent=error?.message || "Could not sign in.";
-    }finally{btn.disabled=false;btn.textContent="ENTER CONSOLE →"}
+    }finally{
+      btn.disabled=false;
+      btn.textContent="ENTER CONSOLE →";
+    }
   });
 });
 </script>
