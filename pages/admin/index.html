@@ -1,147 +1,546 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Kapeng Barako — Admin</title>
 <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
-<link rel="stylesheet" href="../../css/admin.css?v=kb-production-15">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js" defer></script>
-<script src="../../js/admin-auth.js?v=kb-production-11" defer></script>
+<style>
+:root{
+  --bg:#0F0B06;--sidebar:#1A1207;--card:#221A0E;--border:#2A2116;
+  --gold:#C8A951;--text:#F5E9D3;--muted:#9A8A73;--danger:#D84B4B;
+  --radius:20px;--shadow:0 16px 42px rgba(0,0,0,.24)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.app{min-height:100vh}
+.login-screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top,#2a1b0c 0,#0F0B06 46%,#0F0B06 100%)}
+.login-card{width:min(430px,100%);background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.brand img{width:42px;height:42px}
+.brand strong{display:block;font-size:15px}
+.brand small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.kicker{color:var(--gold);font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+.login-card h1{font-family:Georgia,serif;font-size:42px;line-height:.95;margin:8px 0 10px}
+.login-card p{color:var(--muted);font-size:11px;line-height:1.6;margin:0 0 22px}
+.field{display:grid;gap:7px;margin-bottom:14px}
+.field label{color:#bba98f;font-size:10px;font-weight:800}
+.field input,.field select{
+  width:100%;height:46px;border:1px solid var(--border);border-radius:14px;
+  background:#171006;color:var(--text);padding:0 13px;outline:none
+}
+.field input:focus,.field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,169,81,.12)}
+.primary-btn,.ghost-btn,.danger-btn{
+  min-height:42px;border-radius:999px;padding:0 16px;border:1px solid var(--border);
+  font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase
+}
+.primary-btn{background:var(--gold);color:#120d05;border-color:var(--gold)}
+.ghost-btn{background:transparent;color:var(--text)}
+.danger-btn{background:transparent;color:#ef9a9a;border-color:rgba(216,75,75,.35)}
+.full{width:100%}
+.login-error{min-height:18px;color:#ef9a9a;font-size:10px;margin:0 0 8px}
+.shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;background:var(--sidebar);border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;z-index:20}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:8px 8px 18px;border-bottom:1px solid var(--border)}
+.sidebar-brand img{width:34px;height:34px}
+.sidebar-brand strong{display:block;font-size:13px}
+.sidebar-brand small{display:block;color:var(--muted);font-size:9px;margin-top:2px}
+.nav{display:grid;gap:4px;padding-top:16px}
+.nav button{width:100%;border:1px solid transparent;background:transparent;color:#a18f77;border-radius:14px;padding:12px 12px;text-align:left;display:flex;gap:10px;align-items:center;font-size:10px;font-weight:850}
+.nav button span{width:20px;color:#6f5c43;font-size:8px}
+.nav button:hover,.nav button.active{background:#25190c;border-color:#3a2a18;color:var(--text)}
+.nav button.active span{color:var(--gold)}
+.sidebar-foot{margin-top:auto;border-top:1px solid var(--border);padding-top:14px;display:grid;gap:8px}
+.sidebar-user{padding:10px 12px;border:1px solid var(--border);border-radius:14px;color:#ae9d84;font-size:9px;overflow:hidden;text-overflow:ellipsis}
+.main{min-width:0}
+.topbar{position:sticky;top:0;z-index:15;min-height:80px;background:rgba(15,11,6,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 30px;display:flex;align-items:center;justify-content:space-between}
+.topbar h2{font-family:Georgia,serif;font-size:28px;margin:4px 0 0}
+.top-actions{display:flex;gap:8px;align-items:center}
+.menu-btn{display:none}
+.content{padding:28px;max-width:1420px;margin:0 auto}
+.view{display:none}.view.active{display:block}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding:24px;background:linear-gradient(135deg,#25180b,#1b1007);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px}
+.hero h1{font:600 clamp(34px,4vw,52px)/.98 Georgia,serif;letter-spacing:-.03em;margin:7px 0}
+.hero p{color:var(--muted);font-size:11px;margin:0;max-width:640px;line-height:1.6}
+.hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+.metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;min-height:116px}
+.metric span{display:block;color:#9a8b74;font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:800}
+.metric strong{display:block;color:var(--text);font:600 30px Georgia,serif;margin-top:20px}
+.metric.low{border-color:rgba(216,75,75,.55);box-shadow:0 0 0 1px rgba(216,75,75,.1)}
+.metric.low strong{color:#ff9b9b}
+.grid-two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:16px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.card-head h3{margin:3px 0 0;font:600 23px Georgia,serif}
+.card-note{font-size:9px;color:var(--muted)}
+.chart-wrap{height:270px;position:relative}
+canvas{width:100%;height:100%;display:block}
+.queue{display:grid;gap:8px;max-height:270px;overflow:auto}
+.queue-row{display:flex;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--border);border-radius:14px;background:#1b1107}
+.queue-row strong{font-size:10px}.queue-row small{display:block;color:var(--muted);font-size:8px;margin-top:3px}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-height:24px;padding:0 9px;border-radius:999px;background:#2b2012;border:1px solid var(--border);color:#ceb98f;font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.badge.pending{color:#e2c57b}.badge.ready{color:#dbc37f}.badge.delivered{color:#9fd3a9}.badge.low{background:rgba(216,75,75,.13);border-color:rgba(216,75,75,.45);color:#ff9b9b}
+.table-card{padding:0;overflow:hidden}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:980px}
+th,td{padding:13px 15px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{color:#84735e;font-size:8px;letter-spacing:.1em;text-transform:uppercase;font-weight:900}
+td{font-size:10px;color:#e9ddca}
+tbody tr:hover{background:rgba(255,255,255,.018)}
+.muted{display:block;color:var(--muted);font-size:8px;margin-top:4px}
+.status-select{height:34px;border:1px solid var(--border);background:#171006;color:var(--text);border-radius:10px;padding:0 9px;outline:none;font-size:9px}
+.status-select:focus{border-color:var(--gold)}
+.track-btn{height:32px;padding:0 11px;border:1px solid var(--border);background:transparent;color:var(--gold);border-radius:999px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.1em}
+.search-row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+.search-row input{flex:1;min-width:180px;height:44px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--text);padding:0 13px;outline:none}
+.search-row input:focus{border-color:var(--gold)}
+.search-count{font-size:9px;color:var(--muted)}
+.inventory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.inventory-card{padding:18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+.inventory-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.inventory-card h3{margin:7px 0 3px;font:600 22px Georgia,serif}
+.inventory-id{color:var(--muted);font-size:8px}
+.stock-value{font:600 28px Georgia,serif;color:var(--gold);margin:20px 0 2px}
+.stock-low{color:#ff9b9b!important}
+.empty{padding:42px 24px;color:var(--muted);text-align:center;font-size:10px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:20px;z-index:80}
+.modal{width:min(500px,100%);background:var(--card);border:1px solid var(--border);border-radius:22px;padding:20px;box-shadow:var(--shadow)}
+.modal h3{font:600 28px Georgia,serif;margin:6px 0 18px}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start}
+.close{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:20px}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.track-list{display:grid;gap:10px}
+.track-step{display:grid;grid-template-columns:22px 1fr;gap:9px;align-items:start}
+.track-dot{width:10px;height:10px;border-radius:50%;background:#4d3e2c;margin-top:4px;box-shadow:0 0 0 4px #2b2012}
+.track-step.current .track-dot,.track-step.done .track-dot{background:var(--gold)}
+.track-step strong{display:block;font-size:10px}.track-step small{color:var(--muted);font-size:8px}
+.order-detail{display:grid;gap:12px;padding:14px;border:1px solid var(--border);border-radius:16px;background:#1b1107;margin-bottom:14px}
+.detail-row{display:flex;justify-content:space-between;gap:10px}.detail-row span{color:var(--muted);font-size:9px}.detail-row strong{font-size:10px;text-align:right}
+.gcash-ref{font-weight:900;color:#e8d7b7}.gcash-missing{color:#ff9b9b}
+@media(max-width:1050px){.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-two{grid-template-columns:1fr}.inventory-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:820px){
+  .shell{grid-template-columns:1fr}.sidebar{position:fixed;left:-280px;top:0;width:250px;transition:left .2s ease;box-shadow:var(--shadow)}.sidebar.open{left:0}.menu-btn{display:inline-flex;width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--text);align-items:center;justify-content:center;margin-right:10px}.topbar{padding:0 16px}.content{padding:18px}.top-actions .admin-email{display:none}.inventory-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.metric-grid{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.hero-actions{width:100%}.hero-actions>*{flex:1}.search-row{align-items:stretch;flex-direction:column}.search-row input{width:100%}}
+</style>
 </head>
 <body>
-<button class="admin-menu" id="admin-menu" type="button" aria-label="Open admin menu" aria-expanded="false"><span></span><span></span><span></span></button>
-<div class="admin-overlay" id="admin-overlay"></div>
-<div class="admin-shell">
-  <aside class="admin-sidebar" id="admin-sidebar">
-    <div class="admin-brand"><a href="../../index.html"><img src="../../images/favicon.svg" alt=""><span><b>Kapeng Barako</b><small>Admin Console</small></span></a><button id="admin-close" type="button" aria-label="Close menu">×</button></div>
-    <nav class="admin-nav">
-      <button class="active" data-view="overview"><span>01</span>Overview</button>
-      <button data-view="orders"><span>02</span>Orders</button>
-      <button data-view="inventory"><span>03</span>Inventory</button>
-      <button data-view="products"><span>04</span>Products</button>
-      <button data-view="customers"><span>05</span>Customers</button>
-      <button data-view="promos"><span>06</span>Promos</button>
-      <button data-view="content"><span>07</span>Content</button><button data-view="gallery"><span>08</span>Gallery</button><button data-view="ads"><span>09</span>Ads</button>
-    </nav>
-    <div class="admin-sidebar-foot"><a href="../../index.html">← Storefront</a><button id="logout" type="button">Logout</button></div>
-  </aside>
-
-  <main class="admin-main">
-    <header class="admin-topbar"><div><span class="eyebrow">KAPENG BARAKO</span><h1 id="view-title">Overview</h1></div><div class="admin-top-actions"><span class="admin-user" id="admin-user">admin</span></div></header>
-
-    <section class="admin-view active" id="view-overview" data-view-panel="overview">
-      <div class="welcome"><div><span class="eyebrow">OPERATIONS</span><h2>Run the Barako.</h2><p>Orders, roast stock, customers and revenue in one clean control room.</p></div><div class="welcome-actions"><button id="enable-low-stock-sound" class="admin-button outline" type="button">🔔 Enable Alert Sound</button><a class="admin-button gold" href="../../index.html#products">Open Storefront →</a></div></div>
-      <div class="metric-grid">
-        <article class="metric"><span>Order records</span><strong id="metric-orders">0</strong></article>
-        <article class="metric low-card" id="low-card"><span>Low-stock</span><strong id="metric-low">0</strong><small>≤ 5 packs</small></article>
-        <article class="metric"><span>Open tickets</span><strong id="metric-tickets">0</strong></article>
-        <article class="metric"><span>Revenue</span><strong id="metric-revenue">₱0</strong></article>
-        <article class="metric"><span>Today Sales</span><strong id="metric-today">₱0</strong></article>
-        <article class="metric"><span>This Week</span><strong id="metric-week">₱0</strong></article>
-        <article class="metric"><span>Customers</span><strong id="metric-customers">0</strong></article>
-      </div>
-      <div id="low-stock-alert" class="low-stock-alert" hidden></div>
-      <div class="admin-grid-two">
-        <section class="panel chart-panel"><div class="panel-head"><div><span class="eyebrow">LAST 7 DAYS</span><h3>Sales</h3></div><span class="panel-note">Local order records</span></div><div class="chart-wrap"><canvas id="sales-chart"></canvas><div id="chart-fallback" class="chart-fallback" hidden></div></div></section>
-        <section class="panel"><div class="panel-head"><div><span class="eyebrow">FULFILLMENT</span><h3>Queue</h3></div></div><div id="fulfillment-queue" class="queue"></div></section>
-      </div>
-      <section class="panel"><div class="panel-head"><div><span class="eyebrow">ORDER FLOW</span><h3>Current status</h3></div></div><div class="status-grid"><div><b id="count-pending">0</b><span>Pending</span></div><div><b id="count-processing">0</b><span>Processing</span></div><div><b id="count-ready">0</b><span>Ready</span></div><div><b id="count-delivered">0</b><span>Delivered</span></div></div></section>
-    </section>
-
-    <section class="admin-view" id="view-orders" data-view-panel="orders" hidden>
-      <div class="view-head"><div><span class="eyebrow">ORDER MANAGEMENT</span><h2>Orders</h2><p>Search by Order ID or customer name.</p></div></div>
-      <div class="order-search-bar"><label class="order-search-field"><span aria-hidden="true">⌕</span><input id="order-search" type="search" placeholder="Search Order ID or customer name..." autocomplete="off" aria-label="Search orders by Order ID or customer name"><button id="clear-order-search" type="button" aria-label="Clear order search">×</button></label><span id="order-search-count" class="panel-note"></span></div>
-      <div class="panel table-panel"><div id="orders-table"></div></div>
-    </section>
-
-    <section class="admin-view" id="view-inventory" data-view-panel="inventory" hidden>
-      <div class="view-head"><div><span class="eyebrow">STOCK CONTROL</span><h2>Inventory</h2><p>Product packs are the live inventory source. Orders deduct automatically.</p></div></div>
-      <div class="inventory-note">Low-stock rule: <strong>5 packs or below</strong> turns red.</div>
-      <div class="panel table-panel"><div id="inventory-table"></div></div>
-    </section>
-
-    <section class="admin-view" id="view-products" data-view-panel="products" hidden>
-      <div class="view-head"><div><span class="eyebrow">PRODUCTION CATALOG</span><h2>Products</h2><p>Real product records only. Add your actual product, price, and stock.</p></div><div class="view-head-actions"><button id="add-product" class="admin-button gold" type="button">+ Add Product</button></div></div>
-      <div class="panel table-panel"><div id="products-table"></div></div>
-    </section>
-
-    <section class="admin-view" id="view-customers" data-view-panel="customers" hidden>
-      <div class="view-head"><div><span class="eyebrow">CUSTOMER DIRECTORY</span><h2>Customers</h2></div></div>
-      <div class="panel table-panel"><div id="customers-table"></div></div>
-    </section>
-
-    <section class="admin-view" id="view-promos" data-view-panel="promos" hidden>
-      <div class="view-head"><div><span class="eyebrow">PRICING</span><h2>Promo codes</h2><p>Create codes such as BARAKO10 for the storefront checkout.</p></div><button id="add-promo" class="admin-button gold" type="button">+ Add promo</button></div>
-      <div class="panel table-panel"><div id="promos-table"></div></div>
-    </section>
-
-    <section class="admin-view" id="view-contact" data-view-panel="contact" hidden>
-      <div class="view-head"><div><span class="eyebrow">BUSINESS CONTACT</span><h2>Contact</h2><p>These details are used by the main site footer and contact page.</p></div><button id="save-contact" class="admin-button gold" type="button">Save Contact</button></div>
-      <div class="panel form-panel contact-manager-form">
-        <label>Business / Store name<input id="contact-business-name" placeholder="Kapeng Barako"></label>
-        <label>Email<input id="contact-manager-email" type="email" placeholder="hello@example.com"></label>
-        <label>Phone<input id="contact-manager-phone" type="tel" placeholder="+63 9XX XXX XXXX"></label>
-        <label>Location / Address<input id="contact-manager-location" placeholder="Business address"></label>
-        <label>Facebook URL<input id="contact-manager-facebook" type="url" placeholder="https://facebook.com/..."></label>
-        <label>Messenger URL<input id="contact-manager-messenger" type="url" placeholder="https://m.me/..."></label>
-        <label>Business hours<input id="contact-manager-hours" placeholder="Mon–Sat · 8:00 AM–5:00 PM"></label>
-        <small>Only information you enter here will be published. No placeholder contact details are generated.</small>
-      </div>
-    </section>
-
-    <section class="admin-view" id="view-gallery" data-view-panel="gallery" hidden>
-      <div class="view-head"><div><span class="eyebrow">VISUAL CATALOG</span><h2>Gallery Manager</h2><p>Replace the six main-site gallery photos with your real product, farm, roast, or coffee photos.</p></div></div>
-      <div class="panel table-panel"><div id="gallery-table"></div></div>
-    </section>
-    <section class="admin-view" id="view-ads" data-view-panel="ads" hidden>
-      <div class="view-head"><div><span class="eyebrow">ADVERTISEMENT</span><h2>Ad Container</h2><p>Enter the advertisement destination link here. This is the admin container only; storefront placement can be connected next.</p></div><div class="view-head-actions"><button id="save-ads" class="admin-button gold" type="button">Save Ad Link</button><button id="clear-ads" class="admin-button outline" type="button">Clear</button></div></div>
-      <div class="panel ads-manager-panel">
-        <div class="ads-input-grid">
-          <label>Advertisement link<input id="ads-link" type="url" placeholder="https://example.com/advertisement" inputmode="url" autocomplete="off"></label>
-          <label>Image URL<input id="ads-image" type="url" placeholder="https://example.com/ad.jpg" inputmode="url" autocomplete="off"></label>
-          <label>Ad label<input id="ads-label" type="text" placeholder="Sponsored" autocomplete="off"></label>
-        </div>
-        <div class="ads-container" id="ads-preview">
-          <span class="ads-container-kicker">ADVERTISEMENT SLOT</span>
-          <img id="ads-preview-image" class="ads-preview-image" alt="Advertisement preview" hidden>
-          <strong id="ads-preview-title">No ad configured</strong>
-          <p id="ads-preview-copy">Add an advertisement link and image URL above, then save it.</p>
-          <a id="ads-preview-open" href="#" target="_blank" rel="noopener noreferrer" hidden>OPEN AD LINK ↗</a>
-        </div>
-        <div class="content-note">The saved values are stored in this browser's admin storage. No live AdSense code is added yet.</div>
-      </div>
-    </section>
-
-    <section class="admin-view" id="view-content" data-view-panel="content" hidden>
-      <div class="view-head"><div><span class="eyebrow">CONTENT</span><h2>Story & announcements</h2><p>Safe place to update approved contact, announcement and social-proof content.</p></div><button id="save-content" class="admin-button gold" type="button">Save content</button></div>
-      <div class="panel form-panel">
-        <label>Fresh roast announcement<input id="content-announcement" value="Bagong ani na!"></label>
-        <label>Announcement body<textarea id="content-body" rows="4">Add the latest approved harvest or roast update.</textarea></label>
-        <label>Facebook URL<input id="content-facebook" placeholder="https://facebook.com/..."></label>
-        <label>Email<input id="content-email" value="ILAG"></label>
-        <label>Phone<input id="content-phone" value="ILAG"></label>
-        <label>Location<input id="content-location" value="ILAG"></label>
-        <div class="content-note">Real customer screenshots should be added as approved brand assets; no fabricated testimonials are generated.</div>
-      </div>
-    </section>
-  </main>
+<div id="loginScreen" class="login-screen">
+  <form id="loginForm" class="login-card">
+    <div class="brand"><img src="../../images/favicon.svg" alt=""><div><strong>Kapeng Barako</strong><small>Admin Console</small></div></div>
+    <div class="kicker">Restricted Admin</div>
+    <h1>Run the Barako.</h1>
+    <p>Sign in to manage orders, inventory and customer-facing order status.</p>
+    <div class="field"><label for="loginUser">Username</label><input id="loginUser" autocomplete="username" required></div>
+    <div class="field"><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
+    <div id="loginError" class="login-error"></div>
+    <button class="primary-btn full" type="submit">Enter Admin →</button>
+  </form>
 </div>
 
-<dialog id="product-dialog"><form method="dialog" id="product-form"><button class="dialog-close" type="button" data-product-dialog-close>×</button><span class="eyebrow">NEW PRODUCT</span><h2>Add product</h2><label>Product name<input id="product-name" placeholder="Barako 2kg" required></label><label>Size<input id="product-size" placeholder="2kg" required></label><label>Price (₱)<input id="product-price" type="number" min="0" step="1" required></label><label>Stock (packs)<input id="product-stock" type="number" min="0" step="1" value="0" required></label><label>Badge<input id="product-badge" placeholder="NEW"></label><label>Roast<select id="product-roast"><option>Light</option><option selected>Medium</option><option>Dark</option></select></label><label>Grind<select id="product-grind"><option selected>Whole</option><option>Coarse</option><option>Fine</option></select></label><label>Description<textarea id="product-note" rows="3" placeholder="Product description"></textarea></label><div class="dialog-actions"><button class="admin-button outline" type="button" data-product-dialog-close>Cancel</button><button class="admin-button gold" type="submit">Add Product</button></div></form></dialog>
-<dialog id="promo-dialog"><form method="dialog" id="promo-form"><button class="dialog-close" type="button" data-dialog-close>×</button><span class="eyebrow">PROMO RULE</span><h2>New promo</h2><label>Name<input id="promo-name" required></label><label>Code<input id="promo-code" required></label><label>Type<select id="promo-type"><option value="percent">Percent</option><option value="fixed">Fixed</option></select></label><label>Value<input id="promo-value" type="number" min="0" required></label><label>Minimum packs<input id="promo-min" type="number" min="0" value="0"></label><label>Active<input id="promo-active" type="checkbox" checked></label><div class="dialog-actions"><button class="admin-button outline" type="button" data-dialog-close>Cancel</button><button class="admin-button gold" type="submit">Save</button></div></form></dialog>
-<div id="admin-toast" class="admin-toast"></div>
+<div id="adminApp" class="app hidden">
+  <div class="shell">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand"><img src="../../images/favicon.svg" alt=""><div><strong>Kapeng Barako</strong><small>Admin</small></div></div>
+      <nav id="nav" class="nav">
+        <button class="active" data-view="overview"><span>01</span>Overview</button>
+        <button data-view="orders"><span>02</span>Orders</button>
+        <button data-view="inventory"><span>03</span>Inventory</button>
+        <button data-view="customers"><span>04</span>Customers</button>
+      </nav>
+      <div class="sidebar-foot">
+        <div id="adminEmail" class="sidebar-user">admin</div>
+        <button id="logoutBtn" class="danger-btn" type="button">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div style="display:flex;align-items:center">
+          <button id="menuBtn" class="menu-btn" type="button" aria-label="Open menu">☰</button>
+          <div><div class="kicker">KAPENG BARAKO</div><h2 id="viewTitle">Overview</h2></div>
+        </div>
+        <div class="top-actions"><span class="badge admin-email">ADMIN</span></div>
+      </header>
+
+      <div class="content">
+        <section id="view-overview" class="view active">
+          <div class="hero">
+            <div><div class="kicker">OPERATIONS</div><h1>Dashboard</h1><p>Real-time totals from <code>kb_orders</code> and the current product inventory in this browser.</p></div>
+            <div class="hero-actions"><a class="ghost-btn" href="../../index.html" style="display:inline-flex;align-items:center;text-decoration:none">Storefront →</a></div>
+          </div>
+          <div class="metric-grid">
+            <article class="metric"><span>Total Revenue</span><strong id="mRevenue">₱0</strong></article>
+            <article class="metric"><span>Total Orders</span><strong id="mOrders">0</strong></article>
+            <article class="metric"><span>Pending</span><strong id="mPending">0</strong></article>
+            <article id="lowMetric" class="metric"><span>Low Stock</span><strong id="mLow">0</strong><small style="display:block;color:var(--muted);font-size:8px;margin-top:5px">≤ 5 packs</small></article>
+          </div>
+          <div class="grid-two">
+            <section class="card"><div class="card-head"><div><div class="kicker">SALES</div><h3>Last 7 Days</h3></div><span id="chartNote" class="card-note">₱0</span></div><div class="chart-wrap"><canvas id="salesChart" width="900" height="270"></canvas></div></section>
+            <section class="card"><div class="card-head"><div><div class="kicker">FULFILLMENT</div><h3>Pending Queue</h3></div></div><div id="queue" class="queue"></div></section>
+          </div>
+        </section>
+
+        <section id="view-orders" class="view">
+          <div class="hero"><div><div class="kicker">ORDER MANAGEMENT</div><h1>Orders</h1><p>Customer orders use the shared <code>kb_orders</code> record. Status edits are written back immediately.</p></div></div>
+          <div class="search-row"><input id="orderSearch" type="search" placeholder="Search Order ID or customer name..." autocomplete="off"><span id="orderCount" class="search-count"></span></div>
+          <section class="card table-card"><div id="ordersTable" class="table-wrap"></div></section>
+        </section>
+
+        <section id="view-inventory" class="view">
+          <div class="hero"><div><div class="kicker">STOCK CONTROL</div><h1>Inventory</h1><p>Edit the current three catalog products without changing any other order fields.</p></div></div>
+          <div id="inventoryGrid" class="inventory-grid"></div>
+        </section>
+
+        <section id="view-customers" class="view">
+          <div class="hero"><div><div class="kicker">CUSTOMER DIRECTORY</div><h1>Customers</h1><p>Customers are built from the names and contact details inside <code>kb_orders</code>.</p></div></div>
+          <section class="card table-card"><div id="customersTable" class="table-wrap"></div></section>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="stockModal" class="modal-backdrop hidden">
+  <form id="stockForm" class="modal">
+    <div class="modal-head"><div><div class="kicker">INVENTORY EDIT</div><h3 id="stockTitle">Edit stock</h3></div><button id="closeStock" class="close" type="button">×</button></div>
+    <div class="field"><label for="stockInput">Stock (packs)</label><input id="stockInput" type="number" min="0" step="1" required></div>
+    <div class="form-actions"><button id="cancelStock" class="ghost-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save Stock</button></div>
+  </form>
+</div>
+
+<div id="trackModal" class="modal-backdrop hidden">
+  <section class="modal">
+    <div class="modal-head"><div><div class="kicker">ORDER TRACKING</div><h3 id="trackTitle">Order</h3></div><button id="closeTrack" class="close" type="button">×</button></div>
+    <div id="trackBody"></div>
+    <div class="form-actions"><button id="closeTrackBtn" class="primary-btn" type="button">Done</button></div>
+  </section>
+</div>
+
 <script>
-/* Admin navigation compatibility hotfix: the legacy selector expects forEach. */
 (() => {
-  const nativeQuerySelector = Document.prototype.querySelector;
-  Document.prototype.querySelector = function(selector) {
-    if (selector === ".admin-nav button") {
-      return this.querySelectorAll(selector);
+  "use strict";
+
+  const ORDER_KEY = "kb_orders";
+  const PRODUCT_KEY = "kb_rebuild_products";
+  const ADMIN_KEY = "kb_admin";
+  const ADMIN_USER = "admin";
+  const ADMIN_PASS = "barako123";
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+
+  const read = (key, fallback) => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? fallback : JSON.parse(raw);
+    } catch {
+      return fallback;
     }
-    return nativeQuerySelector.call(this, selector);
   };
+  const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+  const money = (n) => "₱" + Number(n || 0).toLocaleString("en-PH", {maximumFractionDigits:2});
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;","'":"&#39;" }[c]));
+  const normalizeStatus = (s) => {
+    const v = String(s || "Pending").toLowerCase();
+    if (v === "delivered") return "Delivered";
+    if (v === "ready" || v === "ready to ship" || v === "processing/roasting" || v === "dispatched" || v === "in transit") return "Ready";
+    return "Pending";
+  };
+  const statusClass = (s) => normalizeStatus(s).toLowerCase();
+
+  let orderSearch = "";
+  let editingProductId = null;
+
+  function isAdmin() {
+    return localStorage.getItem(ADMIN_KEY) === "1";
+  }
+
+  function showLogin() {
+    $("#loginScreen").classList.remove("hidden");
+    $("#adminApp").classList.add("hidden");
+  }
+
+  function showApp() {
+    $("#loginScreen").classList.add("hidden");
+    $("#adminApp").classList.remove("hidden");
+    $("#adminEmail").textContent = ADMIN_USER;
+    renderAll();
+  }
+
+  function products() {
+    const list = read(PRODUCT_KEY, []);
+    return Array.isArray(list) ? list : [];
+  }
+
+  function orders() {
+    const list = read(ORDER_KEY, []);
+    return Array.isArray(list) ? list : [];
+  }
+
+  function customerName(o) {
+    return String(o?.customer?.name || o?.customerName || o?.name || "Customer").trim();
+  }
+
+  function customerEmail(o) {
+    return String(o?.customer?.email || o?.email || "").trim();
+  }
+
+  function gcashRef(o) {
+    return String(o?.gcashRef || o?.gcashReference || o?.gcash_ref || o?.paymentReference || "").trim();
+  }
+
+  function itemsCount(o) {
+    const items = Array.isArray(o?.items) ? o.items : [];
+    return items.reduce((sum, item) => sum + Number(item?.qty || 1), 0);
+  }
+
+  function productStock(id, value) {
+    const list = products();
+    return list.map(p => String(p.id) === String(id) ? {...p, stock:Number(value)} : p);
+  }
+
+  function renderOverview() {
+    const os = orders();
+    const ps = products();
+    const pending = os.filter(o => normalizeStatus(o.status) === "Pending").length;
+    const low = ps.filter(p => Number(p.stock || 0) <= 5);
+    const revenue = os.reduce((sum, o) => sum + Number(o.total || 0), 0);
+
+    $("#mRevenue").textContent = money(revenue);
+    $("#mOrders").textContent = os.length;
+    $("#mPending").textContent = pending;
+    $("#mLow").textContent = low.length;
+    $("#lowMetric").classList.toggle("low", low.length > 0);
+
+    const queue = os.filter(o => normalizeStatus(o.status) !== "Delivered").sort((a,b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0)).slice(0,8);
+    $("#queue").innerHTML = queue.length ? queue.map(o =>
+      '<div class="queue-row"><div><strong>'+esc(o.id || "—")+'</strong><small>'+esc(customerName(o))+'</small></div><div><span class="badge '+statusClass(o.status)+'">'+esc(normalizeStatus(o.status))+'</span><small>'+money(o.total)+'</small></div></div>'
+    ).join("") : '<div class="empty">No pending orders.</div>';
+
+    drawSalesChart(os);
+  }
+
+  function drawSalesChart(os) {
+    const canvas = $("#salesChart");
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(320, Math.floor(rect.width || canvas.clientWidth || 900));
+    const height = 270;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,width,height);
+
+    const days = [];
+    const values = [];
+    const end = new Date();
+    for (let i=6; i>=0; i--) {
+      const day = new Date(end.getFullYear(),end.getMonth(),end.getDate()-i);
+      const from = day.getTime();
+      const to = from + 86400000;
+      days.push(day.toLocaleDateString("en-PH",{weekday:"short"}));
+      values.push(os.filter(o => {
+        const t = new Date(o.createdAt || 0).getTime();
+        return Number.isFinite(t) && t >= from && t < to;
+      }).reduce((sum,o) => sum + Number(o.total || 0),0));
+    }
+
+    const max = Math.max(...values, 1);
+    const left = 18, right = width - 12, top = 20, bottom = height - 34;
+    ctx.strokeStyle = "#2A2116"; ctx.lineWidth = 1;
+    for(let i=0;i<4;i++){
+      const y=top+(bottom-top)*(i/3);
+      ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();
+    }
+
+    ctx.beginPath();
+    values.forEach((v,i)=>{
+      const x=left+(right-left)*(i/6);
+      const y=bottom-(v/max)*(bottom-top);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle="#C8A951";ctx.lineWidth=3;ctx.lineJoin="round";ctx.lineCap="round";ctx.stroke();
+
+    values.forEach((v,i)=>{
+      const x=left+(right-left)*(i/6);
+      const y=bottom-(v/max)*(bottom-top);
+      ctx.fillStyle="#C8A951";ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle="#9A8A73";ctx.font="9px Inter, sans-serif";ctx.textAlign="center";ctx.fillText(days[i],x,height-12);
+    });
+    $("#chartNote").textContent = money(values.reduce((a,b)=>a+b,0)) + " / 7d";
+  }
+
+  function renderOrders() {
+    const os = orders().sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    const q = orderSearch.trim().toLowerCase();
+    const filtered = q ? os.filter(o => String(o.id || "").toLowerCase().includes(q) || customerName(o).toLowerCase().includes(q)) : os;
+    $("#orderCount").textContent = q ? filtered.length+" of "+os.length+" orders" : os.length+" orders";
+    if(!os.length){ $("#ordersTable").innerHTML='<div class="empty">No orders yet.</div>'; return; }
+    if(!filtered.length){ $("#ordersTable").innerHTML='<div class="empty">No matching orders.</div>'; return; }
+
+    $("#ordersTable").innerHTML = '<table><thead><tr><th>Order ID</th><th>Customer</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>GCash Ref</th><th>Track</th></tr></thead><tbody>'+
+      filtered.map(o => {
+        const status = normalizeStatus(o.status);
+        const ref = gcashRef(o);
+        return '<tr>'+
+          '<td><strong>'+esc(o.id || "—")+'</strong></td>'+
+          '<td><strong>'+esc(customerName(o))+'</strong><span class="muted">'+esc(customerEmail(o))+'</span></td>'+
+          '<td>'+esc(new Date(o.createdAt || Date.now()).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}))+'</td>'+
+          '<td>'+itemsCount(o)+'</td>'+
+          '<td><strong>'+money(o.total)+'</strong></td>'+
+          '<td><select class="status-select" data-status-id="'+esc(o.id)+'"><option value="Pending">Pending</option><option value="Ready">Ready</option><option value="Delivered">Delivered</option></select></td>'+
+          '<td><strong class="gcash-ref '+(!ref && String(o.payment||"").toLowerCase()==="gcash" ? "gcash-missing" : "")+'">'+esc(String(o.payment||"").toLowerCase()==="gcash" ? (ref || "MISSING") : (ref || "—"))+'</strong></td>'+
+          '<td><button class="track-btn" type="button" data-track-id="'+esc(o.id)+'">Track</button></td>'+
+        '</tr>';
+      }).join("")+'</tbody></table>';
+
+    $$("[data-status-id]").forEach(sel => {
+      const o = os.find(x => String(x.id) === String(sel.dataset.statusId));
+      if(o) sel.value = normalizeStatus(o.status);
+      sel.addEventListener("change", () => updateOrderStatus(sel.dataset.statusId, sel.value));
+    });
+    $$("[data-track-id]").forEach(btn => btn.addEventListener("click", () => openTrack(btn.dataset.trackId)));
+  }
+
+  function updateOrderStatus(id, status) {
+    const current = orders();
+    const idx = current.findIndex(o => String(o.id) === String(id));
+    if(idx < 0) return;
+    const previous = current[idx]?.status;
+    current[idx] = {...current[idx], status, statusUpdatedAt:new Date().toISOString()};
+    write(ORDER_KEY,current);
+    renderAll();
+  }
+
+  function renderInventory() {
+    const ps = products().slice(0,3);
+    const root = $("#inventoryGrid");
+    if(!ps.length){root.innerHTML='<div class="card"><div class="empty">No product records found in kb_rebuild_products.</div></div>';return;}
+    root.innerHTML = ps.map(p => {
+      const stock = Number(p.stock || 0);
+      return '<article class="inventory-card"><div class="inventory-top"><div><div class="kicker">'+esc(p.size || "PRODUCT")+'</div><h3>'+esc(p.name || "Product")+'</h3><span class="inventory-id">'+esc(p.id || "—")+'</span></div><span class="badge '+(stock<=5?"low":"")+'">'+(stock<=5?"LOW STOCK":"IN STOCK")+'</span></div><div class="stock-value '+(stock<=5?"stock-low":"")+'">'+stock+' packs</div><button class="primary-btn" type="button" data-edit-stock="'+esc(p.id)+'">Edit Stock</button></article>';
+    }).join("");
+    $$("[data-edit-stock]").forEach(btn => btn.addEventListener("click", () => openStock(btn.dataset.editStock)));
+  }
+
+  function renderCustomers() {
+    const map = new Map();
+    orders().forEach(o => {
+      const key = (customerEmail(o) || customerName(o)).toLowerCase();
+      if(!map.has(key)) map.set(key,{name:customerName(o),email:customerEmail(o),phone:String(o?.customer?.phone || o?.phone || ""),orders:0,spend:0});
+      const c = map.get(key);
+      c.orders += 1; c.spend += Number(o.total || 0);
+    });
+    const list=[...map.values()].sort((a,b)=>b.spend-a.spend);
+    if(!list.length){$("#customersTable").innerHTML='<div class="empty">No customers found in kb_orders.</div>';return;}
+    $("#customersTable").innerHTML='<table><thead><tr><th>Customer</th><th>Phone</th><th>Email</th><th>Orders</th><th>Total Spend</th></tr></thead><tbody>'+
+      list.map(c=>'<tr><td><strong>'+esc(c.name)+'</strong></td><td>'+esc(c.phone || "—")+'</td><td>'+esc(c.email || "—")+'</td><td>'+c.orders+'</td><td><strong>'+money(c.spend)+'</strong></td></tr>').join("")+
+      '</tbody></table>';
+  }
+
+  function openStock(id) {
+    const p = products().find(x => String(x.id) === String(id));
+    if(!p) return;
+    editingProductId = id;
+    $("#stockTitle").textContent = "Edit " + (p.name || p.id);
+    $("#stockInput").value = Number(p.stock || 0);
+    $("#stockModal").classList.remove("hidden");
+    $("#stockInput").focus();
+  }
+
+  function closeStock() {
+    $("#stockModal").classList.add("hidden");
+    editingProductId = null;
+  }
+
+  function openTrack(id) {
+    const o = orders().find(x => String(x.id) === String(id));
+    if(!o) return;
+    const status = normalizeStatus(o.status);
+    const ref = gcashRef(o);
+    const steps = ["Pending","Ready","Delivered"];
+    $("#trackTitle").textContent = "#" + (o.id || "—");
+    $("#trackBody").innerHTML =
+      '<div class="order-detail">'+
+        '<div class="detail-row"><span>Customer</span><strong>'+esc(customerName(o))+'</strong></div>'+
+        '<div class="detail-row"><span>Total</span><strong>'+money(o.total)+'</strong></div>'+
+        '<div class="detail-row"><span>Payment</span><strong>'+esc(o.payment || "—")+'</strong></div>'+
+        '<div class="detail-row"><span>GCash Ref</span><strong class="'+(String(o.payment||"").toLowerCase()==="gcash" && !ref ? "gcash-missing" : "")+'">'+esc(ref || "—")+'</strong></div>'+
+      '</div>'+
+      '<div class="track-list">'+steps.map(step=>{
+        const currentIndex=steps.indexOf(status), stepIndex=steps.indexOf(step);
+        return '<div class="track-step '+(stepIndex<=currentIndex?"done ":"")+(step===status?"current":"")+'"><span class="track-dot"></span><div><strong>'+esc(step)+'</strong><small>'+(step===status?"Current":"")+'</small></div></div>';
+      }).join("")+'</div>';
+    $("#trackModal").classList.remove("hidden");
+  }
+
+  function closeTrack(){ $("#trackModal").classList.add("hidden"); }
+
+  function renderAll() {
+    renderOverview();renderOrders();renderInventory();renderCustomers();
+  }
+
+  function openView(view) {
+    $$(".view").forEach(v => v.classList.toggle("active", v.id === "view-"+view));
+    $$("#nav button").forEach(b => b.classList.toggle("active", b.dataset.view === view));
+    $("#viewTitle").textContent = view.charAt(0).toUpperCase()+view.slice(1);
+    if(view==="overview")renderOverview();
+    if(view==="orders")renderOrders();
+    if(view==="inventory")renderInventory();
+    if(view==="customers")renderCustomers();
+    $("#sidebar").classList.remove("open");
+  }
+
+  $("#loginForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const user = $("#loginUser").value.trim();
+    const pass = $("#loginPass").value;
+    if(user === ADMIN_USER && pass === ADMIN_PASS){
+      localStorage.setItem(ADMIN_KEY,"1");
+      $("#loginError").textContent="";
+      showApp();
+    }else{
+      $("#loginError").textContent="Invalid username or password.";
+    }
+  });
+
+  $("#logoutBtn").addEventListener("click",()=>{
+    localStorage.removeItem(ADMIN_KEY);
+    showLogin();
+  });
+
+  $$("#nav button").forEach(btn => btn.addEventListener("click",()=>openView(btn.dataset.view)));
+  $("#orderSearch").addEventListener("input",e=>{orderSearch=e.target.value;renderOrders();});
+  $("#menuBtn").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
+
+  $("#stockForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const value = Number($("#stockInput").value);
+    if(!editingProductId || !Number.isInteger(value) || value < 0) return;
+    write(PRODUCT_KEY, productStock(editingProductId,value));
+    closeStock();renderAll();
+  });
+  $("#closeStock").addEventListener("click",closeStock);
+  $("#cancelStock").addEventListener("click",closeStock);
+  $("#stockModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeStock();});
+
+  $("#closeTrack").addEventListener("click",closeTrack);
+  $("#closeTrackBtn").addEventListener("click",closeTrack);
+  $("#trackModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeTrack();});
+
+  window.addEventListener("storage",e=>{
+    if([ORDER_KEY,PRODUCT_KEY].includes(e.key)) renderAll();
+    if(e.key===ADMIN_KEY && !isAdmin()) showLogin();
+  });
+  window.addEventListener("resize",()=>{if(!$("#view-overview").classList.contains("active"))return;drawSalesChart(orders());});
+
+  if(isAdmin()) showApp(); else showLogin();
 })();
 </script>
-<script src="../../js/admin.js?v=kb-production-17" defer></script>
-</body></html>
+</body>
+</html>
