@@ -745,7 +745,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   $("#loginForm").addEventListener("submit", async e => {
     e.preventDefault();
-    const btn = $("#loginForm button[type="submit"]");
+    const btn = $('#loginForm button[type="submit"]');
     $("#loginError").textContent="";
     btn.disabled = true;
     btn.textContent = "SIGNING IN…";
