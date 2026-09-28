@@ -331,21 +331,17 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         </section>
 
         <section id="view-content" class="view">
-          <div class="hero"><div><div class="kicker">CONTENT</div><h1>Story & Announcements</h1><p>Update approved storefront announcement and contact content stored in this browser.</p></div><div class="hero-actions"><button id="extraSaveContent" class="primary-btn" type="button">Save Content</button></div></div>
+          <div class="hero"><div><div class="kicker">CONTENT</div><h1>Story & Announcements</h1><p>Manage storefront announcement content only. Business contact details remain exclusively in Contact.</p></div><div class="hero-actions"><button id="extraSaveContent" class="primary-btn" type="button">Save Content</button></div></div>
           <section class="admin-extra-card">
             <div class="extra-form-grid">
-              <div class="extra-field"><label for="extraContentTitle">Announcement Title</label><input id="extraContentTitle" placeholder="Fresh roast update"></div>
-              <div class="extra-field"><label for="extraContentEmail">Business Email</label><input id="extraContentEmail" type="email" placeholder="hello@example.com"></div>
+              <div class="extra-field"><label for="extraContentTitle">Announcement Title</label><input id="extraContentTitle" placeholder="Latest store update"></div>
               <div class="extra-field full"><label for="extraContentBody">Announcement Body</label><textarea id="extraContentBody" rows="5" placeholder="Approved storefront announcement"></textarea></div>
-              <div class="extra-field"><label for="extraContentFacebook">Facebook URL</label><input id="extraContentFacebook" type="url" placeholder="https://facebook.com/..."></div>
-              <div class="extra-field"><label for="extraContentPhone">Phone</label><input id="extraContentPhone" type="tel" placeholder="+63 ..."></div>
-              <div class="extra-field full"><label for="extraContentLocation">Location</label><input id="extraContentLocation" placeholder="Lipa City, Batangas"></div>
             </div>
-            <div class="extra-note">Only values saved here are reused by the related storefront/contact systems.</div>
+            <div class="extra-note">An empty title and body keep the public announcement bar hidden. No contact information is stored here.</div>
           </section>
         </section>
 
-        <section id="view-gallery" class="view">
+<section id="view-gallery" class="view">
           <div class="hero"><div><div class="kicker">VISUAL CATALOG</div><h1>Gallery</h1><p>Maintain the six gallery slots used by the storefront.</p></div></div>
           <section class="admin-extra-card"><div id="extraGallery" class="extra-grid"></div></section>
         </section>
@@ -395,21 +391,21 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         </section>
 
         <section id="view-settings" class="view">
-          <div class="hero"><div><div class="kicker">STORE CONTROL</div><h1>Store Settings</h1><p>Manage business-wide delivery, payments, stock thresholds and operating hours saved under the shared store settings record.</p></div><div class="hero-actions"><button id="saveStoreSettings" class="primary-btn" type="button">Save Settings</button></div></div>
+          <div class="hero"><div><div class="kicker">STORE CONTROL</div><h1>Store Settings</h1><p>Manage delivery, payment availability, stock thresholds and roast scheduling. Business contact details stay in Contact.</p></div><div class="hero-actions"><button id="saveStoreSettings" class="primary-btn" type="button">Save Settings</button></div></div>
           <section class="admin-extra-card">
             <div class="extra-form-grid">
               <div class="extra-field"><label for="storeStatus">Store Status</label><select id="storeStatus"><option value="open">Open</option><option value="closed">Closed</option></select></div>
               <div class="extra-field"><label for="storeLowStock">Low Stock Threshold</label><input id="storeLowStock" type="number" min="0" step="1" value="5"></div>
               <div class="extra-field"><label for="storeDeliveryFee">Delivery Fee (₱)</label><input id="storeDeliveryFee" type="number" min="0" step="1" value="0"></div>
               <div class="extra-field"><label for="storeFreeDelivery">Free Delivery Threshold (₱)</label><input id="storeFreeDelivery" type="number" min="0" step="1" value="0"></div>
-              <div class="extra-field"><label for="storeHours">Business Hours</label><input id="storeHours" placeholder="Mon–Sat · 8:00 AM–5:00 PM"></div>
               <div class="extra-field"><label for="storeRoastSchedule">Roast Schedule</label><input id="storeRoastSchedule" placeholder="e.g. Tue & Fri"></div>
               <div class="extra-field full"><label>Payment Methods</label><div class="extra-toolbar"><label class="extra-switch"><input id="payGcash" type="checkbox" checked> GCash</label><label class="extra-switch"><input id="payCod" type="checkbox" checked> COD</label><label class="extra-switch"><input id="payBank" type="checkbox" checked> Bank Transfer</label></div></div>
             </div>
+            <div class="extra-note">Contact name, email, phone, address and social links are managed only in the Contact module.</div>
           </section>
         </section>
 
-        <section id="view-activity" class="view">
+<section id="view-activity" class="view">
           <div class="hero"><div><div class="kicker">AUDIT TRAIL</div><h1>Activity Log</h1><p>Records actions generated by the admin controls and catalog/order changes detected in this browser.</p></div><div class="hero-actions"><button id="clearActivity" class="danger-btn" type="button">Clear Log</button></div></div>
           <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">RECENT EVENTS</div><h3>Admin Activity</h3></div><span id="activityCount" class="extra-sub"></span></div><div id="activityList" class="extra-list"></div></section>
         </section>
@@ -822,7 +818,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       <div class="extra-field"><label for="extraProductBadge">Badge</label><input id="extraProductBadge" placeholder="NEW"></div>
       <div class="extra-field"><label for="extraProductRoast">Roast</label><select id="extraProductRoast"><option>Light</option><option selected>Medium</option><option>Dark</option></select></div>
       <div class="extra-field"><label for="extraProductGrind">Grind</label><select id="extraProductGrind"><option selected>Whole</option><option>Coarse</option><option>Fine</option></select></div>
-      <div class="extra-field full"><label for="extraProductImage">Product Photo URL</label><input id="extraProductImage" type="url" placeholder="https://.../product.jpg"></div>
+      <div class="extra-field full"><label for="extraProductImage">Product Photo URL</label><input id="extraProductImage" type="text" inputmode="url" placeholder="https://.../product.jpg or images/product.jpg"></div>
       <div class="extra-field"><label for="extraProductOrigin">Origin</label><input id="extraProductOrigin" placeholder="Farm / region"></div>
       <div class="extra-field"><label for="extraProductRoastDate">Roast Date</label><input id="extraProductRoastDate" type="date"></div>
       <div class="extra-field"><label for="extraProductRoastLevel">Roast Level</label><input id="extraProductRoastLevel" placeholder="Dark"></div>
@@ -1042,19 +1038,19 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function loadContent(){
-    const s={...(read(SETTINGS_KEY,{})||{})}, cms={...(read(CMS_KEY,{})||{})};
-    document.getElementById("extraContentTitle").value=String(cms?.announcement?.title||"");
-    document.getElementById("extraContentBody").value=String(cms?.announcement?.body||"");
-    document.getElementById("extraContentEmail").value=String(s.email||"");
-    document.getElementById("extraContentFacebook").value=String(s.facebook||"");
-    document.getElementById("extraContentPhone").value=String(s.phone||"");
-    document.getElementById("extraContentLocation").value=String(s.location||"");
+    const cms=read(CMS_KEY,{});
+    const announcement=cms&&typeof cms==="object"&&cms.announcement?cms.announcement:{};
+    document.getElementById("extraContentTitle").value=String(announcement.title||"");
+    document.getElementById("extraContentBody").value=String(announcement.body||"");
   }
   function saveContent(){
-    const s={...(read(SETTINGS_KEY,{})||{})};
-    s.email=document.getElementById("extraContentEmail").value.trim();s.facebook=document.getElementById("extraContentFacebook").value.trim();s.phone=document.getElementById("extraContentPhone").value.trim();s.location=document.getElementById("extraContentLocation").value.trim();
-    const cms={...(read(CMS_KEY,{})||{}),announcement:{title:document.getElementById("extraContentTitle").value.trim(),body:document.getElementById("extraContentBody").value.trim()}};
-    write(SETTINGS_KEY,s);write(CMS_KEY,cms);toastExtra("Content saved.");
+    const current=read(CMS_KEY,{});
+    const cms={...(current&&typeof current==="object"?current:{}),announcement:{
+      title:document.getElementById("extraContentTitle").value.trim(),
+      body:document.getElementById("extraContentBody").value.trim()
+    }};
+    write(CMS_KEY,cms);
+    toastExtra("Announcement content saved.");
   }
 
   function loadContact(){
@@ -1073,7 +1069,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       facebook:document.getElementById("extraContactFacebook").value.trim(),
       messenger:document.getElementById("extraContactMessenger").value.trim()
     });
-    write(SETTINGS_KEY,current);toastExtra("Contact details saved.");
+    write(SETTINGS_KEY,current);
+    toastExtra("Contact details saved.");
   }
 
   function renderGallery(){
