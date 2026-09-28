@@ -912,6 +912,130 @@
       </article>
 
       <style>
+        /* LIPA / BATANGAS FARM VISUAL */
+        #products.kb-collection .kb-origin-quote-card {
+          position: relative;
+          isolation: isolate;
+          min-height: 300px;
+          margin-top: 24px;
+          border: 1px solid #C8A951;
+          border-radius: 20px;
+          overflow: hidden;
+          background: #221A0E;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          box-sizing: border-box;
+        }
+
+        #products.kb-collection .kb-origin-quote-bg {
+          position: absolute;
+          inset: -20px;
+          z-index: -3;
+          background:
+            linear-gradient(
+              135deg,
+              rgba(26,18,7,0.74),
+              rgba(26,18,7,0.46)
+            ),
+            url("https://commons.wikimedia.org/wiki/Special:FilePath/9656Dagatan%2C%20Lipa%2C%20Batangas%2068.jpg") center / cover no-repeat;
+          filter: blur(5px);
+          transform: scale(1.04);
+        }
+
+        #products.kb-collection .kb-origin-quote-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: -2;
+          background:
+            radial-gradient(
+              circle at center,
+              rgba(26,18,7,0.22),
+              rgba(26,18,7,0.62)
+            );
+        }
+
+        #products.kb-collection .kb-origin-quote-content {
+          width: min(900px, 90%);
+          padding: 52px 28px;
+        }
+
+        #products.kb-collection .kb-origin-quote-kicker {
+          margin: 0 0 14px;
+          color: #C8A951;
+          font-size: 10px;
+          line-height: 1;
+          font-weight: 800;
+          letter-spacing: 2.5px;
+          text-transform: uppercase;
+        }
+
+        #products.kb-collection .kb-origin-quote {
+          margin: 0;
+          color: #C8A951;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: clamp(34px, 5vw, 58px);
+          line-height: 0.98;
+          font-weight: 700;
+          letter-spacing: -1px;
+          text-shadow: 0 3px 18px rgba(0,0,0,0.36);
+        }
+
+        #products.kb-collection .kb-origin-quote-location {
+          margin: 18px 0 0;
+          color: #F5E9D3;
+          font-size: 11px;
+          line-height: 1.4;
+          font-weight: 700;
+          letter-spacing: 1.7px;
+          text-transform: uppercase;
+        }
+
+        #products.kb-collection .kb-origin-quote-credit {
+          display: inline-block;
+          margin-top: 11px;
+          color: #B8A998;
+          font-size: 9px;
+          line-height: 1.4;
+          text-decoration: none;
+          opacity: 0.9;
+        }
+
+        #products.kb-collection .kb-origin-quote-credit:hover {
+          color: #F5E9D3;
+        }
+
+        @media (max-width: 600px) {
+          #products.kb-collection .kb-origin-quote-card {
+            min-height: 250px;
+          }
+
+          #products.kb-collection .kb-origin-quote-content {
+            padding: 40px 20px;
+          }
+        }
+      </style>
+
+      <!-- LIPA / BATANGAS VISUAL -->
+      <figure class="kb-origin-quote-card">
+        <div class="kb-origin-quote-bg" aria-hidden="true"></div>
+        <div class="kb-origin-quote-overlay" aria-hidden="true"></div>
+
+        <figcaption class="kb-origin-quote-content">
+          <p class="kb-origin-quote-kicker">LIPA · BATANGAS</p>
+          <blockquote class="kb-origin-quote">“Kapeng may tapang, may puso.”</blockquote>
+          <p class="kb-origin-quote-location">A quiet visual nod to the coffee country behind Barako.</p>
+          <a
+            class="kb-origin-quote-credit"
+            href="https://commons.wikimedia.org/wiki/File:9656Dagatan,_Lipa,_Batangas_68.jpg"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Photo: Dagatan, Lipa, Batangas · Wikimedia Commons · CC0</a>
+        </figcaption>
+      </figure>
+
+      <style>
         /* MOBILE STICKY CART — scoped to #products */
         #products #kb-mobile-sticky-cart {
           display: none;
