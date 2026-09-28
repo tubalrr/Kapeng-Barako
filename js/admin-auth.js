@@ -169,6 +169,18 @@
     const credential = await authMod.signInWithEmailLink(currentAuth, email, window.location.href);
     try { localStorage.removeItem("kb_admin_email_for_signin"); } catch {}
 
+    // The email-link credential may have created a new Firebase UID when
+    // the old admin account was originally created with Google. Bootstrap
+    // the verified allowlisted admin identity server-side before checking
+    // the UID-based Firestore admin record.
+    try {
+      const backendModule = await import("./firebase-backend.js");
+      await backendModule.bootstrapAdminFromEmail();
+    } catch (error) {
+      await authMod.signOut(currentAuth);
+      throw new Error(error?.message || "Admin identity verification failed.");
+    }
+
     const admin = await verifyAdminWithoutSession(credential.user);
     if (!admin) {
       await authMod.signOut(currentAuth);
