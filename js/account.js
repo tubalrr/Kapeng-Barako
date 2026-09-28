@@ -24,7 +24,7 @@ function demoDefaults(){
       {name:"Barako 500g",weight:"500g",qty:1,price:620},
       {name:"Barako 250g",weight:"250g",qty:1,price:350}
     ]}],
-    addresses:[{id:"demo-home",label:"Home",recipient:"Alex Morgan",phone:"+63 917 555 0148",address:"Demo Address, Quezon City, Metro Manila, Philippines"}],
+    addresses:[{id:"demo-home",label:"Home",recipient:"Alex Morgan",phone:"+63 917 555 0148",address:"Demo Address, Quezon City, Metro Manila, Philippines",isDefault:true}],
     wishlist:[{id:"demo-wish-1",name:"Barako 1kg",weight:"1kg",grind:"Whole"}]
   };
 }
@@ -57,6 +57,34 @@ function deleteDemoAccount(){
   if(!isDemoAccount())return;
   if(!confirm("Remove the demo customer account and all demo data from this browser?"))return;
   localStorage.removeItem(DEMO_KEY);state.user=null;state.profile=null;state.orders=[];state.addresses=[];state.wishlist=[];state.demoActive=false;state.mode="login";renderAuth();
+}
+
+function normalizeAddresses(list){
+  const addresses=Array.isArray(list)?list.map(a=>({...a,isDefault:Boolean(a.isDefault)})):[];
+  if(addresses.length&&!addresses.some(a=>a.isDefault))addresses[0].isDefault=true;
+  const first=addresses.findIndex(a=>a.isDefault);
+  return addresses.map((a,i)=>({...a,isDefault:i===first}));
+}
+function defaultAddress(){
+  return normalizeAddresses(state.addresses).find(a=>a.isDefault)||null;
+}
+function saveCheckoutDefault(a){
+  if(!a)return;
+  try{
+    localStorage.setItem("kb_checkout_default",JSON.stringify({
+      recipient:a.recipient||state.profile?.fullName||"",
+      phone:a.phone||state.profile?.phone||"",
+      address:a.address||"",
+      label:a.label||"Home"
+    }));
+  }catch{}
+}
+function setDefaultAddress(id){
+  const addresses=normalizeAddresses(state.addresses).map(a=>({...a,isDefault:String(a.id)===String(id)}));
+  state.addresses=addresses;
+  const selected=addresses.find(a=>a.isDefault);
+  saveCheckoutDefault(selected);
+  return selected;
 }
 
 function getProfileName(){
@@ -204,7 +232,7 @@ function getLocalCustomerOrders(email){
 }
 
 async function loadAccount(){
-  if(isDemoAccount()){const data=getDemoData();state.profile=data.profile||{};state.orders=data.orders||[];state.addresses=data.addresses||[];state.wishlist=data.wishlist||[];return}
+  if(isDemoAccount()){const data=getDemoData();state.profile=data.profile||{};state.orders=data.orders||[];state.addresses=normalizeAddresses(data.addresses||[]);state.wishlist=data.wishlist||[];saveCheckoutDefault(defaultAddress());return}
   const uid=state.user.uid;
   const [profileSnap,ordersSnap,addrSnap,wishSnap]=await Promise.all([
     getDoc(doc(db,"users",uid)),
@@ -222,7 +250,7 @@ async function loadAccount(){
     const tb=b.createdAt?.toDate?b.createdAt.toDate().getTime():new Date(b.createdAt||0).getTime();
     return tb-ta;
   });
-  state.addresses=addrSnap.docs.map(d=>({id:d.id,...d.data()}));
+  state.addresses=normalizeAddresses(addrSnap.docs.map(d=>({id:d.id,...d.data()})));
   state.wishlist=wishSnap.docs.map(d=>({id:d.id,...d.data()}));
 }
 
@@ -300,8 +328,12 @@ function trackView(){
 
 
 function addressesView(){
- return `<div class="panel-head"><div><h2>My Address Book</h2><p>Save delivery details for faster checkout.</p></div><button class="account-btn primary" id="add-address">+ Add Address</button></div>
-<div id="address-list" class="address-grid">${state.addresses.length?state.addresses.map(a=>`<article class="address-card"><h3>${esc(a.label||"Delivery Address")}</h3><p>${esc(a.recipient||state.profile?.fullName||"")}<br>${esc(a.phone||state.profile?.phone||"")}<br>${esc(a.address||"")}</p><div class="card-actions"><button class="small-btn" data-edit-address="${esc(a.id)}">Edit</button><button class="small-btn" data-delete-address="${esc(a.id)}">Delete</button></div></article>`).join(""):'<div class="empty-state" style="grid-column:1/-1">No saved addresses yet.</div>'}</div>`;
+ const addresses=normalizeAddresses(state.addresses);
+ state.addresses=addresses;
+ const defaultId=addresses.find(a=>a.isDefault)?.id||"";
+ if(defaultId) saveCheckoutDefault(addresses.find(a=>String(a.id)===String(defaultId)));
+ return `<div class="panel-head"><div><h2>My Address Book</h2><p>Your default address is used to make the next checkout faster.</p></div><button class="account-btn primary" id="add-address">+ Add New</button></div>
+<div id="address-list" class="address-grid">${addresses.length?addresses.map(a=>`<article class="address-card ${a.isDefault?"is-default":""}"><div class="address-title-row"><h3>${esc(a.label||"Delivery Address")}</h3>${a.isDefault?'<span class="default-address-badge">DEFAULT</span>':""}</div><p>${esc(a.recipient||state.profile?.fullName||"")}<br>${esc(a.phone||state.profile?.phone||"")}<br>${esc(a.address||"")}</p><div class="card-actions">${a.isDefault?"":`<button class="small-btn primary-outline" data-default-address="${esc(a.id)}">Set Default</button>`}<button class="small-btn" data-edit-address="${esc(a.id)}">Edit</button><button class="small-btn" data-delete-address="${esc(a.id)}">Delete</button></div></article>`).join(""):'<div class="empty-state" style="grid-column:1/-1">No saved address yet. Add your first address for faster checkout.</div>'}</div>`;
 }
 
 function wishlistView(){
@@ -343,6 +375,8 @@ function formatDate(v){if(!v)return"Date unavailable";try{const d=v.toDate?v.toD
 function bindPanel(){
  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;renderDashboard()});
  document.querySelector("#add-address")?.addEventListener("click",()=>addressForm());
+ document.querySelectorAll("[data-default-address]").forEach(b=>b.onclick=()=>persistDefaultAddress(b.dataset.defaultAddress));
+
  document.querySelectorAll("[data-edit-address]").forEach(b=>b.onclick=()=>addressForm(state.addresses.find(a=>a.id===b.dataset.editAddress)));
  document.querySelectorAll("[data-delete-address]").forEach(b=>b.onclick=()=>removeAddress(b.dataset.deleteAddress));
  document.querySelectorAll("[data-remove-wish]").forEach(b=>b.onclick=()=>removeWishlist(b.dataset.removeWish));
@@ -360,15 +394,44 @@ function addressForm(a={}){
  saveAddress({id:a.id,label,recipient,phone,address});
 }
 
-async function saveAddress(a){
+async function persistDefaultAddress(id){
  try{
-  if(isDemoAccount()){state.addresses=a.id?state.addresses.map(x=>x.id===a.id?{...x,...a}:x):[...state.addresses,{id:"demo-address-"+Date.now(),...a}];saveDemoData();renderPanel();return}
-  const ref=a.id?doc(db,"users",state.user.uid,"addresses",a.id):doc(collection(db,"users",state.user.uid,"addresses"));
-  await setDoc(ref,{label:a.label,recipient:a.recipient,phone:a.phone,address:a.address,updatedAt:serverTimestamp()},{merge:true});
+  if(isDemoAccount()){
+    const selected=setDefaultAddress(id);saveDemoData();renderPanel();return;
+  }
+  const addresses=normalizeAddresses(state.addresses);
+  for(const address of addresses){
+    await setDoc(doc(db,"users",state.user.uid,"addresses",String(address.id)),{isDefault:String(address.id)===String(id),updatedAt:serverTimestamp()},{merge:true});
+  }
   await loadAccount();renderPanel();
  }catch(e){alert(friendlyError(e))}
 }
-async function removeAddress(id){if(!confirm("Delete this saved address?"))return;try{if(isDemoAccount()){state.addresses=state.addresses.filter(a=>a.id!==id);saveDemoData();renderPanel();return}await deleteDoc(doc(db,"users",state.user.uid,"addresses",id));await loadAccount();renderPanel()}catch(e){alert(friendlyError(e))}}
+async function saveAddress(a){
+ try{
+  if(isDemoAccount()){
+    const isFirst=!state.addresses.length;
+    const newId=a.id||"demo-address-"+Date.now();
+    const next=a.id?state.addresses.map(x=>x.id===a.id?{...x,...a}:x):[...state.addresses,{id:newId,...a,isDefault:isFirst}];
+    state.addresses=normalizeAddresses(next);
+    saveDemoData();saveCheckoutDefault(defaultAddress());renderPanel();return;
+  }
+  const isFirst=!state.addresses.length;
+  const ref=a.id?doc(db,"users",state.user.uid,"addresses",a.id):doc(collection(db,"users",state.user.uid,"addresses"));
+  await setDoc(ref,{label:a.label,recipient:a.recipient,phone:a.phone,address:a.address,isDefault:a.id?Boolean(state.addresses.find(x=>String(x.id)===String(a.id))?.isDefault):isFirst,updatedAt:serverTimestamp()},{merge:true});
+  await loadAccount();saveCheckoutDefault(defaultAddress());renderPanel();
+ }catch(e){alert(friendlyError(e))}
+}
+async function removeAddress(id){
+ if(!confirm("Delete this saved address?"))return;
+ try{
+  if(isDemoAccount()){
+    state.addresses=normalizeAddresses(state.addresses.filter(a=>String(a.id)!==String(id)));
+    saveDemoData();saveCheckoutDefault(defaultAddress());renderPanel();return;
+  }
+  await deleteDoc(doc(db,"users",state.user.uid,"addresses",id));
+  await loadAccount();saveCheckoutDefault(defaultAddress());renderPanel();
+ }catch(e){alert(friendlyError(e))}
+}
 async function removeWishlist(id){try{if(isDemoAccount()){state.wishlist=state.wishlist.filter(w=>w.id!==id);saveDemoData();renderPanel();return}await deleteDoc(doc(db,"users",state.user.uid,"wishlist",id));await loadAccount();renderPanel()}catch(e){alert(friendlyError(e))}}
 async function saveProfile(e){
  e.preventDefault();const fd=new FormData(e.currentTarget);
