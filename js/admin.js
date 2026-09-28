@@ -72,7 +72,90 @@
   function updateOrderStatus(id,status){const list=read(ORDERS_KEY,[]);const idx=list.findIndex(o=>String(o.id)===String(id));if(idx<0)return;list[idx]={...list[idx],status,statusUpdatedAt:new Date().toISOString()};write(ORDERS_KEY,list);toast("Order "+id+" → "+status);renderOverview();renderOrders()}
 
   function renderProducts(){
-    refreshData();const root=$("#products-table");root.innerHTML='<table class="data-table"><thead><tr><th>Product</th><th>Size</th><th>Base price</th><th>Stock</th><th>Badge</th></tr></thead><tbody>'+products.map(p=>'<tr><td><strong>'+esc(p.name)+'</strong></td><td>'+esc(p.size)+'</td><td>'+money(p.price)+'</td><td class="'+(Number(p.stock)<=5?"inventory-low":"")+'">'+Number(p.stock||0)+' packs</td><td>'+esc(p.badge||"")+'</td></tr>').join("")+'</tbody></table>'}
+    refreshData();
+    const root=$("#products-table");
+    if(!products.length){
+      root.innerHTML='<div class="empty">No products found.</div>';
+      return;
+    }
+
+    root.innerHTML='<div class="product-manager-head">'+
+      '<div><strong>Product Catalog</strong><span>Edit price and stock directly, then save.</span></div>'+
+      '<button id="save-all-products" class="admin-button gold" type="button">Save All Changes</button>'+
+      '</div>'+
+      '<div class="product-manager-grid">'+
+      products.map(p=>{
+        const stock=Number(p.stock||0);
+        return '<article class="product-manager-card" data-product-card="'+esc(p.id)+'">'+
+          '<div class="product-manager-top">'+
+            '<div><span class="eyebrow">'+esc(p.size||"PRODUCT")+'</span><h3>'+esc(p.name)+'</h3><span class="product-manager-id">'+esc(p.id)+'</span></div>'+
+            '<span class="badge '+(stock<=5?"low":"")+'">'+(stock<=5?"LOW STOCK":"IN STOCK")+'</span>'+
+          '</div>'+
+          '<div class="product-manager-fields">'+
+            '<label>Price (₱)<input type="number" min="0" step="1" value="'+Number(p.price||0)+'" data-product-price="'+esc(p.id)+'"></label>'+
+            '<label>Stock (packs)<input type="number" min="0" step="1" value="'+stock+'" data-product-stock="'+esc(p.id)+'"></label>'+
+          '</div>'+
+          '<div class="product-manager-meta">'+
+            '<span>Size: <b>'+esc(p.size||"—")+'</b></span>'+
+            '<span>Badge: <b>'+esc(p.badge||"—")+'</b></span>'+
+          '</div>'+
+          '<button class="admin-button outline product-save-button" type="button" data-product-save="'+esc(p.id)+'">Save '+esc(p.size||"Product")+'</button>'+
+        '</article>';
+      }).join("")+
+      '</div>';
+
+    $$("[data-product-save]").forEach(btn=>btn.addEventListener("click",()=>saveProduct(btn.dataset.productSave)));
+    $("#save-all-products")?.addEventListener("click",saveAllProducts);
+  }
+
+  function collectProduct(id){
+    const product=products.find(p=>String(p.id)===String(id));
+    if(!product)return null;
+    const priceInput=document.querySelector('[data-product-price="'+CSS.escape(String(id))+'"]');
+    const stockInput=document.querySelector('[data-product-stock="'+CSS.escape(String(id))+'"]');
+    if(!priceInput||!stockInput)return null;
+
+    const price=Number(priceInput.value);
+    const stock=Number(stockInput.value);
+
+    if(!Number.isFinite(price)||price<0){
+      toast("Invalid price for "+product.size+".");
+      priceInput.focus();
+      return null;
+    }
+    if(!Number.isFinite(stock)||stock<0||!Number.isInteger(stock)){
+      toast("Stock must be a whole number for "+product.size+".");
+      stockInput.focus();
+      return null;
+    }
+
+    return {...product,price,stock};
+  }
+
+  function saveProduct(id){
+    const updated=collectProduct(id);
+    if(!updated)return;
+
+    products=products.map(p=>String(p.id)===String(id)?updated:p);
+    write(PRODUCTS_KEY,products);
+    toast(updated.size+" updated: "+money(updated.price)+" · "+updated.stock+" packs");
+    renderProducts();
+    renderOverview();
+  }
+
+  function saveAllProducts(){
+    const updated=[];
+    for(const product of products){
+      const next=collectProduct(product.id);
+      if(!next)return;
+      updated.push(next);
+    }
+    products=updated;
+    write(PRODUCTS_KEY,products);
+    toast("All product prices and stock saved.");
+    renderProducts();
+    renderOverview();
+  }
 
   function renderCustomers(){
     const root=$("#customers-table"),list=customers();if(!list.length){root.innerHTML='<div class="empty">Customers are created automatically from orders.</div>';return}
