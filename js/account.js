@@ -16,11 +16,30 @@ const money=n=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const state={user:null,profile:null,orders:[],addresses:[],wishlist:[],tab:"overview",mode:"login",loading:false};
 
+function getProfileName(){
+  return String(state.profile?.fullName||state.user?.displayName||state.user?.email||"Coffee lover").trim();
+}
+function getInitials(name){
+  const parts=String(name||"Customer").trim().split(/\s+/).filter(Boolean);
+  return (parts.slice(0,2).map(x=>x[0]).join("")||"C").toUpperCase();
+}
+function avatarMarkup(name,photoURL="",className="profile-avatar"){
+  const safeName=esc(name||"Customer");
+  return photoURL
+    ? `<span class="${className} has-photo"><img src="${esc(photoURL)}" alt="${safeName}"></span>`
+    : `<span class="${className}" aria-hidden="true">${esc(getInitials(name))}</span>`;
+}
+
+
 function shell(){return `
 <div class="account-shell">
 <header class="account-topbar"><div class="account-nav">
 <a class="account-brand" href="../index.html"><img src="../images/favicon.svg" alt=""><span>Kapeng Barako<small>Customer Account</small></span></a>
-<div class="account-nav-actions"><a class="account-btn" href="../index.html#products">Shop Coffee</a><button class="account-btn danger" id="logout-btn" type="button">Logout</button></div>
+<div class="account-nav-actions">
+<button class="account-profile-chip" id="top-profile" type="button" aria-label="Open my profile">${avatarMarkup(getProfileName(),state.user?.photoURL||"", "profile-avatar small")}<span><strong>${esc(getProfileName())}</strong><small>My Profile</small></span></button>
+<a class="account-btn" href="../index.html#products">Shop Coffee</a>
+<button class="account-btn danger" id="logout-btn" type="button">Logout</button>
+</div>
 </div></header>
 <main class="account-main" id="account-main"></main>
 </div>`}
@@ -97,7 +116,7 @@ async function signup(e){
     await updateProfile(cred.user,{displayName:String(fd.get("name")).trim()});
     await setDoc(doc(db,"users",cred.user.uid),{
       fullName:String(fd.get("name")).trim(),email:cred.user.email,phone:String(fd.get("phone")).trim(),
-      createdAt:serverTimestamp(),updatedAt:serverTimestamp()
+      provider:"password",photoURL:"",createdAt:serverTimestamp(),updatedAt:serverTimestamp()
     },{merge:true});
     await sendEmailVerification(cred.user);
     await signOut(auth);
@@ -110,9 +129,11 @@ async function googleLogin(){
   if(!isFirebaseConfigured){msg("Firebase is not configured yet. Add your Firebase Web App config in js/firebase-config.js.","error");return}
   try{
     const cred=await signInWithPopup(auth,new GoogleAuthProvider());
+    const existing=await getDoc(doc(db,"users",cred.user.uid));
     await setDoc(doc(db,"users",cred.user.uid),{
       fullName:cred.user.displayName||"",email:cred.user.email||"",phone:cred.user.phoneNumber||"",
-      provider:"google.com",updatedAt:serverTimestamp()
+      provider:"google.com",photoURL:cred.user.photoURL||"",
+      ...(!existing.exists()?{createdAt:serverTimestamp()}:{}),updatedAt:serverTimestamp()
     },{merge:true});
   }catch(err){msg(friendlyError(err),"error")}
 }
@@ -133,7 +154,7 @@ async function loadAccount(){
     getDocs(collection(db,"users",uid,"addresses")).catch(()=>({docs:[]})),
     getDocs(collection(db,"users",uid,"wishlist")).catch(()=>({docs:[]}))
   ]);
-  state.profile=profileSnap.exists()?profileSnap.data():{fullName:state.user.displayName||"",email:state.user.email||"",phone:state.user.phoneNumber||""};
+  state.profile=profileSnap.exists()?profileSnap.data():{fullName:state.user.displayName||"",email:state.user.email||"",phone:state.user.phoneNumber||"",provider:state.user.providerData?.[0]?.providerId||""};
   state.orders=ordersSnap.docs.map(d=>({id:d.id,...d.data()}));
   state.addresses=addrSnap.docs.map(d=>({id:d.id,...d.data()}));
   state.wishlist=wishSnap.docs.map(d=>({id:d.id,...d.data()}));
@@ -187,7 +208,30 @@ ${state.wishlist.length?`<div class="wishlist-grid">${state.wishlist.map(w=>`<ar
 
 function profileView(){
  const p=state.profile||{};
- return `<div class="panel-head"><div><h2>Profile</h2><p>Keep your delivery and account details current.</p></div></div><form id="profile-form" class="profile-form"><div class="form-grid"><div class="field"><label>Full Name</label><input name="fullName" value="${esc(p.fullName)}" required></div><div class="field"><label>Email</label><input value="${esc(p.email||state.user.email||"")}" disabled></div><div class="field"><label>Phone Number</label><input name="phone" type="tel" value="${esc(p.phone||"")}" required></div></div><button class="account-btn primary" type="submit">Save Profile</button><div id="profile-msg"></div></form>`;
+ const name=getProfileName();
+ const email=p.email||state.user?.email||"";
+ const verified=Boolean(state.user?.emailVerified);
+ const provider=state.user?.providerData?.[0]?.providerId==="google.com"?"Google":"Email & Password";
+ const joined=state.user?.metadata?.creationTime?new Date(state.user.metadata.creationTime).toLocaleDateString("en-PH",{year:"numeric",month:"long",day:"numeric"}):"—";
+ return `
+<div class="panel-head"><div><h2>My Profile</h2><p>Your personal customer profile is private to your signed-in account.</p></div></div>
+<div class="profile-summary">
+  ${avatarMarkup(name,state.user?.photoURL||"", "profile-avatar large")}
+  <div class="profile-summary-copy"><strong>${esc(name)}</strong><span>${esc(email)}</span><div class="profile-badges"><span>${verified?"Verified email":"Email verification status unavailable"}</span><span>${esc(provider)}</span></div></div>
+</div>
+<div class="profile-meta">
+  <div><span>Customer</span><strong>${esc(name)}</strong></div>
+  <div><span>Member since</span><strong>${esc(joined)}</strong></div>
+</div>
+<form id="profile-form" class="profile-form">
+  <div class="form-grid">
+    <div class="field"><label>Full Name</label><input name="fullName" value="${esc(p.fullName||name)}" required autocomplete="name"></div>
+    <div class="field"><label>Email Address</label><input value="${esc(email)}" disabled autocomplete="email"></div>
+    <div class="field"><label>Phone Number</label><input name="phone" type="tel" value="${esc(p.phone||"")}" required autocomplete="tel"></div>
+  </div>
+  <button class="account-btn primary" type="submit">Save Profile</button>
+  <div id="profile-msg"></div>
+</form>`;
 }
 
 function formatDate(v){if(!v)return"Date unavailable";try{const d=v.toDate?v.toDate():new Date(v);return d.toLocaleString("en-PH",{year:"numeric",month:"short",day:"numeric"})}catch{return"Date unavailable"}}
@@ -231,6 +275,7 @@ function renderDashboard(){
  appRoot.innerHTML=shell();
  document.querySelector("#account-main").innerHTML=dashboard();
  document.querySelector("#logout-btn").onclick=()=>signOut(auth);
+ document.querySelector("#top-profile").onclick=()=>{state.tab="profile";renderDashboard()};
  renderPanel();
 }
 
