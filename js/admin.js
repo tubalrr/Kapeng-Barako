@@ -13,6 +13,7 @@
   const money=n=>"₱"+Number(n||0).toLocaleString("en-PH");
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let products=read(PRODUCTS_KEY,[]);if(!Array.isArray(products))products=[];
+  let gallery=read(GALLERY_KEY,[]);if(!Array.isArray(gallery))gallery=[];
   let orderSearch="";
   const demoSignature=JSON.stringify(DEFAULT_PRODUCTS.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
   const currentSignature=JSON.stringify(products.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
@@ -107,6 +108,23 @@
   }
 
   function updateOrderStatus(id,status){const list=read(ORDERS_KEY,[]);const idx=list.findIndex(o=>String(o.id)===String(id));if(idx<0)return;list[idx]={...list[idx],status,statusUpdatedAt:new Date().toISOString()};write(ORDERS_KEY,list);toast("Order "+id+" → "+status);renderOverview();renderOrders()}
+
+  function renderGallery(){
+    const root=$("#gallery-table");
+    const items=Array.from({length:6},(_,i)=>gallery[i]||{slot:i+1,title:"",image:"",alt:""});
+    root.innerHTML='<div class="gallery-manager-grid">'+items.map((g,i)=>'<article class="gallery-manager-card"><div class="gallery-preview">'+(g.image?'<img src="'+esc(g.image)+'" alt="'+esc(g.alt||"")+'">':'<span>PHOTO '+String(i+1).padStart(2,"0")+'</span>')+'</div><label>Photo '+(i+1)+' title<input data-gallery-title="'+i+'" value="'+esc(g.title||"")+'" placeholder="e.g. Roasted Liberica"></label><label>Image URL<input data-gallery-image="'+i+'" value="'+esc(g.image||"")+'" placeholder="https://.../image.jpg"></label><label>Alt text<input data-gallery-alt="'+i+'" value="'+esc(g.alt||"")+'" placeholder="Describe the real photo"></label><button class="admin-button gold" type="button" data-gallery-save="'+i+'">Save Photo '+(i+1)+'</button></article>').join("")+'</div>';
+    $("[data-gallery-save]").forEach(btn=>btn.addEventListener("click",()=>saveGallery(Number(btn.dataset.gallerySave))));
+  }
+  function saveGallery(index){
+    const image=document.querySelector('[data-gallery-image="'+index+'"]')?.value.trim()||"";
+    const title=document.querySelector('[data-gallery-title="'+index+'"]')?.value.trim()||"";
+    const alt=document.querySelector('[data-gallery-alt="'+index+'"]')?.value.trim()||title;
+    if(image && !/^https?:\/\//i.test(image) && !/^images\//i.test(image)){toast("Use an image URL or images/ path.");return}
+    gallery[index]={slot:index+1,title,image,alt};
+    write(GALLERY_KEY,gallery);
+    toast("Gallery photo "+(index+1)+" saved.");
+    renderGallery();
+  }
 
   function renderProducts(){
     refreshData();
@@ -267,7 +285,7 @@
     $$("[data-view-panel]").forEach(p=>{p.hidden=p.dataset.viewPanel!==view;p.classList.toggle("active",p.dataset.viewPanel===view)});
     $("#view-title").textContent={overview:"Overview",orders:"Orders",inventory:"Inventory",products:"Products",customers:"Customers",promos:"Promos",content:"Content"}[view]||"Overview";
     closeMenu();
-    if(view==="overview")renderOverview();if(view==="orders")renderOrders();if(view==="inventory")renderInventorySummary();if(view==="products")renderProducts();if(view==="customers")renderCustomers();if(view==="promos")renderPromos();if(view==="content")renderContent();
+    if(view==="overview")renderOverview();if(view==="orders")renderOrders();if(view==="inventory")renderInventorySummary();if(view==="products")renderProducts();if(view==="customers")renderCustomers();if(view==="promos")renderPromos();if(view==="content")renderContent();if(view==="gallery")renderGallery();
   }
   function closeMenu(){document.body.classList.remove("menu-open");$("#admin-menu")?.classList.remove("is-open");$("#admin-sidebar")?.classList.remove("is-open");$("#admin-overlay")?.classList.remove("is-open");$("#admin-menu")?.setAttribute("aria-expanded","false");}
   function toggleMenu(){const open=!document.body.classList.contains("menu-open");document.body.classList.toggle("menu-open",open);$("#admin-menu").classList.toggle("is-open",open);$("#admin-sidebar").classList.toggle("is-open",open);$("#admin-overlay").classList.toggle("is-open",open);$("#admin-menu").setAttribute("aria-expanded",String(open))}
@@ -278,8 +296,8 @@
     $(".admin-nav button").forEach(b=>b.addEventListener("click",()=>openView(b.dataset.view)));
     initOrderSearch();
     $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
-    renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();
-    window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos()}});
+    renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();
+    window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos()}});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
