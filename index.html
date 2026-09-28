@@ -190,101 +190,117 @@
     </section>
 
     <!-- COLLECTION -->
-    <section id="products" class="kb-collection-section">
+    <section id="products" class="kb-collection">
       <style>
-        #products.kb-collection-section {
-          background: #1A1207;
-          color: #F5E9D3;
+        #products.kb-collection {
+          --kb-bg: #1A1207;
+          --kb-card: #221A0E;
+          --kb-border: #2A2116;
+          --kb-text: #F5E9D3;
+          --kb-muted: #B8A998;
+          --kb-gold: #C8A951;
+          --kb-red: #D95C5C;
+          background: var(--kb-bg);
+          color: var(--kb-text);
           padding: 80px 24px;
           box-sizing: border-box;
           overflow: hidden;
         }
 
-        #products.kb-collection-section > .kb-collection-inner {
+        #products.kb-collection .kb-collection-inner {
           width: 100%;
           max-width: 1400px;
           margin: 0 auto;
         }
 
-        #products.kb-collection-section .kb-eyebrow {
+        #products.kb-collection .kb-collection-label {
           margin: 0;
-          color: #C8A951;
-          letter-spacing: 3px;
+          color: var(--kb-gold);
           font-size: 12px;
           line-height: 1.2;
           font-weight: 700;
+          letter-spacing: 3px;
           text-transform: uppercase;
         }
 
-        #products.kb-collection-section .kb-collection-title {
-          margin: 12px 0;
-          max-width: 980px;
+        #products.kb-collection .kb-collection-title {
+          margin: 12px 0 0;
+          max-width: 900px;
+          color: var(--kb-text);
           font-family: Georgia, "Times New Roman", serif;
           font-size: 56px;
-          font-weight: 500;
           line-height: 0.9;
+          font-weight: 700;
           letter-spacing: -1.5px;
-          color: #F5E9D3;
         }
 
-        #products.kb-collection-section .kb-collection-subtitle {
-          margin: 0;
-          color: #B8A998;
+        #products.kb-collection .kb-collection-subtitle {
+          margin: 18px 0 0;
+          color: var(--kb-muted);
           font-size: 15px;
           line-height: 1.6;
         }
 
-        #products.kb-collection-section #productGrid.kb-collection-grid {
+        #products.kb-collection #productGrid {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 24px;
           margin-top: 48px;
         }
 
-        #products.kb-collection-section .product-card.kb-product-card {
+        #products.kb-collection .product-card {
           min-width: 0;
-          overflow: hidden;
-          background: #221A0E;
-          border: 1px solid #2A2116;
+          background: var(--kb-card);
+          border: 1px solid var(--kb-border);
           border-radius: 20px;
           padding: 24px;
           box-sizing: border-box;
           transition:
-            transform 0.35s cubic-bezier(.22, 1, .36, 1),
-            border-color 0.35s cubic-bezier(.22, 1, .36, 1),
-            box-shadow 0.35s cubic-bezier(.22, 1, .36, 1);
+            transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+            border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        #products.kb-collection-section .product-card.kb-product-card:hover {
+        #products.kb-collection .product-card:hover {
           transform: translateY(-8px);
-          border-color: #C8A951;
-          box-shadow: 0 18px 42px rgba(0, 0, 0, 0.26);
+          border-color: var(--kb-gold);
+          box-shadow: 0 20px 45px rgba(0, 0, 0, 0.24);
         }
 
-        #products.kb-collection-section .kb-product-image {
+        #products.kb-collection .product-image {
           position: relative;
           width: 100%;
           aspect-ratio: 1 / 1;
-          margin: 0 0 22px;
           border-radius: 12px;
-          background: #2A2116;
+          background: var(--kb-border);
           overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
-        #products.kb-collection-section .kb-image-placeholder {
-          color: #8F806D;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 22px;
-          line-height: 1.1;
-          letter-spacing: 2px;
-          text-align: center;
-          opacity: 0.88;
+        #products.kb-collection .kb-bean-icon {
+          width: 78px;
+          height: 78px;
+          color: var(--kb-gold);
+          opacity: 0.95;
         }
 
-        #products.kb-collection-section .stock-badge {
+        #products.kb-collection .image-size {
+          position: absolute;
+          left: 50%;
+          bottom: 20px;
+          transform: translateX(-50%);
+          color: var(--kb-gold);
+          font-size: 11px;
+          line-height: 1;
+          font-weight: 700;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        #products.kb-collection .stock-badge {
           position: absolute;
           top: 14px;
           right: 14px;
@@ -293,96 +309,104 @@
           border: 1px solid rgba(200, 169, 81, 0.55);
           border-radius: 999px;
           background: rgba(26, 18, 7, 0.82);
-          color: #F5E9D3;
+          color: var(--kb-muted);
           font-size: 11px;
           line-height: 1;
-          letter-spacing: 0.2px;
-          backdrop-filter: none;
+          white-space: nowrap;
         }
 
-        #products.kb-collection-section .stock-badge.urgent {
-          color: #F5E9D3;
-          border-color: #C8A951;
+        #products.kb-collection .product-content {
+          padding-top: 22px;
         }
 
-        #products.kb-collection-section .image-size {
-          position: absolute;
-          left: 50%;
-          bottom: 22px;
-          transform: translateX(-50%);
-          color: #C8A951;
-          font-size: 12px;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          font-weight: 700;
-        }
-
-        #products.kb-collection-section .product-content {
-          display: block;
-        }
-
-        #products.kb-collection-section .product-title-line {
+        #products.kb-collection .product-title-line {
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
           gap: 14px;
-          margin-bottom: 22px;
+          margin-bottom: 4px;
         }
 
-        #products.kb-collection-section .product-title-line > div {
+        #products.kb-collection .product-title-line > div {
           min-width: 0;
         }
 
-        #products.kb-collection-section .product-badge {
+        #products.kb-collection .product-title-line h3 {
+          margin: 0;
+          color: var(--kb-text);
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 20px;
+          line-height: 1.15;
+          font-weight: 700;
+        }
+
+        #products.kb-collection .product-title-line p {
+          margin: 6px 0 0;
+          color: var(--kb-muted);
+          font-size: 12px;
+          line-height: 1.35;
+        }
+
+        #products.kb-collection .product-badge {
           display: inline-flex;
           align-items: center;
           margin-bottom: 8px;
           padding: 5px 9px;
-          border: 1px solid #C8A951;
+          border: 1px solid var(--kb-gold);
           border-radius: 999px;
-          color: #C8A951;
+          color: var(--kb-gold);
           background: transparent;
           font-size: 10px;
           line-height: 1;
           font-weight: 700;
-          letter-spacing: 1px;
+          letter-spacing: 0.8px;
           text-transform: uppercase;
         }
 
-        #products.kb-collection-section .product-title-line h3 {
-          margin: 0;
-          color: #F5E9D3;
-          font-family: Georgia, "Times New Roman", serif;
-          font-size: 20px;
-          line-height: 1.15;
-          font-weight: 600;
+        #products.kb-collection .kb-bestseller {
+          display: inline-flex;
+          margin-top: 9px;
+          padding: 5px 9px;
+          border: 1px solid var(--kb-gold);
+          border-radius: 999px;
+          color: var(--kb-gold);
+          font-size: 9px;
+          line-height: 1;
+          font-weight: 800;
+          letter-spacing: 1px;
         }
 
-        #products.kb-collection-section .product-title-line p {
-          margin: 8px 0 0;
-          color: #B8A998;
-          font-size: 12px;
-          line-height: 1.45;
+        #products.kb-collection .kb-low-stock {
+          display: inline-flex;
+          margin-top: 9px;
+          padding: 5px 9px;
+          border: 1px solid var(--kb-red);
+          border-radius: 999px;
+          color: var(--kb-red);
+          font-size: 9px;
+          line-height: 1;
+          font-weight: 800;
+          letter-spacing: 1px;
         }
 
-        #products.kb-collection-section .product-price {
+        #products.kb-collection .product-price {
           flex: 0 0 auto;
-          color: #C8A951;
+          margin-top: 2px;
+          color: var(--kb-gold);
           font-size: 22px;
           line-height: 1;
           font-weight: 800;
           white-space: nowrap;
-          padding-top: 2px;
         }
 
-        #products.kb-collection-section .selector-block {
-          margin-top: 16px;
+        #products.kb-collection .selector-block {
+          margin-top: 19px;
         }
 
-        #products.kb-collection-section .selector-block > span {
+        #products.kb-collection .selector-block > span {
           display: block;
           margin-bottom: 9px;
-          color: #B8A998;
+          color: var(--kb-muted);
           font-size: 11px;
           line-height: 1;
           font-weight: 700;
@@ -390,17 +414,17 @@
           text-transform: uppercase;
         }
 
-        #products.kb-collection-section .pills {
+        #products.kb-collection .pills {
           display: flex;
           flex-wrap: wrap;
           gap: 8px;
         }
 
-        #products.kb-collection-section .pills .pill {
+        #products.kb-collection .pill {
           appearance: none;
-          border: 1px solid #2A2116;
+          border: 1px solid var(--kb-border);
           background: transparent;
-          color: #B8A998;
+          color: var(--kb-muted);
           border-radius: 999px;
           padding: 9px 13px;
           min-height: 34px;
@@ -415,80 +439,123 @@
             transform 0.2s ease;
         }
 
-        #products.kb-collection-section .pills .pill:hover {
-          color: #F5E9D3;
-          border-color: #C8A951;
+        #products.kb-collection .pill:hover {
+          color: var(--kb-text);
+          border-color: var(--kb-gold);
         }
 
-        #products.kb-collection-section .pills .pill.active {
-          color: #1A1207;
-          background: #C8A951;
-          border-color: #C8A951;
+        #products.kb-collection .pill.active {
+          color: var(--kb-bg);
+          background: var(--kb-gold);
+          border-color: var(--kb-gold);
           font-weight: 800;
         }
 
-        #products.kb-collection-section .button.add-to-cart {
+        #products.kb-collection .kb-stock-text {
+          margin-top: 18px;
+          color: var(--kb-muted);
+          font-size: 12px;
+          line-height: 1.4;
+        }
+
+        #products.kb-collection .kb-stock-text.low {
+          color: var(--kb-red);
+          font-weight: 700;
+        }
+
+        #products.kb-collection .add-to-cart {
           width: 100%;
-          margin-top: 22px;
+          margin-top: 18px;
           min-height: 48px;
           border: 0;
           border-radius: 999px;
-          background: #C8A951;
-          color: #1A1207;
+          background: var(--kb-gold);
+          color: var(--kb-bg);
+          font-family: inherit;
           font-size: 12px;
+          line-height: 1;
           font-weight: 800;
           letter-spacing: 0.5px;
           cursor: pointer;
           transition:
-            transform 0.35s cubic-bezier(.22, 1, .36, 1),
+            transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
             filter 0.25s ease,
             opacity 0.25s ease;
         }
 
-        #products.kb-collection-section .button.add-to-cart:hover {
+        #products.kb-collection .add-to-cart:hover {
           transform: scale(1.02);
           filter: brightness(1.05);
         }
 
-        #products.kb-collection-section .button.add-to-cart:active {
+        #products.kb-collection .add-to-cart:active {
           transform: scale(0.99);
         }
 
-        #products.kb-collection-section .button.add-to-cart:disabled {
+        #products.kb-collection .add-to-cart:disabled {
           opacity: 0.45;
           cursor: not-allowed;
           transform: none;
           filter: none;
         }
 
-        @media (max-width: 980px) {
-          #products.kb-collection-section #productGrid.kb-collection-grid {
+        #kb-products-toast {
+          position: fixed;
+          right: 24px;
+          bottom: 24px;
+          z-index: 99999;
+          max-width: min(360px, calc(100vw - 32px));
+          padding: 13px 17px;
+          background: var(--kb-card);
+          border: 1px solid var(--kb-gold);
+          border-radius: 12px;
+          color: var(--kb-text);
+          font-size: 13px;
+          line-height: 1.4;
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+          opacity: 0;
+          transform: translateY(12px);
+          pointer-events: none;
+          transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        #kb-products-toast.is-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        @media (max-width: 900px) {
+          #products.kb-collection #productGrid {
             grid-template-columns: 1fr;
           }
         }
 
         @media (max-width: 600px) {
-          #products.kb-collection-section {
+          #products.kb-collection {
             padding: 60px 16px;
           }
 
-          #products.kb-collection-section .kb-collection-title {
+          #products.kb-collection .kb-collection-title {
             font-size: 42px;
+            line-height: 0.95;
             letter-spacing: -1px;
           }
 
-          #products.kb-collection-section .product-card.kb-product-card {
+          #products.kb-collection .product-card {
             padding: 18px;
           }
 
-          #products.kb-collection-section .product-title-line {
-            gap: 10px;
+          #kb-products-toast {
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            max-width: none;
           }
         }
       </style>
 
       <div class="kb-collection-inner">
-        <p class="kb-eyebrow">THE COLLECTION</p>
+        <p class="kb-collection-label">THE COLLECTION</p>
 
         <h2 class="kb-collection-title">Barako, in its pure form.</h2>
 
@@ -496,14 +563,19 @@
           Choose your roast format, grind, and make it yours.
         </p>
 
-        <div id="productGrid" class="kb-collection-grid">
+        <div class="kb-product-grid" id="productGrid">
 
           <!-- BARAKO STRONG -->
-          <article class="product-card kb-product-card" data-product-id="KB250">
-            <div class="product-image kb-product-image product-image-250">
+          <article class="product-card" data-product-id="KB250">
+            <div class="product-image product-image-250">
               <span class="stock-badge" data-stock-badge="KB250">7 packs left</span>
+
+              <svg class="kb-bean-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M59 12C76 15 88 31 88 49C88 70 72 86 53 88C34 90 17 79 13 61C9 43 19 23 37 16C44 13 51 11 59 12Z" stroke="currentColor" stroke-width="5"/>
+                <path d="M62 18C49 30 43 43 42 56C41 69 45 78 53 86" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+              </svg>
+
               <span class="image-size">250g</span>
-              <span class="kb-image-placeholder" aria-hidden="true">BARAKO<br>STRONG</span>
             </div>
 
             <div class="product-content">
@@ -511,7 +583,7 @@
                 <div>
                   <span class="product-badge">DARK ROAST</span>
                   <h3>Barako Strong</h3>
-                  <p>Dark Roast • 250g</p>
+                  <p>250g • Dark Roast</p>
                 </div>
                 <strong class="product-price" data-price="KB250">₱350</strong>
               </div>
@@ -519,33 +591,40 @@
               <div class="selector-block">
                 <span>ROAST</span>
                 <div class="pills" data-roast-group="KB250">
-                  <button type="button" class="pill">Light</button>
-                  <button type="button" class="pill">Medium</button>
-                  <button type="button" class="pill active">Dark</button>
+                  <button type="button" class="pill" data-value="Light">Light</button>
+                  <button type="button" class="pill" data-value="Medium">Med</button>
+                  <button type="button" class="pill active" data-value="Dark">Dark</button>
                 </div>
               </div>
 
               <div class="selector-block">
                 <span>GRIND</span>
                 <div class="pills" data-grind-group="KB250">
-                  <button type="button" class="pill active">Whole</button>
-                  <button type="button" class="pill">Coarse</button>
-                  <button type="button" class="pill">Fine</button>
+                  <button type="button" class="pill active" data-value="Whole">Whole</button>
+                  <button type="button" class="pill" data-value="Coarse">Coarse</button>
+                  <button type="button" class="pill" data-value="Fine">Fine</button>
                 </div>
               </div>
 
+              <div class="kb-stock-text">7 packs left</div>
+
               <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB250">
-                ADD TO CART →
+                ADD TO CART
               </button>
             </div>
           </article>
 
           <!-- BARAKO CLASSIC -->
-          <article class="product-card kb-product-card" data-product-id="KB500">
-            <div class="product-image kb-product-image product-image-500">
+          <article class="product-card" data-product-id="KB500">
+            <div class="product-image product-image-500">
               <span class="stock-badge" data-stock-badge="KB500">12 packs left</span>
+
+              <svg class="kb-bean-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M59 12C76 15 88 31 88 49C88 70 72 86 53 88C34 90 17 79 13 61C9 43 19 23 37 16C44 13 51 11 59 12Z" stroke="currentColor" stroke-width="5"/>
+                <path d="M62 18C49 30 43 43 42 56C41 69 45 78 53 86" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+              </svg>
+
               <span class="image-size">500g</span>
-              <span class="kb-image-placeholder" aria-hidden="true">BARAKO<br>CLASSIC</span>
             </div>
 
             <div class="product-content">
@@ -553,7 +632,8 @@
                 <div>
                   <span class="product-badge">MEDIUM ROAST</span>
                   <h3>Barako Classic</h3>
-                  <p>Medium Roast • 500g</p>
+                  <p>500g • Medium Roast</p>
+                  <span class="kb-bestseller">BESTSELLER</span>
                 </div>
                 <strong class="product-price" data-price="KB500">₱620</strong>
               </div>
@@ -561,33 +641,40 @@
               <div class="selector-block">
                 <span>ROAST</span>
                 <div class="pills" data-roast-group="KB500">
-                  <button type="button" class="pill">Light</button>
-                  <button type="button" class="pill active">Medium</button>
-                  <button type="button" class="pill">Dark</button>
+                  <button type="button" class="pill" data-value="Light">Light</button>
+                  <button type="button" class="pill active" data-value="Medium">Med</button>
+                  <button type="button" class="pill" data-value="Dark">Dark</button>
                 </div>
               </div>
 
               <div class="selector-block">
                 <span>GRIND</span>
                 <div class="pills" data-grind-group="KB500">
-                  <button type="button" class="pill active">Whole</button>
-                  <button type="button" class="pill">Coarse</button>
-                  <button type="button" class="pill">Fine</button>
+                  <button type="button" class="pill active" data-value="Whole">Whole</button>
+                  <button type="button" class="pill" data-value="Coarse">Coarse</button>
+                  <button type="button" class="pill" data-value="Fine">Fine</button>
                 </div>
               </div>
 
+              <div class="kb-stock-text">12 packs left</div>
+
               <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB500">
-                ADD TO CART →
+                ADD TO CART
               </button>
             </div>
           </article>
 
           <!-- BARAKO RESERVE -->
-          <article class="product-card kb-product-card" data-product-id="KB1K">
-            <div class="product-image kb-product-image product-image-1k">
-              <span class="stock-badge" data-stock-badge="KB1K">3 packs left</span>
+          <article class="product-card" data-product-id="KB1K">
+            <div class="product-image product-image-1k">
+              <span class="stock-badge urgent" data-stock-badge="KB1K">3 packs left</span>
+
+              <svg class="kb-bean-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M59 12C76 15 88 31 88 49C88 70 72 86 53 88C34 90 17 79 13 61C9 43 19 23 37 16C44 13 51 11 59 12Z" stroke="currentColor" stroke-width="5"/>
+                <path d="M62 18C49 30 43 43 42 56C41 69 45 78 53 86" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+              </svg>
+
               <span class="image-size">1kg</span>
-              <span class="kb-image-placeholder" aria-hidden="true">BARAKO<br>RESERVE</span>
             </div>
 
             <div class="product-content">
@@ -595,7 +682,8 @@
                 <div>
                   <span class="product-badge">SIGNATURE</span>
                   <h3>Barako Reserve</h3>
-                  <p>Signature • 1kg</p>
+                  <p>1kg • Signature</p>
+                  <span class="kb-low-stock">LOW STOCK</span>
                 </div>
                 <strong class="product-price" data-price="KB1K">₱1,150</strong>
               </div>
@@ -603,29 +691,182 @@
               <div class="selector-block">
                 <span>ROAST</span>
                 <div class="pills" data-roast-group="KB1K">
-                  <button type="button" class="pill">Light</button>
-                  <button type="button" class="pill">Medium</button>
-                  <button type="button" class="pill active">Dark</button>
+                  <button type="button" class="pill" data-value="Light">Light</button>
+                  <button type="button" class="pill" data-value="Medium">Med</button>
+                  <button type="button" class="pill active" data-value="Dark">Dark</button>
                 </div>
               </div>
 
               <div class="selector-block">
                 <span>GRIND</span>
                 <div class="pills" data-grind-group="KB1K">
-                  <button type="button" class="pill active">Whole</button>
-                  <button type="button" class="pill">Coarse</button>
-                  <button type="button" class="pill">Fine</button>
+                  <button type="button" class="pill active" data-value="Whole">Whole</button>
+                  <button type="button" class="pill" data-value="Coarse">Coarse</button>
+                  <button type="button" class="pill" data-value="Fine">Fine</button>
                 </div>
               </div>
 
+              <div class="kb-stock-text low">3 packs left</div>
+
               <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB1K">
-                ADD TO CART →
+                ADD TO CART
               </button>
             </div>
           </article>
 
         </div>
       </div>
+
+      <div id="kb-products-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+      <script>
+        (() => {
+          "use strict";
+
+          const section = document.getElementById("products");
+          const CART_KEY = "kb_cart";
+          const ORDERS_KEY = "kb_orders";
+
+          if (!section) return;
+
+          function readArray(key) {
+            try {
+              const value = JSON.parse(localStorage.getItem(key) || "[]");
+              return Array.isArray(value) ? value : [];
+            } catch {
+              return [];
+            }
+          }
+
+          function writeArray(key, value) {
+            try {
+              localStorage.setItem(key, JSON.stringify(value));
+            } catch {}
+          }
+
+          function getSelected(card, groupName, fallback) {
+            const group = card.querySelector('[data-' + groupName + '-group]');
+            const active = group?.querySelector(".pill.active");
+
+            return active
+              ? (active.dataset.value || active.textContent.trim())
+              : fallback;
+          }
+
+          function updateHeaderCount() {
+            const cart = readArray(CART_KEY);
+
+            const count = cart.reduce((sum, item) => {
+              return sum + Math.max(1, Number(item.qty ?? item.quantity ?? 1));
+            }, 0);
+
+            section.ownerDocument
+              .querySelectorAll("#cartCount, #heroCartCount, [data-cart-count], [data-cart-count-value]")
+              .forEach((el) => {
+                el.textContent = count;
+              });
+
+            section.ownerDocument
+              .querySelectorAll("button, a")
+              .forEach((el) => {
+                const label = (el.textContent || "").trim();
+
+                if (/^OPEN CART(?:\s+\d+)?$/i.test(label)) {
+                  el.textContent = "OPEN CART " + count;
+                }
+              });
+          }
+
+          let toastTimer;
+
+          function showToast(message) {
+            const toast = document.getElementById("kb-products-toast");
+            if (!toast) return;
+
+            toast.textContent = message;
+            toast.classList.add("is-visible");
+
+            clearTimeout(toastTimer);
+
+            toastTimer = setTimeout(() => {
+              toast.classList.remove("is-visible");
+            }, 2200);
+          }
+
+          function addProduct(card) {
+            const id = card.dataset.productId;
+            const name = card.querySelector(".product-title-line h3")?.textContent.trim();
+            const priceText = card.querySelector(".product-price")?.textContent || "";
+            const price = Number(priceText.replace(/[^0-9.]/g, ""));
+
+            const roast = getSelected(card, "roast", "Dark");
+            const grind = getSelected(card, "grind", "Whole");
+
+            if (!id || !name || !price) return;
+
+            const cart = readArray(CART_KEY);
+
+            const existing = cart.find((item) =>
+              String(item.id) === String(id) &&
+              String(item.roast) === String(roast) &&
+              String(item.grind) === String(grind)
+            );
+
+            if (existing) {
+              existing.qty = Number(existing.qty || 1) + 1;
+              existing.quantity = existing.qty;
+              existing.name = name;
+              existing.price = price;
+              existing.roast = roast;
+              existing.grind = grind;
+            } else {
+              cart.push({
+                id,
+                name,
+                price,
+                roast,
+                grind,
+                qty: 1
+              });
+            }
+
+            writeArray(CART_KEY, cart);
+
+            const orders = readArray(ORDERS_KEY);
+
+            orders.push({
+              id,
+              name,
+              price,
+              roast,
+              grind
+            });
+
+            writeArray(ORDERS_KEY, orders);
+
+            updateHeaderCount();
+            showToast("Added to cart");
+          }
+
+          section.querySelectorAll("[data-kb-collection-add]").forEach((button) => {
+            button.addEventListener("click", () => {
+              addProduct(button.closest(".product-card"));
+            });
+          });
+
+          /*
+            Existing storefront script already handles [data-add-to-cart].
+            To avoid double-adding, we intentionally do not attach
+            another click handler to those existing buttons here.
+          */
+
+          updateHeaderCount();
+
+          window.addEventListener("storage", (event) => {
+            if (event.key === CART_KEY) updateHeaderCount();
+          });
+        })();
+      </script>
     </section>
 
     <!-- DELIVERY & PAYMENT -->
