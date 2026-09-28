@@ -152,6 +152,8 @@
         throw new Error("Email link sign-in is not enabled yet. Enable Email link in Firebase Authentication → Sign-in method.");
       if (error?.code === "auth/unauthorized-domain")
         throw new Error("Add tubalrr.github.io to Firebase Authentication → Authorized domains.");
+      if (error?.code === "auth/quota-exceeded")
+        throw new Error("Firebase email-link quota has been reached. No sign-in email was sent. Wait for the quota to reset or add a billing instrument to the Firebase project to increase the email-link limit.");
       throw error;
     }
   }
