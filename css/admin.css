@@ -327,4 +327,8 @@ code{font:600 11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:#F
 }
 
 .metric-card strong.low-stock-alert,.status-card .status-row strong.low-stock-alert{color:#B42318!important}
+.metric-card.low-stock-card{border-color:#F0B7B2;background:#FFF7F6}
+.metric-card.low-stock-card span{color:#B42318}
+.metric-card.low-stock-card strong{color:#B42318!important}
+
 .inventory-low{color:#B42318!important;font-weight:900}
