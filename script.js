@@ -90,6 +90,19 @@
     return cloneDefaults();
   };
 
+  let catalogChannel=null;
+  try{
+    if("BroadcastChannel" in window){
+      catalogChannel=new BroadcastChannel("kapeng-barako-catalog");
+      catalogChannel.addEventListener("message",event=>{
+        if(event.data?.type==="products-updated"){
+          renderProducts();
+          renderCart();
+        }
+      });
+    }
+  }catch{}
+
   let cart = read(CART_KEY, []);
   if (!Array.isArray(cart)) cart = [];
 
@@ -1323,6 +1336,8 @@
   }
 
   function setupStorageSync() {
+    window.addEventListener("focus", () => { renderProducts(); renderCart(); });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) { renderProducts(); renderCart(); } });
     window.addEventListener("storage", event => {
       if (!event.key) return;
 
