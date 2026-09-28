@@ -95,6 +95,7 @@
 
   let brewSeconds = 180;
   let brewTimer = null;
+  let brewLastTick = 0;
 
   function toast(message) {
     const element = $("#toast");
@@ -970,16 +971,77 @@
     overlay.addEventListener("click", closeMobileMenu);
   }
 
+  function setTimerButtons() {
+    const running = Boolean(brewTimer);
+    const start = $("#timerStart");
+    const pause = $("#timerPause");
+    const reset = $("#timerReset");
+
+    if (start) {
+      start.disabled = running;
+      start.textContent = running ? "RUNNING…" : "START";
+      start.setAttribute("aria-pressed", String(running));
+    }
+    if (pause) {
+      pause.disabled = !running;
+      pause.setAttribute("aria-pressed", String(!running));
+    }
+    if (reset) {
+      reset.disabled = brewSeconds === 180 && !running;
+    }
+  }
+
   function drawTimer() {
     const timer = $("#brewTimer");
     if (!timer) return;
 
-    const minutes = Math.floor(brewSeconds / 60);
-    const seconds = brewSeconds % 60;
+    const total = Math.max(0, Math.floor(brewSeconds));
+    const minutes = Math.floor(total / 60);
+    const seconds = total % 60;
 
     timer.textContent =
       String(minutes).padStart(2, "0") + ":" +
       String(seconds).padStart(2, "0");
+
+    timer.setAttribute(
+      "aria-label",
+      "Brew timer " +
+      String(minutes).padStart(2, "0") +
+      " minutes " +
+      String(seconds).padStart(2, "0") +
+      " seconds"
+    );
+
+    setTimerButtons();
+  }
+
+  function stopTimer() {
+    if (brewTimer) {
+      clearInterval(brewTimer);
+      brewTimer = null;
+    }
+    brewLastTick = 0;
+    setTimerButtons();
+  }
+
+  function tickTimer() {
+    if (!brewTimer) return;
+
+    const now = Date.now();
+    const elapsed = Math.floor((now - brewLastTick) / 1000);
+
+    if (elapsed > 0) {
+      brewSeconds = Math.max(0, brewSeconds - elapsed);
+      brewLastTick += elapsed * 1000;
+      drawTimer();
+    }
+
+    if (brewSeconds <= 0) {
+      stopTimer();
+      brewSeconds = 0;
+      drawTimer();
+      toast("Brew timer complete.");
+    }
   }
 
   function startTimer() {
@@ -987,42 +1049,56 @@
 
     if (brewSeconds <= 0) {
       brewSeconds = 180;
-      drawTimer();
     }
 
-    brewTimer = setInterval(() => {
-      brewSeconds -= 1;
-      drawTimer();
-
-      if (brewSeconds <= 0) {
-        clearInterval(brewTimer);
-        brewTimer = null;
-        brewSeconds = 0;
-        drawTimer();
-        toast("Brew timer complete.");
-      }
-    }, 1000);
+    brewLastTick = Date.now();
+    brewTimer = window.setInterval(tickTimer, 200);
+    drawTimer();
+    toast("Brew timer started.");
   }
 
   function pauseTimer() {
-    if (!brewTimer) return;
-    clearInterval(brewTimer);
-    brewTimer = null;
+    if (!brewTimer) {
+      toast("Brew timer is already paused.");
+      return;
+    }
+
+    tickTimer();
+    stopTimer();
+    drawTimer();
     toast("Brew timer paused.");
   }
 
   function resetTimer() {
-    clearInterval(brewTimer);
-    brewTimer = null;
+    stopTimer();
     brewSeconds = 180;
     drawTimer();
+    toast("Brew timer reset.");
   }
 
   function setupTimer() {
     drawTimer();
-    $("#timerStart")?.addEventListener("click", startTimer);
-    $("#timerPause")?.addEventListener("click", pauseTimer);
-    $("#timerReset")?.addEventListener("click", resetTimer);
+
+    const start = $("#timerStart");
+    const pause = $("#timerPause");
+    const reset = $("#timerReset");
+
+    start?.addEventListener("click", event => {
+      event.preventDefault();
+      startTimer();
+    });
+
+    pause?.addEventListener("click", event => {
+      event.preventDefault();
+      pauseTimer();
+    });
+
+    reset?.addEventListener("click", event => {
+      event.preventDefault();
+      resetTimer();
+    });
+
+    setTimerButtons();
   }
 
   function setupModalControls() {
@@ -1056,26 +1132,46 @@
 
     $("#trackForm")?.addEventListener("submit", trackOrder);
 
-    $("#brewVideoButton")?.addEventListener("click", () => {
+    $("#brewVideoButton")?.addEventListener("click", event => {
+      event.preventDefault();
       const dialog = $("#brew-dialog");
-      if (dialog?.showModal) {
-        dialog.showModal();
-        lockBody(true);
-      } else {
+
+      if (!dialog) {
         toast("Brew guide is unavailable.");
+        return;
+      }
+
+      try {
+        if (typeof dialog.showModal === "function") {
+          if (!dialog.open) dialog.showModal();
+        } else {
+          dialog.setAttribute("open", "");
+        }
+        lockBody(true);
+      } catch {
+        dialog.setAttribute("open", "");
+        lockBody(true);
       }
     });
 
-    $("#brewDialogStart")?.addEventListener("click", () => {
+    $("#brewDialogStart")?.addEventListener("click", event => {
+      event.preventDefault();
       resetTimer();
       startTimer();
-      $("#brew-dialog")?.close();
+
+      const dialog = $("#brew-dialog");
+      if (dialog?.close) dialog.close();
+      else dialog?.removeAttribute("open");
+
       lockBody(false);
     });
 
-    $$("[data-close-dialog]").forEach(button => {
-      button.addEventListener("click", () => {
-        button.closest("dialog")?.close();
+    $("[data-close-dialog]").forEach(button => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        const dialog = button.closest("dialog");
+        if (dialog?.close) dialog.close();
+        else dialog?.removeAttribute("open");
         lockBody(false);
       });
     });
