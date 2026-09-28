@@ -72,6 +72,61 @@
     lastLowStockCount=count;
   }
 
+  async function syncMainPageData(){
+    try{
+      const response=await fetch("../../index.html",{cache:"no-store"});
+      if(!response.ok)return false;
+      const html=await response.text();
+      const doc=new DOMParser().parseFromString(html,"text/html");
+
+      const existingProducts=read(PRODUCTS_KEY,null);
+      if(!Array.isArray(existingProducts)||!existingProducts.length){
+        const importedProducts=[...doc.querySelectorAll("#productGrid .product-card[data-product-id]")].map(card=>{
+          const id=String(card.dataset.productId||"").trim();
+          const title=card.querySelector("h3")?.textContent.trim()||"";
+          const size=card.querySelector(".image-size")?.textContent.trim()||"";
+          const priceText=card.querySelector(".product-price")?.textContent||"";
+          const price=Number(priceText.replace(/[^0-9.]/g,""))||0;
+          const stockText=card.querySelector("[data-stock-badge]")?.textContent||"";
+          const stockMatch=stockText.match(/(\\d+)\\s*packs?/i);
+          const stock=stockMatch?Number(stockMatch[1]):0;
+          const badge=card.querySelector(".product-badge")?.textContent.trim()||"";
+          const note=card.querySelector(".product-title-line p")?.textContent.trim()||"";
+          const roast=card.querySelector('[data-roast-group] .pill.active')?.textContent.trim()||"";
+          const grind=card.querySelector('[data-grind-group] .pill.active')?.textContent.trim()||"";
+          return {id,name:title,size,price,stock,badge,roast,grind,note};
+        }).filter(p=>p.id&&p.name);
+        if(importedProducts.length){
+          products=importedProducts;
+          write(PRODUCTS_KEY,products);
+        }
+      }
+
+      const existingGallery=read(GALLERY_KEY,null);
+      if(!Array.isArray(existingGallery)||!existingGallery.length){
+        const importedGallery=[...doc.querySelectorAll("#gallery .gallery-grid figure")].map((figure,index)=>{
+          const img=figure.querySelector("img");
+          const caption=figure.querySelector("figcaption")?.textContent.trim()||"";
+          const title=caption.replace(/^\\d+\\s*[·.-]?\\s*/,"").trim();
+          return {
+            slot:index+1,
+            title,
+            image:img?.getAttribute("src")||"",
+            alt:img?.getAttribute("alt")||title
+          };
+        }).filter(g=>g.image);
+        if(importedGallery.length){
+          gallery=importedGallery;
+          write(GALLERY_KEY,gallery);
+        }
+      }
+      return true;
+    }catch(error){
+      console.warn("Main page data sync skipped:",error);
+      return false;
+    }
+  }
+
   function renderOverview(){
     refreshData();
     const low=lowProducts(), cs=customers();
@@ -349,6 +404,7 @@
     }
     $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
     renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();
+    syncMainPageData().then(()=>{refreshData();renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();});
     window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderGallery()}});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
