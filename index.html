@@ -487,6 +487,59 @@
           font-weight: 800;
         }
 
+        #products.kb-collection .kb-subscription-option {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 17px;
+          padding: 11px 12px;
+          border: 1px solid #2A2116;
+          border-radius: 12px;
+          background: #1A1207;
+          cursor: pointer;
+          transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        #products.kb-collection .kb-subscription-option:hover {
+          border-color: rgba(200, 169, 81, 0.75);
+        }
+
+        #products.kb-collection .kb-subscription-option:has(input:checked) {
+          border-color: #C8A951;
+          background: rgba(200, 169, 81, 0.07);
+        }
+
+        #products.kb-collection .kb-subscription-option input {
+          width: 16px;
+          height: 16px;
+          margin: 0;
+          flex: 0 0 auto;
+          accent-color: #C8A951;
+          cursor: pointer;
+        }
+
+        #products.kb-collection .kb-subscription-copy {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          min-width: 0;
+        }
+
+        #products.kb-collection .kb-subscription-title {
+          color: #F5E9D3;
+          font-size: 12px;
+          line-height: 1.2;
+          font-weight: 700;
+        }
+
+        #products.kb-collection .kb-subscription-save {
+          color: #C8A951;
+          font-size: 10px;
+          line-height: 1.2;
+          font-weight: 800;
+          letter-spacing: 0.3px;
+        }
+
         #products.kb-collection .kb-stock-text {
           margin-top: 18px;
           color: var(--kb-muted);
@@ -643,7 +696,19 @@
                 </div>
               </div>
 
-              <div class="kb-stock-text">7 packs left</div>
+                            <label class="kb-subscription-option">
+                <input
+                  type="checkbox"
+                  class="kb-subscription-checkbox"
+                  data-product-subscription="KB250"
+                >
+                <span class="kb-subscription-copy">
+                  <span class="kb-subscription-title">Deliver every 2 weeks</span>
+                  <span class="kb-subscription-save">Save 10%</span>
+                </span>
+              </label>
+
+<div class="kb-stock-text">7 packs left</div>
 
               <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB250">
                 ADD TO CART
@@ -693,7 +758,19 @@
                 </div>
               </div>
 
-              <div class="kb-stock-text">12 packs left</div>
+                            <label class="kb-subscription-option">
+                <input
+                  type="checkbox"
+                  class="kb-subscription-checkbox"
+                  data-product-subscription="KB500"
+                >
+                <span class="kb-subscription-copy">
+                  <span class="kb-subscription-title">Deliver every 2 weeks</span>
+                  <span class="kb-subscription-save">Save 10%</span>
+                </span>
+              </label>
+
+<div class="kb-stock-text">12 packs left</div>
 
               <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB500">
                 ADD TO CART
@@ -743,7 +820,19 @@
                 </div>
               </div>
 
-              <div class="kb-stock-text low">3 packs left</div>
+                            <label class="kb-subscription-option">
+                <input
+                  type="checkbox"
+                  class="kb-subscription-checkbox"
+                  data-product-subscription="KB1K"
+                >
+                <span class="kb-subscription-copy">
+                  <span class="kb-subscription-title">Deliver every 2 weeks</span>
+                  <span class="kb-subscription-save">Save 10%</span>
+                </span>
+              </label>
+
+<div class="kb-stock-text low">3 packs left</div>
 
               <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB1K">
                 ADD TO CART
@@ -1305,6 +1394,51 @@
           window.addEventListener("storage", (event) => {
             if (event.key === CART_KEY) updateHeaderCount();
           });
+        /* SUBSCRIPTION PREFERENCE */
+        const SUBSCRIPTION_KEY = "kb_subscription_preferences";
+
+        function readSubscriptionPreferences() {
+          try {
+            const value = JSON.parse(localStorage.getItem(SUBSCRIPTION_KEY) || "{}");
+            return value && typeof value === "object" ? value : {};
+          } catch {
+            return {};
+          }
+        }
+
+        function saveSubscriptionPreferences(value) {
+          try {
+            localStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify(value));
+          } catch {}
+        }
+
+        const subscriptionPreferences = readSubscriptionPreferences();
+
+        section.querySelectorAll(".kb-subscription-checkbox").forEach((checkbox) => {
+          const productId = checkbox.dataset.productSubscription;
+          checkbox.checked = Boolean(subscriptionPreferences[productId]);
+
+          checkbox.addEventListener("change", () => {
+            const preferences = readSubscriptionPreferences();
+
+            preferences[productId] = checkbox.checked;
+
+            saveSubscriptionPreferences(preferences);
+
+            const card = checkbox.closest(".product-card");
+            if (card) {
+              card.dataset.subscription = checkbox.checked ? "biweekly" : "";
+              card.dataset.subscriptionDiscount = checkbox.checked ? "10" : "0";
+            }
+
+            showToast(
+              checkbox.checked
+                ? "Every 2 weeks selected — save 10%"
+                : "Subscription removed"
+            );
+          });
+        });
+
         })();
       </script>
     </section>
