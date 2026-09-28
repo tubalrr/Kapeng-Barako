@@ -14,7 +14,37 @@ import { firebaseConfig, isFirebaseConfigured } from "./firebase-config.js";
 const appRoot=document.querySelector("#app");
 const money=n=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const state={user:null,profile:null,orders:[],addresses:[],wishlist:[],tab:"overview",mode:"login",loading:false};
+const state={user:null,profile:null,orders:[],addresses:[],wishlist:[],tab:"overview",mode:"login",loading:false,demoActive:false};
+const DEMO_KEY="kb_demo_customer_v1";
+
+function demoDefaults(){
+  return {
+    profile:{fullName:"Alex Morgan",email:"demo@kapengbarako.com",phone:"+63 917 555 0148",provider:"demo",photoURL:""},
+    orders:[{id:"KB-DEMO-001",status:"In Transit",total:1120,createdAt:"2026-09-26T09:20:00+08:00",items:[
+      {name:"Barako 500g",weight:"500g",qty:1,price:620},
+      {name:"Barako 250g",weight:"250g",qty:1,price:350}
+    ]}],
+    addresses:[{id:"demo-home",label:"Home",recipient:"Alex Morgan",phone:"+63 917 555 0148",address:"Demo Address, Quezon City, Metro Manila, Philippines"}],
+    wishlist:[{id:"demo-wish-1",name:"Barako 1kg",weight:"1kg",grind:"Whole"}]
+  };
+}
+function getDemoData(){
+  try{const saved=JSON.parse(localStorage.getItem(DEMO_KEY)||"null");return saved&&saved.profile?saved:demoDefaults()}catch{return demoDefaults()}
+}
+function saveDemoData(){localStorage.setItem(DEMO_KEY,JSON.stringify({profile:state.profile,orders:state.orders,addresses:state.addresses,wishlist:state.wishlist}))}
+function isDemoAccount(){return Boolean(state.user?.isDemo)}
+function startDemoAccount(){
+  const data=getDemoData();
+  state.demoActive=true;
+  state.user={uid:"demo_customer",displayName:data.profile?.fullName||"Alex Morgan",email:data.profile?.email||"demo@kapengbarako.com",phoneNumber:data.profile?.phone||"+63 917 555 0148",photoURL:data.profile?.photoURL||"",emailVerified:true,isDemo:true,providerData:[{providerId:"demo"}],metadata:{creationTime:"2026-09-01T08:00:00+08:00"}};
+  state.profile=data.profile||{};state.orders=data.orders||[];state.addresses=data.addresses||[];state.wishlist=data.wishlist||[];state.tab="overview";
+  renderDashboard();
+}
+function deleteDemoAccount(){
+  if(!isDemoAccount())return;
+  if(!confirm("Remove the demo customer account and all demo data from this browser?"))return;
+  localStorage.removeItem(DEMO_KEY);state.user=null;state.profile=null;state.orders=[];state.addresses=[];state.wishlist=[];state.demoActive=false;state.mode="login";renderAuth();
+}
 
 function getProfileName(){
   return String(state.profile?.fullName||state.user?.displayName||state.user?.email||"Coffee lover").trim();
@@ -60,6 +90,7 @@ function renderAuth(){
 <p class="sub">${login?"Sign in to manage your Kapeng Barako orders.":"Use your real contact details for delivery and account recovery."}</p>
 <div id="auth-msg"></div>
 <button class="google-btn" id="google-btn" type="button"><span class="google-mark">G</span> Continue with Google</button>
+<div class="demo-box"><div><strong>Demo Customer</strong><span>Preview the customer profile without connecting Firebase.</span><small>Demo data is saved only in this browser and can be removed from the Profile page.</small></div><button class="account-btn gold demo-btn" id="demo-btn" type="button">OPEN DEMO ACCOUNT</button></div>
 <div class="divider">or continue with email</div>
 <form class="auth-form" id="auth-form">
 ${login?"":`<div class="field"><label>Full Name</label><input name="name" autocomplete="name" required></div>
@@ -74,6 +105,7 @@ ${login?"":`<div class="field"><label>Confirm Password</label><input name="confi
 ${login?'<button class="account-btn" id="forgot-btn" type="button" style="width:100%;margin-top:10px">Forgot password?</button>':""}
 <div class="auth-switch">${login?"Don't have an account yet?":"Already have an account?"} <button id="switch-auth" type="button">${login?"Sign Up":"Log In"}</button></div>`;
   document.querySelector("#google-btn").onclick=googleLogin;
+  document.querySelector("#demo-btn").onclick=startDemoAccount;
   document.querySelector("#auth-form").onsubmit=login?loginWithEmail:signup;
   document.querySelector("#switch-auth").onclick=()=>{state.mode=login?"signup":"login";renderAuth()};
   document.querySelector("#forgot-btn")?.addEventListener("click",forgotPassword);
@@ -147,6 +179,7 @@ async function forgotPassword(){
 }
 
 async function loadAccount(){
+  if(isDemoAccount()){const data=getDemoData();state.profile=data.profile||{};state.orders=data.orders||[];state.addresses=data.addresses||[];state.wishlist=data.wishlist||[];return}
   const uid=state.user.uid;
   const [profileSnap,ordersSnap,addrSnap,wishSnap]=await Promise.all([
     getDoc(doc(db,"users",uid)),
@@ -231,7 +264,9 @@ function profileView(){
   </div>
   <button class="account-btn primary" type="submit">Save Profile</button>
   <div id="profile-msg"></div>
-</form>`;
+</form>
+${isDemoAccount()?`<div class="demo-remove-card"><div><strong>Demo account</strong><span>This is sample customer data for testing. You can remove it before using the account.</span></div><button class="small-btn danger-outline" id="remove-demo-account" type="button">REMOVE DEMO ACCOUNT</button></div>`:""}
+`;
 }
 
 function formatDate(v){if(!v)return"Date unavailable";try{const d=v.toDate?v.toDate():new Date(v);return d.toLocaleString("en-PH",{year:"numeric",month:"short",day:"numeric"})}catch{return"Date unavailable"}}
@@ -243,6 +278,7 @@ function bindPanel(){
  document.querySelectorAll("[data-delete-address]").forEach(b=>b.onclick=()=>removeAddress(b.dataset.deleteAddress));
  document.querySelectorAll("[data-remove-wish]").forEach(b=>b.onclick=()=>removeWishlist(b.dataset.removeWish));
  document.querySelector("#profile-form")?.addEventListener("submit",saveProfile);
+ document.querySelector("#remove-demo-account")?.addEventListener("click",deleteDemoAccount);
 }
 
 function addressForm(a={}){
@@ -255,18 +291,21 @@ function addressForm(a={}){
 
 async function saveAddress(a){
  try{
+  if(isDemoAccount()){state.addresses=a.id?state.addresses.map(x=>x.id===a.id?{...x,...a}:x):[...state.addresses,{id:"demo-address-"+Date.now(),...a}];saveDemoData();renderPanel();return}
   const ref=a.id?doc(db,"users",state.user.uid,"addresses",a.id):doc(collection(db,"users",state.user.uid,"addresses"));
   await setDoc(ref,{label:a.label,recipient:a.recipient,phone:a.phone,address:a.address,updatedAt:serverTimestamp()},{merge:true});
   await loadAccount();renderPanel();
  }catch(e){alert(friendlyError(e))}
 }
-async function removeAddress(id){if(!confirm("Delete this saved address?"))return;try{await deleteDoc(doc(db,"users",state.user.uid,"addresses",id));await loadAccount();renderPanel()}catch(e){alert(friendlyError(e))}}
-async function removeWishlist(id){try{await deleteDoc(doc(db,"users",state.user.uid,"wishlist",id));await loadAccount();renderPanel()}catch(e){alert(friendlyError(e))}}
+async function removeAddress(id){if(!confirm("Delete this saved address?"))return;try{if(isDemoAccount()){state.addresses=state.addresses.filter(a=>a.id!==id);saveDemoData();renderPanel();return}await deleteDoc(doc(db,"users",state.user.uid,"addresses",id));await loadAccount();renderPanel()}catch(e){alert(friendlyError(e))}}
+async function removeWishlist(id){try{if(isDemoAccount()){state.wishlist=state.wishlist.filter(w=>w.id!==id);saveDemoData();renderPanel();return}await deleteDoc(doc(db,"users",state.user.uid,"wishlist",id));await loadAccount();renderPanel()}catch(e){alert(friendlyError(e))}}
 async function saveProfile(e){
  e.preventDefault();const fd=new FormData(e.currentTarget);
  try{
-  await updateProfile(state.user,{displayName:String(fd.get("fullName")).trim()});
-  await updateDoc(doc(db,"users",state.user.uid),{fullName:String(fd.get("fullName")).trim(),phone:String(fd.get("phone")).trim(),updatedAt:serverTimestamp()});
+  const fullName=String(fd.get("fullName")).trim();const phone=String(fd.get("phone")).trim();
+  if(isDemoAccount()){state.profile={...state.profile,fullName,phone};state.user.displayName=fullName;state.user.phoneNumber=phone;saveDemoData();state.tab="profile";renderDashboard();document.querySelector("#profile-msg").innerHTML="<div class=\"notice success\">Demo profile saved.</div>";return}
+  await updateProfile(state.user,{displayName:fullName});
+  await updateDoc(doc(db,"users",state.user.uid),{fullName,phone,updatedAt:serverTimestamp()});
   await loadAccount();document.querySelector("#profile-msg").innerHTML='<div class="notice success">Profile saved.</div>';
  }catch(err){document.querySelector("#profile-msg").innerHTML='<div class="notice error">'+esc(friendlyError(err))+'</div>'}
 }
@@ -274,7 +313,7 @@ async function saveProfile(e){
 function renderDashboard(){
  appRoot.innerHTML=shell();
  document.querySelector("#account-main").innerHTML=dashboard();
- document.querySelector("#logout-btn").onclick=()=>signOut(auth);
+ document.querySelector("#logout-btn").onclick=()=>{if(isDemoAccount()){state.user=null;state.profile=null;state.orders=[];state.addresses=[];state.wishlist=[];state.demoActive=false;renderAuth()}else{signOut(auth)}};
  document.querySelector("#top-profile").onclick=()=>{state.tab="profile";renderDashboard()};
  renderPanel();
 }
@@ -283,13 +322,13 @@ let auth=null,db=null;
 if(isFirebaseConfigured){
  const firebaseApp=initializeApp(firebaseConfig);auth=getAuth(firebaseApp);db=getFirestore(firebaseApp);
  onAuthStateChanged(auth,async user=>{
+  if(state.demoActive)return;
   if(!user){state.user=null;renderAuth();return}
   await reload(user);
   if(user.providerData.some(p=>p.providerId==="password")&&!user.emailVerified){await signOut(auth);renderAuth();return}
   state.user=user;await loadAccount();renderDashboard();
  });
 }else{
- appRoot.innerHTML=authScreen();
  renderAuth();
- msg("Setup required: connect a Firebase Web App before customer data can be stored securely.","error");
+ msg("Firebase is not configured yet. You can still open the demo customer account for a full UI preview.","error");
 }
