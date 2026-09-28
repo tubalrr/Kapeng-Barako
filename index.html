@@ -1,83 +1,495 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Kapeng Barako — bold Liberica coffee roasted in Batangas.">
-<meta name="theme-color" content="#1A1207">
-<title>Kapeng Barako — Bold by Nature</title>
-<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
-<link rel="stylesheet" href="css/home.css?v=kb-rebuild-1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#1A1207">
+  <meta name="description" content="Kapeng Barako — bold by nature, roasted in Batangas.">
+  <title>Kapeng Barako — Bold by Nature</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="site-topbar"><div class="site-container"><span>Freshly roasted • Quezon City</span><span>BATANGAS LIBERICA • SMALL-BATCH</span></div></div>
-
-<button class="kb-menu" id="menu-button" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-<div class="kb-overlay" id="menu-overlay" hidden></div>
-<aside class="kb-sidebar" id="mobile-sidebar" aria-label="Mobile navigation">
-  <div class="sidebar-head"><a class="brand" href="#top"><img src="images/favicon.svg" alt=""><span><b>Kapeng Barako</b><small>Batangas • Liberica</small></span></a><button class="sidebar-close" id="sidebar-close" type="button">×</button></div>
-  <nav class="sidebar-nav"><a href="#top">Home</a><a href="#story">Kwento</a><a href="#products">Collection</a><a href="#delivery">Delivery</a><a href="#farm-story">Farm Story</a><a href="#reviews">Customer Voice</a><a href="#brew-guide">Brew Guide</a><a href="#coffee-tips">Coffee Tips</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></nav>
-  <div class="sidebar-foot"><span>Bold by nature.</span><a href="pages/admin/login.html">Admin</a></div>
-</aside>
-
-<header class="site-header" id="top"><div class="site-container nav">
-  <a class="brand" href="#top"><img src="images/favicon.svg" alt="Kapeng Barako"><span><b>Kapeng Barako</b><small>Batangas • Liberica Coffee</small></span></a>
-  <nav class="desktop-nav"><a href="#story">Kwento</a><a href="#products">Collection</a><a href="#delivery">Delivery</a><a href="#brew-guide">Brew Guide</a><a href="#faq">FAQ</a></nav>
-  <div class="nav-actions"><button class="cart-trigger" id="open-cart" type="button">CART <span id="cart-count">0</span></button><a class="nav-admin" href="pages/admin/login.html">ADMIN</a></div>
-</div></header>
-
-<main>
-<section class="hero"><div class="site-container hero-grid">
-  <div class="hero-copy"><span class="eyebrow">BATANGAS LIBERICA • SMALL-BATCH ROAST</span>
-    <h1>KAPENG BARAKO.<br><em>BOLD BY NATURE.</em><br>ROASTED IN<br>BATANGAS.</h1>
-    <p>Small-batch Liberica coffee, roasted with intent in Batangas — rich aroma, deep character, unmistakably Barako.</p>
-    <div class="hero-actions"><a class="button gold" href="#products">SHOP COFFEE →</a><button class="button outline" id="hero-cart" type="button">OPEN CART <span id="hero-cart-count">0</span></button><button class="button outline" id="hero-track" type="button">TRACK ORDER</button></div>
-    <div class="hero-notes"><div><b>LOCAL ORIGIN</b><span>Batangas Liberica</span></div><div><b>SMALL BATCH</b><span>Roasted with intent</span></div><div><b>FRESH ROAST</b><span>Made for the ritual</span></div></div>
-  </div>
-  <div class="hero-art"><div class="bokeh b1"></div><div class="bokeh b2"></div><div class="bokeh b3"></div><div class="bokeh b4"></div>
-    <div class="roast-card"><div class="roast-card-top"><span>FEATURED ROAST</span><b>01 / 03</b></div>
-      <div class="cup-scene"><div class="steam s1"></div><div class="steam s2"></div><div class="steam s3"></div><div class="cup-handle"></div><div class="cup"></div><div class="coffee"></div><div class="saucer"></div></div>
-      <div class="roast-card-bottom"><div><span>Barako Strong</span><small>Dark Roast · 250g</small></div><b>₱350</b></div>
+  <!-- HEADER -->
+  <div class="top-strip">
+    <div class="container top-strip-inner">
+      <span>Freshly roasted • Quezon City</span>
+      <span>BATANGAS LIBERICA • SMALL-BATCH ROAST</span>
     </div>
   </div>
-</div></section>
 
-<section class="dark-section section-pad" id="story"><div class="site-container two-col story-grid"><div class="section-label"><span>KWENTO</span><b>01</b></div><div><span class="eyebrow">LIBERICA · SMALL BATCH · BATANGAS</span><h2>Hindi lang kape.<br><em>May proseso.</em></h2><p class="lead">Mula sa beans hanggang sa tasa, bawat batch ay may sariling rhythm. Init, oras, kulay, aroma — lahat may bahagi sa isang mas matapang na umaga.</p><p class="muted">Kapeng Barako is a local coffee ritual rooted in Batangas and the distinctive Liberica bean. This storefront keeps the brand story factual and leaves personal farmer details to approved CMS content.</p></div></div></section>
+  <button class="hamburger" id="menuButton" type="button" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 
-<section class="dark-section section-pad" id="why"><div class="site-container"><div class="section-head"><div><span class="eyebrow">BAKIT BARAKO?</span><h2>Simple reasons<br><em>to choose a stronger cup.</em></h2></div><span class="section-index">02</span></div><div class="reason-grid"><article><span>01</span><h3>Matapang / Pure</h3><p>Bold character, deep aroma, and a cup with unmistakable Barako presence.</p></article><article><span>02</span><h3>Gawang Batangas</h3><p>A local coffee story connected to Batangas and Liberica tradition.</p></article><article><span>03</span><h3>Fresh Roast</h3><p>Small-batch roasting focused on freshness, aroma, and daily ritual.</p></article></div></div></section>
+  <div class="menu-overlay" id="menuOverlay" aria-hidden="true"></div>
 
-<section class="dark-section section-pad" id="products"><div class="site-container"><div class="section-head"><div><span class="eyebrow">THE COLLECTION</span><h2>Choose your<br><em>daily dose of Barako.</em></h2></div><span class="section-index">03</span></div><div class="product-grid" id="product-grid"></div></div></section>
+  <aside class="mobile-sidebar" id="mobileSidebar" aria-label="Mobile navigation">
+    <div class="sidebar-top">
+      <a href="#top" class="brand brand-sidebar">
+        <img src="images/favicon.svg" alt="Kapeng Barako logo">
+        <span><strong>Kapeng Barako</strong><small>Batangas • Liberica Coffee</small></span>
+      </a>
+      <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#top">Home</a>
+      <a href="#story">Kwento</a>
+      <a href="#why">Bakit Barako</a>
+      <a href="#products">The Collection</a>
+      <a href="#delivery">Delivery & Payment</a>
+      <a href="#confidence">Wholesale</a>
+      <a href="#farm-story">Farm Story</a>
+      <a href="#reviews">Customer Voice</a>
+      <a href="#brew-guide">Brew Guide</a>
+      <a href="#tips">Coffee Tips</a>
+      <a href="#faq">FAQ</a>
+      <a href="#gallery">Gallery</a>
+      <a href="pages/admin/">Admin</a>
+    </nav>
+    <div class="sidebar-foot">
+      <span>Bold by nature.</span>
+      <span>KB • 2026</span>
+    </div>
+  </aside>
 
-<section class="dark-section section-pad delivery-section" id="delivery"><div class="site-container delivery-grid"><div><span class="eyebrow">DELIVERY & PAYMENT</span><h2>From the roast.<br><em>To your door.</em></h2><p class="lead">Clear checkout, regional delivery rules, and a simple shipping promise.</p><div class="shipping-banner"><strong>FREE SHIPPING</strong><span>When you buy 2 packs or more.</span></div></div><div class="delivery-card"><div><span class="mini-label">PAYMENT</span><div class="tag-row"><span class="dark-tag">GCash</span><span class="dark-tag">COD</span><span class="dark-tag">Bank Transfer</span></div></div><div><span class="mini-label">FULFILLMENT</span><div class="tag-row"><span class="dark-tag">Lalamove</span><span class="dark-tag">J&T</span><span class="dark-tag">LBC</span><span class="dark-tag">QC Meetup</span></div></div><div class="delivery-note">Shipping rates can be configured in Admin. The checkout uses the configured regional rate before saving the order.</div></div></div></section>
+  <header class="site-header" id="top">
+    <div class="container nav">
+      <a class="brand" href="#top">
+        <img src="images/favicon.svg" alt="Kapeng Barako logo">
+        <span><strong>Kapeng Barako</strong><small>Batangas • Liberica Coffee</small></span>
+      </a>
 
-<section class="dark-section section-pad" id="confidence"><div class="site-container"><div class="section-head"><div><span class="eyebrow">BUY WITH CONFIDENCE</span><h2>Built for the next order,<br><em>not just the first.</em></h2></div></div><div class="conversion-grid">
-<article class="feature-panel"><span class="mini-label">WHOLESALE MODE</span><h3>10kg+ for cafés, offices & shops.</h3><p>Switch on wholesale mode and save a bulk inquiry locally.</p><label class="switch"><input id="wholesale-toggle" type="checkbox"><span></span><b>Enable wholesale</b></label><div id="wholesale-panel" class="feature-form" hidden><div class="form-two"><label>Kilos<input id="wholesale-kg" type="number" min="10" value="10"></label><label>Roast<select id="wholesale-roast"><option>Light</option><option selected>Medium</option><option>Dark</option></select></label></div><button class="button gold full" id="wholesale-request" type="button">REQUEST WHOLESALE QUOTE</button></div></article>
-<article class="feature-panel"><span class="mini-label">AUTO-DELIVERY</span><h3>Padalhan ako tuwing</h3><p>Save a recurring preference locally. Automatic billing requires a backend.</p><div class="form-two"><label>Product<select id="subscription-product"></select></label><label>Weight<select id="subscription-weight"></select></label></div><label>Every <select id="subscription-day"><option>5th</option><option selected>15th</option><option>25th</option></select></label><button class="button outline full" id="subscription-save" type="button">SAVE DELIVERY PREFERENCE</button></article>
-</div></div></section>
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="#story">Kwento</a>
+        <a href="#products">Collection</a>
+        <a href="#delivery">Delivery</a>
+        <a href="#brew-guide">Brew Guide</a>
+        <a href="#faq">FAQ</a>
+      </nav>
 
-<section class="section-pad light-panel" id="farm-story"><div class="site-container two-col farm-grid"><div class="farm-visual"><div class="farm-ring r1"></div><div class="farm-ring r2"></div><div class="farm-word">BATANGAS<span>LIBERICA</span></div></div><div><span class="eyebrow dark-eyebrow">FARM STORY</span><h2>From Batangas soil<br><em>to your morning ritual.</em></h2><p class="lead dark-copy">Local origin. Small-batch roast. Farm-to-cup craft.</p><div class="farm-facts"><div><b>01</b><span>Local origin</span></div><div><b>02</b><span>Small-batch roast</span></div><div><b>03</b><span>Farm-to-cup</span></div></div><p class="editor-note">Insert approved farmer names, farm locations, harvest dates, and real photos in Admin CMS before publishing personal sourcing claims.</p></div></div></section>
+      <div class="nav-actions">
+        <button class="cart-button" id="openCart" type="button">CART <span id="cartCount">0</span></button>
+      </div>
+    </div>
+  </header>
 
-<section class="dark-section section-pad" id="reviews"><div class="site-container"><div class="section-head"><div><span class="eyebrow">CUSTOMER VOICE</span><h2>Real people.<br><em>Real cups.</em></h2></div><span class="section-index">04</span></div><div class="review-grid" id="review-grid"><div class="review-slot"><span>VERIFIED SOCIAL PROOF</span><h3>Real Facebook screenshots belong here.</h3><p>No invented testimonials are seeded. Add approved screenshots or reviews through the admin content tools.</p></div></div></div></section>
+  <main>
+    <!-- HERO -->
+    <section class="hero-section">
+      <div class="hero-glow hero-glow-one"></div>
+      <div class="hero-glow hero-glow-two"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">BATANGAS LIBERICA • SMALL-BATCH ROAST</span>
+          <h1>KAPENG BARAKO.<br><em>BOLD BY NATURE.</em><br>ROASTED IN<br>BATANGAS.</h1>
+          <p class="hero-description">
+            Small-batch Liberica coffee, roasted with intent in Batangas — rich aroma,
+            deep character, unmistakably Barako.
+          </p>
 
-<section class="dark-section section-pad" id="brew-guide"><div class="site-container brew-grid"><div><div class="video-card"><img src="images/brew-placeholder.svg" alt="Brew guide placeholder"><button class="play-chip" id="brew-video" type="button">OPEN VIDEO ↗</button></div><span class="eyebrow">INTERACTIVE BREW GUIDE</span><h2>Three minutes.<br><em>One strong cup.</em></h2><div class="timer"><strong id="timer-display">03:00</strong><div><button class="button gold" id="timer-start" type="button">START</button><button class="button outline" id="timer-pause" type="button">PAUSE</button><button class="button outline" id="timer-reset" type="button">RESET</button></div></div></div><div class="brew-steps"><article><span>01</span><h3>Heat</h3><p>Pakuluan ang tubig at ihanda ang brewing vessel.</p></article><article><span>02</span><h3>Brew</h3><p>Lagay ang coffee at simulan ang three-minute timer.</p></article><article><span>03</span><h3>Serve</h3><p>Salain at ihain habang sariwa ang aroma.</p></article></div></div></section>
+          <div class="hero-actions">
+            <a href="#products" class="button button-gold">SHOP COFFEE →</a>
+            <button class="button button-outline" id="heroCartButton" type="button">OPEN CART <span id="heroCartCount">0</span></button>
+            <button class="button button-outline" id="heroTrackButton" type="button">TRACK ORDER</button>
+          </div>
 
-<section class="section-pad light-panel" id="coffee-tips"><div class="site-container"><div class="section-head"><div><span class="eyebrow">COFFEE TIPS</span><h2>Learn the ritual.<br><em>Make it yours.</em></h2></div></div><div class="announcement" id="announcement"><div class="ann-kicker">LATEST</div><div><h3>Bagong ani na!</h3><p>Latest approved roast or harvest announcement.</p><small></small></div></div><div class="tips-grid"><article><span>01</span><h3>Paano mag cold brew ng Barako</h3><p>Start coarse, brew slowly, and adjust strength to your taste.</p></article><article><span>02</span><h3>Whole bean o ground?</h3><p>Choose your grind around the brewer you use most.</p></article><article><span>03</span><h3>Fresh roast routine</h3><p>Store your coffee well and make your morning ritual repeatable.</p></article></div></div></section>
+          <div class="hero-meta-grid">
+            <div><span>LOCAL ORIGIN</span><strong>Batangas Liberica</strong></div>
+            <div><span>SMALL BATCH</span><strong>Roasted with intent</strong></div>
+            <div><span>FRESH ROAST</span><strong>Made for the ritual</strong></div>
+          </div>
+        </div>
 
-<section class="dark-section section-pad" id="ritual"><div class="site-container ritual-grid"><div><span class="eyebrow">THE RITUAL</span><h2>Slow down.<br><em>Drink stronger.</em></h2></div><div><p class="lead">Heat. Brew. Pause. Serve.</p><div class="ritual-line"><span>06:15</span><span>GRIND</span><span>BREW</span><span>POUR</span></div></div></div></section>
+        <div class="hero-visual" aria-label="Featured Kapeng Barako roast">
+          <div class="coffee-bokeh coffee-bokeh-a"></div>
+          <div class="coffee-bokeh coffee-bokeh-b"></div>
+          <div class="coffee-bokeh coffee-bokeh-c"></div>
 
-<section class="dark-section section-pad" id="faq"><div class="site-container faq-wrap"><div><span class="eyebrow">FAQ</span><h2>Questions,<br><em>answered simply.</em></h2></div><div class="faq-list"><details open><summary>Matapang ba?</summary><p>Barako has a naturally bold character, but strength can be adjusted through your coffee-to-water ratio.</p></details><details><summary>Anong grind ang bagay?</summary><p>Whole bean gives you the most flexibility; choose coarse, medium, or fine depending on your brewer.</p></details><details><summary>May free shipping ba?</summary><p>The default store rule is free shipping when the basket reaches 2 packs or more.</p></details><details><summary>Paano mag-track?</summary><p>Open Track Order, enter your Order ID, and view the latest status saved in this browser.</p></details></div></div></section>
+          <article class="featured-card">
+            <div class="featured-top">
+              <span>FEATURED ROAST</span>
+              <span>01 / 03</span>
+            </div>
 
-<section class="dark-section section-pad origin-section" id="origin"><div class="site-container"><div class="section-head"><div><span class="eyebrow">ORIGIN / CRAFT</span><h2>Built around<br><em>the bean.</em></h2></div><span class="section-index">05</span></div><div class="gallery-grid" id="gallery-grid"><figure><img src="images/gallery-01.svg" alt="Roasted Liberica beans"><figcaption>01 · ROAST</figcaption></figure><figure><img src="images/gallery-02.svg" alt="Coffee farm"><figcaption>02 · FARM</figcaption></figure><figure><img src="images/gallery-03.svg" alt="Coffee cup"><figcaption>03 · CUP</figcaption></figure><figure><img src="images/gallery-04.svg" alt="Green coffee beans"><figcaption>04 · HARVEST</figcaption></figure><figure><img src="images/gallery-05.svg" alt="Small batch roasting"><figcaption>05 · CRAFT</figcaption></figure><figure><img src="images/gallery-06.svg" alt="Coffee ritual"><figcaption>06 · RITUAL</figcaption></figure></div></div></section>
-</main>
+            <div class="cup-illustration">
+              <span class="steam steam-a"></span>
+              <span class="steam steam-b"></span>
+              <span class="steam steam-c"></span>
+              <span class="cup-saucer"></span>
+              <span class="cup-handle"></span>
+              <span class="cup-body"></span>
+              <span class="cup-coffee"></span>
+              <span class="cup-mark">KB</span>
+            </div>
 
-<footer class="site-footer" id="contact"><div class="site-container footer-grid"><div><a class="brand" href="#top"><img src="images/favicon.svg" alt=""><span><b>Kapeng Barako</b><small>Bold by Nature</small></span></a><p>Locally inspired, small-batch coffee with the character of Batangas.</p></div><div><span class="eyebrow">CONTACT</span><a href="mailto:ILAG" data-contact="email">ILAG</a><span data-contact="phone">ILAG</span><span data-contact="location">ILAG</span></div><div><span class="eyebrow">SOCIAL</span><a href="#" data-social="facebook">Facebook</a><a href="#" data-social="instagram">Instagram</a><a href="#" data-social="tiktok">TikTok</a></div><div><span class="eyebrow">CONTROL</span><a href="pages/admin/login.html">Admin</a><a href="#top">Back to top ↑</a></div></div><div class="footer-bottom site-container"><span>© 2026 Kapeng Barako</span><span>Built for GitHub Pages</span></div></footer>
+            <div class="featured-bottom">
+              <div>
+                <strong>Barako Strong</strong>
+                <small>Dark Roast • 250g</small>
+              </div>
+              <strong class="featured-price">₱350</strong>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
 
-<div class="modal" id="cart-modal" hidden><button class="modal-bg" data-close-modal aria-label="Close cart"></button><aside class="cart-drawer"><div class="drawer-head"><div><span class="eyebrow">YOUR ORDER</span><h2>Cart</h2></div><button class="drawer-close" data-close-modal type="button">×</button></div><div id="cart-list"></div><div class="cart-summary"><div><span>Items</span><b id="cart-items">0</b></div><div><span>Shipping</span><b id="cart-shipping">Calculated at checkout</b></div><div class="total"><span>Total</span><b id="cart-total">₱0</b></div><button class="button gold full" id="checkout-open" type="button">CHECKOUT →</button></div></aside></div>
+    <!-- KWENTO -->
+    <section class="section-dark section-space" id="story">
+      <div class="container story-layout">
+        <div class="section-marker"><span>KWENTO</span><strong>01</strong></div>
+        <div class="story-copy">
+          <span class="eyebrow">LIBERICA • SMALL BATCH • BATANGAS</span>
+          <h2>Hindi lang kape.<br><em>May proseso.</em></h2>
+          <p class="lead">
+            Mula sa beans hanggang sa tasa, bawat batch may sariling rhythm.
+            Init, oras, kulay, aroma — lahat may bahagi sa isang mas matapang na umaga.
+          </p>
+          <p class="muted">
+            Kapeng Barako is built around the local Liberica tradition of Batangas:
+            bold, aromatic, and made to be part of a real daily ritual.
+          </p>
+          <div class="story-tags">
+            <span>LIBERICA</span><span>SMALL BATCH</span><span>BATANGAS</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<div class="modal" id="checkout-modal" hidden><button class="modal-bg" data-close-modal aria-label="Close checkout"></button><section class="checkout-card"><div class="drawer-head"><div><span class="eyebrow">CHECKOUT</span><h2>Place your order</h2></div><button class="drawer-close" data-close-modal type="button">×</button></div><form id="checkout-form"><div class="form-grid"><label>Full name<input name="name" required></label><label>Phone<input name="phone" required></label><label>Email<input name="email" type="email"></label><label>Payment<select name="payment"><option>GCash</option><option>Cash on Delivery (COD)</option><option>Bank Transfer</option></select></label><label class="full">Delivery address<textarea name="address" rows="3" required></textarea></label><label>Voucher<input name="voucher" id="voucher-code" placeholder="Optional"></label><label>Fulfillment<select name="fulfillment"><option>Lalamove</option><option>J&T</option><option>LBC</option><option>QC Meetup</option></select></label></div><div class="payment-help" id="payment-help">GCash / COD / Bank Transfer</div><div class="checkout-breakdown"><div><span>Subtotal</span><b id="checkout-subtotal">₱0</b></div><div><span>Shipping</span><b id="checkout-shipping">—</b></div><div><span>Discount</span><b id="checkout-discount">—</b></div><div class="grand"><span>Total</span><b id="checkout-total">₱0</b></div></div><button class="button gold full" type="submit">PLACE ORDER</button><p class="form-footnote">Static GitHub Pages mode: order data is saved in this browser only.</p></form><div class="success-box" id="order-success" hidden><span class="success-mark">✓</span><h3>Order recorded.</h3><p id="success-text"></p><button class="button gold full" data-close-modal type="button">DONE</button></div></section></div>
+    <!-- BAKIT BARAKO -->
+    <section class="section-dark section-space" id="why">
+      <div class="container">
+        <div class="section-heading-row">
+          <div>
+            <span class="eyebrow">BAKIT BARAKO?</span>
+            <h2>Simple reasons<br><em>to choose a stronger cup.</em></h2>
+          </div>
+          <span class="section-number">02</span>
+        </div>
 
-<div class="modal" id="track-modal" hidden><button class="modal-bg" data-close-modal aria-label="Close tracking"></button><section class="track-card"><div class="drawer-head"><div><span class="eyebrow">ORDER TRACKING</span><h2>Track my order</h2></div><button class="drawer-close" data-close-modal type="button">×</button></div><form id="track-form"><label>Order ID<input id="track-id" required placeholder="KB-ABC123"></label><button class="button gold full" type="submit">TRACK ORDER →</button></form><div id="track-result"></div></section></div>
+        <div class="reason-grid">
+          <article class="reason-card">
+            <span class="reason-number">01</span>
+            <h3>Matapang / Pure</h3>
+            <p>Bold character, rich aroma, at isang tasa na hindi nagpapanggap.</p>
+          </article>
+          <article class="reason-card">
+            <span class="reason-number">02</span>
+            <h3>Gawang Batangas</h3>
+            <p>Inspired by local Liberica tradition at sa pinanggagalingan ng beans.</p>
+          </article>
+          <article class="reason-card">
+            <span class="reason-number">03</span>
+            <h3>Fresh Roast</h3>
+            <p>Small-batch roasting focused on freshness, aroma, at everyday ritual.</p>
+          </article>
+        </div>
+      </div>
+    </section>
 
-<dialog class="simple-dialog" id="brew-dialog"><div><button class="drawer-close" data-close-dialog type="button">×</button><span class="eyebrow">VIDEO PLACEHOLDER</span><h2>Swap in the approved brew video.</h2><p>Replace the local placeholder or add the final approved embed when supplied.</p></div></dialog>
-<script src="js/storefront.js?v=kb-rebuild-2" defer></script>
-</body></html>
+    <!-- THE COLLECTION -->
+    <section class="section-dark section-space" id="products">
+      <div class="container">
+        <div class="section-heading-row">
+          <div>
+            <span class="eyebrow">THE COLLECTION</span>
+            <h2>Choose your<br><em>daily dose of Barako.</em></h2>
+          </div>
+          <span class="section-number">03</span>
+        </div>
+
+        <div class="collection-grid" id="productGrid">
+          <article class="product-card" data-product-id="KB250">
+            <div class="product-image product-image-250">
+              <span class="stock-badge" data-stock-badge="KB250">⚡ 7 packs left</span>
+              <span class="image-size">250g</span>
+              <div class="bean-cluster"><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="product-content">
+              <div class="product-title-line">
+                <div><span class="product-badge">BEST SELLER</span><h3>Barako 250g</h3><p>Bold, aromatic, unmistakably Barako.</p></div>
+                <strong class="product-price" data-price="KB250">₱350</strong>
+              </div>
+              <div class="selector-block">
+                <span>ROAST</span>
+                <div class="pills" data-roast-group="KB250">
+                  <button type="button" class="pill">Light</button><button type="button" class="pill">Medium</button><button type="button" class="pill active">Dark</button>
+                </div>
+              </div>
+              <div class="selector-block">
+                <span>GRIND</span>
+                <div class="pills" data-grind-group="KB250">
+                  <button type="button" class="pill active">Whole</button><button type="button" class="pill">Coarse</button><button type="button" class="pill">Fine</button>
+                </div>
+              </div>
+              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB250">ADD TO CART →</button>
+            </div>
+          </article>
+
+          <article class="product-card" data-product-id="KB500">
+            <div class="product-image product-image-500">
+              <span class="stock-badge" data-stock-badge="KB500">⚡ 7 packs left</span>
+              <span class="image-size">500g</span>
+              <div class="bean-cluster bean-cluster-large"><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="product-content">
+              <div class="product-title-line">
+                <div><span class="product-badge">FRESH ROAST</span><h3>Barako 500g</h3><p>Deeper supply for the serious daily cup.</p></div>
+                <strong class="product-price" data-price="KB500">₱620</strong>
+              </div>
+              <div class="selector-block">
+                <span>ROAST</span>
+                <div class="pills" data-roast-group="KB500">
+                  <button type="button" class="pill">Light</button><button type="button" class="pill active">Medium</button><button type="button" class="pill">Dark</button>
+                </div>
+              </div>
+              <div class="selector-block">
+                <span>GRIND</span>
+                <div class="pills" data-grind-group="KB500">
+                  <button type="button" class="pill active">Whole</button><button type="button" class="pill">Coarse</button><button type="button" class="pill">Fine</button>
+                </div>
+              </div>
+              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB500">ADD TO CART →</button>
+            </div>
+          </article>
+
+          <article class="product-card" data-product-id="KB1K">
+            <div class="product-image product-image-1k">
+              <span class="stock-badge" data-stock-badge="KB1K">⚡ 7 packs left</span>
+              <span class="image-size">1kg</span>
+              <div class="bean-cluster bean-cluster-xl"><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="product-content">
+              <div class="product-title-line">
+                <div><span class="product-badge">VALUE</span><h3>Barako 1kg</h3><p>The full ritual, ready for the week.</p></div>
+                <strong class="product-price" data-price="KB1K">₱1,150</strong>
+              </div>
+              <div class="selector-block">
+                <span>ROAST</span>
+                <div class="pills" data-roast-group="KB1K">
+                  <button type="button" class="pill">Light</button><button type="button" class="pill">Medium</button><button type="button" class="pill active">Dark</button>
+                </div>
+              </div>
+              <div class="selector-block">
+                <span>GRIND</span>
+                <div class="pills" data-grind-group="KB1K">
+                  <button type="button" class="pill active">Whole</button><button type="button" class="pill">Coarse</button><button type="button" class="pill">Fine</button>
+                </div>
+              </div>
+              <button class="button button-gold add-to-cart" type="button" data-add-to-cart="KB1K">ADD TO CART →</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- DELIVERY & PAYMENT -->
+    <section class="section-dark section-space" id="delivery">
+      <div class="container delivery-layout">
+        <div>
+          <span class="eyebrow">DELIVERY & PAYMENT</span>
+          <h2>From the roast.<br><em>To your door.</em></h2>
+          <p class="lead">Clear checkout, simple payment options, at walang surprise sa shipping promise.</p>
+          <div class="shipping-callout"><strong>FREE SHIPPING</strong><span>Kapag 2 packs or more ang order.</span></div>
+        </div>
+        <div class="info-card">
+          <div><span class="mini-label">PAYMENT</span><div class="tag-list"><span>GCash</span><span>Cash on Delivery (COD)</span><span>Bank Transfer</span></div></div>
+          <div><span class="mini-label">FULFILLMENT</span><div class="tag-list"><span>Lalamove</span><span>J&T</span><span>LBC</span><span>QC Meetup</span></div></div>
+          <div class="info-note">Batangas / Manila / provincial shipping rates can be configured from Admin.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHOLESALE + AUTO DELIVERY -->
+    <section class="section-dark section-space" id="confidence">
+      <div class="container">
+        <div class="section-heading-row">
+          <div><span class="eyebrow">BUY WITH CONFIDENCE</span><h2>Built for the next order,<br><em>not just the first.</em></h2></div>
+        </div>
+
+        <div class="confidence-grid">
+          <article class="feature-card">
+            <span class="mini-label">WHOLESALE MODE</span>
+            <h3>10kg+ for cafés, offices & shops.</h3>
+            <p>Toggle bulk mode, choose kilos, and save a wholesale inquiry for follow-up.</p>
+            <label class="switch-row"><input id="wholesaleToggle" type="checkbox"><span></span><b>Enable wholesale mode</b></label>
+            <div class="feature-form" id="wholesaleForm" hidden>
+              <div class="form-two">
+                <label>Kilos<input id="wholesaleKg" type="number" min="10" step="1" value="10"></label>
+                <label>Roast<select id="wholesaleRoast"><option>Light</option><option selected>Medium</option><option>Dark</option></select></label>
+              </div>
+              <button class="button button-gold full" id="wholesaleRequest" type="button">REQUEST WHOLESALE QUOTE</button>
+            </div>
+          </article>
+
+          <article class="feature-card">
+            <span class="mini-label">AUTO-DELIVERY</span>
+            <h3>Padalhan ako tuwing</h3>
+            <p>Save your recurring delivery preference locally for your next routine order.</p>
+            <div class="form-two">
+              <label>Product<select id="subscriptionProduct"><option value="KB250">Barako 250g</option><option value="KB500">Barako 500g</option><option value="KB1K">Barako 1kg</option></select></label>
+              <label>Schedule<select id="subscriptionDay"><option>5th</option><option selected>15th</option><option>25th</option></select></label>
+            </div>
+            <button class="button button-outline full" id="subscriptionSave" type="button">SAVE DELIVERY PREFERENCE</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FARM STORY -->
+    <section class="section-dark section-space" id="farm-story">
+      <div class="container farm-grid">
+        <div class="farm-visual">
+          <div class="farm-ring farm-ring-one"></div>
+          <div class="farm-ring farm-ring-two"></div>
+          <div class="farm-word">BATANGAS<span>LIBERICA</span></div>
+        </div>
+        <div class="farm-copy">
+          <span class="eyebrow">FARM STORY</span>
+          <h2>From Batangas soil<br><em>to your morning ritual.</em></h2>
+          <p class="lead">Local origin. Small-batch roast. Farm-to-cup craft.</p>
+          <div class="farm-facts">
+            <div><strong>01</strong><span>Local origin</span></div>
+            <div><strong>02</strong><span>Small-batch roast</span></div>
+            <div><strong>03</strong><span>Farm-to-cup</span></div>
+          </div>
+          <p class="muted">Farmer names, exact farm locations, and harvest-specific claims should be added only from approved brand content through Admin.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CUSTOMER VOICE -->
+    <section class="section-dark section-space" id="reviews">
+      <div class="container">
+        <div class="section-heading-row">
+          <div><span class="eyebrow">CUSTOMER VOICE</span><h2>Real people.<br><em>Real cups.</em></h2></div>
+          <span class="section-number">04</span>
+        </div>
+        <div class="review-slot" id="reviewSlot">
+          <span>VERIFIED SOCIAL PROOF</span>
+          <h3>Approved Facebook screenshots go here.</h3>
+          <p>Walang fake testimonials. Real, brand-approved customer feedback lang ang ipi-publish dito.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BREW GUIDE -->
+    <section class="section-dark section-space" id="brew-guide">
+      <div class="container brew-grid">
+        <div>
+          <div class="video-placeholder">
+            <img src="images/brew-placeholder.svg" alt="Kapeng Barako brew guide placeholder">
+            <button class="video-button" id="brewVideoButton" type="button">OPEN BREW VIDEO ↗</button>
+          </div>
+          <span class="eyebrow">INTERACTIVE BREW GUIDE</span>
+          <h2>Three minutes.<br><em>One strong cup.</em></h2>
+          <div class="brew-timer-card">
+            <strong id="brewTimer">03:00</strong>
+            <div class="timer-actions">
+              <button class="button button-gold" id="timerStart" type="button">START</button>
+              <button class="button button-outline" id="timerPause" type="button">PAUSE</button>
+              <button class="button button-outline" id="timerReset" type="button">RESET</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="brew-steps">
+          <article><span>01</span><h3>Heat</h3><p>Pakuluan ang tubig at ihanda ang brewing vessel.</p></article>
+          <article><span>02</span><h3>Brew</h3><p>Lagay ang coffee at simulan ang 3-minute timer.</p></article>
+          <article><span>03</span><h3>Serve</h3><p>Salain, pour, then enjoy habang fresh ang aroma.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIPS -->
+    <section class="section-dark section-space" id="tips">
+      <div class="container">
+        <div class="section-heading-row"><div><span class="eyebrow">COFFEE TIPS + THE RITUAL</span><h2>Learn the ritual.<br><em>Make it yours.</em></h2></div></div>
+        <div class="tips-grid">
+          <article><span>01</span><h3>Paano mag cold brew ng Barako</h3><p>Simple brewing notes para sa smooth, slow-made cup.</p></article>
+          <article><span>02</span><h3>Whole bean o ground?</h3><p>Piliin ang grind base sa brewer na gamit mo araw-araw.</p></article>
+          <article><span>03</span><h3>Fresh roast routine</h3><p>Store well, grind when needed, then enjoy the ritual.</p></article>
+        </div>
+        <div class="ritual-banner"><span>THE RITUAL</span><strong>GRIND • BREW • POUR • PAUSE</strong></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section-dark section-space" id="faq">
+      <div class="container faq-layout">
+        <div><span class="eyebrow">FAQ</span><h2>Questions,<br><em>answered simply.</em></h2></div>
+        <div class="faq-list">
+          <details open><summary>Matapang ba?</summary><p>Barako has bold character, pero puwedeng i-adjust ang strength gamit ang coffee-to-water ratio.</p></details>
+          <details><summary>Anong grind ang bagay?</summary><p>Whole bean for flexibility; coarse, medium, or fine depende sa brewer.</p></details>
+          <details><summary>May free shipping ba?</summary><p>Yes. Default rule: free shipping kapag 2 packs or more ang basket.</p></details>
+          <details><summary>Paano mag-track?</summary><p>Enter your Order ID sa Track Order para makita ang latest saved status.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section class="section-dark section-space" id="gallery">
+      <div class="container">
+        <div class="section-heading-row"><div><span class="eyebrow">ORIGIN / CRAFT</span><h2>Built around<br><em>the bean.</em></h2></div><span class="section-number">05</span></div>
+        <div class="gallery-grid">
+          <figure><img src="images/gallery-01.svg" alt="Roasted Liberica beans"><figcaption>01 · ROAST</figcaption></figure>
+          <figure><img src="images/gallery-02.svg" alt="Coffee farm"><figcaption>02 · FARM</figcaption></figure>
+          <figure><img src="images/gallery-03.svg" alt="Coffee cup"><figcaption>03 · CUP</figcaption></figure>
+          <figure><img src="images/gallery-04.svg" alt="Green coffee beans"><figcaption>04 · HARVEST</figcaption></figure>
+          <figure><img src="images/gallery-05.svg" alt="Small batch roasting"><figcaption>05 · CRAFT</figcaption></figure>
+          <figure><img src="images/gallery-06.svg" alt="Coffee ritual"><figcaption>06 · RITUAL</figcaption></figure>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <a class="brand" href="#top"><img src="images/favicon.svg" alt=""><span><strong>Kapeng Barako</strong><small>Bold by Nature</small></span></a>
+        <p>Locally inspired Liberica coffee with the character of Batangas.</p>
+      </div>
+      <div><span class="eyebrow">CONTACT</span><a href="mailto:ILAG">ILAG</a><span>ILAG</span><span>ILAG</span></div>
+      <div><span class="eyebrow">QUICK LINKS</span><a href="#products">Collection</a><a href="#brew-guide">Brew Guide</a><a href="#faq">FAQ</a></div>
+      <div><span class="eyebrow">CONTROL</span><a href="pages/admin/">Admin</a><a href="#top">Back to top ↑</a></div>
+    </div>
+    <div class="container footer-bottom"><span>© 2026 Kapeng Barako</span><span>Built for GitHub Pages</span></div>
+  </footer>
+
+  <!-- CART -->
+  <div class="cart-modal" id="cartModal" hidden>
+    <button class="cart-modal-backdrop" type="button" data-close-cart aria-label="Close cart"></button>
+    <aside class="cart-panel">
+      <div class="panel-header">
+        <div><span class="eyebrow">YOUR ORDER</span><h2>Cart</h2></div>
+        <button class="close-button" type="button" data-close-cart>×</button>
+      </div>
+      <div id="cartItems"></div>
+      <div class="cart-total-row"><span>Total</span><strong id="cartTotal">₱0</strong></div>
+      <button class="button button-gold full" id="checkoutButton" type="button">CHECKOUT →</button>
+    </aside>
+  </div>
+
+  <!-- TRACKING -->
+  <div class="track-modal" id="trackModal" hidden>
+    <button class="track-modal-backdrop" type="button" data-close-track aria-label="Close tracking"></button>
+    <section class="track-panel">
+      <div class="panel-header">
+        <div><span class="eyebrow">ORDER TRACKING</span><h2>Track my order</h2></div>
+        <button class="close-button" type="button" data-close-track>×</button>
+      </div>
+      <form id="trackForm" class="track-form">
+        <label>ORDER ID<input id="trackOrderId" placeholder="KB-ABC123" required></label>
+        <button class="button button-gold full" type="submit">TRACK ORDER →</button>
+      </form>
+      <div id="trackResult"></div>
+    </section>
+  </div>
+
+  <div class="tiny-toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
