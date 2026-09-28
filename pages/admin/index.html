@@ -215,20 +215,16 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 @media(max-width:760px){.profile-grid{grid-template-columns:1fr}.order-detail-item{grid-template-columns:1fr auto}.advanced-bars{gap:6px}}
 </style>
 
-<script src="../../js/admin-auth.js?v=kb-firebase-auth-1" defer></script>
+<script src="../../js/admin-auth.js?v=kb-firebase-auth-2"></script>
 </head>
 <body>
 <div id="loginScreen" class="login-screen">
-  <form id="loginForm" class="login-card">
-    <div class="brand"><img src="../../images/favicon.svg" alt=""><div><strong>Kapeng Barako</strong><small>Admin Console</small></div></div>
-    <div class="kicker">Restricted Admin</div>
-    <h1>Run the Barako.</h1>
-    <p>Sign in to manage orders, inventory and customer-facing order status.</p>
-    <div class="field"><label for="loginUser">Admin Email</label><input id="loginUser" type="email" autocomplete="username" placeholder="admin@example.com" required></div>
-    <div class="field"><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="Firebase password" required></div>
-    <div id="loginError" class="login-error"></div>
-    <button class="primary-btn full" type="submit">Enter Admin →</button>
-  </form>
+  <section class="login-card" aria-live="polite">
+    <div class="brand"><img src="../../images/favicon.svg" alt=""><div><strong>Kapeng Barako</strong><small>Admin</small></div></div>
+    <div class="kicker">PROTECTED ADMIN AREA</div>
+    <h1>Checking session…</h1>
+    <p>Please wait while your Firebase admin session is verified.</p>
+  </section>
 </div>
 
 <div id="adminApp" class="app hidden">
@@ -743,35 +739,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     $("#sidebar").classList.remove("open");
   }
 
-  $("#loginForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    const btn = $('#loginForm button[type="submit"]');
-    $("#loginError").textContent="";
-    btn.disabled = true;
-    btn.textContent = "SIGNING IN…";
-    try {
-      const admin = await window.KBAdminAuth.authenticate($("#loginUser").value, $("#loginPass").value);
-      $("#loginScreen").classList.add("hidden");
-      $("#adminApp").classList.remove("hidden");
-      $("#adminEmail").textContent = admin.email || "ADMIN";
-      renderAll();
-    } catch (error) {
-      $("#loginError").textContent = error?.code === "FIREBASE_NOT_CONFIGURED"
-        ? "Firebase is not configured. Complete docs/FIREBASE_SETUP.md first."
-        : (error?.message || "Could not sign in.");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Enter Admin →";
-    }
-  });
-
   $("#logoutBtn").addEventListener("click", async()=>{
     try { await window.KBAdminAuth.logout(); }
-    finally {
-      $("#adminApp").classList.add("hidden");
-      $("#loginScreen").classList.remove("hidden");
-      $("#loginPass").value = "";
-    }
+    finally { location.replace("./login.html"); }
   });
 
   $$("#nav button").forEach(btn => btn.addEventListener("click",()=>openView(btn.dataset.view)));
@@ -803,18 +773,17 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     $("#adminApp").classList.add("hidden");
     try {
       const admin = await window.KBAdminAuth.requireAdmin();
-      if (admin) {
-        $("#loginScreen").classList.add("hidden");
-        $("#adminApp").classList.remove("hidden");
-        $("#adminEmail").textContent = admin.email || "ADMIN";
-        renderAll();
-      } else {
-        $("#loginError").textContent = "Please sign in with an authorized admin account.";
+      if (!admin) {
+        location.replace("./login.html?reason=expired");
+        return;
       }
+      $("#loginScreen").classList.add("hidden");
+      $("#adminApp").classList.remove("hidden");
+      $("#adminEmail").textContent = admin.email || "ADMIN";
+      renderAll();
     } catch (error) {
-      $("#loginError").textContent = error?.code === "FIREBASE_NOT_CONFIGURED"
-        ? "Firebase is not configured. Complete docs/FIREBASE_SETUP.md first."
-        : (error?.message || "Admin authentication is unavailable.");
+      const reason = error?.code === "FIREBASE_NOT_CONFIGURED" ? "setup" : "expired";
+      location.replace("./login.html?reason="+encodeURIComponent(reason));
     }
   })();
 })();
