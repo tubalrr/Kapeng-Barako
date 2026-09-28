@@ -202,6 +202,7 @@ function dashboard(){
 <aside class="account-sidebar">
 <button class="account-tab ${state.tab==="overview"?"active":""}" data-tab="overview">Overview</button>
 <button class="account-tab ${state.tab==="orders"?"active":""}" data-tab="orders">My Orders</button>
+<button class="account-tab ${state.tab==="track"?"active":""}" data-tab="track">Track Order</button>
 <button class="account-tab ${state.tab==="addresses"?"active":""}" data-tab="addresses">Address Book</button>
 <button class="account-tab ${state.tab==="wishlist"?"active":""}" data-tab="wishlist">Wishlist</button>
 <button class="account-tab ${state.tab==="profile"?"active":""}" data-tab="profile">Profile</button>
@@ -217,6 +218,7 @@ function renderPanel(){
 <div class="stat-grid"><div class="stat-card"><span>Total orders</span><strong>${state.orders.length}</strong></div><div class="stat-card"><span>Delivered</span><strong>${deliveredCount()}</strong></div><div class="stat-card"><span>Favorites</span><strong>${state.wishlist.length}</strong></div></div>
 <div class="notice">Tip: Save your default delivery address and favorite a 500g pack so your next order takes less time.</div>`;
  else if(state.tab==="orders")panel.innerHTML=ordersView();
+ else if(state.tab==="track")panel.innerHTML=trackView();
  else if(state.tab==="addresses")panel.innerHTML=addressesView();
  else if(state.tab==="wishlist")panel.innerHTML=wishlistView();
  else panel.innerHTML=profileView();
@@ -226,8 +228,43 @@ function deliveredCount(){return state.orders.filter(o=>String(o.status).toLower
 
 function ordersView(){
  if(!state.orders.length)return `<div class="panel-head"><div><h2>My Orders</h2><p>Your verified account orders will appear here.</p></div></div><div class="empty-state">No orders yet.<br><a class="account-btn gold" href="../index.html#products" style="display:inline-flex;margin-top:12px">Shop Coffee</a></div>`;
- return `<div class="panel-head"><div><h2>My Orders</h2><p>Order history and current delivery status.</p></div></div><div class="order-list">${state.orders.map(order=>`<article class="order-card"><div class="order-top"><div><div class="order-id">#${esc(order.id)}</div><div class="order-meta">${formatDate(order.createdAt)}</div></div><span class="status ${String(order.status).toLowerCase()}">${esc(order.status||"Pending")}</span></div><div class="order-items">${(order.items||[]).map(i=>`<div class="order-item"><span>${esc(i.name)} · ${esc(i.weight||"")} × ${Number(i.qty||1)}</span><strong>${money(Number(i.price||0)*Number(i.qty||1))}</strong></div>`).join("")}</div><div class="order-total"><span>Total</span><span>${money(order.total)}</span></div></article>`).join("")}</div>`;
+ return `<div class="panel-head"><div><h2>My Orders</h2><p>Order history and current delivery status.</p></div><button class="account-btn primary" type="button" data-show-track>Track my order</button></div><div class="order-list">${state.orders.map(order=>`<article class="order-card"><div class="order-top"><div><div class="order-id">#${esc(order.id)}</div><div class="order-meta">${formatDate(order.createdAt)}</div></div><span class="status ${String(order.status||"Pending").toLowerCase()}">${esc(order.status||"Pending")}</span></div><div class="order-items">${(order.items||[]).map(i=>`<div class="order-item"><span>${esc(i.name)} · ${esc(i.size||i.weight||"")} × ${Number(i.qty||1)}</span><strong>${money(Number(i.price||0)*Number(i.qty||1))}</strong></div>`).join("")}</div><div class="order-total"><span>Total</span><span>${money(order.total)}</span></div><div class="card-actions"><button class="small-btn track-order-btn" type="button" data-track-order="${esc(order.id)}">Track Order →</button></div></article>`).join("")}</div>`;
 }
+
+function trackingStage(order){
+ const current=String(order?.status||"Pending").toLowerCase();
+ const stages=[
+   ["Pending","Order received"],
+   ["Verified Payment","Payment verified"],
+   ["Processing/Roasting","Roasting & preparation"],
+   ["Ready to Ship","Ready for dispatch"],
+   ["Dispatched","In transit"],
+   ["Delivered","Delivered"]
+ ];
+ if(current==="cancelled") return {cancelled:true,stages};
+ const currentIndex=stages.findIndex(([status])=>status.toLowerCase()===current);
+ return {cancelled:false,stages,currentIndex};
+}
+
+function trackCard(order){
+ const t=trackingStage(order);
+ return `<article class="track-card">
+   <div class="track-card-head"><div><span class="track-label">ORDER</span><strong>#${esc(order.id)}</strong><span class="order-meta">Placed ${formatDate(order.createdAt)}</span></div><span class="status ${String(order.status||"Pending").toLowerCase()}">${esc(order.status||"Pending")}</span></div>
+   ${t.cancelled
+     ? '<div class="track-cancelled">This order is cancelled.</div>'
+     : '<div class="track-line">'+t.stages.map(([status,label],i)=>{
+         const done=t.currentIndex>=i;
+         return '<div class="track-step '+(done?"done":"")+' '+(t.currentIndex===i?"current":"")+'"><span class="track-dot"></span><div><strong>'+esc(label)+'</strong><small>'+esc(status)+(t.currentIndex===i?' · Current':'')+'</small></div></div>';
+       }).join("")+'</div>'}
+   <div class="track-summary"><span>Order total</span><strong>${money(order.total)}</strong></div>
+ </article>`;
+}
+
+function trackView(){
+ if(!state.orders.length)return `<div class="panel-head"><div><h2>Track My Order</h2><p>Your signed-in orders and their current store status.</p></div></div><div class="empty-state">No orders to track yet.<br><a class="account-btn gold" href="../index.html#products" style="display:inline-flex;margin-top:12px">Shop Coffee</a></div>`;
+ return `<div class="panel-head"><div><h2>Track My Order</h2><p>Status comes from your account order record. It updates when the store updates the order.</p></div></div><div class="track-order-list">${state.orders.map(trackCard).join("")}</div>`;
+}
+
 
 function addressesView(){
  return `<div class="panel-head"><div><h2>My Address Book</h2><p>Save delivery details for faster checkout.</p></div><button class="account-btn primary" id="add-address">+ Add Address</button></div>
@@ -279,6 +316,8 @@ function bindPanel(){
  document.querySelectorAll("[data-remove-wish]").forEach(b=>b.onclick=()=>removeWishlist(b.dataset.removeWish));
  document.querySelector("#profile-form")?.addEventListener("submit",saveProfile);
  document.querySelector("#remove-demo-account")?.addEventListener("click",deleteDemoAccount);
+ document.querySelector("[data-show-track]")?.addEventListener("click",()=>{state.tab="track";renderDashboard()});
+ document.querySelectorAll("[data-track-order]").forEach(button=>button.addEventListener("click",()=>{state.tab="track";renderDashboard()}));
 }
 
 function addressForm(a={}){
