@@ -16,30 +16,6 @@
   const PROMO_KEY = "kb_promos";
   const ADS_KEY = "kb_ads";
 
-  const DEFAULT_PRODUCTS = [
-    {
-      id: "KB250", name: "Barako Strong", size: "250g", price: 350, stock: 7,
-      badge: "BEST SELLER", note: "Bold, aromatic, unmistakably Barako.",
-      roast: "Dark", grind: "Whole", image: "", featured: true,
-      origin: "", roastDate: "", roastLevel: "", netWeight: "250g",
-      batch: "", process: "", tastingNotes: ""
-    },
-    {
-      id: "KB500", name: "Barako Classic", size: "500g", price: 620, stock: 7,
-      badge: "FRESH ROAST", note: "More coffee for the serious daily cup.",
-      roast: "Medium", grind: "Whole", image: "", featured: false,
-      origin: "", roastDate: "", roastLevel: "", netWeight: "500g",
-      batch: "", process: "", tastingNotes: ""
-    },
-    {
-      id: "KB1K", name: "Barako Reserve", size: "1kg", price: 1150, stock: 7,
-      badge: "SIGNATURE", note: "The full ritual, ready for the week.",
-      roast: "Dark", grind: "Whole", image: "", featured: false,
-      origin: "", roastDate: "", roastLevel: "", netWeight: "1kg",
-      batch: "", process: "", tastingNotes: ""
-    }
-  ];
-
   const DEFAULT_GALLERY = [
     {slot:1,title:"Roast",image:"images/gallery-01.svg",alt:"Roasted Liberica beans"},
     {slot:2,title:"Farm",image:"images/gallery-02.svg",alt:"Coffee farm"},
@@ -82,14 +58,11 @@
       "'": "&#39;"
     }[char]));
 
-  const cloneDefaults = () => DEFAULT_PRODUCTS.map(product => ({ ...product }));
-
+  // Production-only catalog: Admin is the sole source of product records.
+  // Never seed demo/default products when the catalog is empty.
   const getProducts = () => {
-    const saved = read(PRODUCT_KEY, null);
-    if (Array.isArray(saved) && saved.length) return saved;
-    const seeded = cloneDefaults();
-    write(PRODUCT_KEY, seeded);
-    return seeded;
+    const saved = read(PRODUCT_KEY, []);
+    return Array.isArray(saved) ? saved : [];
   };
 
   const getGallery = () => {
@@ -175,21 +148,13 @@
 
     let bundleDiscount = 0;
 
+    // Bundle membership is the source of truth; no legacy product IDs.
     bundleIds.forEach(bundleId => {
-      const hasStrong = cart.some(
+      const bundleLines = cart.filter(
         item => String(item.bundleId || "") === bundleId &&
-          String(item.id) === "KB250" &&
           Number(item.qty || 0) > 0
       );
-      const hasClassic = cart.some(
-        item => String(item.bundleId || "") === bundleId &&
-          String(item.id) === "KB500" &&
-          Number(item.qty || 0) > 0
-      );
-
-      if (hasStrong && hasClassic) {
-        bundleDiscount += 100;
-      }
+      if (bundleLines.length >= 2) bundleDiscount += 100;
     });
 
     return Math.max(0, baseTotal - bundleDiscount);
@@ -1646,7 +1611,7 @@
     $("#subscriptionSave")?.addEventListener("click", () => {
       const preference = {
         id: "SUB-" + Date.now().toString(36).toUpperCase(),
-        product: $("#subscriptionProduct")?.value || "KB250",
+        product: $("#subscriptionProduct")?.value || "",
         day: $("#subscriptionDay")?.value || "15th",
         active: true,
         createdAt: new Date().toISOString()
