@@ -215,6 +215,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 @media(max-width:760px){.profile-grid{grid-template-columns:1fr}.order-detail-item{grid-template-columns:1fr auto}.advanced-bars{gap:6px}}
 </style>
 
+<script src="../../js/admin-auth.js?v=kb-firebase-auth-1" defer></script>
 </head>
 <body>
 <div id="loginScreen" class="login-screen">
@@ -223,8 +224,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     <div class="kicker">Restricted Admin</div>
     <h1>Run the Barako.</h1>
     <p>Sign in to manage orders, inventory and customer-facing order status.</p>
-    <div class="field"><label for="loginUser">Username</label><input id="loginUser" autocomplete="username" value="admin" required></div>
-    <div class="field"><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
+    <div class="field"><label for="loginUser">Admin Email</label><input id="loginUser" type="email" autocomplete="username" placeholder="admin@example.com" required></div>
+    <div class="field"><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" placeholder="Firebase password" required></div>
     <div id="loginError" class="login-error"></div>
     <button class="primary-btn full" type="submit">Enter Admin →</button>
   </form>
@@ -461,9 +462,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   const ORDER_KEY = "kb_orders";
   const PRODUCT_KEY = "kb_rebuild_products";
-  const ADMIN_KEY = "kb_admin";
-  const ADMIN_USER = "admin";
-  const ADMIN_PASS = "barako123";
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
 
@@ -488,22 +486,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   let orderSearch = "";
   let editingProductId = null;
-
-  function isAdmin() {
-    return localStorage.getItem(ADMIN_KEY) === "1";
-  }
-
-  function showLogin() {
-    $("#loginScreen").classList.remove("hidden");
-    $("#adminApp").classList.add("hidden");
-  }
-
-  function showApp() {
-    $("#loginScreen").classList.add("hidden");
-    $("#adminApp").classList.remove("hidden");
-    $("#adminEmail").textContent = ADMIN_USER;
-    renderAll();
-  }
 
   function products() {
     const list = read(PRODUCT_KEY, []);
@@ -760,22 +742,35 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     $("#sidebar").classList.remove("open");
   }
 
-  $("#loginForm").addEventListener("submit", e => {
+  $("#loginForm").addEventListener("submit", async e => {
     e.preventDefault();
-    const user = $("#loginUser").value.trim();
-    const pass = $("#loginPass").value;
-    if(user.toLowerCase() === ADMIN_USER && pass === ADMIN_PASS){
-      localStorage.setItem(ADMIN_KEY,"1");
-      $("#loginError").textContent="";
-      showApp();
-    }else{
-      $("#loginError").textContent="Invalid username or password.";
+    const btn = $("#loginForm button[type="submit"]");
+    $("#loginError").textContent="";
+    btn.disabled = true;
+    btn.textContent = "SIGNING IN…";
+    try {
+      const admin = await window.KBAdminAuth.authenticate($("#loginUser").value, $("#loginPass").value);
+      $("#loginScreen").classList.add("hidden");
+      $("#adminApp").classList.remove("hidden");
+      $("#adminEmail").textContent = admin.email || "ADMIN";
+      renderAll();
+    } catch (error) {
+      $("#loginError").textContent = error?.code === "FIREBASE_NOT_CONFIGURED"
+        ? "Firebase is not configured. Complete docs/FIREBASE_SETUP.md first."
+        : (error?.message || "Could not sign in.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Enter Admin →";
     }
   });
 
-  $("#logoutBtn").addEventListener("click",()=>{
-    localStorage.removeItem(ADMIN_KEY);
-    showLogin();
+  $("#logoutBtn").addEventListener("click", async()=>{
+    try { await window.KBAdminAuth.logout(); }
+    finally {
+      $("#adminApp").classList.add("hidden");
+      $("#loginScreen").classList.remove("hidden");
+      $("#loginPass").value = "";
+    }
   });
 
   $$("#nav button").forEach(btn => btn.addEventListener("click",()=>openView(btn.dataset.view)));
@@ -799,11 +794,28 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   window.addEventListener("storage",e=>{
     if([ORDER_KEY,PRODUCT_KEY].includes(e.key)) renderAll();
-    if(e.key===ADMIN_KEY && !isAdmin()) showLogin();
   });
   window.addEventListener("resize",()=>{if(!$("#view-overview").classList.contains("active"))return;drawSalesChart(orders());});
 
-  if(isAdmin()) showApp(); else showLogin();
+  (async()=>{
+    $("#loginScreen").classList.remove("hidden");
+    $("#adminApp").classList.add("hidden");
+    try {
+      const admin = await window.KBAdminAuth.requireAdmin();
+      if (admin) {
+        $("#loginScreen").classList.add("hidden");
+        $("#adminApp").classList.remove("hidden");
+        $("#adminEmail").textContent = admin.email || "ADMIN";
+        renderAll();
+      } else {
+        $("#loginError").textContent = "Please sign in with an authorized admin account.";
+      }
+    } catch (error) {
+      $("#loginError").textContent = error?.code === "FIREBASE_NOT_CONFIGURED"
+        ? "Firebase is not configured. Complete docs/FIREBASE_SETUP.md first."
+        : (error?.message || "Admin authentication is unavailable.");
+    }
+  })();
 })();
 </script>
 
