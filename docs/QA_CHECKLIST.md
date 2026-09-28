@@ -11,6 +11,12 @@ Run this checklist on the deployed GitHub Pages site after Firebase configuratio
 - [ ] Signed-in customer can submit an order through the backend.
 - [ ] Order confirmation shows the returned order reference.
 - [ ] Admin login rejects wrong credentials.
+- [ ] `pages/admin/login.html` is the only admin login flow.
+- [ ] `pages/admin/index.html` never authenticates credentials directly and redirects unauthenticated users to login.
+- [ ] Only the `kb_admin_session` app session key is used.
+- [ ] Session expiry redirects to login without a redirect loop.
+- [ ] Logout clears the app session and Firebase Auth session.
+- [ ] Refreshing an active admin session does not send the user back to login.
 - [ ] Authorized Firebase admin can enter the Admin Console.
 - [ ] A non-admin Firebase account is rejected.
 - [ ] Logout ends the Firebase session.
