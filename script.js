@@ -12,6 +12,7 @@
   const GALLERY_KEY = "kb_gallery";
   const SHIPPING_KEY = "kb_shipping_rule";
   const PROMO_KEY = "kb_promos";
+  const ADS_KEY = "kb_ads";
 
   const DEFAULT_PRODUCTS = [
     {
@@ -266,6 +267,33 @@
     if (facebook) { facebook.hidden = !settings.facebook; facebook.href = settings.facebook || "#"; }
     const messenger = $("[data-kb-messenger]");
     if (messenger) { messenger.hidden = !settings.messenger; messenger.href = settings.messenger || "#"; }
+  }
+
+  function renderAdvertisement() {
+    const root = $("#storefront-ad");
+    if (!root) return;
+
+    const data = read(ADS_KEY, { link: "", label: "" }) || {};
+    const link = String(data.link || "").trim();
+    const label = String(data.label || "Sponsored").trim() || "Sponsored";
+
+    const title = $("#storefront-ad-title");
+    const copy = $("#storefront-ad-copy");
+    const open = $("#storefront-ad-open");
+
+    root.classList.toggle("has-link", Boolean(link));
+    if (title) title.textContent = link ? label : "Advertisement";
+    if (copy) {
+      copy.textContent = link
+        ? "Sponsored placement"
+        : "Advertisement space";
+    }
+
+    if (open) {
+      open.hidden = !link;
+      open.href = link || "#";
+      open.setAttribute("aria-label", link ? "Open advertisement" : "Advertisement not configured");
+    }
   }
 
   function renderGallery() {
@@ -1388,13 +1416,14 @@
     window.addEventListener("storage", event => {
       if (!event.key) return;
 
-      if ([CART_KEY, ORDER_KEY, PRODUCT_KEY, GALLERY_KEY, "kb_settings"].includes(event.key)) {
+      if ([CART_KEY, ORDER_KEY, PRODUCT_KEY, GALLERY_KEY, ADS_KEY, "kb_settings"].includes(event.key)) {
         cart = read(CART_KEY, []);
         if (!Array.isArray(cart)) cart = [];
         renderProducts();
         renderGallery();
         renderCart();
         if (event.key === "kb_settings") renderContactInfo();
+        if (event.key === ADS_KEY) renderAdvertisement();
       }
     });
   }
@@ -1402,6 +1431,7 @@
   function init() {
     renderProducts();
     renderGallery();
+    renderAdvertisement();
     renderContactInfo();
     renderCart();
     setupNavigation();
