@@ -1821,3 +1821,24 @@ section,
   .cup-illustration .steam-b{margin-left:0;height:68px;}
   .cup-illustration .steam-c{margin-left:13px;height:54px;}
 }
+
+/* FEATURED CUP — HANDLE MUST ATTACH TO THE CUP BODY */
+.cup-illustration .cup-handle{
+  left:calc(50% + 80px);
+  right:auto;
+  bottom:101px;
+  z-index:3;
+}
+.cup-illustration .cup-body,
+.cup-illustration .cup-coffee,
+.cup-illustration .cup-mark{
+  z-index:4;
+}
+
+@media(max-width:720px){
+  .cup-illustration .cup-handle{
+    left:calc(50% + 65px);
+    right:auto;
+    bottom:75px;
+  }
+}
