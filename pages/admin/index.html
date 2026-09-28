@@ -400,6 +400,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
               <div class="extra-field"><label for="storeDeliveryFee">Delivery Fee (₱)</label><input id="storeDeliveryFee" type="number" min="0" step="1" value="0"></div>
               <div class="extra-field"><label for="storeFreeDelivery">Free Delivery Threshold (₱)</label><input id="storeFreeDelivery" type="number" min="0" step="1" value="0"></div>
               <div class="extra-field"><label for="storeRoastSchedule">Roast Schedule</label><input id="storeRoastSchedule" placeholder="e.g. Tue & Fri"></div>
+              <div class="extra-field"><label for="storeHours">Business Hours</label><input id="storeHours" placeholder="Mon–Sat · 8:00 AM–5:00 PM"></div>
               <div class="extra-field full"><label>Payment Methods</label><div class="extra-toolbar"><label class="extra-switch"><input id="payGcash" type="checkbox" checked> GCash</label><label class="extra-switch"><input id="payCod" type="checkbox" checked> COD</label><label class="extra-switch"><input id="payBank" type="checkbox" checked> Bank Transfer</label></div></div>
             </div>
             <div class="extra-note">Contact name, email, phone, address and social links are managed only in the Contact module.</div>
@@ -1412,6 +1413,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       deliveryFee:Number(saved.deliveryFee ?? 0),
       freeDeliveryThreshold:Number(saved.freeDeliveryThreshold ?? 0),
       hours:saved.hours || "",
+      roastSchedule:saved.roastSchedule || "",
       payments:saved.payments || {gcash:true,cod:true,bank:true}
     };
     const set = (id,value) => {
@@ -1423,6 +1425,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     set("storeDeliveryFee",data.deliveryFee);
     set("storeFreeDelivery",data.freeDeliveryThreshold);
     set("storeHours",data.hours);
+    set("storeRoastSchedule",data.roastSchedule || "");
     const gcash = document.getElementById("payGcash");
     const cod = document.getElementById("payCod");
     const bank = document.getElementById("payBank");
@@ -1438,6 +1441,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       deliveryFee:Math.max(0,Number(document.getElementById("storeDeliveryFee").value || 0)),
       freeDeliveryThreshold:Math.max(0,Number(document.getElementById("storeFreeDelivery").value || 0)),
       hours:document.getElementById("storeHours").value.trim(),
+      roastSchedule:document.getElementById("storeRoastSchedule").value.trim(),
       payments:{
         gcash:document.getElementById("payGcash").checked,
         cod:document.getElementById("payCod").checked,
@@ -1453,6 +1457,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       deliveryFee:data.deliveryFee,
       freeDeliveryThreshold:data.freeDeliveryThreshold,
       businessHours:data.hours,
+      roastSchedule:data.roastSchedule,
       paymentMethods:data.payments
     });
     log("settings","Updated store settings",data);
@@ -1493,7 +1498,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function ensureInventoryHistory() {
-    const table = document.getElementById("inventory-table");
+    const table = document.getElementById("inventoryGrid");
     if (!table) return;
     let mount = document.getElementById("inventoryHistoryHost");
     if (!mount) {
@@ -1505,7 +1510,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function filteredOrderList() {
-    const query = (document.getElementById("order-search")?.value || "").trim().toLowerCase();
+    const query = (document.getElementById("orderSearch")?.value || "").trim().toLowerCase();
     return orders().slice().sort((a,b) =>
       new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
     ).filter(order => !query ||
@@ -1566,7 +1571,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function ensureOrderDetails() {
-    const table = document.getElementById("orders-table");
+    const table = document.getElementById("ordersTable");
     if (!table) return;
     let host = document.getElementById("orderDetailHost");
     if (!host) {
@@ -1620,7 +1625,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function ensureCustomerProfiles() {
-    const table = document.getElementById("customers-table");
+    const table = document.getElementById("customersTable");
     if (!table) return;
     let host = document.getElementById("customerProfileHost");
     if (!host) {
@@ -1788,9 +1793,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       if (file) importBackup(file);
     });
 
-    const ordersRoot = document.getElementById("orders-table");
-    const customersRoot = document.getElementById("customers-table");
-    const inventoryRoot = document.getElementById("inventory-table");
+    const ordersRoot = document.getElementById("ordersTable");
+    const customersRoot = document.getElementById("customersTable");
+    const inventoryRoot = document.getElementById("inventoryGrid");
 
     ordersRoot?.addEventListener("change",event => {
       const select = event.target;
