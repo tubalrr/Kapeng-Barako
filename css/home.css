@@ -792,3 +792,171 @@ footer a:hover{color:var(--gold)!important}
   .track-map-link{white-space:normal}
   .track-map{height:190px}
 }
+
+
+/* =========================================================
+   KAPENG BARAKO — PREMIUM LEFT SIDEBAR
+   Replaces the horizontal top navigation without changing
+   storefront HTML structure or JavaScript behavior.
+   ========================================================= */
+:root{--sidebar-width:268px}
+
+.site-header{
+  position:fixed!important;
+  inset:0 auto 0 0!important;
+  width:var(--sidebar-width)!important;
+  height:100vh!important;
+  z-index:1000!important;
+  background:linear-gradient(180deg,rgba(20,13,6,.985),rgba(26,18,7,.985))!important;
+  border-right:1px solid rgba(200,169,81,.20)!important;
+  border-bottom:0!important;
+  backdrop-filter:blur(18px)!important;
+}
+
+.site-header .nav-wrap{
+  width:100%!important;
+  height:100vh!important;
+  min-height:100vh!important;
+  margin:0!important;
+  padding:28px 20px 22px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  gap:0!important;
+}
+
+.site-header .brand{
+  width:100%;
+  padding:0 4px 25px;
+  margin-bottom:18px;
+  border-bottom:1px solid rgba(245,233,211,.10);
+}
+
+.site-header .brand-mark{
+  width:46px;height:46px;border-radius:13px;
+}
+
+.site-header .brand-copy strong{font-size:18px}
+.site-header .brand-copy small{font-size:7px}
+
+.site-header .desktop-nav{
+  display:flex!important;
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  gap:4px!important;
+  overflow-y:auto;
+  padding:5px 0 18px;
+  scrollbar-width:none;
+}
+.site-header .desktop-nav::-webkit-scrollbar{display:none}
+
+.site-header .desktop-nav a,
+.site-header .nav-track-button{
+  width:100%;
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  padding:0 13px;
+  border-radius:11px;
+  font-size:9px;
+  letter-spacing:.13em;
+  color:rgba(245,233,211,.64);
+  text-align:left;
+  transition:background .2s,color .2s,transform .2s;
+}
+
+.site-header .desktop-nav a:before{
+  content:"";
+  width:5px;height:5px;
+  margin-right:12px;
+  border-radius:50%;
+  background:rgba(200,169,81,.45);
+  box-shadow:0 0 0 3px rgba(200,169,81,.06);
+  flex:0 0 auto;
+}
+
+.site-header .desktop-nav a:hover,
+.site-header .nav-track-button:hover{
+  color:var(--cream)!important;
+  background:rgba(200,169,81,.09);
+  transform:translateX(2px);
+}
+
+.site-header .nav-track-button{
+  color:var(--gold-2)!important;
+  justify-content:flex-start;
+}
+
+.site-header .nav-track-button:before{
+  content:"↗";
+  width:17px;
+  margin-right:7px;
+  color:var(--gold);
+  font-size:12px;
+}
+
+.site-header .nav-actions{
+  width:100%;
+  display:grid!important;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding-top:17px;
+  border-top:1px solid rgba(245,233,211,.10);
+}
+
+.site-header .cart-button{
+  width:100%;
+  min-width:0;
+}
+
+.site-header .nav-cta{
+  width:100%;
+}
+
+.site-header .menu-button{display:none!important}
+.site-header .mobile-nav{display:none!important}
+
+body > main,
+body > footer{
+  margin-left:var(--sidebar-width)!important;
+}
+
+body > main .site-container,
+body > footer .site-container{
+  width:min(1240px,calc(100% - 40px));
+}
+
+@media(max-width:900px){
+  :root{--sidebar-width:220px}
+  .site-header .nav-wrap{padding:22px 14px 16px!important}
+  .site-header .brand{padding-bottom:19px;margin-bottom:12px}
+  .site-header .brand-copy strong{font-size:16px}
+  .site-header .desktop-nav a,
+  .site-header .nav-track-button{min-height:40px;font-size:8px;padding-inline:10px}
+  .site-header .desktop-nav a:before{margin-right:9px}
+  body > main .site-container,
+  body > footer .site-container{width:min(1240px,calc(100% - 28px))}
+}
+
+@media(max-width:560px){
+  :root{--sidebar-width:190px}
+  .site-header .nav-wrap{padding:18px 10px 12px!important}
+  .site-header .brand{gap:8px;padding-bottom:15px}
+  .site-header .brand-mark{width:38px;height:38px;border-radius:10px}
+  .site-header .brand-copy strong{font-size:14px}
+  .site-header .brand-copy small{font-size:6px;letter-spacing:.12em}
+  .site-header .desktop-nav{gap:2px}
+  .site-header .desktop-nav a,
+  .site-header .nav-track-button{min-height:38px;padding-inline:8px;font-size:7px;letter-spacing:.09em}
+  .site-header .desktop-nav a:before{width:4px;height:4px;margin-right:7px}
+  .site-header .nav-actions{grid-template-columns:1fr;padding-top:12px}
+  .site-header .cart-button,
+  .site-header .nav-cta{height:38px}
+  body > main .site-container,
+  body > footer .site-container{width:calc(100% - 20px)}
+}
