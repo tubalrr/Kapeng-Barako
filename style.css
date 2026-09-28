@@ -1009,3 +1009,67 @@ body{font-size:16px}
   .payment-brand{min-height:44px;font-size:10px}
   .payment-brand.gcash-brand img{width:62px}
 }
+
+/* DELIVERY PROVIDER BRAND LOGOS */
+.delivery-brand-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:10px;
+}
+.delivery-brand{
+  min-height:50px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:7px 11px;
+  border:1px solid #3A2D20;
+  border-radius:12px;
+  background:#1A1007;
+  color:#C7B9A6;
+  font-size:9px;
+  font-weight:800;
+}
+.delivery-brand img{
+  display:block;
+  width:auto;
+  height:28px;
+  max-width:100px;
+  object-fit:contain;
+  border-radius:4px;
+}
+.lalamove-brand,
+.jt-brand{
+  background:#fff;
+  border-color:#ded9d1;
+}
+.lalamove-brand img{width:92px;height:27px}
+.jt-brand img{width:92px;height:25px}
+.lbc-brand{
+  background:#fff;
+  border-color:#ded9d1;
+}
+.lbc-brand img{
+  width:56px;
+  height:31px;
+}
+.meetup-brand{
+  background:#1A1007;
+}
+.delivery-brand-mark{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(200,169,81,.30);
+  border-radius:8px;
+  color:var(--gold2);
+  font-size:16px;
+}
+@media(max-width:720px){
+  .delivery-brand{min-height:46px;padding:6px 9px}
+  .lalamove-brand img{width:82px}
+  .jt-brand img{width:82px}
+  .lbc-brand img{width:51px}
+}
