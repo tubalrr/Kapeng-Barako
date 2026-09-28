@@ -13,6 +13,12 @@
   const money=n=>"₱"+Number(n||0).toLocaleString("en-PH");
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let products=read(PRODUCTS_KEY,[]);if(!Array.isArray(products))products=[];
+  const demoSignature=JSON.stringify(DEFAULT_PRODUCTS.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
+  const currentSignature=JSON.stringify(products.map(({id,name,size,price,stock})=>({id,name,size,price,stock})));
+  if(currentSignature===demoSignature && !localStorage.getItem("kb_catalog_real_initialized")){
+    products=[];
+    localStorage.removeItem(PRODUCTS_KEY);
+  }
   let orders=Array.isArray(read(ORDERS_KEY,[]))?read(ORDERS_KEY,[]):[];
   let promos=Array.isArray(read(PROMOS_KEY,[]))?read(PROMOS_KEY,[]):[];
 
@@ -99,12 +105,13 @@
             '<span>Size: <b>'+esc(p.size||"—")+'</b></span>'+
             '<span>Badge: <b>'+esc(p.badge||"—")+'</b></span>'+
           '</div>'+
-          '<button class="admin-button outline product-save-button" type="button" data-product-save="'+esc(p.id)+'">Save '+esc(p.size||"Product")+'</button>'+
+          '<div class="product-card-actions"><button class="admin-button outline product-save-button" type="button" data-product-save="'+esc(p.id)+'">Save '+esc(p.size||"Product")+'</button><button class="admin-button danger product-delete-button" type="button" data-product-delete="'+esc(p.id)+'">Delete</button></div>'+
         '</article>';
       }).join("")+
       '</div>';
 
-    $$("[data-product-save]").forEach(btn=>btn.addEventListener("click",()=>saveProduct(btn.dataset.productSave)));
+    $("[data-product-save]").forEach(btn=>btn.addEventListener("click",()=>saveProduct(btn.dataset.productSave)));
+    $("[data-product-delete]").forEach(btn=>btn.addEventListener("click",()=>deleteProduct(btn.dataset.productDelete)));
     $("#save-all-products")?.addEventListener("click",saveAllProducts);
   }
 
@@ -139,6 +146,18 @@
     products=products.map(p=>String(p.id)===String(id)?updated:p);
     write(PRODUCTS_KEY,products);
     toast(updated.size+" updated: "+money(updated.price)+" · "+updated.stock+" packs");
+    renderProducts();
+    renderOverview();
+  }
+
+  function deleteProduct(id){
+    const product=products.find(p=>String(p.id)===String(id));
+    if(!product)return;
+    if(!confirm("Delete "+product.name+" from the catalog?"))return;
+    products=products.filter(p=>String(p.id)!==String(id));
+    write(PRODUCTS_KEY,products);
+    localStorage.setItem("kb_catalog_real_initialized","1");
+    toast(product.name+" deleted.");
     renderProducts();
     renderOverview();
   }
@@ -195,6 +214,7 @@
     const product={id,name,size,price,stock,badge,roast,grind,note};
     products.push(product);
     write(PRODUCTS_KEY,products);
+    localStorage.setItem("kb_catalog_real_initialized","1");
     $("#product-dialog").close();
     $("#product-form").reset();
     $("#product-stock").value="0";
