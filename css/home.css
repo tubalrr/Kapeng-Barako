@@ -1086,3 +1086,30 @@ body.sidebar-open > .sidebar-toggle{
 .site-header .brand{
   padding-left:58px!important;
 }
+
+/* FINAL OVERRIDE — SIDEBAR CLOSED UNTIL ☰ IS CLICKED */
+.site-header{
+  transform:translateX(-105%)!important;
+  transition:transform .28s ease!important;
+}
+body.sidebar-open .site-header{
+  transform:translateX(0)!important;
+}
+body > main,
+body > footer{
+  margin-left:0!important;
+  transition:margin-left .28s ease!important;
+}
+body.sidebar-open > main,
+body.sidebar-open > footer{
+  margin-left:var(--sidebar-width)!important;
+}
+body > .sidebar-toggle{
+  position:fixed!important;
+  left:14px!important;
+  top:14px!important;
+  z-index:99999!important;
+}
+body.sidebar-open > .sidebar-toggle{
+  left:calc(var(--sidebar-width) + 14px)!important;
+}
