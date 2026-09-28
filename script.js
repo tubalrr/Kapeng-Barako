@@ -10,44 +10,43 @@
   const ORDER_KEY = "kb_orders";
   const PRODUCT_KEY = "kb_rebuild_products";
   const GALLERY_KEY = "kb_gallery";
+  const REVIEWS_KEY = "kb_reviews";
+  const CMS_KEY = "kb_cms";
   const SHIPPING_KEY = "kb_shipping_rule";
   const PROMO_KEY = "kb_promos";
   const ADS_KEY = "kb_ads";
 
   const DEFAULT_PRODUCTS = [
     {
-      id: "KB250",
-      name: "Barako Strong",
-      size: "250g",
-      price: 350,
-      stock: 7,
-      badge: "BEST SELLER",
-      note: "Bold, aromatic, unmistakably Barako.",
-      roast: "Dark",
-      grind: "Whole"
+      id: "KB250", name: "Barako Strong", size: "250g", price: 350, stock: 7,
+      badge: "BEST SELLER", note: "Bold, aromatic, unmistakably Barako.",
+      roast: "Dark", grind: "Whole", image: "", featured: true,
+      origin: "", roastDate: "", roastLevel: "", netWeight: "250g",
+      batch: "", process: "", tastingNotes: ""
     },
     {
-      id: "KB500",
-      name: "Barako 500g",
-      size: "500g",
-      price: 620,
-      stock: 7,
-      badge: "FRESH ROAST",
-      note: "More coffee for the serious daily cup.",
-      roast: "Medium",
-      grind: "Whole"
+      id: "KB500", name: "Barako Classic", size: "500g", price: 620, stock: 7,
+      badge: "FRESH ROAST", note: "More coffee for the serious daily cup.",
+      roast: "Medium", grind: "Whole", image: "", featured: false,
+      origin: "", roastDate: "", roastLevel: "", netWeight: "500g",
+      batch: "", process: "", tastingNotes: ""
     },
     {
-      id: "KB1K",
-      name: "Barako 1kg",
-      size: "1kg",
-      price: 1150,
-      stock: 7,
-      badge: "VALUE",
-      note: "The full ritual, ready for the week.",
-      roast: "Dark",
-      grind: "Whole"
+      id: "KB1K", name: "Barako Reserve", size: "1kg", price: 1150, stock: 7,
+      badge: "SIGNATURE", note: "The full ritual, ready for the week.",
+      roast: "Dark", grind: "Whole", image: "", featured: false,
+      origin: "", roastDate: "", roastLevel: "", netWeight: "1kg",
+      batch: "", process: "", tastingNotes: ""
     }
+  ];
+
+  const DEFAULT_GALLERY = [
+    {slot:1,title:"Roast",image:"images/gallery-01.svg",alt:"Roasted Liberica beans"},
+    {slot:2,title:"Farm",image:"images/gallery-02.svg",alt:"Coffee farm"},
+    {slot:3,title:"Cup",image:"images/gallery-03.svg",alt:"Coffee cup"},
+    {slot:4,title:"Harvest",image:"images/gallery-04.svg",alt:"Green coffee beans"},
+    {slot:5,title:"Craft",image:"images/gallery-05.svg",alt:"Small batch roasting"},
+    {slot:6,title:"Ritual",image:"images/gallery-06.svg",alt:"Coffee ritual"}
   ];
 
   const $ = (selector, root = document) => root.querySelector(selector);
@@ -88,7 +87,17 @@
   const getProducts = () => {
     const saved = read(PRODUCT_KEY, null);
     if (Array.isArray(saved) && saved.length) return saved;
-    return cloneDefaults();
+    const seeded = cloneDefaults();
+    write(PRODUCT_KEY, seeded);
+    return seeded;
+  };
+
+  const getGallery = () => {
+    const saved = read(GALLERY_KEY, null);
+    if (Array.isArray(saved) && saved.length) return saved;
+    const seeded = DEFAULT_GALLERY.map(item => ({ ...item }));
+    write(GALLERY_KEY, seeded);
+    return seeded;
   };
 
   let catalogChannel=null;
@@ -98,6 +107,8 @@
       catalogChannel.addEventListener("message",event=>{
         if(event.data?.type==="products-updated"){
           renderProducts();
+          renderFeaturedProduct();
+          syncSubscriptionProducts();
           renderCart();
         }
       });
@@ -281,20 +292,26 @@
       businessName: "", email: "", phone: "", location: "", facebook: "", messenger: "", hours: "",
       ...(read("kb_settings", {}) || {})
     };
-    $$("[data-kb-business-name]").forEach(el => el.textContent = settings.businessName || "Kapeng Barako");
-    $$("[data-kb-email]").forEach(el => el.textContent = settings.email || "Contact email not configured");
-    $$("[data-kb-phone]").forEach(el => el.textContent = settings.phone || "Phone not configured");
-    $$("[data-kb-location]").forEach(el => el.textContent = settings.location || "Location not configured");
-    $$("[data-kb-hours]").forEach(el => { el.textContent = settings.hours || ""; el.hidden = !settings.hours; });
-
+    const block = $("#footerContactBlock");
+    const business = $("[data-kb-business-name]");
+    const email = $("[data-kb-email]");
+    const phone = $("[data-kb-phone]");
+    const location = $("[data-kb-location]");
+    const hours = $("[data-kb-hours]");
     const emailLink = $("[data-kb-email-link]");
-    if (emailLink) emailLink.href = settings.email ? "mailto:" + settings.email : "pages/contact.html";
     const phoneLink = $("[data-kb-phone-link]");
-    if (phoneLink) phoneLink.href = settings.phone ? "tel:" + settings.phone.replace(/[^+\d]/g, "") : "pages/contact.html";
     const facebook = $("[data-kb-facebook]");
-    if (facebook) { facebook.hidden = !settings.facebook; facebook.href = settings.facebook || "#"; }
     const messenger = $("[data-kb-messenger]");
+    if (business) { business.textContent = settings.businessName || ""; business.hidden = !settings.businessName; }
+    if (emailLink) { emailLink.hidden = !settings.email; emailLink.href = settings.email ? "mailto:" + settings.email : "pages/contact.html"; }
+    if (email) email.textContent = settings.email || "";
+    if (phoneLink) { phoneLink.hidden = !settings.phone; phoneLink.href = settings.phone ? "tel:" + settings.phone.replace(/[^+\d]/g, "") : "pages/contact.html"; }
+    if (phone) phone.textContent = settings.phone || "";
+    if (location) { location.textContent = settings.location || ""; location.hidden = !settings.location; }
+    if (hours) { hours.textContent = settings.hours || ""; hours.hidden = !settings.hours; }
+    if (facebook) { facebook.hidden = !settings.facebook; facebook.href = settings.facebook || "#"; }
     if (messenger) { messenger.hidden = !settings.messenger; messenger.href = settings.messenger || "#"; }
+    if (block) block.hidden = !(settings.businessName || settings.email || settings.phone || settings.location || settings.hours || settings.facebook || settings.messenger);
   }
 
   function renderAdvertisement() {
@@ -339,26 +356,120 @@
   }
 
   function renderGallery() {
-    const items = read(GALLERY_KEY, []);
-    if (!Array.isArray(items)) return;
-
-    $$(".gallery-grid figure").forEach((figure, index) => {
-      const item = items[index];
-      if (!item || !item.image) return;
-
+    const items = getGallery();
+    const figures = $("#mainGalleryGrid [data-gallery-slot]");
+    figures.forEach((figure, index) => {
+      const item = items[index] || {};
       const image = $("img", figure);
       const caption = $("figcaption", figure);
-
+      const hasImage = Boolean(String(item.image || "").trim());
+      figure.classList.toggle("is-empty", !hasImage);
       if (image) {
-        image.src = item.image;
-        image.alt = item.alt || item.title || image.alt;
+        image.src = hasImage ? item.image : "";
+        image.alt = item.alt || item.title || "Gallery image";
+        image.hidden = !hasImage;
       }
-
-      if (caption && item.title) {
-        caption.textContent =
-          String(index + 1).padStart(2, "0") + " · " + String(item.title).toUpperCase();
+      if (caption) {
+        caption.textContent = String(index + 1).padStart(2, "0") + (item.title ? " · " + String(item.title).toUpperCase() : "");
       }
     });
+  }
+
+  function renderAnnouncement() {
+    const bar = $("#kbAnnouncementBar");
+    const primary = $("#kbAnnouncementPrimary");
+    const secondary = $("#kbAnnouncementSecondary");
+    if (!bar) return;
+    const cms = read(CMS_KEY, {});
+    const announcement = cms && typeof cms === "object" && cms.announcement ? cms.announcement : {};
+    const title = String(announcement.title || "").trim();
+    const body = String(announcement.body || "").trim();
+    const message = [title, body].filter(Boolean).join(" • ");
+    let closed = false;
+    try { closed = sessionStorage.getItem("kb_announcement_closed") === "1"; } catch {}
+    const visible = Boolean(message) && !closed;
+    bar.hidden = !visible;
+    bar.classList.toggle("is-closed", !visible);
+    document.body.classList.toggle("kb-announcement-visible", visible);
+    if (primary) primary.textContent = visible ? message : "";
+    if (secondary) secondary.textContent = visible ? message : "";
+  }
+
+  function renderFeaturedProduct() {
+    const products = getProducts();
+    const product = products.find(item => item.featured === true) || products[0];
+    const card = $(".featured-card");
+    if (!card || !product) return;
+    const name = $("#featuredProductName");
+    const meta = $("#featuredProductMeta");
+    const price = $("#featuredProductPrice");
+    const image = $("#featuredProductImage");
+    const fallback = $("#featuredProductFallback");
+    if (name) name.textContent = product.name || "Featured product";
+    const metaParts = [product.roastLevel || product.roast, product.size || product.netWeight].filter(Boolean);
+    if (meta) meta.textContent = metaParts.join(" • ") || "Catalog details";
+    if (price) price.textContent = money(product.price);
+    if (image && fallback) {
+      const src = String(product.image || "").trim();
+      image.hidden = !src;
+      image.src = src || "";
+      image.alt = product.name ? product.name + " product photo" : "Product photo";
+      fallback.hidden = Boolean(src);
+    }
+  }
+
+  function syncSubscriptionProducts() {
+    const select = $("#subscriptionProduct");
+    if (!select) return;
+    const products = getProducts().filter(product => Number(product.stock || 0) > 0);
+    const current = select.value;
+    const saved = read("kb_subscription_preference", {});
+    const preferred = String(current || saved?.product || "");
+    select.innerHTML = products.map(product =>
+      '<option value="' + esc(product.id) + '">' + esc(product.name || product.id) +
+      (product.size ? " · " + esc(product.size) : "") + '</option>'
+    ).join("");
+    const exists = products.some(product => String(product.id) === preferred);
+    if (exists) select.value = preferred;
+    else if (products[0]) select.value = products[0].id;
+  }
+
+  function renderReviews() {
+    const section = $("#reviews");
+    const root = $("#reviewsList");
+    if (!section || !root) return;
+    const saved = read(REVIEWS_KEY, []);
+    const reviews = Array.isArray(saved) ? saved.filter(review => review && review.verified === true && review.published !== false) : [];
+    section.hidden = reviews.length === 0;
+    root.innerHTML = reviews.map(review => {
+      const rating = Math.max(1, Math.min(5, Number(review.rating || 5)));
+      return '<article class="premium-review-card">' +
+        '<div class="review-stars" aria-label="' + rating + ' out of 5 stars">' + "★".repeat(rating) + '</div>' +
+        '<p>“' + esc(review.text || "") + '”</p>' +
+        '<strong>' + esc(review.name || "Verified customer") + '</strong>' +
+        '<span>' + (review.orderId ? "Verified purchase · " + esc(review.orderId) : "Verified customer review") + '</span>' +
+      '</article>';
+    }).join("");
+  }
+
+  function renderTrustSignals() {
+    const orders = read(ORDER_KEY, []);
+    const list = Array.isArray(orders) ? orders : [];
+    const delivered = list.filter(order => String(order.status || "").toLowerCase() === "delivered").length;
+    const deliveredCard = $("#trustDeliveredCard");
+    const deliveredTitle = $("#trustDeliveredTitle");
+    const deliveredText = $("#trustDeliveredText");
+    if (deliveredCard) deliveredCard.hidden = delivered <= 0;
+    if (deliveredTitle) deliveredTitle.textContent = delivered + (delivered === 1 ? " delivered order" : " delivered orders");
+    if (deliveredText) deliveredText.textContent = "Based on recorded orders in this storefront browser.";
+    const settings = read("kb_settings", {}) || {};
+    const roastSchedule = String(settings.roastSchedule || "").trim();
+    const roastCard = $("#trustRoastCard");
+    const roastTitle = $("#trustRoastTitle");
+    const roastText = $("#trustRoastText");
+    if (roastCard) roastCard.hidden = !roastSchedule;
+    if (roastTitle) roastTitle.textContent = roastSchedule ? "Roast schedule" : "";
+    if (roastText) roastText.textContent = roastSchedule;
   }
 
   function getNextRoastTarget() {
@@ -407,12 +518,54 @@
     const stockBadge = $("[data-stock-badge]", card);
     const lowStockTimer = $("[data-low-stock-timer]", card);
     const addButton = $("[data-add-to-cart]", card);
+    const visual = $(".product-image", card);
+    const existingPhoto = $(".product-photo", card);
+    let productPhoto = existingPhoto;
+    if (visual && !productPhoto) {
+      productPhoto = document.createElement("img");
+      productPhoto.className = "product-photo";
+      productPhoto.loading = "lazy";
+      productPhoto.decoding = "async";
+      visual.insertBefore(productPhoto, visual.firstChild);
+    }
+    let meta = $(".product-data-meta", card);
+    if (card && !meta) {
+      meta = document.createElement("div");
+      meta.className = "product-data-meta";
+      const content = $(".product-content", card);
+      const titleLine = $(".product-title-line", card);
+      if (content && titleLine) content.insertBefore(meta, titleLine.nextSibling);
+    }
 
     if (name) name.textContent = product.name || "Barako Coffee";
     if (note) note.textContent = product.note || "Fresh Kapeng Barako.";
     if (badge) badge.textContent = product.badge || "NEW";
     if (size) size.textContent = product.size || "";
     if (price) price.textContent = money(product.price);
+
+    const productImage = String(product.image || "").trim();
+    if (visual) visual.classList.toggle("has-photo", Boolean(productImage));
+    if (productPhoto) {
+      productPhoto.hidden = !productImage;
+      productPhoto.src = productImage || "";
+      productPhoto.alt = product.name ? product.name + " product photo" : "Product photo";
+      productPhoto.onerror = () => {
+        productPhoto.hidden = true;
+        visual?.classList.remove("has-photo");
+      };
+    }
+
+    if (meta) {
+      const details = [
+        product.origin ? "Origin: " + product.origin : "",
+        product.batch ? "Batch: " + product.batch : "",
+        product.roastDate ? "Roasted: " + product.roastDate : "",
+        product.process ? "Process: " + product.process : "",
+        product.tastingNotes ? product.tastingNotes : ""
+      ].filter(Boolean);
+      meta.innerHTML = details.slice(0,5).map(value => "<span>" + esc(value) + "</span>").join("");
+      meta.hidden = details.length === 0;
+    }
 
     const roastValue = String(product.roast || "Dark").trim();
     const grindValue = String(product.grind || "Whole").trim();
@@ -497,8 +650,9 @@
           '<div class="product-image product-image-generic">' +
             '<span class="stock-badge" data-stock-badge="' + esc(product.id) + '"></span>' +
             '<span class="low-stock-timer" data-low-stock-timer hidden></span>' +
+            '<img class="product-photo" loading="lazy" decoding="async" alt="" hidden>' +
             '<span class="image-size"></span>' +
-            '<div class="bean-cluster bean-cluster-large"><i></i><i></i><i></i><i></i></div>' +
+            '<div class="product-image-fallback"><svg class="kb-bean-icon" viewBox="0 0 100 100" fill="none" aria-hidden="true"><path d="M59 12C76 15 88 31 88 49C88 70 72 86 53 88C34 90 17 79 13 61C9 43 19 23 37 16C44 13 51 11 59 12Z" stroke="currentColor" stroke-width="5"/><path d="M62 18C49 30 43 43 42 56C41 69 45 78 53 86" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg></div>' +
           '</div>' +
           '<div class="product-content">' +
             '<div class="product-title-line">' +
@@ -512,17 +666,17 @@
             '<div class="selector-block">' +
               '<span>ROAST</span>' +
               '<div class="pills" data-roast-group="' + esc(product.id) + '">' +
-                '<button type="button" class="pill">Light</button>' +
-                '<button type="button" class="pill">Medium</button>' +
-                '<button type="button" class="pill">Dark</button>' +
+                '<button type="button" class="pill" data-value="Light">Light</button>' +
+                '<button type="button" class="pill" data-value="Medium">Medium</button>' +
+                '<button type="button" class="pill" data-value="Dark">Dark</button>' +
               '</div>' +
             '</div>' +
             '<div class="selector-block">' +
               '<span>GRIND</span>' +
               '<div class="pills" data-grind-group="' + esc(product.id) + '">' +
-                '<button type="button" class="pill">Whole</button>' +
-                '<button type="button" class="pill">Coarse</button>' +
-                '<button type="button" class="pill">Fine</button>' +
+                '<button type="button" class="pill" data-value="Whole">Whole</button>' +
+                '<button type="button" class="pill" data-value="Coarse">Coarse</button>' +
+                '<button type="button" class="pill" data-value="Fine">Fine</button>' +
               '</div>' +
             '</div>' +
             '<button class="button button-gold add-to-cart" type="button" data-add-to-cart="' +
@@ -534,6 +688,9 @@
 
       syncProductCard(card, product);
     });
+
+    const bundle = $("#kb-starter-bundle", grid);
+    if (bundle) grid.appendChild(bundle);
   }
 
   function getSelected(card, groupAttribute, fallback) {
@@ -824,6 +981,8 @@
       },
       payment,
       gcashRef,
+      paymentStatus: payment === "GCash" ? "Pending Review" : "Not Required",
+      paymentReviewedAt: "",
       fulfillment: String(data.get("fulfillment") || ""),
       voucher: String(data.get("voucher") || "").trim().toUpperCase(),
       subtotal,
@@ -941,15 +1100,19 @@
     let active = steps.indexOf(order.status);
     if (active < 0) active = 0;
 
+    const paymentStatus = String(order.paymentStatus || (order.payment === "GCash" ? "Pending Review" : "Not Required"));
     root.innerHTML =
       '<div class="track-customer">' +
         '<strong>' + esc(order.id) + '</strong><br>' +
         esc(order.customer?.name || "Customer") + '<br>' +
         esc(address || "Delivery address not provided") +
+        '<div class="track-payment-status"><span>PAYMENT</span><strong>' + esc(paymentStatus) + '</strong></div>' +
       '</div>' +
       steps.map((step, index) => {
+        const isPaymentStep = step === "Verified Payment";
+        const paymentVerified = isPaymentStep && paymentStatus === "Verified";
         const state =
-          index < active ? "done" :
+          index < active || paymentVerified ? "done" :
           index === active ? "active" : "";
 
         const mark =
@@ -1432,6 +1595,7 @@
   }
 
   function setupBusinessFeatures() {
+    syncSubscriptionProducts();
     $("#wholesaleToggle")?.addEventListener("change", event => {
       const form = $("#wholesaleForm");
       if (form) form.hidden = !event.target.checked;
@@ -1516,20 +1680,31 @@
     window.addEventListener("storage", event => {
       if (!event.key) return;
 
-      if ([CART_KEY, ORDER_KEY, PRODUCT_KEY, GALLERY_KEY, ADS_KEY, "kb_settings"].includes(event.key)) {
+      if ([CART_KEY, ORDER_KEY, PRODUCT_KEY, GALLERY_KEY, REVIEWS_KEY, CMS_KEY, ADS_KEY, "kb_settings"].includes(event.key)) {
         cart = read(CART_KEY, []);
         if (!Array.isArray(cart)) cart = [];
         renderProducts();
         renderGallery();
+        renderFeaturedProduct();
+        syncSubscriptionProducts();
+        renderReviews();
+        renderTrustSignals();
         renderCart();
-        if (event.key === "kb_settings") renderContactInfo();
+        if (event.key === "kb_settings") { renderContactInfo(); renderTrustSignals(); }
+        if (event.key === CMS_KEY) renderAnnouncement();
         if (event.key === ADS_KEY) renderAdvertisement();
       }
     });
   }
 
   function init() {
+    renderAnnouncement();
     renderProducts();
+    renderFeaturedProduct();
+    syncSubscriptionProducts();
+    renderGallery();
+    renderReviews();
+    renderTrustSignals();
     window.setInterval(() => {
       $(".product-card[data-product-id]").forEach(card => {
         const id = String(card.dataset.productId || "");
