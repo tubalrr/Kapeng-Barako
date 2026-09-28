@@ -194,6 +194,27 @@
     }).join("");
   }
 
+  function renderContactInfo() {
+    const settings = {
+      businessName: "", email: "", phone: "", location: "", facebook: "", messenger: "", hours: "",
+      ...(read("kb_settings", {}) || {})
+    };
+    $("[data-kb-business-name]").forEach(el => el.textContent = settings.businessName || "Kapeng Barako");
+    $("[data-kb-email]").forEach(el => el.textContent = settings.email || "Contact email not configured");
+    $("[data-kb-phone]").forEach(el => el.textContent = settings.phone || "Phone not configured");
+    $("[data-kb-location]").forEach(el => el.textContent = settings.location || "Location not configured");
+    $("[data-kb-hours]").forEach(el => { el.textContent = settings.hours || ""; el.hidden = !settings.hours; });
+
+    const emailLink = $("[data-kb-email-link]");
+    if (emailLink) emailLink.href = settings.email ? "mailto:" + settings.email : "pages/contact.html";
+    const phoneLink = $("[data-kb-phone-link]");
+    if (phoneLink) phoneLink.href = settings.phone ? "tel:" + settings.phone.replace(/[^+\d]/g, "") : "pages/contact.html";
+    const facebook = $("[data-kb-facebook]");
+    if (facebook) { facebook.hidden = !settings.facebook; facebook.href = settings.facebook || "#"; }
+    const messenger = $("[data-kb-messenger]");
+    if (messenger) { messenger.hidden = !settings.messenger; messenger.href = settings.messenger || "#"; }
+  }
+
   function renderGallery() {
     const items = read(GALLERY_KEY, []);
     if (!Array.isArray(items)) return;
@@ -1305,12 +1326,13 @@
     window.addEventListener("storage", event => {
       if (!event.key) return;
 
-      if ([CART_KEY, ORDER_KEY, PRODUCT_KEY, GALLERY_KEY].includes(event.key)) {
+      if ([CART_KEY, ORDER_KEY, PRODUCT_KEY, GALLERY_KEY, "kb_settings"].includes(event.key)) {
         cart = read(CART_KEY, []);
         if (!Array.isArray(cart)) cart = [];
         renderProducts();
         renderGallery();
         renderCart();
+        if (event.key === "kb_settings") renderContactInfo();
       }
     });
   }
@@ -1318,6 +1340,7 @@
   function init() {
     renderProducts();
     renderGallery();
+    renderContactInfo();
     renderCart();
     setupNavigation();
     setupMenu();
