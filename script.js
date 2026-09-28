@@ -558,8 +558,10 @@
     if (meta) {
       const details = [
         product.origin ? "Origin: " + product.origin : "",
-        product.batch ? "Batch: " + product.batch : "",
+        product.roastLevel || product.roast ? "Roast: " + (product.roastLevel || product.roast) : "",
+        product.netWeight || product.size ? "Net: " + (product.netWeight || product.size) : "",
         product.roastDate ? "Roasted: " + product.roastDate : "",
+        product.batch ? "Batch: " + product.batch : "",
         product.process ? "Process: " + product.process : "",
         product.tastingNotes ? product.tastingNotes : ""
       ].filter(Boolean);
