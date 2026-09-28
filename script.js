@@ -91,6 +91,10 @@ function renderProducts(){
   }
   if(grid) grid.querySelectorAll(".catalog-empty").forEach(x=>x.remove());
   if(grid){
+    const ids=new Set(products.map(p=>String(p.id)));
+    grid.querySelectorAll(".product-card[data-product-id]").forEach(card=>{
+      if(!ids.has(String(card.dataset.productId))) card.remove();
+    });
     products.forEach(p=>{
       let card=grid.querySelector('[data-product-id="'+CSS.escape(String(p.id))+'"]');
       if(!card){
