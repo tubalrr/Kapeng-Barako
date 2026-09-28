@@ -328,6 +328,36 @@
     root.innerHTML='<table class="data-table"><thead><tr><th>Name</th><th>Code</th><th>Rule</th><th>Status</th></tr></thead><tbody>'+promos.map(p=>'<tr><td>'+esc(p.name)+'</td><td><strong>'+esc(p.code)+'</strong></td><td>'+esc(p.type==="percent"?Number(p.value||0)+"% off":money(p.value)+" off")+' · min '+Number(p.minPacks||0)+' packs</td><td><span class="badge">'+(p.active!==false?"ACTIVE":"OFF")+'</span></td></tr>').join("")+'</tbody></table>';
   }
 
+  function renderContact(){
+    const s={
+      businessName:"",email:"",phone:"",location:"",facebook:"",messenger:"",hours:"",
+      ...(read(SETTINGS_KEY,{})||{})
+    };
+    $("#contact-business-name").value=s.businessName||"";
+    $("#contact-manager-email").value=s.email||"";
+    $("#contact-manager-phone").value=s.phone||"";
+    $("#contact-manager-location").value=s.location||"";
+    $("#contact-manager-facebook").value=s.facebook||"";
+    $("#contact-manager-messenger").value=s.messenger||"";
+    $("#contact-manager-hours").value=s.hours||"";
+  }
+
+  function saveContact(){
+    const existing=read(SETTINGS_KEY,{})||{};
+    const settings={
+      ...existing,
+      businessName:$("#contact-business-name").value.trim(),
+      email:$("#contact-manager-email").value.trim(),
+      phone:$("#contact-manager-phone").value.trim(),
+      location:$("#contact-manager-location").value.trim(),
+      facebook:$("#contact-manager-facebook").value.trim(),
+      messenger:$("#contact-manager-messenger").value.trim(),
+      hours:$("#contact-manager-hours").value.trim()
+    };
+    write(SETTINGS_KEY,settings);
+    toast("Contact details saved. Main site updated.");
+  }
+
   function renderContent(){
     const s={email:"ILAG",phone:"ILAG",location:"ILAG",facebook:"",...(read(SETTINGS_KEY,{})||{})},cms={announcement:{title:"Bagong ani na!",body:"Add the latest approved roast or harvest update."},...(read(CMS_KEY,{})||{})};
     $("#content-announcement").value=cms.announcement?.title||"Bagong ani na!";$("#content-body").value=cms.announcement?.body||"";$("#content-facebook").value=s.facebook||"";$("#content-email").value=s.email||"ILAG";$("#content-phone").value=s.phone||"ILAG";$("#content-location").value=s.location||"ILAG";
@@ -376,9 +406,9 @@
   function openView(view){
     $$(".admin-nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
     $$("[data-view-panel]").forEach(p=>{p.hidden=p.dataset.viewPanel!==view;p.classList.toggle("active",p.dataset.viewPanel===view)});
-    $("#view-title").textContent={overview:"Overview",orders:"Orders",inventory:"Inventory",products:"Products",customers:"Customers",promos:"Promos",content:"Content",gallery:"Gallery"}[view]||"Overview";
+    $("#view-title").textContent={overview:"Overview",orders:"Orders",inventory:"Inventory",products:"Products",customers:"Customers",promos:"Promos",content:"Content",contact:"Contact",gallery:"Gallery"}[view]||"Overview";
     closeMenu();
-    if(view==="overview")renderOverview();if(view==="orders")renderOrders();if(view==="inventory")renderInventorySummary();if(view==="products")renderProducts();if(view==="customers")renderCustomers();if(view==="promos")renderPromos();if(view==="content")renderContent();if(view==="gallery")renderGallery();
+    if(view==="overview")renderOverview();if(view==="orders")renderOrders();if(view==="inventory")renderInventorySummary();if(view==="products")renderProducts();if(view==="customers")renderCustomers();if(view==="promos")renderPromos();if(view==="content")renderContent();if(view==="contact")renderContact();if(view==="gallery")renderGallery();
   }
   function closeMenu(){document.body.classList.remove("menu-open");$("#admin-menu")?.classList.remove("is-open");$("#admin-sidebar")?.classList.remove("is-open");$("#admin-overlay")?.classList.remove("is-open");$("#admin-menu")?.setAttribute("aria-expanded","false");}
   function toggleMenu(){const open=!document.body.classList.contains("menu-open");document.body.classList.toggle("menu-open",open);$("#admin-menu").classList.toggle("is-open",open);$("#admin-sidebar").classList.toggle("is-open",open);$("#admin-overlay").classList.toggle("is-open",open);$("#admin-menu").setAttribute("aria-expanded",String(open))}
@@ -402,8 +432,8 @@
       });
       syncSoundButton();
     }
-    $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
-    renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();
+    $("#add-product")?.addEventListener("click",()=>$("#product-dialog").showModal());$$("[data-product-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#product-dialog").close()));$("#product-form")?.addEventListener("submit",addProduct);$("#save-content")?.addEventListener("click",saveContent);$("#save-contact")?.addEventListener("click",saveContact);$("#add-promo")?.addEventListener("click",()=>$("#promo-dialog").showModal());$$("[data-dialog-close]").forEach(b=>b.addEventListener("click",()=>$("#promo-dialog").close()));$("#promo-form")?.addEventListener("submit",addPromo);
+    renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderContact();renderGallery();
     syncMainPageData().then(()=>{refreshData();renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderContent();renderGallery();});
     window.addEventListener("storage",e=>{if([PRODUCTS_KEY,ORDERS_KEY,PROMOS_KEY,SETTINGS_KEY,CMS_KEY,GALLERY_KEY].includes(e.key)){renderOverview();renderOrders();renderInventorySummary();renderProducts();renderCustomers();renderPromos();renderGallery()}});
   }
