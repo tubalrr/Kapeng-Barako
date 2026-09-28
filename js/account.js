@@ -29,7 +29,20 @@ function demoDefaults(){
   };
 }
 function getDemoData(){
-  try{const saved=JSON.parse(localStorage.getItem(DEMO_KEY)||"null");return saved&&saved.profile?saved:demoDefaults()}catch{return demoDefaults()}
+  try{
+    const saved=JSON.parse(localStorage.getItem(DEMO_KEY)||"null");
+    const base=saved&&saved.profile?saved:demoDefaults();
+    const localOrders=JSON.parse(localStorage.getItem("kb_orders")||"[]");
+    if(Array.isArray(localOrders)&&localOrders.length){
+      base.orders=localOrders
+        .filter(order=>order&&order.id)
+        .slice()
+        .sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))
+        .slice(0,50)
+        .map(order=>({...order,testData:true}));
+    }
+    return base;
+  }catch{return demoDefaults()}
 }
 function saveDemoData(){localStorage.setItem(DEMO_KEY,JSON.stringify({profile:state.profile,orders:state.orders,addresses:state.addresses,wishlist:state.wishlist}))}
 function isDemoAccount(){return Boolean(state.user?.isDemo)}
