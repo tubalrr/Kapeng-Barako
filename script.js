@@ -333,6 +333,23 @@
     });
   }
 
+  function getNextRoastLabel() {
+    const now = new Date();
+    const roast = new Date(now);
+    roast.setHours(6, 0, 0, 0);
+
+    if (now.getTime() >= roast.getTime()) {
+      roast.setDate(roast.getDate() + 1);
+    }
+
+    const isTomorrow =
+      roast.getDate() !== now.getDate() ||
+      roast.getMonth() !== now.getMonth() ||
+      roast.getFullYear() !== now.getFullYear();
+
+    return "Roast " + (isTomorrow ? "tomorrow" : "today") + " 6AM";
+  }
+
   function syncProductCard(card, product) {
     const stock = Math.max(0, Number(product.stock || 0));
     const name = $(".product-title-line h3", card);
@@ -362,10 +379,20 @@
 
     if (stockBadge) {
       if (stock > 0) {
-        stockBadge.textContent =
-          stock <= 5 ? "⚡ Only " + stock + " packs left" : "⚡ " + stock + " packs left";
+        if (stock <= 5) {
+          stockBadge.textContent =
+            "⚡ " + stock + " packs left • " + getNextRoastLabel();
+          stockBadge.setAttribute(
+            "aria-label",
+            stock + " packs left. " + getNextRoastLabel() + "."
+          );
+        } else {
+          stockBadge.textContent = "⚡ " + stock + " packs left";
+          stockBadge.setAttribute("aria-label", stock + " packs left.");
+        }
       } else {
         stockBadge.textContent = "SOLD OUT";
+        stockBadge.setAttribute("aria-label", "Sold out.");
       }
       stockBadge.classList.toggle("urgent", stock > 0 && stock <= 5);
     }
@@ -1444,6 +1471,15 @@
 
   function init() {
     renderProducts();
+    window.setInterval(() => {
+      $(".product-card[data-product-id]").forEach(card => {
+        const id = String(card.dataset.productId || "");
+        const product = getProducts().find(item => String(item.id) === id);
+        if (product && Number(product.stock || 0) > 0 && Number(product.stock || 0) <= 5) {
+          syncProductCard(card, product);
+        }
+      });
+    }, 60000);
     renderGallery();
     renderAdvertisement();
     renderContactInfo();
