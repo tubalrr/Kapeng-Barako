@@ -740,6 +740,8 @@
     if (!address) {
       map.hidden = true;
       map.innerHTML = "";
+      const vehicle = $("#trackMapVehicle");
+      if (vehicle) vehicle.hidden = true;
       return;
     }
 
@@ -767,6 +769,30 @@
         'referrerpolicy="strict-origin-when-cross-origin" ' +
         'allowfullscreen>' +
       '</iframe>';
+
+    const vehicle = $("#trackMapVehicle");
+    if (vehicle) {
+      const fulfillment = String(order.fulfillment || "").toLowerCase();
+      const icon = $(".track-vehicle-icon", vehicle);
+      const label = $(".track-vehicle-label", vehicle);
+
+      const isMotorcycle =
+        fulfillment.includes("lalamove") ||
+        fulfillment.includes("meetup");
+
+      if (icon) {
+        icon.textContent = isMotorcycle ? "🏍️" : "🚚";
+      }
+
+      if (label) {
+        label.textContent = isMotorcycle
+          ? "Motorcycle delivery"
+          : "Delivery vehicle";
+      }
+
+      vehicle.hidden = false;
+      vehicle.dataset.mode = isMotorcycle ? "motorcycle" : "vehicle";
+    }
   }
 
   function trackOrder(event) {
@@ -798,6 +824,8 @@
         map.hidden = true;
         map.innerHTML = "";
       }
+      const vehicle = $("#trackMapVehicle");
+      if (vehicle) vehicle.hidden = true;
 
       return;
     }
