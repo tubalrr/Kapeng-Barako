@@ -4,6 +4,7 @@
 const CART_KEY = "kb_cart";
 const ORDER_KEY = "kb_orders";
 const PRODUCT_KEY = "kb_rebuild_products";
+const GALLERY_KEY = "kb_gallery";
 
 const DEFAULT_PRODUCTS = [
   {id:"KB250",name:"Barako 250g",size:"250g",price:350,stock:7},
@@ -66,6 +67,19 @@ function renderCart(){
   root.innerHTML=cart.map((item,i)=>
     '<div class="cart-item"><div><h3>'+esc(item.name)+'</h3><small>'+esc(item.size)+' • '+esc(item.roast)+' Roast • '+esc(item.grind)+' Grind</small><div class="qty"><button type="button" data-plus="'+i+'">+</button><span>'+Number(item.qty||0)+'</span><button type="button" data-minus="'+i+'">−</button></div><button class="remove-item" type="button" data-remove="'+i+'">REMOVE</button></div><strong class="cart-price">'+money(Number(item.price||0)*Number(item.qty||0))+'</strong></div>'
   ).join("");
+}
+
+function renderGallery(){
+  const items=read(GALLERY_KEY,[]);
+  if(!Array.isArray(items)) return;
+  $(".gallery-grid figure").forEach((figure,i)=>{
+    const g=items[i];
+    if(!g?.image)return;
+    const img=figure.querySelector("img");
+    const caption=figure.querySelector("figcaption");
+    if(img){img.src=g.image;img.alt=g.alt||g.title||img.alt;}
+    if(caption && g.title)caption.textContent=String(i+1).padStart(2,"0")+" · "+g.title.toUpperCase();
+  });
 }
 
 function renderProducts(){
@@ -403,6 +417,7 @@ function init(){
     if([CART_KEY,ORDER_KEY,PRODUCT_KEY].includes(e.key)){
       cart=read(CART_KEY,[]);
       renderProducts();
+renderGallery();
       renderCart();
     }
   });
