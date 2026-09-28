@@ -636,6 +636,7 @@
 
   function renderInventory() {
     inventory = read(KEY.inventory, []);
+    syncProductInventory();
     const total = inventory.reduce((s,i)=>s+Number(i.stock||0),0);
     const green = inventory.filter(i=>i.category==="beans").reduce((s,i)=>s+Number(i.stock||0),0);
     const pack = inventory.filter(i=>i.category==="packaging").reduce((s,i)=>s+Number(i.stock||0),0);
@@ -644,6 +645,7 @@
     $("#inv-green").textContent = green.toLocaleString();
     $("#inv-pack").textContent = pack.toLocaleString();
     $("#inv-alerts").textContent = alerts;
+    $("#inv-alerts").classList.toggle("low-stock-alert", alerts > 0);
     const list = inventory.filter(i=>!invFilter || i.category===invFilter);
     const root = $("#inventory-table");
     if (!list.length) {
