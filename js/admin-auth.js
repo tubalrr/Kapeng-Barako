@@ -131,6 +131,43 @@
     return { uid: user.uid, email: user.email || "", ...snap.data() };
   }
 
+  async function signInWithEmailPassword(email, password) {
+    const { auth: currentAuth, authMod } = await init();
+    const normalized = String(email || "").trim().toLowerCase();
+    if (!normalized) throw new Error("Enter your admin email.");
+    if (!password) throw new Error("Enter your admin password.");
+
+    try {
+      await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
+      const credential = await authMod.signInWithEmailAndPassword(currentAuth, normalized, password);
+
+      try {
+        const backendModule = await import("./firebase-backend.js");
+        await backendModule.bootstrapAdminFromEmail();
+      } catch (error) {
+        await authMod.signOut(currentAuth);
+        throw new Error(error?.message || "Admin identity verification failed.");
+      }
+
+      const admin = await verifyAdminWithoutSession(credential.user);
+      if (!admin) {
+        await authMod.signOut(currentAuth);
+        throw new Error("This email is not authorized for the Kapeng Barako Admin Console.");
+      }
+
+      rememberAdmin(admin);
+      return admin;
+    } catch (error) {
+      if (error?.code === "auth/invalid-credential" || error?.code === "auth/wrong-password")
+        throw new Error("Incorrect email or password.");
+      if (error?.code === "auth/user-not-found")
+        throw new Error("No Firebase account exists for this email.");
+      if (error?.code === "auth/operation-not-allowed")
+        throw new Error("Email/Password sign-in is not enabled in Firebase Authentication.");
+      throw error;
+    }
+  }
+
   async function sendAdminEmailLink(email) {
     const { auth: currentAuth, authMod } = await init();
     const normalized = String(email || "").trim().toLowerCase();
@@ -255,6 +292,7 @@
     SESSION_KEY,
     SESSION_TTL_MS,
     init,
+    signInWithEmailPassword,
     sendAdminEmailLink,
     completeAdminEmailLink,
     restore,
