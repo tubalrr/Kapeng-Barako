@@ -19,24 +19,22 @@
   <section class="login-card">
     <span class="eyebrow">ADMIN ACCESS</span>
     <h2>Sign in.</h2>
-    <p>Enter your authorized admin email. We'll send a secure sign-in link.</p>
+    <p>Sign in with your authorized admin email and password.</p>
     <form id="admin-email-form">
       <label for="admin-email">EMAIL</label>
       <input id="admin-email" type="email" placeholder="admin@example.com" autocomplete="email" required>
+      <label for="admin-password">PASSWORD</label>
+      <input id="admin-password" type="password" placeholder="Enter password" autocomplete="current-password" required>
       <div id="login-error" class="error" role="alert"></div>
-      <button id="email-admin-login" class="login-button" type="submit">SEND SIGN-IN LINK →</button>
+      <button id="email-admin-login" class="login-button" type="submit">SIGN IN WITH EMAIL →</button>
     </form>
-    <div id="email-sent" class="seed-note" hidden>
-      <strong>Check your email</strong>
-      <small>A secure sign-in link was sent. Open it on this device to enter the Admin Console.</small>
-    </div>
     <div class="seed-note admin-email-note">
       <strong>ADMIN EMAIL</strong>
       <small><code>vracelle2@gmail.com</code></small>
     </div>
     <div class="seed-note">
-      <strong>Passwordless Admin</strong>
-      <small>No admin password is stored in this website. Access is allowed only when Firebase authenticates the email and the matching <code>/admins/{uid}</code> document is active.</small>
+      <strong>EMAIL + PASSWORD ADMIN</strong>
+      <small>Access is allowed only when Firebase authenticates the email and the matching <code>/admins/{uid}</code> document is active.</small>
     </div>
     <a class="back-link" href="../../index.html">← Back to storefront</a>
   </section>
@@ -45,43 +43,35 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const form = document.querySelector("#admin-email-form");
   const emailInput = document.querySelector("#admin-email");
+  const passwordInput = document.querySelector("#admin-password");
   const btn = document.querySelector("#email-admin-login");
   const err = document.querySelector("#login-error");
-  const sent = document.querySelector("#email-sent");
 
   try {
-    const linkedAdmin = await window.KBAdminAuth.completeAdminEmailLink();
-    if (linkedAdmin) {
-      location.replace("./index.html");
-      return;
-    }
     const admin = await window.KBAdminAuth.restore();
     if (admin) {
       location.replace("./index.html");
       return;
     }
   } catch (error) {
-    err.textContent = error?.message || "The sign-in link could not be completed.";
+    err.textContent = error?.message || "Could not restore the admin session.";
   }
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
     err.textContent = "";
-    sent.hidden = true;
     btn.disabled = true;
-    btn.textContent = "SENDING…";
+    btn.textContent = "SIGNING IN…";
     try {
-      await window.KBAdminAuth.sendAdminEmailLink(emailInput.value);
-      sent.hidden = false;
-      btn.textContent = "LINK SENT ✓";
+      await window.KBAdminAuth.signInWithEmailPassword(emailInput.value, passwordInput.value);
+      location.replace("./index.html");
     } catch (error) {
-      console.error("[Kapeng Barako] admin email-link login failed", error);
-      err.textContent = error?.message || "Could not send the sign-in link.";
+      console.error("[Kapeng Barako] admin email/password login failed", error);
+      err.textContent = error?.message || "Could not sign in.";
       btn.disabled = false;
-      btn.textContent = "SEND SIGN-IN LINK →";
+      btn.textContent = "SIGN IN WITH EMAIL →";
     }
   });
-});
-</script>
+});</script>
 </body>
 </html>
