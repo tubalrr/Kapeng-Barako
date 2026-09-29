@@ -405,6 +405,7 @@
     init,
     signInWithEmailPassword,
     setupAdminEmailPassword,
+    signInDemo,
     sendAdminEmailLink,
     completeAdminEmailLink,
     restore,
