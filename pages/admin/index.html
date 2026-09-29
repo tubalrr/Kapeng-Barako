@@ -354,6 +354,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
               <div class="extra-field"><label for="extraAdsLink">Link</label><input id="extraAdsLink" type="url" placeholder="https://example.com/offer"></div>
               <div class="extra-field full"><label for="extraAdsImage">Image</label><input id="extraAdsImage" type="url" placeholder="https://example.com/ad.jpg"></div>
               <div class="extra-field full"><label for="extraAdsCopy">Copy</label><textarea id="extraAdsCopy" rows="4" placeholder="A short message or offer description."></textarea></div>
+              <div class="extra-field full"><label class="extra-switch"><input id="extraAdsActive" type="checkbox" checked> Active</label></div>
             </div>
             <div class="extra-preview ads-preview" id="extraAdsPreview"><span>No ad configured</span></div>
             <div class="extra-actions"><a id="extraAdsOpen" class="extra-link" href="#" target="_blank" rel="noopener noreferrer" hidden>OPEN AD LINK ↗</a></div>
@@ -1674,6 +1675,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const image=String(ads.image||"").trim();
     const copy=String(ads.copy||"").trim();
     const link=String(ads.link||"").trim();
+    const active=ads.active!==false;
     const hasAd=Boolean(title||image||copy||link);
 
     const titleInput=document.getElementById("extraAdsTitle");
@@ -1682,11 +1684,13 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const linkInput=document.getElementById("extraAdsLink");
     const pv=document.getElementById("extraAdsPreview");
     const op=document.getElementById("extraAdsOpen");
+    const activeInput=document.getElementById("extraAdsActive");
 
     if(titleInput)titleInput.value=title;
     if(imageInput)imageInput.value=image;
     if(copyInput)copyInput.value=copy;
     if(linkInput)linkInput.value=link;
+    if(activeInput)activeInput.checked=active;
 
     if(pv){
       if(!hasAd){
@@ -1699,6 +1703,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
           (link?'<span class="extra-link">↗ '+esc(link)+'</span>':'');
       }
       pv.classList.toggle("is-empty",!hasAd);
+      pv.classList.toggle("is-inactive",hasAd&&!active);
     }
     if(op){
       op.hidden=!link;
@@ -1712,11 +1717,12 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const image=document.getElementById("extraAdsImage").value.trim();
     const copy=document.getElementById("extraAdsCopy").value.trim();
     const link=document.getElementById("extraAdsLink").value.trim();
+    const active=document.getElementById("extraAdsActive").checked;
 
     if(link&&!/^https?:\\/\\//i.test(link)){toastExtra("Use a valid http:// or https:// advertisement link.");return}
     if(image&&!/^https?:\\/\\//i.test(image)){toastExtra("Use a valid http:// or https:// image URL.");return}
 
-    const data={title,image,copy,link};
+    const data={title,image,copy,link,active};
     write(ADS_KEY,data);
     notifyStorefront("ads-updated");
     toastExtra(title||image||copy||link?"Advertisement saved.":"Advertisement cleared.");
@@ -1724,7 +1730,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function clearAds(){
-    write(ADS_KEY,{title:"",image:"",copy:"",link:""});
+    write(ADS_KEY,{title:"",image:"",copy:"",link:"",active:false});
     notifyStorefront("ads-updated");
     toastExtra("Advertisement cleared.");
     renderAds();
