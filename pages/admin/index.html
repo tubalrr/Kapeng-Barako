@@ -1573,6 +1573,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const title=document.querySelector('[data-g-title="'+index+'"]')?.value.trim()||"";
     const alt=document.querySelector('[data-g-alt="'+index+'"]')?.value.trim()||title;
     if(image&&!/^https?:\/\//i.test(image)&&!/^images\//i.test(image)){toastExtra("Use an image URL or images/ path.");return}
+    if(image && !alt){toastExtra("Add alt text for the gallery image.");return}
     gallery[index]={slot:index+1,title,image,alt};
     write(GALLERY_KEY,gallery);
     notifyStorefront("gallery-updated");
