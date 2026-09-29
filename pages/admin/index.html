@@ -900,6 +900,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
           status,
           statusUpdatedAt: new Date()
         });
+        log("order", "Order " + id + " status changed to " + status, {orderId:id,status});
         toast("Order " + id + " → " + status);
         return;
       }
@@ -909,6 +910,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       if(idx < 0) return;
       current[idx] = {...current[idx], status, statusUpdatedAt:new Date().toISOString()};
       write(ORDER_KEY,current);
+      log("order", "Order " + id + " status changed to " + status, {orderId:id,status});
       renderAll();
     } catch (error) {
       console.error("[Kapeng Barako] order status update failed", error);
@@ -1310,6 +1312,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     if(!Number.isFinite(price)||price<0||!Number.isFinite(stock)||stock<0||!Number.isInteger(stock)){toastExtra("Enter a valid non-negative price and whole-number stock.");return}
 
     const previous=list.map(product=>({...product}));
+    const previousProduct = previous[idx];
     const next=list.map(p=>{
       if(featured && p.featured===true && String(p.id)!==String(id)) return {...p,featured:false};
       return p;
@@ -1324,6 +1327,14 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     write(PRODUCT_KEY,next);
     notifyStorefront();
     await syncProductCatalogToFirestore(next, previous);
+    const changedFields = ["name","size","price","image","origin","roastDate","roastLevel","netWeight","batch","process","tastingNotes","roast","grind","featured"]
+      .filter(field => JSON.stringify(previousProduct?.[field]) !== JSON.stringify(next[idx]?.[field]));
+    if (Number(previousProduct?.stock || 0) !== Number(next[idx]?.stock || 0)) {
+      log("inventory", (next[idx].name || id) + " stock changed: " + Number(previousProduct?.stock || 0) + " → " + Number(next[idx]?.stock || 0), {productId:id,previousStock:Number(previousProduct?.stock || 0),newStock:Number(next[idx]?.stock || 0)});
+    }
+    if (changedFields.length) {
+      log("product", (next[idx].name || id) + " product details updated", {productId:id,fields:changedFields});
+    }
     toastExtra((next[idx].name||id)+" updated.");
     renderExtraProducts();
     updateSnapshot();
@@ -1336,6 +1347,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     write(PRODUCT_KEY,next);
     notifyStorefront();
     await syncProductCatalogToFirestore(next,list);
+    log("product", (product.name || id) + " deleted from catalog", {productId:id,action:"delete"});
     toastExtra((product.name||id)+" deleted.");
     renderExtraProducts();
     updateSnapshot();
@@ -1355,6 +1367,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     write(PRODUCT_KEY,next);
     notifyStorefront();
     await syncProductCatalogToFirestore(next, previous);
+    log("product", name + " added to catalog", {productId:id,action:"add",price,stock});
+    if (stock > 0) log("inventory", name + " stock initialized at " + stock + " packs", {productId:id,newStock:stock});
     document.getElementById("extraProductDialog")?.close();document.getElementById("extraProductForm")?.reset();
     toastExtra(name+" added.");renderExtraProducts();updateSnapshot();
   }
@@ -1578,20 +1592,25 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const item={id:editIndex>=0&&next[editIndex]?.id?next[editIndex].id:"P-"+Date.now(),name,code,type,value,minPacks,active};
     if(editIndex>=0&&editIndex<next.length)next[editIndex]=item;else next.push(item);
     write(PROMO_KEY,next);dialog?.removeAttribute("data-edit-index");dialog?.close();
+    log("promo", (editIndex>=0 ? "Updated promo " : "Created promo ") + code, {code,action:editIndex>=0?"update":"create",active});
     document.getElementById("extraPromoForm")?.reset();document.getElementById("extraPromoActive").checked=true;
     toastExtra(code+" saved.");renderPromos();return true;
   }
 
   function toggleExtraPromo(index){
     const list=read(PROMO_KEY,[]);const next=Array.isArray(list)?list.slice():[];if(!next[index])return;
-    next[index]={...next[index],active:next[index].active===false};write(PROMO_KEY,next);notifyStorefront("promos-updated");renderPromos();
+    next[index]={...next[index],active:next[index].active===false};write(PROMO_KEY,next);notifyStorefront("promos-updated");
+    log("promo", (next[index].code || "Promo") + (next[index].active ? " activated" : " deactivated"), {code:next[index].code,action:next[index].active?"activate":"deactivate"});
+    renderPromos();
     toastExtra(next[index].active?"Promo activated.":"Promo deactivated.");
   }
 
   function deleteExtraPromo(index){
     const list=read(PROMO_KEY,[]);const next=Array.isArray(list)?list.slice():[];const p=next[index];if(!p)return;
     if(!confirm("Delete promo "+(p.code||"")+"?"))return;
-    next.splice(index,1);write(PROMO_KEY,next);notifyStorefront("promos-updated");renderPromos();toastExtra((p.code||"Promo")+" deleted.");
+    next.splice(index,1);write(PROMO_KEY,next);notifyStorefront("promos-updated");
+    log("promo", (p.code || "Promo") + " deleted", {code:p.code,action:"delete"});
+    renderPromos();toastExtra((p.code||"Promo")+" deleted.");
   }
 
   function addExtraPromo(){
@@ -2441,9 +2460,13 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
           storeSettings:K.STORE,cms:K.CMS,gallery:K.GALLERY,ads:K.ADS,reviews:"kb_reviews",
           activity:K.ACTIVITY,inventoryHistory:K.HISTORY,notificationRead:K.READ
         };
-        Object.entries(allowed).forEach(([source,key]) => {
-          if (Object.prototype.hasOwnProperty.call(records,source)) write(key,records[source]);
-        });
+        const importedKeys = Object.entries(allowed)
+          .filter(([source]) => Object.prototype.hasOwnProperty.call(records,source))
+          .map(([source,key]) => {
+            write(key,records[source]);
+            return source;
+          });
+        log("backup","Imported backup records", {version:payload.version || 1,records:importedKeys});
         toast("Backup restored. Reloading...");
         setTimeout(() => location.reload(),300);
       } catch (error) {
