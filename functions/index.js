@@ -22,12 +22,26 @@ function normalizeItems(items) {
   if (!Array.isArray(items) || !items.length) {
     throw new HttpsError("invalid-argument", "Cart is empty.");
   }
-  return items.map(item => ({
-    productId: clean(item.productId || item.id, 120),
-    qty: Math.max(1, Math.min(99, Number(item.qty || 1))),
-    roast: clean(item.roast, 40),
-    grind: clean(item.grind, 40)
-  }));
+
+  return items.map(item => {
+    const productId = clean(item.productId || item.id, 120);
+    const rawQty = Number(item.qty);
+
+    if (!productId) {
+      throw new HttpsError("invalid-argument", "A cart item is missing its product ID.");
+    }
+
+    if (!Number.isInteger(rawQty) || rawQty < 1 || rawQty > 99) {
+      throw new HttpsError("invalid-argument", "Quantity must be a whole number from 1 to 99.");
+    }
+
+    return {
+      productId,
+      qty: rawQty,
+      roast: clean(item.roast, 40),
+      grind: clean(item.grind, 40)
+    };
+  });
 }
 
 // Passwordless admin identity bootstrap.
