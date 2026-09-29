@@ -7,7 +7,6 @@
  * window.KBAdminOrders / window.KBAdminCore.
  */
 
-
 (() => {
   "use strict";
 
@@ -21,19 +20,8 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
 
-  const demoStore = () => window.KBAdminAuth?.readDemoData?.() || null;
-  const isDemoMode = () => Boolean(demoStore());
-
-  const persistDemoStore = (data) => {
-    try {
-      const key = window.KBAdminAuth?.DEMO_DATA_KEY;
-      if (key) sessionStorage.setItem(key, JSON.stringify(data));
-    } catch {}
-  };
   const read = (key, fallback) => {
     try {
-      const demo = demoStore();
-      if (demo && Object.prototype.hasOwnProperty.call(demo, key)) return demo[key];
       const raw = localStorage.getItem(key);
       return raw === null ? fallback : JSON.parse(raw);
     } catch {
@@ -41,12 +29,6 @@
     }
   };
   const write = (key, value) => {
-    const demo = demoStore();
-    if (demo) {
-      demo[key] = value;
-      persistDemoStore(demo);
-      return;
-    }
     localStorage.setItem(key, JSON.stringify(value));
   };
   const money = (n) => "₱" + Number(n || 0).toLocaleString("en-PH", {maximumFractionDigits:2});
@@ -69,11 +51,6 @@
   }
 
   function orders() {
-    // DEMO / TEST DATA is isolated from live Firestore records.
-    if (demoStore()) {
-      const demoOrders = read(ORDER_KEY, []);
-      return Array.isArray(demoOrders) ? demoOrders : [];
-    }
     if (firestoreOrdersReady) return firestoreOrders;
     const list = read(ORDER_KEY, []);
     return Array.isArray(list) ? list : [];
@@ -101,8 +78,6 @@
       firestoreProductsUnsubscribe = firestore.onSnapshot(
         firestore.collection(firestoreDb, "products"),
         snapshot => {
-          if (demoStore()) return;
-
           const remoteProducts = snapshot.docs.map(docSnap => {
             const remote = docSnap.data() || {};
             return {
@@ -154,21 +129,13 @@
       firestoreOrdersUnsubscribe = firestore.onSnapshot(
         firestore.query(firestore.collection(firestoreDb, "orders"), firestore.orderBy("createdAt", "desc")),
         snapshot => {
-          // Never expose live Firestore orders inside DEMO / TEST DATA mode.
-          if (demoStore()) {
-            firestoreOrders = [];
-            firestoreOrdersReady = false;
-            renderAll();
-            return;
-          }
-
           firestoreOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), source: "firestore" }));
           firestoreOrdersReady = true;
 
           // Keep kb_orders as the shared browser order cache while Firestore remains
           // the live backend. Merge by order ID so customer/admin pages never create
           // duplicate order records.
-          if (!demoStore()) {
+          {
             const current = read(ORDER_KEY, []);
             const map = new Map(
               (Array.isArray(current) ? current : [])
@@ -220,7 +187,7 @@
 
     // Update the shared kb_orders cache immediately; Firestore snapshot will
     // reconcile it with the backend and push the same state to customer views.
-    if (!demoStore()) {
+    {
       const cached = read(ORDER_KEY, []);
       const list = Array.isArray(cached) ? cached : [];
       const index = list.findIndex(order => String(order?.id) === String(id));
@@ -263,8 +230,6 @@
   }
 
   async function syncProductCatalogToFirestore(nextProducts, previousProducts = []) {
-    if (demoStore()) return;
-
     try {
       if (!firestoreDb) {
         const [{ getApps, getApp, initializeApp }, config] = await Promise.all([
@@ -400,9 +365,7 @@
 
     const source = document.getElementById("orderFlowSource");
     if (source) {
-      if (demoStore()) {
-        source.innerHTML = 'Demo session <code>kb_demo_admin_data</code>';
-      } else if (firestoreOrdersReady) {
+      if (firestoreOrdersReady) {
         source.textContent = "Live from Firestore";
       } else {
         source.innerHTML = 'Browser cache <code>kb_orders</code>';
@@ -748,26 +711,19 @@
       }
       $("#loginScreen").classList.add("hidden");
       $("#adminApp").classList.remove("hidden");
-      const isDemo = Boolean(admin.demo);
-      $("#adminEmail").textContent = isDemo ? "DEMO ACCOUNT" : (admin.email || "ADMIN");
+      $("#adminEmail").textContent = admin.email || "ADMIN";
       const modeBadge = $("#adminModeBadge");
       if (modeBadge) {
-        modeBadge.textContent = isDemo ? "DEMO MODE" : "ADMIN";
-        modeBadge.classList.toggle("low", isDemo);
+        modeBadge.textContent = "ADMIN";
+        modeBadge.classList.remove("low");
       }
-      const kicker = $("#dashboardKicker");
-      const desc = $("#dashboardDescription");
       const flowSource = $("#orderFlowSource");
-      if (isDemo) {
-        if (kicker) kicker.textContent = "DEMO OPERATIONS";
-        if (desc) desc.textContent = "Safe demo data for testing the Admin Console. Changes stay inside this browser session and do not touch Firebase.";
-        if (flowSource) flowSource.innerHTML = 'Demo session <code>kb_demo_admin_data</code>';
+      if (flowSource) {
+        flowSource.textContent = "Connecting to Firestore…";
       }
       renderAll();
-      if (!isDemo) {
-        initAdminFirestoreOrders();
-        initAdminFirestoreProducts();
-      }
+      initAdminFirestoreOrders();
+      initAdminFirestoreProducts();
     } catch (error) {
       const reason =
         error?.code === "FIREBASE_NOT_CONFIGURED" ? "setup" :
@@ -780,15 +736,11 @@
   })();
 })();
 
-
-
 (() => {
   "use strict";
   const PRODUCT_KEY="kb_rebuild_products", PROMO_KEY="kb_promos", SETTINGS_KEY="kb_settings", CMS_KEY="kb_cms", GALLERY_KEY="kb_gallery", ADS_KEY="kb_ads", SOUND_KEY="kb_low_stock_sound";
-  const demoStore=()=>window.KBAdminAuth?.readDemoData?.()||null;
-  const persistDemoStore=data=>{try{const key=window.KBAdminAuth?.DEMO_DATA_KEY;if(key)sessionStorage.setItem(key,JSON.stringify(data))}catch{}};
-  const read=(key,fallback)=>{try{const demo=demoStore();if(demo&&Object.prototype.hasOwnProperty.call(demo,key))return demo[key];const raw=localStorage.getItem(key);return raw===null?fallback:JSON.parse(raw)}catch{return fallback}};
-  const write=(key,value)=>{try{const demo=demoStore();if(demo){demo[key]=value;persistDemoStore(demo);return}localStorage.setItem(key,JSON.stringify(value))}catch{}};
+  const read=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw===null?fallback:JSON.parse(raw)}catch{return fallback}};
+  const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
   const esc=(v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money=(n)=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
   const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
@@ -1055,7 +1007,6 @@
       verified:false,
       published:false,
       createdAt:new Date().toISOString(),
-      demo: Boolean(demoStore())
     });
     write("kb_reviews",list);
     notifyStorefront("reviews-updated");
@@ -1097,10 +1048,6 @@
     const list=reviewList();
     const review=list[index];
     if(!review)return;
-    if(review.demo===true){
-      toastExtra("Demo reviews cannot be published to the customer storefront.");
-      return;
-    }
     if(review.verified!==true){
       toastExtra("Verify the review before publishing.");
       return;
@@ -1427,8 +1374,6 @@
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 
-
-
 (() => {
   "use strict";
   const K = {
@@ -1442,20 +1387,10 @@
     ADS:"kb_ads",
     ACTIVITY:"kb_activity_log",
     HISTORY:"kb_inventory_history",
-    READ:"kb_notification_read",
-    DEMO:"kb_demo_customer_v1"
-  };
-  const demoStore = () => window.KBAdminAuth?.readDemoData?.() || null;
-  const persistDemoStore = data => {
-    try {
-      const key = window.KBAdminAuth?.DEMO_DATA_KEY;
-      if (key) sessionStorage.setItem(key, JSON.stringify(data));
-    } catch {}
+    READ:"kb_notification_read"
   };
   const read = (key, fallback) => {
     try {
-      const demo = demoStore();
-      if (demo && Object.prototype.hasOwnProperty.call(demo, key)) return demo[key];
       const raw = localStorage.getItem(key);
       return raw === null ? fallback : JSON.parse(raw);
     } catch {
@@ -1464,12 +1399,6 @@
   };
   const write = (key, value) => {
     try {
-      const demo = demoStore();
-      if (demo) {
-        demo[key] = value;
-        persistDemoStore(demo);
-        return;
-      }
       localStorage.setItem(key, JSON.stringify(value));
     } catch {}
   };
@@ -2128,13 +2057,6 @@
     reader.readAsText(file);
   }
 
-  function clearDemo() {
-    if (!confirm("Remove the demo customer flag? Real orders and catalog records stay untouched.")) return;
-    localStorage.removeItem(K.DEMO);
-    log("maintenance","Removed demo customer flag");
-    toast("Demo customer removed.");
-  }
-
   function bind() {
     document.getElementById("analyticsRange")?.addEventListener("change",renderAnalytics);
     document.getElementById("saveStoreSettings")?.addEventListener("click",saveSettings);
@@ -2151,7 +2073,6 @@
     });
     document.getElementById("exportBackup")?.addEventListener("click",exportBackup);
     document.getElementById("exportOrdersCsv")?.addEventListener("click",exportOrdersCsv);
-    document.getElementById("clearDemoData")?.addEventListener("click",clearDemo);
     document.getElementById("importBackup")?.addEventListener("change",event => {
       const file = event.target.files?.[0];
       if (file) importBackup(file);
