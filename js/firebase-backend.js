@@ -51,6 +51,15 @@ export async function migrateLegacyCatalog(payload) {
   const result = await fn(payload);
   return result.data;
 }
+export async function setAdminPasswordFromGoogle(password) {
+  if (!backendReady()) throw new Error("Firebase backend is not configured.");
+  const user = getBackendAuth()?.currentUser;
+  if (!user) throw new Error("Sign in with the authorized Google account first.");
+  const fn = httpsCallable(getBackendFunctions(), "setAdminPasswordFromGoogle");
+  const result = await fn({ password });
+  return result.data;
+}
+
 export async function bootstrapAdminFromEmail() {
   if (!backendReady()) throw new Error("Firebase backend is not configured.");
   const user = getBackendAuth()?.currentUser;
