@@ -2012,33 +2012,62 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   function buildNotifications() {
     const list = [];
     const threshold = Number(read(K.STORE,{lowStock:5})?.lowStock ?? 5);
+
+    // New orders are tied to the real order's creation time. The notification ID
+    // is stable per order, so reading it does not create duplicate alerts.
+    orders().filter(order => {
+      const created = orderTime(order.createdAt);
+      return created > 0;
+    }).slice(0,30).forEach(order => {
+      const created = orderTime(order.createdAt);
+      list.push({
+        id:"new-order:"+String(order.id),
+        type:"New Order",
+        title:"New order " + (order.id || "—"),
+        body:customerName(order) + " · " + money(order.total) + " · " +
+          new Date(created).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}),
+        at:created
+      });
+    });
+
     products().filter(product => Number(product.stock || 0) <= threshold).forEach(product => {
+      const stock = Math.max(0,Number(product.stock || 0));
       list.push({
-        id:"stock:"+product.id,
+        id:"stock:"+String(product.id),
         type:"Inventory",
-        title:"Low stock: " + product.name,
-        body:Number(product.stock || 0) + " packs remaining."
+        title:stock === 0 ? "Sold out: " + product.name : "Low stock: " + product.name,
+        body:stock === 0 ? "0 packs remaining." : stock + " packs remaining.",
+        at:0
       });
     });
-    orders().filter(order => String(order.status || "Pending") === "Pending").slice(0,20).forEach(order => {
+
+    // Important admin events come from the existing real activity log.
+    getActivity().slice(0,30).forEach(event => {
+      const at = orderTime(event.at);
       list.push({
-        id:"order:"+order.id,
-        type:"Orders",
-        title:"Pending order " + (order.id || "—"),
-        body:customerName(order) + " · " + money(order.total)
+        id:"admin:"+String(event.id || event.at || event.message),
+        type:"Admin Event",
+        title:String(event.message || "Admin event"),
+        body:String(event.type || "Admin") + (at ? " · " + new Date(at).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}) : ""),
+        at:at || 0
       });
     });
+
     orders().filter(order => String(order.payment || "").toLowerCase() === "gcash" &&
       !String(order.gcashRef || order.gcashReference || order.gcash_ref || "").trim()
     ).slice(0,20).forEach(order => {
       list.push({
-        id:"gcash:"+order.id,
+        id:"gcash:"+String(order.id),
         type:"Payment",
         title:"Missing GCash reference",
-        body:"Order " + (order.id || "—") + " needs payment review."
+        body:"Order " + (order.id || "—") + " needs payment review.",
+        at:orderTime(order.createdAt)
       });
     });
-    return list.slice(0,60);
+
+    return list
+      .sort((a,b) => Number(b.at || 0) - Number(a.at || 0))
+      .slice(0,80);
   }
 
   function renderNotifications() {
@@ -2049,23 +2078,36 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const root = document.getElementById("notificationList");
     if (count) count.textContent = unread + " unread";
     if (!root) return;
-    root.innerHTML = list.length ? list.map(item =>
-      '<div class="notification-item ' + (readSet.has(item.id) ? "" : "unread") + '">' +
+
+    const markRead = id => {
+      const current = new Set((read(K.READ,[]) || []).map(String));
+      current.add(String(id));
+      write(K.READ,[...current].slice(-500));
+      renderNotifications();
+    };
+    const markAll = () => {
+      const current = new Set((read(K.READ,[]) || []).map(String));
+      list.forEach(item => current.add(String(item.id)));
+      write(K.READ,[...current].slice(-500));
+      renderNotifications();
+    };
+
+    root.innerHTML = list.length ? list.map(item => {
+      const isRead = readSet.has(item.id);
+      return '<div class="notification-item ' + (isRead ? "" : "unread") + '">' +
         '<div style="display:flex;gap:10px"><span class="notification-dot ' +
-        (readSet.has(item.id) ? "read" : "") + '"></span><div class="notification-copy">' +
+        (isRead ? "read" : "") + '"></span><div class="notification-copy">' +
         '<strong>' + esc(item.title) + '</strong><span>' + esc(item.type) + " · " + esc(item.body) +
         '</span></div></div><div class="notification-actions">' +
         '<button class="ghost-btn" type="button" data-notification-id="' + esc(item.id) + '">' +
-        (readSet.has(item.id) ? "Read" : "Mark Read") + '</button></div></div>'
-    ).join("") : '<div class="empty">No operational notifications.</div>';
+        (isRead ? "Read" : "Mark Read") + '</button></div></div>';
+    }).join("") : '<div class="empty">No operational notifications.</div>';
+
     root.querySelectorAll("[data-notification-id]").forEach(button => {
-      button.addEventListener("click", () => {
-        const current = new Set((read(K.READ,[]) || []).map(String));
-        current.add(button.dataset.notificationId);
-        write(K.READ,[...current]);
-        renderNotifications();
-      });
+      button.addEventListener("click", () => markRead(button.dataset.notificationId));
     });
+    const markAllButton = document.getElementById("markAllRead");
+    if (markAllButton) markAllButton.onclick = markAll;
   }
 
   function renderSettings() {
