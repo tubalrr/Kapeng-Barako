@@ -32,9 +32,4 @@ body{font-size:16px}
   margin-top:-3px;
 }
 
-.login-button-demo{
-  background:#3A2A18;
-  color:#F5E9D3;
-  border:1px solid #6B5424;
-}
-.login-button-demo:hover{background:#4A351D}
+
