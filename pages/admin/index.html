@@ -178,6 +178,10 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 .extra-product-photo{width:100%;height:180px;object-fit:cover;border-radius:14px;border:1px solid var(--border);background:#171006;margin-bottom:14px;display:block}
 .review-admin-text{color:#d8c8ae;font-size:10px;line-height:1.6}
 .review-admin-meta{color:var(--muted);font-size:8px;line-height:1.5}
+.review-row-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.review-action-btn{font-size:8px;padding:7px 10px;min-height:30px}
+.review-workflow-note{padding:11px 12px;border:1px solid var(--border);border-radius:12px;background:#171006;color:var(--muted);font-size:8px;line-height:1.6}
+.review-workflow-note strong{color:var(--gold)}
 @media(max-width:560px){.extra-status-grid{grid-template-columns:1fr 1fr}.extra-stat-grid{grid-template-columns:1fr}}
 </style>
 
@@ -358,7 +362,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
         <section id="view-reviews" class="view">
           <div class="hero"><div><div class="kicker">VERIFIED CUSTOMER VOICE</div><h1>Reviews</h1><p>Only reviews explicitly marked Verified and Published are shown on the public storefront.</p></div><div class="hero-actions"><button id="extraAddReview" class="primary-btn" type="button">+ Add Review</button></div></div>
-          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">REVIEW RECORDS</div><h3>Published Feedback</h3></div><span id="extraReviewCount" class="extra-sub"></span></div><div id="extraReviews" class="extra-table"></div></section>
+          <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">REVIEW RECORDS</div><h3>Review Approval Queue</h3></div><span id="extraReviewCount" class="extra-sub"></span></div><p class="extra-note">Unverified and unpublished records never appear on the storefront. Demo account review records stay isolated from the public store.</p><div id="extraReviews" class="extra-table"></div></section>
         </section>
 
 <section id="view-analytics" class="view">
@@ -1140,7 +1144,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       <div class="extra-field"><label for="extraReviewOrder">Order ID (optional)</label><input id="extraReviewOrder" placeholder="KB-..."></div>
       <div class="extra-field"><span class="extra-note">Verification is tied to a real delivered Order ID before a review can be published.</span></div>
       <div class="extra-field full"><label for="extraReviewText">Review</label><textarea id="extraReviewText" rows="5" required placeholder="Customer feedback"></textarea></div>
-      <div class="extra-field full"><label class="extra-switch"><input id="extraReviewPublished" type="checkbox" checked> Publish on storefront</label></div>
+      <div class="extra-field full"><div class="review-workflow-note"><strong>Workflow:</strong> Add → Verify → Publish. New reviews are always saved as Unverified + Unpublished. Only verified reviews tied to a Delivered order can be published.</div></div>
     </div>
     <div class="extra-actions"><button class="ghost-btn" type="button" data-extra-review-close>Cancel</button><button class="primary-btn" type="submit">Save Review</button></div>
   </form>
@@ -1310,13 +1314,47 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     toastExtra(name+" added.");renderExtraProducts();updateSnapshot();
   }
 
+  function reviewList(){
+    const list=read("kb_reviews",[]);
+    return Array.isArray(list)?list:[];
+  }
+
+  function reviewOrder(orderId){
+    const id=String(orderId||"").trim().replace(/^#/,"").toUpperCase();
+    if(!id) return null;
+    return orders().find(order=>String(order.id||"").toUpperCase()===id) || null;
+  }
+
   function renderExtraReviews(){
     const root=document.getElementById("extraReviews");if(!root)return;
-    const list=read("kb_reviews",[]);const reviews=Array.isArray(list)?list:[];
-    const count=document.getElementById("extraReviewCount");if(count)count.textContent=reviews.length+" record"+(reviews.length===1?"":"s");
-    if(!reviews.length){root.innerHTML='<div class="empty">No review records yet.</div>';return}
-    root.innerHTML='<table><thead><tr><th>Customer</th><th>Rating</th><th>Review</th><th>Verification</th><th>Status</th><th></th></tr></thead><tbody>'+
-      reviews.map((r,i)=>'<tr><td><strong>'+esc(r.name||"Customer")+'</strong><div class="review-admin-meta">'+esc(r.orderId||"No order ID")+'</div></td><td>'+Number(r.rating||0)+'/5</td><td><div class="review-admin-text">'+esc(r.text||"")+'</div></td><td><span class="badge '+(r.verified===true?"":"low")+'">'+(r.verified===true?"VERIFIED":"UNVERIFIED")+'</span></td><td><span class="badge '+(r.published===false?"low":"")+'">'+(r.published===false?"HIDDEN":"PUBLISHED")+'</span></td><td><button class="danger-btn" type="button" data-x-review-delete="'+i+'">Delete</button></td></tr>').join("")+
+    const reviews=reviewList();
+    const count=document.getElementById("extraReviewCount");
+    if(count)count.textContent=reviews.length+" record"+(reviews.length===1?"":"s");
+    if(!reviews.length){
+      root.innerHTML='<div class="empty">No review records yet.</div>';
+      return;
+    }
+    root.innerHTML='<table><thead><tr><th>Customer</th><th>Rating</th><th>Review</th><th>Verification</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+      reviews.map((r,i)=>{
+        const verified=r.verified===true;
+        const published=r.published===true;
+        const order=reviewOrder(r.orderId);
+        const actionButtons=
+          (!verified?'<button class="ghost-btn review-action-btn" type="button" data-x-review-verify="'+i+'">Verify</button>':'')+
+          (verified&&!published?'<button class="primary-btn review-action-btn" type="button" data-x-review-publish="'+i+'">Publish</button>':'')+
+          (published?'<button class="ghost-btn review-action-btn" type="button" data-x-review-unpublish="'+i+'">Unpublish</button>':'')+
+          '<button class="danger-btn review-action-btn" type="button" data-x-review-delete="'+i+'">Delete</button>';
+        return '<tr>'+
+          '<td><strong>'+esc(r.name||"Customer")+'</strong><div class="review-admin-meta">'+esc(r.orderId||"No order ID")+'</div></td>'+
+          '<td>'+Number(r.rating||0)+'/5</td>'+
+          '<td><div class="review-admin-text">'+esc(r.text||"")+'</div></td>'+
+          '<td><span class="badge '+(verified?"":"low")+'">'+(verified?"VERIFIED":"UNVERIFIED")+'</span>'+
+            (order?'<div class="review-admin-meta">'+esc(String(order.status||"Unknown").toUpperCase())+'</div>':'')+
+          '</td>'+
+          '<td><span class="badge '+(published?"":"low")+'">'+(published?"PUBLISHED":"UNPUBLISHED")+'</span></td>'+
+          '<td><div class="review-row-actions">'+actionButtons+'</div></td>'+
+        '</tr>';
+      }).join("")+
       '</tbody></table>';
   }
 
@@ -1325,27 +1363,84 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const rating=Number(document.getElementById("extraReviewRating")?.value||5);
     const textValue=document.getElementById("extraReviewText")?.value.trim()||"";
     const orderId=document.getElementById("extraReviewOrder")?.value.trim().replace(/^#/,"").toUpperCase()||"";
-    const published=document.getElementById("extraReviewPublished")?.checked!==false;
     if(!name||!textValue){toastExtra("Customer name and review text are required.");return}
     if(!Number.isInteger(rating)||rating<1||rating>5){toastExtra("Rating must be between 1 and 5.");return}
-    const allOrders=orders();
-    const matched=orderId?allOrders.find(order=>String(order.id||"").toUpperCase()===orderId):null;
-    if(published && (!orderId || !matched)){toastExtra("A published review needs a valid Order ID from kb_orders.");return}
-    if(published && matched && String(matched.status||"").toLowerCase()!=="delivered"){toastExtra("A published review requires a Delivered order.");return}
-    const list=read("kb_reviews",[]);
-    const reviews=Array.isArray(list)?list:[];
-    reviews.unshift({
+
+    const list=reviewList();
+    list.unshift({
       id:"R-"+Date.now().toString(36).toUpperCase(),
       name,rating,text:textValue,orderId,
-      verified:Boolean(matched),
-      published:published && Boolean(matched),
+      verified:false,
+      published:false,
       createdAt:new Date().toISOString()
     });
-    write("kb_reviews",reviews);
+    write("kb_reviews",list);
+    notifyStorefront("reviews-updated");
     document.getElementById("extraReviewDialog")?.close();
     document.getElementById("extraReviewForm")?.reset();
-    document.getElementById("extraReviewPublished").checked=true;
-    toastExtra(matched?"Verified review saved.":"Review saved as unpublished until tied to a delivered order.");
+    toastExtra("Review added as Unverified + Unpublished.");
+    renderExtraReviews();
+  }
+
+  function verifyExtraReview(index){
+    const list=reviewList();
+    const review=list[index];
+    if(!review){return}
+    const order=reviewOrder(review.orderId);
+    if(!order){
+      toastExtra("Verify requires a valid Order ID from kb_orders.");
+      return;
+    }
+    const status=String(order.status||"").trim().toLowerCase();
+    if(status!=="delivered"){
+      toastExtra("Only reviews tied to a Delivered order can be verified.");
+      return;
+    }
+    list[index]={
+      ...review,
+      verified:true,
+      verifiedAt:new Date().toISOString(),
+      verifiedOrderId:String(order.id||review.orderId||"").toUpperCase()
+    };
+    // Verification alone never publishes a review.
+    list[index].published=false;
+    write("kb_reviews",list);
+    notifyStorefront("reviews-updated");
+    toastExtra("Review verified. Publish it when approved.");
+    renderExtraReviews();
+  }
+
+  function publishExtraReview(index){
+    const list=reviewList();
+    const review=list[index];
+    if(!review)return;
+    if(review.verified!==true){
+      toastExtra("Verify the review before publishing.");
+      return;
+    }
+    list[index]={
+      ...review,
+      published:true,
+      publishedAt:new Date().toISOString()
+    };
+    write("kb_reviews",list);
+    notifyStorefront("reviews-updated");
+    toastExtra("Review published to the storefront.");
+    renderExtraReviews();
+  }
+
+  function unpublishExtraReview(index){
+    const list=reviewList();
+    const review=list[index];
+    if(!review)return;
+    list[index]={
+      ...review,
+      published:false,
+      unpublishedAt:new Date().toISOString()
+    };
+    write("kb_reviews",list);
+    notifyStorefront("reviews-updated");
+    toastExtra("Review unpublished from the storefront.");
     renderExtraReviews();
   }
 
@@ -1495,10 +1590,21 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       if(save)saveExtraProduct(save.dataset.xSave); else if(del)deleteExtraProduct(del.dataset.xDelete);
     });
     document.getElementById("extraReviews")?.addEventListener("click",event=>{
-      const button=event.target.closest("[data-x-review-delete]");if(!button)return;
-      const idx=Number(button.dataset.xReviewDelete),current=read("kb_reviews",[]);
-      if(!Array.isArray(current)||!current[idx]||!confirm("Delete this review?"))return;
-      current.splice(idx,1);write("kb_reviews",current);toastExtra("Review deleted.");renderExtraReviews();
+      const verify=event.target.closest("[data-x-review-verify]");
+      if(verify){verifyExtraReview(Number(verify.dataset.xReviewVerify));return}
+      const publish=event.target.closest("[data-x-review-publish]");
+      if(publish){publishExtraReview(Number(publish.dataset.xReviewPublish));return}
+      const unpublish=event.target.closest("[data-x-review-unpublish]");
+      if(unpublish){unpublishExtraReview(Number(unpublish.dataset.xReviewUnpublish));return}
+      const button=event.target.closest("[data-x-review-delete]");
+      if(!button)return;
+      const idx=Number(button.dataset.xReviewDelete),current=reviewList();
+      if(!current[idx]||!confirm("Delete this review?"))return;
+      current.splice(idx,1);
+      write("kb_reviews",current);
+      notifyStorefront("reviews-updated");
+      toastExtra("Review deleted.");
+      renderExtraReviews();
     });
     document.getElementById("extraPromos")?.addEventListener("click",event=>{
       const button=event.target.closest("[data-x-promo-delete]");if(!button)return;
