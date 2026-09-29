@@ -417,9 +417,10 @@
     const savedImage = String(data.image || "").trim();
     const copyValue = String(data.copy || "").trim();
     const link = String(data.link || "").trim();
+    const active = data.active !== false;
     const hasAd = Boolean(titleValue || savedImage || copyValue || link);
 
-    section.hidden = !hasAd;
+    section.hidden = !hasAd || !active;
     root.classList.toggle("has-link", Boolean(link));
     root.classList.toggle("has-image", Boolean(savedImage));
     root.classList.toggle("is-configured", hasAd);
