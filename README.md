@@ -213,7 +213,6 @@ The Admin Console uses the buyer's Firebase Authentication project and checks au
 
 GitHub Pages is static hosting. A browser-side authentication guard cannot by itself provide a server-side security boundary. For production use, protected operations should be enforced by trusted backend code and appropriate Firebase/Firestore Security Rules.
 
-The included demo admin account is for template/demo use only and must not be treated as a production credential.
 
 ## Backend and multi-user architecture
 
@@ -361,7 +360,6 @@ The template does **not** claim to have real customers, real customer reviews, r
 
 - Demo customer identities use explicit **TEST CUSTOMER** labels and `.invalid` email addresses.
 - Demo orders and demo products exist only to exercise the UI/demo workflow and are not real business records.
-- Demo analytics may calculate totals from demo records while the Admin Console is in **DEMO MODE**; these values must not be presented as real store sales or customer counts.
 - The storefront does not inject fake customer reviews. Reviews are shown only when they are explicitly marked verified and published by the Admin workflow.
 - Production customer counts, sales, revenue, and order history must come from actual configured backend records.
 - Do not use demo names, demo orders, demo reviews, or demo metrics as testimonials or evidence of real store activity.
