@@ -1372,7 +1372,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       name,rating,text:textValue,orderId,
       verified:false,
       published:false,
-      createdAt:new Date().toISOString()
+      createdAt:new Date().toISOString(),
+      demo: Boolean(demoStore())
     });
     write("kb_reviews",list);
     notifyStorefront("reviews-updated");
@@ -1414,8 +1415,17 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const list=reviewList();
     const review=list[index];
     if(!review)return;
+    if(review.demo===true){
+      toastExtra("Demo reviews cannot be published to the customer storefront.");
+      return;
+    }
     if(review.verified!==true){
       toastExtra("Verify the review before publishing.");
+      return;
+    }
+    const order=reviewOrder(review.orderId);
+    if(!order || String(order.status||"").trim().toLowerCase()!=="delivered"){
+      toastExtra("Publishing requires a currently Delivered order.");
       return;
     }
     list[index]={
