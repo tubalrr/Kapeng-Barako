@@ -132,7 +132,7 @@
   }
 
   async function signInWithEmailPassword(email, password) {
-    const { auth: currentAuth, authMod, db: currentDb, firestoreMod } = await init();
+    const { auth: currentAuth, authMod } = await init();
     const normalized = String(email || "").trim().toLowerCase();
     if (!normalized) throw new Error("Enter your admin email.");
     if (!password) throw new Error("Enter your admin password.");
@@ -145,26 +145,18 @@
       }
       const credential = await signIn(currentAuth, normalized, password);
 
-      // Email/password authentication can create a different UID from the
-      // original Google admin account. For the single allowlisted admin email,
-      // create/update only that UID's admin record. Firestore rules restrict
-      // this create operation to this exact verified email and matching UID.
+      // Bootstrap the authenticated admin UID on the trusted backend.
+      // This avoids circular Firestore client permissions during first-time setup.
       if (normalized === "vracelle2@gmail.com") {
         try {
-          await firestoreMod.setDoc(
-            firestoreMod.doc(currentDb, "admins", credential.user.uid),
-            {
-              active: true,
-              role: "admin",
-              email: normalized,
-              updatedAt: firestoreMod.serverTimestamp()
-            },
-            { merge: true }
-          );
+          const backendModule = await import("./firebase-backend.js");
+          await backendModule.bootstrapAdminFromEmail();
         } catch (bootstrapError) {
           await authMod.signOut(currentAuth);
           const code = bootstrapError?.code ? ` [${bootstrapError.code}]` : "";
-          throw new Error((bootstrapError?.message || "Admin identity bootstrap failed.") + code);
+          throw new Error(
+            (bootstrapError?.message || "Admin identity bootstrap failed.") + code
+          );
         }
       }
 
