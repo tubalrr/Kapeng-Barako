@@ -881,9 +881,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       }
       $("#loginScreen").classList.add("hidden");
       $("#adminApp").classList.remove("hidden");
-      $("#adminEmail").textContent = admin.email || "ADMIN";
+      $("#adminEmail").textContent = admin.demo ? "DEMO ACCOUNT" : (admin.email || "ADMIN");
       renderAll();
-      initAdminFirestoreOrders();
+      if (!admin.demo) initAdminFirestoreOrders();
     } catch (error) {
       const reason =
         error?.code === "FIREBASE_NOT_CONFIGURED" ? "setup" :
