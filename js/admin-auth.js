@@ -16,8 +16,6 @@
       // Demo Mode is a separate session contract and must never be cleared here.
       localStorage.removeItem("kb_admin");
       localStorage.removeItem("kb_admin_firebase");
-      sessionStorage.removeItem("kb_demo_admin_session");
-      sessionStorage.removeItem("kb_demo_admin_data");
     } catch {}
   }
 
