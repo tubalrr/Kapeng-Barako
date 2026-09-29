@@ -865,7 +865,7 @@
           '<label>Phone<input name="phone" autocomplete="tel" required></label>' +
           '<label>Email<input name="email" type="email" autocomplete="email"></label>' +
           '<label>Payment<select name="payment" id="checkoutPayment"></select></label>' +
-          '<label id="gcashRefRow">GCash Ref Number<input name="gcashRef" id="gcashRef" inputmode="numeric" maxlength="32" autocomplete="off" placeholder="Enter GCash transaction reference number"></label>' +
+          '<label id="gcashRefRow">GCash Ref Number<input name="gcashRef" id="gcashRef" inputmode="numeric" maxlength="32" autocomplete="one-time-code" placeholder="Enter GCash transaction reference number"></label>' +
           '<label>Delivery address<textarea name="address" rows="3" autocomplete="street-address" required></textarea></label>' +
           '<label>Voucher<input name="voucher" placeholder="Optional"></label>' +
           '<label>Fulfillment<select name="fulfillment">' +
@@ -974,6 +974,11 @@
 
     if (payment === "GCash" && !gcashRef) {
       toast("Please enter your GCash Ref Number.");
+      return;
+    }
+
+    if (payment === "GCash" && gcashRef.replace(/\s+/g, "") === phone.replace(/\s+/g, "")) {
+      toast("GCash Ref Number cannot be your phone number.");
       return;
     }
 
