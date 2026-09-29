@@ -1959,30 +1959,24 @@
       productStockUnsubscribe = firestore.onSnapshot(
         firestore.collection(db, "products"),
         snapshot => {
-          const current = getProducts();
-          const byId = new Map(current.map(product => [String(product.id), product]));
-          let changed = false;
+          // Firestore is the live catalog backend. Mirror its current product set
+          // into kb_rebuild_products so deleted/new/edited products are reflected
+          // everywhere, including the Subscription selector.
+          const next = snapshot.docs.map(docSnap => ({
+            id: String(docSnap.id),
+            ...(docSnap.data() || {}),
+            stock: Math.max(0, Number(docSnap.data()?.stock || 0))
+          }));
 
-          snapshot.docs.forEach(docSnap => {
-            const remote = docSnap.data() || {};
-            const id = String(docSnap.id);
-            const stock = Math.max(0, Number(remote.stock || 0));
-            const existing = byId.get(id);
+          const previous = getProducts();
+          const changed = JSON.stringify(previous) !== JSON.stringify(next);
 
-            if (existing) {
-              if (Number(existing.stock || 0) !== stock) {
-                existing.stock = stock;
-                changed = true;
-              }
-            } else {
-              byId.set(id, { id, ...remote, stock });
-              changed = true;
-            }
-          });
+          if (!changed) {
+            // Still re-sync the selector on any catalog snapshot.
+            syncSubscriptionProducts();
+            return;
+          }
 
-          if (!changed) return;
-
-          const next = [...byId.values()];
           write(PRODUCT_KEY, next);
           cart = normalizeCart();
           renderProducts();
@@ -1991,11 +1985,14 @@
           renderCart();
         },
         error => {
-          console.error("[Kapeng Barako] product stock listener failed", error);
+          console.error("[Kapeng Barako] product catalog listener failed", error);
+          // Local kb_rebuild_products remains usable when the backend is temporarily unavailable.
+          syncSubscriptionProducts();
         }
       );
     } catch (error) {
-      console.error("[Kapeng Barako] product stock sync setup failed", error);
+      console.error("[Kapeng Barako] product catalog sync setup failed", error);
+      syncSubscriptionProducts();
     }
   }
 
