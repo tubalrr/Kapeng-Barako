@@ -34,6 +34,57 @@ This repository is intended as a **website/template that the buyer configures an
 - `docs/FIREBASE_SETUP.md` — buyer Firebase installation and deployment guide
 - `docs/QA_CHECKLIST.md` — desktop, mobile, authentication, backend, and release QA checklist
 
+## Storage key registry
+
+The browser-side storage keys below are the current documented registry. These keys are implementation details for browser/local workflows; they are **not a replacement for a production database**.
+
+### Canonical application keys
+
+| Key | Purpose | Primary owner |
+|---|---|---|
+| `kb_rebuild_products` | Current Admin-controlled product catalog/cache | Admin + storefront |
+| `kb_orders` | Browser order cache / local order records | Storefront + account + admin |
+| `kb_cart` | Customer shopping cart | Storefront |
+| `kb_gallery` | Admin-controlled gallery content | Admin + storefront |
+| `kb_reviews` | Reviews displayed by the storefront | Admin + storefront |
+| `kb_promos` | Promo/voucher definitions | Admin + storefront |
+| `kb_cms` | CMS/announcement content | Admin + storefront |
+| `kb_settings` | Store/contact/settings data | Admin + storefront |
+| `kb_store_settings` | Store-level operational settings | Admin |
+| `kb_ads` | Advertisement configuration | Admin + storefront |
+| `kb_activity_log` | Admin activity/audit log | Admin |
+| `kb_inventory_history` | Inventory change history | Admin |
+| `kb_notification_read` | Admin notification read-state | Admin |
+| `kb_demo_customer_v1` | Demo/test customer data flag/state | Customer demo |
+| `kb_demo_admin_data` | Demo/test admin data | Admin demo |
+| `kb_demo_admin_session` | Demo admin session | Admin demo |
+| `kb_admin_session` | Current browser admin session metadata | Admin authentication |
+| `kb_checkout_default` | Customer's selected default checkout address | Customer account |
+| `kb_pending_order_id` | Pending order reference during checkout recovery | Storefront |
+| `kb_announcement_closed` | Session-only announcement dismissal | Storefront |
+| `kb_checkout_return` | Checkout return/navigation state | Storefront |
+| `kb_cookie_consent` | Cookie/consent UI state | Storefront |
+| `kb_admin_catalog_updated` | Admin catalog update marker | Admin |
+| `kb_adv_last_products` | Previous product snapshot used for inventory-change detection | Admin |
+| `kb_low_stock_sound` | Admin low-stock notification sound preference/state | Admin |
+
+### Transitional / legacy keys
+
+These keys should **not** be used for new features:
+
+- `kb_admin` — legacy admin session key; current auth uses `kb_admin_session`.
+- `kb_admin_firebase` — legacy Firebase admin session key; retained only for migration/cleanup.
+- `kb_admin_email_for_signin` — legacy admin sign-in helper key; not part of the current authentication contract.
+- `kb_shipping_rule` — legacy storefront key retained for compatibility; review/remove it when the shipping implementation no longer depends on it.
+
+The current authentication cleanup intentionally removes obsolete admin session keys when the current Admin authentication module initializes. This is different from actively using those keys as the authentication source.
+
+### Naming rule for future development
+
+Use the `kb_` prefix for browser storage keys and add a key to this registry before introducing it. Do not create aliases such as `kb_products` when the canonical product key is already `kb_rebuild_products`.
+
+If a key is replaced, document the replacement and migration/cleanup behavior rather than silently leaving multiple competing keys in the template.
+
 ## Folder structure
 
 The following structure reflects the current repository layout:
