@@ -4,6 +4,9 @@
   // Single admin session contract for the entire Admin Console.
   const SESSION_KEY = "kb_admin_session";
   const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+  const DEMO_SESSION_KEY = "kb_demo_admin_session";
+  const DEMO_EMAIL = "demo@kapengbarako.local";
+  const DEMO_PASSWORD = "demo123456";
 
   let firebase = null;
   let auth = null;
@@ -14,6 +17,7 @@
     try {
       localStorage.removeItem("kb_admin");
       localStorage.removeItem("kb_admin_firebase");
+      sessionStorage.removeItem(DEMO_SESSION_KEY);
     } catch {}
   }
 
@@ -80,6 +84,44 @@
       try { sessionStorage.removeItem(SESSION_KEY); } catch {}
       return null;
     }
+  }
+
+  function rememberDemoAdmin() {
+    try {
+      sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify({
+        uid: "demo-admin",
+        email: DEMO_EMAIL,
+        role: "demo",
+        demo: true,
+        signedInAt: new Date().toISOString(),
+        expiresAt: Date.now() + SESSION_TTL_MS
+      }));
+    } catch {}
+  }
+
+  function readDemoSession() {
+    try {
+      const raw = sessionStorage.getItem(DEMO_SESSION_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!data?.demo || !data?.expiresAt || Date.now() >= Number(data.expiresAt)) {
+        sessionStorage.removeItem(DEMO_SESSION_KEY);
+        return null;
+      }
+      return data;
+    } catch {
+      try { sessionStorage.removeItem(DEMO_SESSION_KEY); } catch {}
+      return null;
+    }
+  }
+
+  async function signInDemo(email, password) {
+    const normalized = String(email || "").trim().toLowerCase();
+    if (normalized !== DEMO_EMAIL || String(password || "") !== DEMO_PASSWORD) {
+      throw new Error("Demo account: use demo@kapengbarako.local / demo123456.");
+    }
+    rememberDemoAdmin();
+    return { uid: "demo-admin", email: DEMO_EMAIL, role: "demo", demo: true };
   }
 
   function rememberAdmin(admin) {
@@ -303,6 +345,9 @@
   }
 
   async function restore() {
+    const demo = readDemoSession();
+    if (demo) return demo;
+
     // No local admin session means there is nothing to restore.
     // Redirect immediately instead of waiting on Firebase Auth initialization.
     const session = readSession();
@@ -343,6 +388,7 @@
 
   async function logout() {
     try {
+      sessionStorage.removeItem(DEMO_SESSION_KEY);
       const { auth: currentAuth, authMod } = await init();
       await authMod.signOut(currentAuth);
     } finally {
@@ -353,6 +399,9 @@
   window.KBAdminAuth = {
     SESSION_KEY,
     SESSION_TTL_MS,
+    DEMO_SESSION_KEY,
+    DEMO_EMAIL,
+    DEMO_PASSWORD,
     init,
     signInWithEmailPassword,
     setupAdminEmailPassword,
