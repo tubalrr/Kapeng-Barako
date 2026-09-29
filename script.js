@@ -566,11 +566,24 @@
     }
   }
 
+  function isBundleProduct(product) {
+    return Boolean(
+      product &&
+      (
+        product.isBundle === true ||
+        product.bundle === true ||
+        String(product.type || "").toLowerCase() === "bundle" ||
+        /bundle/i.test(String(product.id || "")) ||
+        /bundle/i.test(String(product.name || ""))
+      )
+    );
+  }
+
   function renderProducts() {
     const grid = $("#productGrid");
     if (!grid) return;
 
-    const products = getProducts();
+    const products = getProducts().filter(product => !isBundleProduct(product));
 
     if (!products.length) {
       grid.innerHTML =
