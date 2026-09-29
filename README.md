@@ -18,11 +18,17 @@ Premium dark-theme artisan coffee storefront with Firebase-backed customer accou
 
 ## Authentication
 
-Customer authentication uses Firebase Authentication. The Admin Console uses the **same Firebase Authentication project** and verifies authorization through:
+Customer authentication uses Firebase Authentication. The Admin Console uses the **same Firebase Authentication project** and checks the signed-in user's authorization through:
 
 `/admins/{uid}` → `{ active: true, role: "admin" }`
 
-There is no hardcoded admin password and no localStorage-only admin security boundary.
+### ⚠️ Admin security limitation
+
+**This template uses client-side authentication for demo/template purposes. It is not suitable as a secure production admin authentication system without a backend.**
+
+GitHub Pages is a static hosting platform, so the Admin Console UI and its client-side authentication guard cannot by themselves provide a server-side security boundary. Firebase Authentication and Firestore Security Rules should still be configured for the buyer's own Firebase project, and any production admin operations that require stronger protection should be enforced by trusted backend code (for example, Cloud Functions or another server-side API).
+
+The included demo admin account is for template/demo use only and must not be treated as a production credential.
 
 ## Orders + inventory
 
