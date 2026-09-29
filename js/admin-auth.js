@@ -108,7 +108,7 @@
         },
         {
           id: "BARAKO-STARTER-BUNDLE", name: "Barako Starter Bundle", size: "250g + 500g",
-          price: 870, stock: 4, badge: "SAVE ₱100", roast: "Medium", grind: "Whole",
+          price: 870, stock: 4, badge: "SAVE ₱100", roast: "Medium", grind: "Whole", bundle: true,
           image: "", origin: "Batangas", roastDate: "2026-09-28",
           roastLevel: "Medium", netWeight: "750g", batch: "DEMO-03",
           process: "Natural", tastingNotes: "Everyday Barako set", featured: false
