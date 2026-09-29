@@ -418,7 +418,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
           <div class="hero"><div><div class="kicker">DATA MANAGEMENT</div><h1>Data & Backup</h1><p>Export and restore the local business records used by this admin. Backups stay on your device unless you share the file.</p></div></div>
           <div class="admin-extra-row">
             <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">BACKUP</div><h3>Export Business Data</h3></div></div><p class="extra-note">Includes orders, products, promos, settings, CMS content, gallery, ads, inventory history, activity log and notification state.</p><div class="extra-actions"><button id="exportBackup" class="primary-btn" type="button">Download JSON Backup</button><button id="exportOrdersCsv" class="ghost-btn" type="button">Export Orders CSV</button></div></section>
-            <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">RESTORE</div><h3>Import JSON Backup</h3></div></div><input id="importBackup" type="file" accept="application/json,.json"><p class="extra-note">Import replaces the selected supported local records with values from the backup file. Review the file before restoring.</p></section>
+            <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">RESTORE</div><h3>Import JSON Backup</h3></div></div><input id="importBackup" type="file" accept="application/json,.json"><p class="extra-note">Import validates the JSON first, shows exactly which supported records will be replaced, requires confirmation, then restores and reloads the admin.</p></section>
           </div>
           <section class="admin-extra-card"><div class="extra-head"><div><div class="kicker">MAINTENANCE</div><h3>Test Data</h3></div></div><p class="extra-note">Remove only the demo customer flag created by this site. Real orders, products and customer records are left untouched.</p><div class="extra-actions"><button id="clearDemoData" class="danger-btn" type="button">Remove Demo Customer</button></div></section>
         </section>
@@ -2449,28 +2449,64 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function importBackup(file) {
+    if (!file) return;
+    if (file.type && file.type !== "application/json" && !/\.json$/i.test(file.name || "")) {
+      toast("Backup import failed: select a JSON file.");
+      return;
+    }
     const reader = new FileReader();
+    reader.onerror = () => toast("Backup import failed: could not read the file.");
     reader.onload = () => {
       try {
         const payload = JSON.parse(String(reader.result || ""));
-        const records = payload.records;
-        if (!records || typeof records !== "object") throw new Error("Invalid backup structure");
+        if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+          throw new Error("Backup must contain a JSON object.");
+        }
+        if (!payload.records || typeof payload.records !== "object" || Array.isArray(payload.records)) {
+          throw new Error("Invalid backup structure: records are missing.");
+        }
+
         const allowed = {
           orders:K.ORDERS,products:K.PRODUCTS,promos:K.PROMOS,settings:K.SETTINGS,
           storeSettings:K.STORE,cms:K.CMS,gallery:K.GALLERY,ads:K.ADS,reviews:"kb_reviews",
           activity:K.ACTIVITY,inventoryHistory:K.HISTORY,notificationRead:K.READ
         };
-        const importedKeys = Object.entries(allowed)
-          .filter(([source]) => Object.prototype.hasOwnProperty.call(records,source))
-          .map(([source,key]) => {
-            write(key,records[source]);
-            return source;
-          });
-        log("backup","Imported backup records", {version:payload.version || 1,records:importedKeys});
+        const available = Object.keys(allowed).filter(source =>
+          Object.prototype.hasOwnProperty.call(payload.records, source)
+        );
+        if (!available.length) throw new Error("Backup contains no supported records.");
+        if (payload.version !== undefined && !Number.isFinite(Number(payload.version))) {
+          throw new Error("Invalid backup version.");
+        }
+
+        const confirmed = confirm(
+          "RESTORE BACKUP?\n\n" +
+          "This will replace the supported local records found in this file:\n\n" +
+          available.map(key => "• " + key).join("\n") +
+          "\n\nThis action can overwrite current local data. Continue?"
+        );
+        if (!confirmed) {
+          toast("Backup restore cancelled.");
+          return;
+        }
+
+        const importedKeys = available.map(source => {
+          const key = allowed[source];
+          write(key,payload.records[source]);
+          return source;
+        });
+        log("backup","Imported backup records", {
+          version:payload.version || 1,
+          records:importedKeys,
+          file:file.name || "backup.json"
+        });
         toast("Backup restored. Reloading...");
-        setTimeout(() => location.reload(),300);
+        setTimeout(() => location.reload(),500);
       } catch (error) {
         toast("Backup import failed: " + error.message);
+      } finally {
+        const input = document.getElementById("importBackup");
+        if (input) input.value = "";
       }
     };
     reader.readAsText(file);
