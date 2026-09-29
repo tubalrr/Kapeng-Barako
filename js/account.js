@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, collection,
-  query, where, orderBy, getDocs, addDoc, deleteDoc, serverTimestamp
+  query, where, orderBy, getDocs, onSnapshot, addDoc, deleteDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 import { firebaseConfig, isFirebaseConfigured } from "./firebase-config.js";
 
@@ -16,6 +16,8 @@ const money=n=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const state={user:null,profile:null,orders:[],addresses:[],wishlist:[],tab:"overview",mode:"login",loading:false,demoActive:false};
 const DEMO_KEY="kb_demo_customer_v1";
+const ORDER_KEY="kb_orders";
+let ordersUnsubscribe=null;
 
 function demoDefaults(){
   return {
@@ -31,17 +33,7 @@ function demoDefaults(){
 function getDemoData(){
   try{
     const saved=JSON.parse(localStorage.getItem(DEMO_KEY)||"null");
-    const base=saved&&saved.profile?saved:demoDefaults();
-    const localOrders=JSON.parse(localStorage.getItem("kb_orders")||"[]");
-    if(Array.isArray(localOrders)&&localOrders.length){
-      base.orders=localOrders
-        .filter(order=>order&&order.id)
-        .slice()
-        .sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))
-        .slice(0,50)
-        .map(order=>({...order,testData:true}));
-    }
-    return base;
+    return saved&&saved.profile?saved:demoDefaults();
   }catch{return demoDefaults()}
 }
 function saveDemoData(){localStorage.setItem(DEMO_KEY,JSON.stringify({profile:state.profile,orders:state.orders,addresses:state.addresses,wishlist:state.wishlist}))}
@@ -219,42 +211,78 @@ async function forgotPassword(){
   catch(err){msg(friendlyError(err),"error")}
 }
 
-function getLocalCustomerOrders(email){
+function writeOrderCache(orders){
   try{
-    const list=JSON.parse(localStorage.getItem("kb_orders")||"[]");
-    if(!Array.isArray(list))return [];
+    const incoming=Array.isArray(orders)?orders:[];
+    const current=JSON.parse(localStorage.getItem(ORDER_KEY)||"[]");
+    const map=new Map(
+      (Array.isArray(current)?current:[])
+        .filter(order=>order?.id)
+        .map(order=>[String(order.id),order])
+    );
+    incoming.filter(order=>order?.id).forEach(order=>{
+      const normalized={
+        ...order,
+        createdAt:order.createdAt?.toDate?order.createdAt.toDate().toISOString():order.createdAt,
+        updatedAt:order.updatedAt?.toDate?order.updatedAt.toDate().toISOString():order.updatedAt,
+        statusUpdatedAt:order.statusUpdatedAt?.toDate?order.statusUpdatedAt.toDate().toISOString():order.statusUpdatedAt
+      };
+      map.set(String(normalized.id),normalized);
+    });
+    localStorage.setItem(ORDER_KEY,JSON.stringify(
+      [...map.values()].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0)).slice(0,500)
+    ));
+  }catch{}
+}
+
+function getLocalCustomerOrders(email){
+function getCachedCustomerOrders(email){
+  try{
+    const list=JSON.parse(localStorage.getItem(ORDER_KEY)||"[]");
     const wanted=String(email||"").trim().toLowerCase();
-    if(!wanted)return [];
-    return list
-      .filter(order=>String(order?.customer?.email||"").trim().toLowerCase()===wanted)
-      .map(order=>({...order,source:"storefront"}));
+    if(!Array.isArray(list)||!wanted)return [];
+    return list.filter(order=>String(order?.customer?.email||"").trim().toLowerCase()===wanted);
   }catch{return []}
 }
 
 async function loadAccount(){
-  if(isDemoAccount()){const data=getDemoData();state.profile=data.profile||{};state.orders=data.orders||[];state.addresses=normalizeAddresses(data.addresses||[]);state.wishlist=data.wishlist||[];saveCheckoutDefault(defaultAddress());return}
+  if(isDemoAccount()){
+    if(ordersUnsubscribe){ordersUnsubscribe();ordersUnsubscribe=null;}
+    const data=getDemoData();
+    state.profile=data.profile||{};
+    state.orders=data.orders||[];
+    state.addresses=normalizeAddresses(data.addresses||[]);
+    state.wishlist=data.wishlist||[];
+    saveCheckoutDefault(defaultAddress());
+    return;
+  }
+
+  if(ordersUnsubscribe){ordersUnsubscribe();ordersUnsubscribe=null;}
   const uid=state.user.uid;
   const [profileSnap,ordersSnap,addrSnap,wishSnap]=await Promise.all([
     getDoc(doc(db,"users",uid)),
-    getDocs(query(collection(db,"orders"),where("customerUid","==",uid),orderBy("createdAt","desc"))).catch(()=>({docs:[]})),
+    getDocs(query(collection(db,"orders"),where("customerUid","==",uid),orderBy("createdAt","desc"))),
     getDocs(collection(db,"users",uid,"addresses")).catch(()=>({docs:[]})),
     getDocs(collection(db,"users",uid,"wishlist")).catch(()=>({docs:[]}))
   ]);
   state.profile=profileSnap.exists()?profileSnap.data():{fullName:state.user.displayName||"",email:state.user.email||"",phone:state.user.phoneNumber||"",provider:state.user.providerData?.[0]?.providerId||""};
-  const firestoreOrders=ordersSnap.docs.map(d=>({id:d.id,...d.data(),source:"firestore"}));
-  const localOrders=getLocalCustomerOrders(state.user.email||state.profile.email);
-  const merged=new Map(firestoreOrders.map(order=>[String(order.id),order]));
-  // Firestore is authoritative. Legacy local orders are only used for IDs not yet migrated.
-  localOrders.forEach(order=>{
-    if(!merged.has(String(order.id))) merged.set(String(order.id),order);
-  });
-  state.orders=[...merged.values()].sort((a,b)=>{
-    const ta=a.createdAt?.toDate?a.createdAt.toDate().getTime():new Date(a.createdAt||0).getTime();
-    const tb=b.createdAt?.toDate?b.createdAt.toDate().getTime():new Date(b.createdAt||0).getTime();
-    return tb-ta;
-  });
+  state.orders=ordersSnap.docs.map(d=>({id:d.id,...d.data(),source:"firestore"}));
+  writeOrderCache(state.orders);
   state.addresses=normalizeAddresses(addrSnap.docs.map(d=>({id:d.id,...d.data()})));
   state.wishlist=wishSnap.docs.map(d=>({id:d.id,...d.data()}));
+
+  // Live order source: Admin status changes are pushed here immediately.
+  ordersUnsubscribe=onSnapshot(
+    query(collection(db,"orders"),where("customerUid","==",uid),orderBy("createdAt","desc")),
+    snapshot=>{
+      state.orders=snapshot.docs.map(d=>({id:d.id,...d.data(),source:"firestore"}));
+      writeOrderCache(state.orders);
+      renderDashboard();
+    },
+    error=>{
+      console.error("[Kapeng Barako] customer order listener failed",error);
+    }
+  );
 }
 
 function dashboard(){
@@ -452,7 +480,7 @@ async function saveProfile(e){
 function renderDashboard(){
  appRoot.innerHTML=shell();
  document.querySelector("#account-main").innerHTML=dashboard();
- document.querySelector("#logout-btn").onclick=()=>{if(isDemoAccount()){state.user=null;state.profile=null;state.orders=[];state.addresses=[];state.wishlist=[];state.demoActive=false;renderAuth()}else{signOut(auth)}};
+ document.querySelector("#logout-btn").onclick=()=>{if(isDemoAccount()){if(ordersUnsubscribe){ordersUnsubscribe();ordersUnsubscribe=null;}state.user=null;state.profile=null;state.orders=[];state.addresses=[];state.wishlist=[];state.demoActive=false;renderAuth()}else{signOut(auth)}};
  document.querySelector("#top-profile").onclick=()=>{state.tab="profile";renderDashboard()};
  renderPanel();
 }
@@ -462,7 +490,10 @@ if(isFirebaseConfigured){
  const firebaseApp=initializeApp(firebaseConfig);auth=getAuth(firebaseApp);db=getFirestore(firebaseApp);
  onAuthStateChanged(auth,async user=>{
   if(state.demoActive)return;
-  if(!user){state.user=null;renderAuth();return}
+  if(!user){
+    if(ordersUnsubscribe){ordersUnsubscribe();ordersUnsubscribe=null;}
+    state.user=null;renderAuth();return
+  }
   await reload(user);
   if(user.providerData.some(p=>p.providerId==="password")&&!user.emailVerified){await signOut(auth);renderAuth();return}
   state.user=user;await loadAccount();renderDashboard();
