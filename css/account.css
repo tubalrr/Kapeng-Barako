@@ -280,3 +280,20 @@ body{font-size:16px}
 .address-card.is-default{border-color:var(--kb-accent);box-shadow:0 0 0 2px rgba(185,133,67,.08)}
 .default-address-badge{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;background:#f4ecdf;color:var(--kb-accent);font-size:9px;font-weight:900;letter-spacing:.08em;white-space:nowrap}
 .primary-outline{border-color:var(--kb-accent);color:var(--kb-accent)}
+
+
+/* Responsive + accessibility QA hardening */
+html,body{max-width:100%;overflow-x:hidden}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid #c8a951;outline-offset:3px
+}
+button:active{transform:translateY(1px)}
+button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+[aria-busy="true"]{cursor:wait}
+@media(max-width:430px){
+  .account-shell,.account-content,.account-card{min-width:0;max-width:100%}
+  table{display:block;max-width:100%;overflow-x:auto}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
