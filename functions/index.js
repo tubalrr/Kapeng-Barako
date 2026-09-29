@@ -61,6 +61,51 @@ exports.bootstrapAdminFromEmail = onCall(async request => {
   return { uid: request.auth.uid, email, role: "admin" };
 });
 
+exports.setAdminPasswordFromGoogle = onCall(async request => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Admin authentication required.");
+  }
+
+  const email = clean(request.auth.token.email, 200).toLowerCase();
+  const provider = clean(request.auth.token.firebase?.sign_in_provider, 60).toLowerCase();
+  const password = String(request.data?.password || "");
+
+  if (email !== "vracelle2@gmail.com") {
+    throw new HttpsError("permission-denied", "This email is not authorized for the Kapeng Barako Admin Console.");
+  }
+
+  if (provider !== "google.com") {
+    throw new HttpsError(
+      "failed-precondition",
+      "For first-time password setup, sign in with the authorized Google account first."
+    );
+  }
+
+  if (password.length < 6 || password.length > 128) {
+    throw new HttpsError("invalid-argument", "Admin password must be 6 to 128 characters.");
+  }
+
+  try {
+    await admin.auth().updateUser(request.auth.uid, {
+      password
+    });
+  } catch (error) {
+    throw new HttpsError(
+      "internal",
+      error?.message || "Could not set the admin password."
+    );
+  }
+
+  await db.collection("admins").doc(request.auth.uid).set({
+    active: true,
+    role: "admin",
+    email,
+    updatedAt: FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  return { uid: request.auth.uid, email, role: "admin" };
+});
+
 exports.createOrder = onCall(async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Please sign in before checkout.");
