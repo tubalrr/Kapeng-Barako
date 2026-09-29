@@ -67,7 +67,7 @@ const ADMIN_BOOTSTRAP_EMAILS = new Set([
   "vracelle2@gmail.com"
 ]);
 
-exports.bootstrapAdminFromEmail = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
+exports.bootstrapAdminFromEmail = onCall({ cors: true }, async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Admin authentication required.");
   }
@@ -91,7 +91,7 @@ exports.bootstrapAdminFromEmail = onCall({ cors: ["https://tubalrr.github.io"] }
   return { uid: request.auth.uid, email, role: "admin" };
 });
 
-exports.setAdminPasswordFromGoogle = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
+exports.setAdminPasswordFromGoogle = onCall({ cors: true }, async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Admin authentication required.");
   }
@@ -136,7 +136,7 @@ exports.setAdminPasswordFromGoogle = onCall({ cors: ["https://tubalrr.github.io"
   return { uid: request.auth.uid, email, role: "admin" };
 });
 
-exports.createOrder = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
+exports.createOrder = onCall({ cors: true }, async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Please sign in before checkout.");
   }
@@ -314,7 +314,7 @@ exports.createOrder = onCall({ cors: ["https://tubalrr.github.io"] }, async requ
   return result;
 });
 
-exports.migrateLegacyOrders = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
+exports.migrateLegacyOrders = onCall({ cors: true }, async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Admin authentication required.");
   }
@@ -363,7 +363,7 @@ exports.migrateLegacyOrders = onCall({ cors: ["https://tubalrr.github.io"] }, as
 });
 
 
-exports.migrateLegacyCatalog = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
+exports.migrateLegacyCatalog = onCall({ cors: true }, async request => {
   if (!request.auth) throw new HttpsError("unauthenticated", "Admin authentication required.");
   await requireAdmin(request.auth.uid);
 
