@@ -462,6 +462,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   let firestoreOrders = [];
   let firestoreOrdersReady = false;
   let firestoreOrdersUnsubscribe = null;
+  let firestoreProductsUnsubscribe = null;
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
 
@@ -523,6 +524,59 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     if (value && typeof value.toDate === "function") return value.toDate().getTime();
     const time = new Date(value || 0).getTime();
     return Number.isFinite(time) ? time : 0;
+  }
+
+  async function initAdminFirestoreProducts() {
+    try {
+      if (!firestoreDb) return;
+
+      const firestore = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js");
+
+      if (firestoreProductsUnsubscribe) firestoreProductsUnsubscribe();
+
+      firestoreProductsUnsubscribe = firestore.onSnapshot(
+        firestore.collection(firestoreDb, "products"),
+        snapshot => {
+          if (demoStore()) return;
+
+          const current = products();
+          const byId = new Map(current.map(product => [String(product.id), product]));
+          let changed = false;
+
+          snapshot.docs.forEach(docSnap => {
+            const remote = docSnap.data() || {};
+            const id = String(docSnap.id);
+            const stock = Math.max(0, Number(remote.stock || 0));
+            const existing = byId.get(id);
+
+            if (existing) {
+              if (Number(existing.stock || 0) !== stock) {
+                existing.stock = stock;
+                changed = true;
+              }
+            } else {
+              byId.set(id, { id, ...remote, stock });
+              changed = true;
+            }
+          });
+
+          if (!changed) return;
+
+          write(PRODUCT_KEY, [...byId.values()]);
+          renderAll();
+          try {
+            const ch = "BroadcastChannel" in window ? new BroadcastChannel("kapeng-barako-catalog") : null;
+            ch?.postMessage({type:"products-updated",at:Date.now()});
+            setTimeout(() => ch?.close(), 50);
+          } catch {}
+        },
+        error => {
+          console.error("[Kapeng Barako] admin product stock listener failed", error);
+        }
+      );
+    } catch (error) {
+      console.error("[Kapeng Barako] admin Firestore product setup failed", error);
+    }
   }
 
   async function initAdminFirestoreOrders() {
@@ -970,7 +1024,10 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         if (flowSource) flowSource.innerHTML = 'Demo session <code>kb_demo_admin_data</code>';
       }
       renderAll();
-      if (!isDemo) initAdminFirestoreOrders();
+      if (!isDemo) {
+        initAdminFirestoreOrders();
+        initAdminFirestoreProducts();
+      }
     } catch (error) {
       const reason =
         error?.code === "FIREBASE_NOT_CONFIGURED" ? "setup" :
