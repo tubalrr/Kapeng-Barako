@@ -74,6 +74,9 @@
           syncSubscriptionProducts();
           renderCart();
         }
+        if(event.data?.type==="gallery-updated"){
+          renderGallery();
+        }
       });
     }
   }catch{}
