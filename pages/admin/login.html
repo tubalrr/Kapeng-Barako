@@ -28,8 +28,7 @@
       <div id="login-error" class="error" role="alert"></div>
       <button id="email-admin-login" class="login-button" type="submit">SIGN IN WITH EMAIL →</button>
       <button id="google-admin-setup" class="login-button login-button-secondary" type="button">FIRST-TIME SETUP WITH GOOGLE</button>
-      <button id="demo-admin-login" class="login-button login-button-demo" type="button">ENTER DEMO ACCOUNT</button>
-      <small class="setup-help">Demo mode uses sample/local browser data only and does not require Firebase.</small>
+      <small class="setup-help"></small>
       <small class="setup-help">Use the Google account you configured as the authorized admin to create/sync the Email + Password credential. See the Firebase setup guide before first login.</small>
     </form>
     <div class="seed-note admin-email-note">
@@ -51,8 +50,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btn = document.querySelector("#email-admin-login");
   const err = document.querySelector("#login-error");
   const googleSetupBtn = document.querySelector("#google-admin-setup");
-  const demoBtn = document.querySelector("#demo-admin-login");
-
   const reasonMessages = {
     expired: "Your Admin session expired. Sign in again.",
     "session-invalid": "The previous Admin session could not be verified. Sign in again.",
@@ -69,31 +66,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const admin = await window.KBAdminAuth.restore();
     if (admin) {
-      location.replace("./index.html?v=kb-admin-console-20260929-3");
+      location.replace("./index.html?v=kb-admin-console-20260929-4");
       return;
     }
   } catch (error) {
     err.textContent = error?.message || "Could not restore the admin session.";
   }
-
-  demoBtn.addEventListener("click", async () => {
-    err.textContent = "";
-    demoBtn.disabled = true;
-    btn.disabled = true;
-    demoBtn.textContent = "ENTERING DEMO…";
-    try {
-      await window.KBAdminAuth.signInDemo(
-        window.KBAdminAuth.DEMO_EMAIL,
-        window.KBAdminAuth.DEMO_PASSWORD
-      );
-      location.replace("./index.html?demo=1&v=kb-admin-console-20260929-3");
-    } catch (error) {
-      err.textContent = error?.message || "Could not enter demo mode.";
-      demoBtn.disabled = false;
-      btn.disabled = false;
-      demoBtn.textContent = "ENTER DEMO ACCOUNT";
-    }
-  });
 
   googleSetupBtn.addEventListener("click", async () => {
     err.textContent = "";
@@ -108,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     googleSetupBtn.textContent = "CONNECTING GOOGLE…";
     try {
       await window.KBAdminAuth.setupAdminEmailPassword(password);
-      location.replace("./index.html?v=kb-admin-console-20260929-3");
+      location.replace("./index.html?v=kb-admin-console-20260929-4");
     } catch (error) {
       console.error("[Kapeng Barako] admin Google password setup failed", error);
       err.textContent = error?.message || "Could not complete the admin password setup.";
@@ -125,7 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     btn.textContent = "SIGNING IN…";
     try {
       await window.KBAdminAuth.signInWithEmailPassword(emailInput.value, passwordInput.value);
-      location.replace("./index.html?v=kb-admin-console-20260929-3");
+      location.replace("./index.html?v=kb-admin-console-20260929-4");
     } catch (error) {
       console.error("[Kapeng Barako] admin email/password login failed", error);
       err.textContent = error?.message || "Could not sign in.";
