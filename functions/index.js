@@ -37,7 +37,7 @@ const ADMIN_BOOTSTRAP_EMAILS = new Set([
   "vracelle2@gmail.com"
 ]);
 
-exports.bootstrapAdminFromEmail = onCall(async request => {
+exports.bootstrapAdminFromEmail = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Admin authentication required.");
   }
@@ -61,7 +61,7 @@ exports.bootstrapAdminFromEmail = onCall(async request => {
   return { uid: request.auth.uid, email, role: "admin" };
 });
 
-exports.setAdminPasswordFromGoogle = onCall(async request => {
+exports.setAdminPasswordFromGoogle = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Admin authentication required.");
   }
@@ -106,7 +106,7 @@ exports.setAdminPasswordFromGoogle = onCall(async request => {
   return { uid: request.auth.uid, email, role: "admin" };
 });
 
-exports.createOrder = onCall(async request => {
+exports.createOrder = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Please sign in before checkout.");
   }
@@ -258,7 +258,7 @@ exports.createOrder = onCall(async request => {
   return result;
 });
 
-exports.migrateLegacyOrders = onCall(async request => {
+exports.migrateLegacyOrders = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Admin authentication required.");
   }
@@ -307,7 +307,7 @@ exports.migrateLegacyOrders = onCall(async request => {
 });
 
 
-exports.migrateLegacyCatalog = onCall(async request => {
+exports.migrateLegacyCatalog = onCall({ cors: ["https://tubalrr.github.io"] }, async request => {
   if (!request.auth) throw new HttpsError("unauthenticated", "Admin authentication required.");
   await requireAdmin(request.auth.uid);
 
