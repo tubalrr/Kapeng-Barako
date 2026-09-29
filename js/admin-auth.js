@@ -141,11 +141,7 @@
       await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
       const credential = await authMod.signInWithEmailAndPassword(currentAuth, normalized, password);
 
-      // The authorized admin document already exists for the approved admin UID.
-      // Do not write to Firestore from the login page; the existing document is
-      // the source of truth for Admin Console authorization.
-      const admin = await verifyAdminWithoutSession(credential.user);
-      if (!admin) {
+      // The email/password account may have a different Firebase UID from the\n      // original Google admin account. Bootstrap the explicitly allowlisted admin\n      // email server-side so /admins/{uid} follows the authenticated UID.\n      if (normalized === "vracelle2@gmail.com") {\n        try {\n          const backendModule = await import("./firebase-backend.js");\n          await backendModule.bootstrapAdminFromEmail();\n        } catch (bootstrapError) {\n          await authMod.signOut(currentAuth);\n          throw new Error(bootstrapError?.message || "Admin identity bootstrap failed.");\n        }\n      }\n\n      const admin = await verifyAdminWithoutSession(credential.user);\n      if (!admin) {
         await authMod.signOut(currentAuth);
         throw new Error("This Firebase email account is authenticated, but its UID is not the active Kapeng Barako admin UID. Use the existing authorized admin account.");
       }
