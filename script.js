@@ -421,7 +421,6 @@
     const card = $(".featured-card");
     if (!card) return;
     card.hidden = !product;
-    if (!product) return;
     const name = $("#featuredProductName");
     const meta = $("#featuredProductMeta");
     const price = $("#featuredProductPrice");
@@ -445,6 +444,16 @@
     if (!select) return;
     const products = getProducts().filter(product => Number(product.stock || 0) > 0);
     const current = select.value;
+
+    if (!products.length) {
+      select.innerHTML = '<option value="">No products available yet.</option>';
+      select.disabled = true;
+      $("#subscriptionSave")?.setAttribute("disabled", "");
+      return;
+    }
+
+    select.disabled = false;
+    $("#subscriptionSave")?.removeAttribute("disabled");
     const saved = read("kb_subscription_preference", {});
     const preferred = String(current || saved?.product || "");
     select.innerHTML = products.map(product =>
@@ -661,12 +670,42 @@
     if (!products.length) {
       grid.innerHTML =
         '<div class="catalog-empty">' +
-          '<span>PRODUCTION CATALOG</span>' +
-          '<h3>Products coming soon.</h3>' +
-          '<p>The store catalog is currently empty.</p>' +
+          '<span>CATALOG</span>' +
+          '<h3>No products available yet.</h3>' +
+          '<p>Please check back once the store catalog is published.</p>' +
         '</div>';
+
+      const cartButton = $("#openCart");
+      const heroCartButton = $("#heroCartButton");
+      const subscriptionProduct = $("#subscriptionProduct");
+      const subscriptionSave = $("#subscriptionSave");
+
+      if (cartButton) {
+        cartButton.disabled = true;
+        cartButton.setAttribute("aria-disabled", "true");
+      }
+      if (heroCartButton) {
+        heroCartButton.disabled = true;
+        heroCartButton.setAttribute("aria-disabled", "true");
+      }
+      if (subscriptionProduct) {
+        subscriptionProduct.disabled = true;
+        subscriptionProduct.innerHTML = '<option value="">No products available yet.</option>';
+      }
+      if (subscriptionSave) {
+        subscriptionSave.disabled = true;
+        subscriptionSave.setAttribute("aria-disabled", "true");
+      }
       return;
     }
+
+    $("#openCart")?.removeAttribute("disabled");
+    $("#openCart")?.removeAttribute("aria-disabled");
+    $("#heroCartButton")?.removeAttribute("disabled");
+    $("#heroCartButton")?.removeAttribute("aria-disabled");
+    $("#subscriptionProduct")?.removeAttribute("disabled");
+    $("#subscriptionSave")?.removeAttribute("disabled");
+    $("#subscriptionSave")?.removeAttribute("aria-disabled");
 
     $$(".catalog-empty", grid).forEach(element => element.remove());
 
@@ -1682,11 +1721,19 @@
 
   function setupModalControls() {
     $("#openCart")?.addEventListener("click", () => {
+      if (!getProducts().length) {
+        toast("No products available yet.");
+        return;
+      }
       renderCart();
       openBox("#cartModal");
     });
 
     $("#heroCartButton")?.addEventListener("click", () => {
+      if (!getProducts().length) {
+        toast("No products available yet.");
+        return;
+      }
       renderCart();
       openBox("#cartModal");
     });
@@ -1829,6 +1876,17 @@
     });
 
     $("#subscriptionSave")?.addEventListener("click", () => {
+      const products = getProducts().filter(product => Number(product.stock || 0) > 0);
+      if (!products.length) {
+        toast("No products available yet.");
+        return;
+      }
+      const selectedProduct = products.find(product => String(product.id) === String($("#subscriptionProduct")?.value));
+      if (!selectedProduct) {
+        toast("Please select an available product.");
+        return;
+      }
+
       const preference = {
         id: "SUB-" + Date.now().toString(36).toUpperCase(),
         product: $("#subscriptionProduct")?.value || "",
