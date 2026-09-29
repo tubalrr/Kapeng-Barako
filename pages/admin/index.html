@@ -1700,8 +1700,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     document.getElementById("extraAddProduct")?.addEventListener("click",()=>document.getElementById("extraProductDialog")?.showModal());
     document.getElementById("extraProductForm")?.addEventListener("submit",e=>{e.preventDefault();addExtraProduct()});
     document.querySelectorAll("[data-extra-dialog-close]").forEach(b=>b.addEventListener("click",()=>document.getElementById("extraProductDialog")?.close()));
-    document.getElementById("extraAddPromo")?.addEventListener("click",()=>document.getElementById("extraPromoDialog")?.showModal());
-    document.getElementById("extraPromoForm")?.addEventListener("submit",e=>{e.preventDefault();addExtraPromo()});
+    document.getElementById("extraAddPromo")?.addEventListener("click",addExtraPromo);
+    document.getElementById("extraPromoForm")?.addEventListener("submit",e=>{e.preventDefault();saveExtraPromo()});
     document.querySelectorAll("[data-extra-promo-close]").forEach(b=>b.addEventListener("click",()=>document.getElementById("extraPromoDialog")?.close()));
     document.getElementById("extraSaveContent")?.addEventListener("click",saveContent);
     document.getElementById("extraSaveContact")?.addEventListener("click",saveContact);
@@ -1742,10 +1742,12 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       renderExtraReviews();
     });
     document.getElementById("extraPromos")?.addEventListener("click",event=>{
-      const button=event.target.closest("[data-x-promo-delete]");if(!button)return;
-      const idx=Number(button.dataset.xPromoDelete),current=read(PROMO_KEY,[]);
-      if(!Array.isArray(current)||!current[idx]||!confirm("Delete promo "+(current[idx].code||"this code")+"?"))return;
-      current.splice(idx,1);write(PROMO_KEY,current);toastExtra("Promo deleted.");renderPromos();
+      const toggle=event.target.closest("[data-x-promo-toggle]");
+      if(toggle){toggleExtraPromo(Number(toggle.dataset.xPromoToggle));return}
+      const edit=event.target.closest("[data-x-promo-edit]");
+      if(edit){openPromoEditor(Number(edit.dataset.xPromoEdit));return}
+      const del=event.target.closest("[data-x-promo-delete]");
+      if(del){deleteExtraPromo(Number(del.dataset.xPromoDelete));return}
     });
     document.getElementById("extraGallery")?.addEventListener("click",event=>{
       const button=event.target.closest("[data-g-save]");if(button)saveGallery(Number(button.dataset.gSave));
