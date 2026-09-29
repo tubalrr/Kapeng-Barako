@@ -480,7 +480,12 @@
     if (!section || !root) return;
     const saved = read(REVIEWS_KEY, []);
     const reviews = Array.isArray(saved)
-      ? saved.filter(review => review && review.verified === true && review.published === true)
+      ? saved.filter(review =>
+          review &&
+          review.demo !== true &&
+          review.verified === true &&
+          review.published === true
+        )
       : [];
     section.hidden = reviews.length === 0;
     root.innerHTML = reviews.map(review => {
