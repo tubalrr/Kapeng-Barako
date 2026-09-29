@@ -261,13 +261,13 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
           <button id="menuBtn" class="menu-btn" type="button" aria-label="Open menu">☰</button>
           <div><div class="kicker">KAPENG BARAKO</div><h2 id="viewTitle">Overview</h2></div>
         </div>
-        <div class="top-actions"><span class="badge admin-email">ADMIN</span></div>
+        <div class="top-actions"><span id="adminModeBadge" class="badge admin-email">ADMIN</span></div>
       </header>
 
       <div class="content">
         <section id="view-overview" class="view active">
           <div class="hero">
-            <div><div class="kicker">OPERATIONS</div><h1>Dashboard</h1><p>Real-time totals from the centralized Firestore order records and the current product inventory.</p></div>
+            <div><div class="kicker" id="dashboardKicker">OPERATIONS</div><h1>Dashboard</h1><p id="dashboardDescription">Real-time totals from the centralized Firestore order records and the current product inventory.</p></div>
             <div class="hero-actions"><a class="ghost-btn" href="../../index.html" style="display:inline-flex;align-items:center;text-decoration:none">Storefront →</a></div>
           </div>
           <div class="metric-grid">
@@ -286,7 +286,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
               </div>
             </section>
             <section class="admin-extra-card">
-              <div class="extra-head"><div><div class="kicker">FULFILLMENT STATUS</div><h3>Order Flow</h3></div><span class="extra-sub">Live from <code>kb_orders</code></span></div>
+              <div class="extra-head"><div><div class="kicker">FULFILLMENT STATUS</div><h3>Order Flow</h3></div><span id="orderFlowSource" class="extra-sub">Live from <code>kb_orders</code></span></div>
               <div class="extra-status-grid">
                 <article class="extra-status"><span>Pending</span><strong id="extraPending">0</strong></article>
                 <article class="extra-status"><span>Ready</span><strong id="extraReady">0</strong></article>
@@ -898,9 +898,23 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       }
       $("#loginScreen").classList.add("hidden");
       $("#adminApp").classList.remove("hidden");
-      $("#adminEmail").textContent = admin.demo ? "DEMO ACCOUNT" : (admin.email || "ADMIN");
+      const isDemo = Boolean(admin.demo);
+      $("#adminEmail").textContent = isDemo ? "DEMO ACCOUNT" : (admin.email || "ADMIN");
+      const modeBadge = $("#adminModeBadge");
+      if (modeBadge) {
+        modeBadge.textContent = isDemo ? "DEMO MODE" : "ADMIN";
+        modeBadge.classList.toggle("low", isDemo);
+      }
+      const kicker = $("#dashboardKicker");
+      const desc = $("#dashboardDescription");
+      const flowSource = $("#orderFlowSource");
+      if (isDemo) {
+        if (kicker) kicker.textContent = "DEMO OPERATIONS";
+        if (desc) desc.textContent = "Safe demo data for testing the Admin Console. Changes stay inside this browser session and do not touch Firebase.";
+        if (flowSource) flowSource.innerHTML = 'Demo session <code>kb_demo_admin_data</code>';
+      }
       renderAll();
-      if (!admin.demo) initAdminFirestoreOrders();
+      if (!isDemo) initAdminFirestoreOrders();
     } catch (error) {
       const reason =
         error?.code === "FIREBASE_NOT_CONFIGURED" ? "setup" :
