@@ -329,6 +329,9 @@
     const hoursValue = value("hours");
     const facebookValue = value("facebook");
     const messengerValue = value("messenger");
+    const instagramValue = value("instagram");
+    const tiktokValue = value("tiktok");
+    const youtubeValue = value("youtube");
 
     $$("[data-kb-business-name]").forEach(el => {
       el.textContent = businessName;
@@ -360,9 +363,21 @@
       el.hidden = !facebookValue;
       el.href = facebookValue || "#";
     });
-    $$("[data-kb-messenger]").forEach(el => {
+    $("[data-kb-messenger]").forEach(el => {
       el.hidden = !messengerValue;
       el.href = messengerValue || "#";
+    });
+    $("[data-kb-instagram]").forEach(el => {
+      el.hidden = !instagramValue;
+      el.href = instagramValue || "#";
+    });
+    $("[data-kb-tiktok]").forEach(el => {
+      el.hidden = !tiktokValue;
+      el.href = tiktokValue || "#";
+    });
+    $("[data-kb-youtube]").forEach(el => {
+      el.hidden = !youtubeValue;
+      el.href = youtubeValue || "#";
     });
 
     const contactBlock = $("#footerContactBlock");
@@ -374,13 +389,16 @@
         locationValue ||
         hoursValue ||
         facebookValue ||
-        messengerValue
+        messengerValue ||
+        instagramValue ||
+        tiktokValue ||
+        youtubeValue
       );
     }
 
     const socialBlock = $("#footerSocialBlock");
     if (socialBlock) {
-      socialBlock.hidden = !(facebookValue || messengerValue);
+      socialBlock.hidden = !(facebookValue || messengerValue || instagramValue || tiktokValue || youtubeValue);
     }
 
     const copyrightLocation = $("#footerCopyrightLocation");
