@@ -912,8 +912,8 @@
         <div class="kb-sticky-cart-left">
           <img id="kb-sticky-cart-thumb" src="images/gallery-03.svg" alt="Kapeng Barako coffee">
           <div class="kb-sticky-cart-info">
-            <strong id="kb-sticky-cart-name" class="kb-sticky-cart-item">Barako Coffee</strong>
-            <span id="kb-sticky-cart-qty" class="kb-sticky-cart-qty">Qty 1</span>
+            <strong id="kb-sticky-cart-name" class="kb-sticky-cart-item">—</strong>
+            <span id="kb-sticky-cart-qty" class="kb-sticky-cart-qty">Qty 0</span>
           </div>
         </div>
         <div class="kb-sticky-cart-right">
@@ -1270,39 +1270,49 @@
               return;
             }
 
-            const item = cart[0];
+            const products = getProducts();
+            const liveLines = cart.map(line => {
+              const product = products.find(item => String(item.id) === String(line.id));
+              if (!product || Number(product.stock || 0) <= 0) return null;
+              return {
+                product,
+                qty: Math.min(
+                  Math.max(1, Number(line.qty || 1)),
+                  Number(product.stock || 0)
+                )
+              };
+            }).filter(Boolean);
+
+            if (!liveLines.length) {
+              bar.classList.remove("is-visible");
+              bar.setAttribute("aria-hidden","true");
+              document.body.classList.remove("kb-has-sticky-cart");
+              return;
+            }
+
+            const item = liveLines[0].product;
             const thumb = document.getElementById("kb-sticky-cart-thumb");
             const name = document.getElementById("kb-sticky-cart-name");
             const qty = document.getElementById("kb-sticky-cart-qty");
             const price = document.getElementById("kb-sticky-cart-price");
 
-            const totalQty = cart.reduce(
-              (sum,line) => sum + Math.max(1,Number(line.qty || 1)),
+            const totalQty = liveLines.reduce(
+              (sum,line) => sum + line.qty,
               0
             );
 
-            const total = cart.reduce(
-              (sum,line) => sum + Number(line.price || 0) * Math.max(1,Number(line.qty || 1)),
+            const total = liveLines.reduce(
+              (sum,line) => sum + Number(line.product.price || 0) * line.qty,
               0
             );
 
-            const bundleIds = new Set(
-              cart.filter(line => line.bundleId).map(line => String(line.bundleId))
-            );
-
-            let discount = 0;
-            bundleIds.forEach(id => {
-              const bundleLines = cart.filter(line =>
-                String(line.bundleId || "") === id &&
-                Number(line.qty || 0) > 0
-              );
-              if (bundleLines.length >= 2) discount += 100;
-            });
-
-            if (thumb) thumb.src = "images/gallery-03.svg";
-            if (name) name.textContent = item.name || "Barako Coffee";
+            if (thumb) {
+              thumb.src = String(item.image || "").trim() || "images/brew-placeholder.svg";
+              thumb.alt = item.name ? item.name + " product photo" : "Product photo";
+            }
+            if (name) name.textContent = item.name || "";
             if (qty) qty.textContent = "Qty " + totalQty;
-            if (price) price.textContent = money(total - discount);
+            if (price) price.textContent = money(total);
 
             bar.classList.add("is-visible");
             bar.setAttribute("aria-hidden","false");
