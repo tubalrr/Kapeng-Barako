@@ -52,6 +52,23 @@ This means:
 - Local browser data should not be treated as a guaranteed backup or as the canonical source for production business records.
 - Use the configured Firebase/Firestore backend for data that must be shared or persisted centrally, and use the backup/export features for supported local records.
 
+## Multi-user / private customer database limitation
+
+This template is **not a fully hosted SaaS e-commerce service by itself**. The repository provides a storefront, admin UI, client-side workflows, and optional Firebase/Firestore backend integration, but the buyer must configure and operate the backend services required for a real store.
+
+For a real multi-user store, the buyer needs:
+
+- **Firebase/Firestore or another backend** for shared application data
+- **Authenticated admin access**
+- **Server-side authorization** for protected operations
+- **A proper database** for customer, order, inventory, and other business records
+- **Secure file storage** for production customer/admin uploads and assets
+- **Payment verification** through a real payment gateway or a controlled manual verification workflow
+
+### Gumroad template positioning
+
+For the Gumroad template, this architecture is suitable as a starting point as long as it is marketed accurately: it is a **website/template that the buyer configures and deploys**, not a fully hosted multi-tenant SaaS platform with a private customer database operated by the seller.
+
 ## Firebase onboarding — buyer must use their own project
 
 **Important for buyers:** this template intentionally ships with Firebase placeholders. You must create and use **your own Firebase project** before enabling live authentication, orders, inventory, checkout, or Admin features. Do not reuse the seller's Firebase project, admin UID, email, or credentials.
