@@ -432,6 +432,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
               <div class="extra-field full"><label for="extraContactLocation">Address / Location</label><input id="extraContactLocation" placeholder="Lipa City, Batangas"></div>
               <div class="extra-field"><label for="extraContactFacebook">Facebook URL</label><input id="extraContactFacebook" type="url" placeholder="https://facebook.com/..."></div>
               <div class="extra-field"><label for="extraContactMessenger">Messenger URL</label><input id="extraContactMessenger" type="url" placeholder="https://m.me/..."></div>
+              <div class="extra-field"><label for="extraContactInstagram">Instagram URL</label><input id="extraContactInstagram" type="url" placeholder="https://instagram.com/..."></div>
+              <div class="extra-field"><label for="extraContactTikTok">TikTok URL</label><input id="extraContactTikTok" type="url" placeholder="https://tiktok.com/@..."></div>
+              <div class="extra-field"><label for="extraContactYouTube">YouTube URL</label><input id="extraContactYouTube" type="url" placeholder="https://youtube.com/@..."></div>
             </div>
           </section>
         </section>
@@ -1615,7 +1618,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   function loadContact(){
     const s={...(read(SETTINGS_KEY,{})||{})};
-    const map={businessName:"extraContactBusiness",email:"extraContactEmail",phone:"extraContactPhone",hours:"extraContactHours",location:"extraContactLocation",facebook:"extraContactFacebook",messenger:"extraContactMessenger"};
+    const map={businessName:"extraContactBusiness",email:"extraContactEmail",phone:"extraContactPhone",hours:"extraContactHours",location:"extraContactLocation",facebook:"extraContactFacebook",messenger:"extraContactMessenger",instagram:"extraContactInstagram",tiktok:"extraContactTikTok",youtube:"extraContactYouTube"};
     Object.entries(map).forEach(([key,id])=>{const el=document.getElementById(id);if(el)el.value=String(s[key]||"")});
   }
   function saveContact(){
@@ -1627,7 +1630,10 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       hours:document.getElementById("extraContactHours").value.trim(),
       location:document.getElementById("extraContactLocation").value.trim(),
       facebook:document.getElementById("extraContactFacebook").value.trim(),
-      messenger:document.getElementById("extraContactMessenger").value.trim()
+      messenger:document.getElementById("extraContactMessenger").value.trim(),
+      instagram:document.getElementById("extraContactInstagram").value.trim(),
+      tiktok:document.getElementById("extraContactTikTok").value.trim(),
+      youtube:document.getElementById("extraContactYouTube").value.trim()
     });
     write(SETTINGS_KEY,current);
     notifyStorefront("contact-updated");
