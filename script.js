@@ -959,27 +959,27 @@
     return Number(rule?.regional?.province ?? 220);
   }
 
-  function promoDiscount(code, subtotal) {
-    const promos = read(PROMO_KEY, []);
-    if (!Array.isArray(promos)) return 0;
-
+  function promoDetails(code) {
     const wanted = String(code || "").trim().toUpperCase();
-    if (!wanted) return 0;
-
-    const promo = promos.find(item =>
-      String(item.code || "").trim().toUpperCase() === wanted &&
-      item.active !== false
-    );
-
-    if (!promo) return 0;
-    if (cartCount() < Number(promo.minPacks || 0)) return 0;
-
+    if (!wanted) return {code:"",promo:null,valid:true,reason:""};
+    const promos = read(PROMO_KEY, []);
+    const list = Array.isArray(promos) ? promos : [];
+    const promo = list.find(item => String(item.code || "").trim().toUpperCase() === wanted);
+    if (!promo) return {code:wanted,promo:null,valid:false,reason:"Promo code not found."};
+    if (promo.active === false) return {code:wanted,promo,valid:false,reason:"This promo code is inactive."};
+    const minPacks = Math.max(0, Number(promo.minPacks || 0));
+    if (cartCount() < minPacks) return {code:wanted,promo,valid:false,reason:"Minimum "+minPacks+" packs required for this promo."};
     const value = Number(promo.value || 0);
+    if (!Number.isFinite(value) || value <= 0) return {code:wanted,promo,valid:false,reason:"This promo code has an invalid discount."};
+    if (promo.type === "percent" && value > 100) return {code:wanted,promo,valid:false,reason:"This promo code has an invalid percentage."};
+    return {code:wanted,promo,valid:true,reason:""};
+  }
 
-    return Math.min(
-      subtotal,
-      promo.type === "percent" ? subtotal * value / 100 : value
-    );
+  function promoDiscount(code, subtotal) {
+    const details = promoDetails(code);
+    if (!details.valid || !details.promo) return 0;
+    const value = Number(details.promo.value || 0);
+    return Math.min(subtotal, details.promo.type === "percent" ? subtotal * value / 100 : value);
   }
 
   function syncPaymentOptions(select, preferred) {
@@ -1133,6 +1133,12 @@
 
     if (payment === "GCash" && gcashRef.replace(/\s+/g, "") === phone.replace(/\s+/g, "")) {
       toast("GCash Ref Number cannot be your phone number.");
+      return;
+    }
+
+    const promo = promoDetails(voucher);
+    if (voucher && !promo.valid) {
+      toast(promo.reason);
       return;
     }
 
