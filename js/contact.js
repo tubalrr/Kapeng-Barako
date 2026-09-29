@@ -19,32 +19,32 @@
     }
   };
 
-  const settings = {
-    email: "",
-    phone: "",
-    location: "",
-    ...(read("kb_settings", {}) || {})
-  };
+  const rawSettings = read("kb_settings", {});
+  const settings = rawSettings && typeof rawSettings === "object" && !Array.isArray(rawSettings)
+    ? rawSettings
+    : {};
+  const emailValue = String(settings.email || "").trim();
+  const phoneValue = String(settings.phone || "").trim();
+  const locationValue = String(settings.location || "").trim();
 
   document.querySelectorAll("[data-kb-email]").forEach(el => {
-    el.textContent = settings.email || "";
+    el.textContent = emailValue;
   });
-
   document.querySelectorAll("[data-kb-phone]").forEach(el => {
-    el.textContent = settings.phone || "";
-    el.parentElement?.parentElement?.toggleAttribute("hidden", !settings.phone);
+    el.textContent = phoneValue;
   });
-
   document.querySelectorAll("[data-kb-location]").forEach(el => {
-    el.textContent = settings.location || "";
+    el.textContent = locationValue;
   });
 
   document.querySelectorAll('[data-kb-contact-detail="email"]').forEach(el => {
-    el.hidden = !settings.email;
+    el.hidden = !emailValue;
   });
-
+  document.querySelectorAll('[data-kb-contact-detail="phone"]').forEach(el => {
+    el.hidden = !phoneValue;
+  });
   document.querySelectorAll('[data-kb-contact-detail="location"]').forEach(el => {
-    el.hidden = !settings.location;
+    el.hidden = !locationValue;
   });
 
   const form = document.querySelector("#contactForm");
