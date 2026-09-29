@@ -434,19 +434,21 @@ function ordersView(){
 
 function normalizeOrderStatus(status){
  const raw=String(status||"Pending").trim().toLowerCase();
- if(raw==="delivered") return "Delivered";
- if(["ready","ready to ship","processing/roasting","dispatched","in transit"].includes(raw)) return "Ready";
- return "Pending";
+ const map={"pending":"Pending","processing":"Processing/Roasting","processing/roasting":"Processing/Roasting","ready":"Ready","ready to ship":"Ready","dispatched":"Dispatched","in transit":"In Transit","delivered":"Delivered"};
+ return map[raw]||"Pending";
 }
 
 function trackingStage(order){
  const current=normalizeOrderStatus(order?.status);
  const stages=[
    ["Pending","Order received"],
+   ["Processing/Roasting","Coffee is being prepared"],
    ["Ready","Ready for dispatch"],
+   ["Dispatched","Handed to delivery"],
+   ["In Transit","On the way"],
    ["Delivered","Delivered"]
  ];
- const currentIndex=stages.findIndex(([status])=>status===current);
+ const currentIndex=Math.max(0,stages.findIndex(([status])=>status===current));
  return {stages,currentIndex};
 }
 
@@ -459,6 +461,7 @@ function trackCard(order){
      const done=t.currentIndex>=i;
      return '<div class="track-step '+(done?"done":"")+' '+(t.currentIndex===i?"current":"")+'"><span class="track-dot"></span><div><strong>'+esc(label)+'</strong><small>'+esc(status)+(t.currentIndex===i?' · Current':'')+'</small></div></div>';
    }).join("")}</div>
+   <div class="track-items">${(order.items||[]).map(i=>`<div class="track-item"><span>${esc(i.name||"Item")} · ${esc(i.size||i.weight||"")} × ${Number(i.qty||1)}</span><strong>${money(Number(i.price||0)*Number(i.qty||1))}</strong></div>`).join("")}</div>
    <div class="track-summary"><span>Order total</span><strong>${money(order.total)}</strong></div>
  </article>`;
 }
