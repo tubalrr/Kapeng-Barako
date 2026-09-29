@@ -205,6 +205,7 @@ exports.createOrder = onCall({ cors: true }, async request => {
         createdAt: previous.createdAt || null,
         updatedAt: previous.updatedAt || null,
         reused: true,
+        remainingStock: {},
         order: clientOrderSnapshot(previous)
       };
     }
@@ -273,6 +274,14 @@ exports.createOrder = onCall({ cors: true }, async request => {
 
     const total = Math.max(0, subtotal + shipping - discount);
 
+    const remainingStock = {};
+    for (let i = 0; i < productRefs.length; i++) {
+      remainingStock[productRefs[i].id] = Math.max(
+        0,
+        Number(productSnaps[i].data()?.stock || 0) - Number(items[i].qty || 0)
+      );
+    }
+
     const order = {
       id: orderRef.id,
       customerUid: request.auth.uid,
@@ -307,6 +316,7 @@ exports.createOrder = onCall({ cors: true }, async request => {
       paymentStatus,
       status: "Pending",
       reused: false,
+      remainingStock,
       order: clientOrderSnapshot(order)
     };
   });
