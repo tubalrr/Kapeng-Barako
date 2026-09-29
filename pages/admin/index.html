@@ -368,12 +368,13 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         </section>
 
 <section id="view-analytics" class="view">
-          <div class="hero"><div><div class="kicker">BUSINESS INTELLIGENCE</div><h1>Analytics</h1><p>Sales, product performance, customer behavior and order flow calculated from the current <code>kb_orders</code> and <code>kb_rebuild_products</code> records.</p></div></div>
+          <div class="hero"><div><div class="kicker">BUSINESS INTELLIGENCE</div><h1>Analytics</h1><p>Numbers are calculated only from current order and product records. Conversion stays unavailable unless the store has real traffic/session records; no value is estimated or fabricated.</p></div></div>
           <div class="admin-extra-card">
             <div class="extra-head"><div><div class="kicker">REPORTING WINDOW</div><h3>Performance Overview</h3></div><select id="analyticsRange" class="status-select"><option value="7">Last 7 Days</option><option value="30" selected>Last 30 Days</option><option value="all">All Time</option></select></div>
             <div class="extra-stat-grid">
               <article class="extra-stat"><span>Revenue</span><strong id="anRevenue">₱0</strong></article>
               <article class="extra-stat"><span>Orders</span><strong id="anOrders">0</strong></article>
+              <article class="extra-stat"><span>Conversion</span><strong id="anConversion">—</strong></article>
               <article class="extra-stat"><span>Avg Order</span><strong id="anAov">₱0</strong></article>
             </div>
           </div>
@@ -1884,9 +1885,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     return Array.isArray(value) ? value : [];
   };
   const customerKey = order => String(
-    order?.customer?.email || order?.email || order?.customer?.phone ||
-    order?.phone || order?.customer?.name || order?.customerName || "customer"
-  ).toLowerCase();
+    order?.customerUid || order?.customer?.uid || order?.customer?.email || order?.email ||
+    order?.customer?.phone || order?.phone || ""
+  ).trim().toLowerCase();
   const customerName = order => String(order?.customer?.name || order?.customerName || "Customer");
   const toast = message => {
     const node = document.getElementById("adminExtraToast") || document.getElementById("admin-toast");
@@ -1911,18 +1912,25 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
   function renderAnalytics() {
     const range = document.getElementById("analyticsRange")?.value || "30";
-    const all = orders();
+    // Use the live admin order source when available (Firestore snapshot),
+    // with the current kb_orders record set only as the fallback.
+    const liveOrders = typeof window.KBAdminOrders === "function" ? window.KBAdminOrders() : orders();
+    const all = Array.isArray(liveOrders) ? liveOrders : [];
     const cutoff = range === "all" ? 0 : Date.now() - Number(range) * 86400000;
     const filtered = all.filter(order => {
       const time = orderTime(order.createdAt);
       return Number.isFinite(time) && time >= cutoff;
     });
-    const revenue = filtered.reduce((sum, order) => sum + Number(order.total || 0), 0);
+    const revenue = filtered.reduce((sum, order) => {
+      const value = Number(order?.total);
+      return Number.isFinite(value) && value >= 0 ? sum + value : sum;
+    }, 0);
     const count = filtered.length;
     const aov = count ? revenue / count : 0;
     const customersMap = new Map();
     all.forEach(order => {
       const key = customerKey(order);
+      if (!key) return;
       customersMap.set(key, (customersMap.get(key) || 0) + 1);
     });
     const totalCustomers = customersMap.size;
@@ -1933,6 +1941,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     };
     set("anRevenue", money(revenue));
     set("anOrders", count);
+    // There is currently no local traffic/session record in this project.
+    // Never derive conversion from orders alone; that would fabricate a denominator.
+    set("anConversion", "—");
     set("anAov", money(aov));
     set("anCustomers", totalCustomers);
     set("anRepeat", repeatCustomers);
@@ -1987,7 +1998,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       ).join("") : '<div class="empty">No product sales in this range.</div>';
     }
 
-    const statuses = ["Pending","Verified Payment","Processing/Roasting","Ready to Ship","Dispatched","Delivered","Cancelled"];
+    const statuses = ["Pending","Processing/Roasting","Ready","Dispatched","In Transit","Delivered"];
     const statusRoot = document.getElementById("anStatus");
     if (statusRoot) {
       statusRoot.innerHTML = statuses.map(status =>
