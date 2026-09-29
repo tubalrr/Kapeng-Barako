@@ -1881,6 +1881,66 @@
     });
   }
 
+  let productStockUnsubscribe = null;
+
+  async function setupProductStockSync() {
+    try {
+      const [{ getApps, getApp, initializeApp }, firestore, config] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js"),
+        import("./js/firebase-config.js")
+      ]);
+
+      if (!config.isFirebaseConfigured) return;
+
+      const app = getApps().length ? getApp() : initializeApp(config.firebaseConfig);
+      const db = firestore.getFirestore(app);
+
+      if (productStockUnsubscribe) productStockUnsubscribe();
+
+      productStockUnsubscribe = firestore.onSnapshot(
+        firestore.collection(db, "products"),
+        snapshot => {
+          const current = getProducts();
+          const byId = new Map(current.map(product => [String(product.id), product]));
+          let changed = false;
+
+          snapshot.docs.forEach(docSnap => {
+            const remote = docSnap.data() || {};
+            const id = String(docSnap.id);
+            const stock = Math.max(0, Number(remote.stock || 0));
+            const existing = byId.get(id);
+
+            if (existing) {
+              if (Number(existing.stock || 0) !== stock) {
+                existing.stock = stock;
+                changed = true;
+              }
+            } else {
+              byId.set(id, { id, ...remote, stock });
+              changed = true;
+            }
+          });
+
+          if (!changed) return;
+
+          const next = [...byId.values()];
+          write(PRODUCT_KEY, next);
+          cart = normalizeCart();
+          renderProducts();
+          renderFeaturedProduct();
+          syncSubscriptionProducts();
+          renderCart();
+        },
+        error => {
+          console.error("[Kapeng Barako] product stock listener failed", error);
+        }
+      );
+    } catch (error) {
+      console.error("[Kapeng Barako] product stock sync setup failed", error);
+    }
+  }
+
   function setupStorageSync() {
     const refreshCartFromStorage = () => {
       cart = normalizeCart();
@@ -1956,6 +2016,7 @@
     setupPrivacyNotice();
     setupKeyboard();
     setupStorageSync();
+    setupProductStockSync();
   }
 
   if (document.readyState === "loading") {
