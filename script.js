@@ -113,6 +113,9 @@
         if(event.data?.type==="reviews-updated"){
           renderReviews();
         }
+        if(event.data?.type==="ads-updated"){
+          renderAdvertisement();
+        }
       });
     }
   }catch{}
@@ -338,43 +341,50 @@
   }
 
   function renderAdvertisement() {
+    const section = $("#advertisement");
     const root = $("#storefront-ad");
-    if (!root) return;
+    if (!section || !root) return;
 
-    const data = read(ADS_KEY, { link: "", image: "", label: "" }) || {};
-    const link = String(data.link || "").trim();
+    const data = read(ADS_KEY, {}) || {};
+    const titleValue = String(data.title || data.label || "").trim();
     const savedImage = String(data.image || "").trim();
-    const image = savedImage || (/^https?:\/\/.*\.(?:avif|gif|jpe?g|png|webp|svg)(?:[?#].*)?$/i.test(link) ? link : "");
-    const label = String(data.label || "Sponsored").trim() || "Sponsored";
+    const copyValue = String(data.copy || "").trim();
+    const link = String(data.link || "").trim();
+    const hasAd = Boolean(titleValue || savedImage || copyValue || link);
+
+    section.hidden = !hasAd;
+    root.classList.toggle("has-link", Boolean(link));
+    root.classList.toggle("has-image", Boolean(savedImage));
+    root.classList.toggle("is-configured", hasAd);
 
     const title = $("#storefront-ad-title");
     const copy = $("#storefront-ad-copy");
     const open = $("#storefront-ad-open");
     const imageEl = $("#storefront-ad-image");
 
-    const hasAd = Boolean(link || image);
-    root.classList.toggle("has-link", hasAd);
-
-    if (title) title.textContent = hasAd ? label : "Advertisement";
-    if (copy) {
-      copy.textContent = hasAd
-        ? "Sponsored placement"
-        : "Advertisement space";
-    }
+    if (title) title.textContent = titleValue;
+    if (copy) copy.textContent = copyValue;
 
     if (imageEl) {
-      imageEl.hidden = !image;
-      imageEl.src = image || "";
-      imageEl.alt = label + " advertisement";
       imageEl.onerror = () => {
         imageEl.hidden = true;
+        imageEl.removeAttribute("src");
       };
+      if (savedImage) {
+        imageEl.src = savedImage;
+        imageEl.alt = titleValue || "Advertisement";
+        imageEl.hidden = false;
+      } else {
+        imageEl.removeAttribute("src");
+        imageEl.removeAttribute("alt");
+        imageEl.hidden = true;
+      }
     }
 
     if (open) {
       open.hidden = !link;
       open.href = link || "#";
-      open.setAttribute("aria-label", link ? "Open advertisement" : "Advertisement not configured");
+      open.setAttribute("aria-label", link ? "Open advertisement" : "Advertisement link not configured");
     }
   }
 
