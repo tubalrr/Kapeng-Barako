@@ -341,6 +341,17 @@ The repository's `firebase.json` currently configures:
 
 Typical Firebase deployment commands are documented in `docs/FIREBASE_SETUP.md`.
 
+## Demo / test data isolation
+
+Demo data is isolated from buyer data.
+
+- Admin **DEMO MODE** reads and writes its seeded records through the demo session store in `sessionStorage`.
+- Demo orders, customers, products, and promo records use the demo namespace and are not merged into the buyer's live Firestore order stream.
+- Live Firestore orders are explicitly ignored while **DEMO MODE** is active.
+- Demo customer-account data uses `kb_demo_customer_v1` and is separate from authenticated customer records.
+- Demo records are labeled as **DEMO / TEST DATA** in the UI/documentation and must never be presented as real customer, sales, or business records.
+- Exiting demo mode does not copy demo records into the buyer's local or Firestore data.
+
 ## Contact information
 
 Contact details are buyer-configured and are not pre-filled with fake business information.
