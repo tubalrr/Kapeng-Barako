@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Kapeng Barako — Admin</title>
+<title>Kapeng Barako — Admin UI Preview</title>
 <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
 <style>
 :root{
@@ -238,17 +238,7 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 </style>
 </head>
-<body>
-<div id="loginScreen" class="login-screen">
-  <section class="login-card" aria-live="polite">
-    <div class="brand"><img src="../../images/favicon.svg" alt=""><div><strong>Kapeng Barako</strong><small>Admin</small></div></div>
-    <div class="kicker">PROTECTED ADMIN AREA</div>
-    <h1>Checking session…</h1>
-    <p>Please wait while your Firebase admin session is verified.</p>
-  </section>
-</div>
-
-<div id="adminApp" class="app hidden">
+<body><div id="adminApp" class="app">
   <div class="shell">
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-brand"><img src="../../images/favicon.svg" alt=""><div><strong>Kapeng Barako</strong><small>Admin</small></div></div>
@@ -537,14 +527,43 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
 </dialog>
 
 <div id="adminExtraToast" class="admin-toast"></div>
-
-
-
 <script>
-if (new URLSearchParams(window.location.search).get("preview") === "1") {
-  window.location.replace("./preview.html?v=kb-admin-preview-2");
-}
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  const previewBanner = document.createElement("div");
+  previewBanner.textContent = "ADMIN UI PREVIEW · No Firebase authentication or live data";
+  previewBanner.style.cssText = "position:fixed;top:12px;right:12px;z-index:9999;background:#C8A951;color:#0F0B06;padding:9px 12px;border-radius:999px;font:800 10px/1 Inter,system-ui,sans-serif;letter-spacing:.08em;box-shadow:0 8px 24px rgba(0,0,0,.25)";
+  document.body.appendChild(previewBanner);
+
+  const showView = (view) => {
+    $$(".view").forEach(node => node.classList.toggle("active", node.id === "view-" + view));
+    $$("#nav button").forEach(button => button.classList.toggle("active", button.dataset.view === view));
+    const title = $("#viewTitle");
+    if (title) title.textContent = view.charAt(0).toUpperCase() + view.slice(1);
+  };
+
+  $$("#nav button[data-view]").forEach(button => {
+    button.addEventListener("click", () => showView(button.dataset.view));
+  });
+
+  const menu = $("#menuBtn");
+  const sidebar = $("#sidebar");
+  menu?.addEventListener("click", () => sidebar?.classList.toggle("open"));
+
+  $$("[data-extra-dialog-close]").forEach(button => {
+    button.addEventListener("click", () => button.closest("dialog")?.close());
+  });
+
+  const addProduct = $("#extraAddProduct");
+  addProduct?.addEventListener("click", () => $("#extraProductDialog")?.showModal());
+
+  const addReview = $("#extraAddReview");
+  addReview?.addEventListener("click", () => $("#extraReviewDialog")?.showModal());
+
+  showView("overview");
+})();
 </script>
-<script src="../../js/admin.js?v=kb-admin-runtime-20260929-8"></script>
 </body>
 </html>
