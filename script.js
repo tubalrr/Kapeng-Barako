@@ -1120,20 +1120,23 @@
       };
 
       if (!result?.reused) {
+        const remainingStock = result?.remainingStock && typeof result.remainingStock === "object"
+          ? result.remainingStock
+          : {};
+
         const updatedProducts = liveProducts.map(product => {
-          const line = localPreview.items.find(
-            item => String(item.id) === String(product.id)
-          );
-          if (!line) return product;
+          const key = String(product.id);
+          if (!Object.prototype.hasOwnProperty.call(remainingStock, key)) return product;
+
           return {
             ...product,
-            stock: Math.max(
-              0,
-              Number(product.stock || 0) - Number(line.qty || 0)
-            )
+            stock: Math.max(0, Number(remainingStock[key] || 0))
           };
         });
+
         write(PRODUCT_KEY, updatedProducts);
+        renderProducts();
+        renderCart();
       }
 
       upsertOrderCache(localPreview);
