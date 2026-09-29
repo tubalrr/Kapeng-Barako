@@ -67,6 +67,11 @@ The browser-side storage keys below are the current documented registry. These k
 | `kb_admin_catalog_updated` | Admin catalog update marker | Admin |
 | `kb_adv_last_products` | Previous product snapshot used for inventory-change detection | Admin |
 | `kb_low_stock_sound` | Admin low-stock notification sound preference/state | Admin |
+| `kb_contact_messages` | Locally saved contact form messages when no business email is configured | Contact page |
+| `kb_last_order` | Last order UI cache used to prefill/reopen tracking | Storefront |
+| `kb_subscription_preference` | Customer delivery preference saved by the storefront | Storefront |
+| `kb_wholesale_request` | Latest wholesale quote request pointer | Storefront |
+| `kb_wholesale_requests` | Wholesale quote request history saved by the storefront | Storefront |
 
 ### Transitional / legacy keys
 
