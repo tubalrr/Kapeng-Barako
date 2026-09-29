@@ -63,9 +63,8 @@ function normalizeItems(items) {
 // Passwordless admin identity bootstrap.
 // Only this explicitly approved admin email can be promoted after
 // Firebase has verified ownership through the email-link flow.
-const ADMIN_BOOTSTRAP_EMAILS = new Set([
-  "vracelle2@gmail.com"
-]);
+const AUTHORIZED_ADMIN_EMAIL = "REPLACE_WITH_ADMIN_EMAIL";
+const ADMIN_BOOTSTRAP_EMAILS = new Set([AUTHORIZED_ADMIN_EMAIL]);
 
 exports.bootstrapAdminFromEmail = onCall({ cors: true }, async request => {
   if (!request.auth) {
@@ -100,7 +99,7 @@ exports.setAdminPasswordFromGoogle = onCall({ cors: true }, async request => {
   const provider = clean(request.auth.token.firebase?.sign_in_provider, 60).toLowerCase();
   const password = String(request.data?.password || "");
 
-  if (email !== "vracelle2@gmail.com") {
+  if (email !== AUTHORIZED_ADMIN_EMAIL) {
     throw new HttpsError("permission-denied", "This email is not authorized for the Kapeng Barako Admin Console.");
   }
 
