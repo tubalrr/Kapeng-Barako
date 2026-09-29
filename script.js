@@ -1171,13 +1171,12 @@
         '<strong>' + esc(order.id) + '</strong><br>' +
         esc(order.customer?.name || "Customer") + '<br>' +
         esc(address || "Delivery address not provided") +
+        '<div class="track-status-row"><span>ORDER STATUS</span><strong>' + esc(normalizedStatus) + '</strong></div>' +
         '<div class="track-payment-status"><span>PAYMENT</span><strong>' + esc(paymentStatus) + '</strong></div>' +
       '</div>' +
       steps.map((step, index) => {
-        const isPaymentStep = step === "Verified Payment";
-        const paymentVerified = isPaymentStep && paymentStatus === "Verified";
         const state =
-          index < active || paymentVerified ? "done" :
+          index < active ? "done" :
           index === active ? "active" : "";
 
         const mark =
