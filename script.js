@@ -40,6 +40,38 @@
   const money = value =>
     "₱" + Number(value || 0).toLocaleString("en-PH", { maximumFractionDigits: 0 });
 
+  function serializeOrder(order) {
+    if (!order || typeof order !== "object") return null;
+    return {
+      ...order,
+      createdAt: order.createdAt?.toDate
+        ? order.createdAt.toDate().toISOString()
+        : order.createdAt,
+      updatedAt: order.updatedAt?.toDate
+        ? order.updatedAt.toDate().toISOString()
+        : order.updatedAt,
+      statusUpdatedAt: order.statusUpdatedAt?.toDate
+        ? order.statusUpdatedAt.toDate().toISOString()
+        : order.statusUpdatedAt
+    };
+  }
+
+  function upsertOrderCache(orderOrOrders) {
+    try {
+      const incoming = Array.isArray(orderOrOrders) ? orderOrOrders : [orderOrOrders];
+      const current = read(ORDER_KEY, []);
+      const list = Array.isArray(current) ? current : [];
+      const map = new Map(list.filter(order => order?.id).map(order => [String(order.id), order]));
+      incoming.map(serializeOrder).filter(Boolean).forEach(order => {
+        map.set(String(order.id), order);
+      });
+      const next = [...map.values()].sort((a, b) =>
+        new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+      );
+      write(ORDER_KEY, next.slice(0, 500));
+    } catch {}
+  }
+
   const esc = value =>
     String(value ?? "").replace(/[&<>"']/g, char => ({
       "&": "&amp;",
@@ -1027,6 +1059,7 @@
       });
 
       write(PRODUCT_KEY, updatedProducts);
+      upsertOrderCache(localPreview);
       write("kb_last_order", localPreview);
 
       cart = [];
@@ -1239,6 +1272,8 @@
     }
   }
 
+  let trackingUnsubscribe = null;
+
   async function trackOrder(event) {
     event.preventDefault();
 
@@ -1250,6 +1285,11 @@
     const root = $("#trackResult");
     const map = $("#trackMap");
     if (!root) return;
+
+    if (trackingUnsubscribe) {
+      trackingUnsubscribe();
+      trackingUnsubscribe = null;
+    }
 
     root.innerHTML = '<div class="empty">Checking your order…</div>';
 
@@ -1276,9 +1316,10 @@
         return;
       }
 
+      const db = firestore.getFirestore(app);
       const snapshot = await firestore.getDocs(
         firestore.query(
-          firestore.collection(firestore.getFirestore(app), "orders"),
+          firestore.collection(db, "orders"),
           firestore.where("customerUid", "==", user.uid)
         )
       );
@@ -1296,18 +1337,35 @@
         return;
       }
 
-      const order = {
-        id: orderDoc.id,
-        ...orderDoc.data()
+      const renderSnapshot = docSnap => {
+        if (!docSnap.exists()) {
+          root.innerHTML = '<div class="empty">This order is no longer available.</div>';
+          if (map) {
+            map.hidden = true;
+            map.innerHTML = "";
+          }
+          return;
+        }
+
+        const order = {
+          id: docSnap.id,
+          ...docSnap.data()
+        };
+
+        renderTrackedOrder(order);
+        upsertOrderCache(order);
+        write("kb_last_order", serializeOrder(order));
       };
 
-      renderTrackedOrder(order);
-      write("kb_last_order", {
-        ...order,
-        createdAt: order.createdAt?.toDate
-          ? order.createdAt.toDate().toISOString()
-          : order.createdAt
-      });
+      renderSnapshot(orderDoc);
+
+      trackingUnsubscribe = firestore.onSnapshot(
+        firestore.doc(db, "orders", orderDoc.id),
+        renderSnapshot,
+        error => {
+          console.error("[Kapeng Barako] tracking listener failed", error);
+        }
+      );
     } catch (error) {
       console.error("[Kapeng Barako] tracking failed", error);
       root.innerHTML =
