@@ -363,19 +363,19 @@
       el.hidden = !facebookValue;
       el.href = facebookValue || "#";
     });
-    $("[data-kb-messenger]").forEach(el => {
+    $$("[data-kb-messenger]").forEach(el => {
       el.hidden = !messengerValue;
       el.href = messengerValue || "#";
     });
-    $("[data-kb-instagram]").forEach(el => {
+    $$("[data-kb-instagram]").forEach(el => {
       el.hidden = !instagramValue;
       el.href = instagramValue || "#";
     });
-    $("[data-kb-tiktok]").forEach(el => {
+    $$("[data-kb-tiktok]").forEach(el => {
       el.hidden = !tiktokValue;
       el.href = tiktokValue || "#";
     });
-    $("[data-kb-youtube]").forEach(el => {
+    $$("[data-kb-youtube]").forEach(el => {
       el.hidden = !youtubeValue;
       el.href = youtubeValue || "#";
     });
@@ -2170,7 +2170,7 @@
     renderReviews();
     renderTrustSignals();
     window.setInterval(() => {
-      $(".product-card[data-product-id]").forEach(card => {
+      $$(".product-card[data-product-id]").forEach(card => {
         const id = String(card.dataset.productId || "");
         const product = getProducts().find(item => String(item.id) === id);
         if (product && Number(product.stock || 0) > 0 && Number(product.stock || 0) <= 5) {
