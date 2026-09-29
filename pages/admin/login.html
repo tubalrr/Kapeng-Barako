@@ -5,7 +5,7 @@
 <title>Kapeng Barako — Admin Login</title>
 <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
 <link rel="stylesheet" href="../../css/admin-login.css?v=kb-rebuild-3">
-<script src="../../js/admin-auth.js?v=kb-firebase-auth-7" defer></script>
+<script src="../../js/admin-auth.js?v=kb-firebase-auth-8" defer></script>
 </head>
 <body>
 <main class="login-shell">
@@ -27,6 +27,8 @@
       <input id="admin-password" type="password" placeholder="Enter password" autocomplete="current-password" required>
       <div id="login-error" class="error" role="alert"></div>
       <button id="email-admin-login" class="login-button" type="submit">SIGN IN WITH EMAIL →</button>
+      <button id="google-admin-setup" class="login-button login-button-secondary" type="button">FIRST-TIME SETUP WITH GOOGLE</button>
+      <small class="setup-help">Use the authorized Google account once to create/sync the Email + Password admin credential. No email-link code is required.</small>
     </form>
     <div class="seed-note admin-email-note">
       <strong>ADMIN EMAIL</strong>
@@ -46,6 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const passwordInput = document.querySelector("#admin-password");
   const btn = document.querySelector("#email-admin-login");
   const err = document.querySelector("#login-error");
+  const googleSetupBtn = document.querySelector("#google-admin-setup");
 
   try {
     const admin = await window.KBAdminAuth.restore();
@@ -56,6 +59,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     err.textContent = error?.message || "Could not restore the admin session.";
   }
+
+  googleSetupBtn.addEventListener("click", async () => {
+    err.textContent = "";
+    const password = String(passwordInput.value || "");
+    if (password.length < 6) {
+      err.textContent = "Enter the password you want to use (minimum 6 characters), then run the one-time Google setup.";
+      return;
+    }
+
+    googleSetupBtn.disabled = true;
+    btn.disabled = true;
+    googleSetupBtn.textContent = "CONNECTING GOOGLE…";
+    try {
+      await window.KBAdminAuth.setupAdminEmailPassword(password);
+      location.replace("./index.html");
+    } catch (error) {
+      console.error("[Kapeng Barako] admin Google password setup failed", error);
+      err.textContent = error?.message || "Could not complete the admin password setup.";
+      googleSetupBtn.disabled = false;
+      googleSetupBtn.textContent = "FIRST-TIME SETUP WITH GOOGLE";
+      btn.disabled = false;
+    }
+  });
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
