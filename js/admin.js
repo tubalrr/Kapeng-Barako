@@ -45,6 +45,53 @@
   let orderSearch = "";
   let editingProductId = null;
 
+  const DEFAULT_CATALOG = [
+    {
+      id: "barako-strong-250g",
+      name: "Barako Strong",
+      size: "250g",
+      price: 350,
+      stock: 7,
+      roast: "Dark",
+      grind: "Whole",
+      origin: "Batangas",
+      featured: false,
+      image: ""
+    },
+    {
+      id: "barako-classic-500g",
+      name: "Barako Classic",
+      size: "500g",
+      price: 620,
+      stock: 12,
+      roast: "Medium",
+      grind: "Whole",
+      origin: "Batangas",
+      featured: true,
+      image: ""
+    },
+    {
+      id: "barako-starter-bundle",
+      name: "Barako Starter Bundle",
+      size: "250g + 500g",
+      price: 870,
+      stock: 10,
+      roast: "Medium",
+      grind: "Whole",
+      origin: "Batangas",
+      featured: false,
+      image: ""
+    }
+  ];
+
+  function ensureLocalCatalog() {
+    const current = products();
+    if (current.length) return current;
+    const seed = DEFAULT_CATALOG.map(product => ({...product}));
+    write(PRODUCT_KEY, seed);
+    return seed;
+  }
+
   function products() {
     const list = read(PRODUCT_KEY, []);
     return Array.isArray(list) ? list : [];
@@ -89,6 +136,16 @@
             };
           });
           const current = products();
+          if (!remoteProducts.length && !current.length) {
+            const seed = ensureLocalCatalog();
+            try {
+              await syncProductCatalogToFirestore(seed, []);
+            } catch (seedError) {
+              console.error("[Kapeng Barako] initial catalog seed failed", seedError);
+            }
+            renderAll();
+            return;
+          }
           const currentSignature = JSON.stringify(current.map(p => ({...p})));
           const remoteSignature = JSON.stringify(remoteProducts.map(p => ({...p})));
           if (currentSignature === remoteSignature) return;
@@ -728,6 +785,7 @@
       const flowSource = $("#orderFlowSource");
       if (flowSource) flowSource.textContent = "Connecting to Firestore…";
 
+      ensureLocalCatalog();
       renderAll();
       initAdminFirestoreOrders();
       initAdminFirestoreProducts();
