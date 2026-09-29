@@ -78,10 +78,10 @@ service cloud.firestore {
       allow read: if (signedIn() && request.auth.uid == adminId) || admin();
       allow create, update: if signedIn() &&
         request.auth.uid == adminId &&
-        request.auth.token.email == "vracelle2@gmail.com" &&
+        request.auth.token.email == "REPLACE_WITH_ADMIN_EMAIL" &&
         request.resource.data.active == true &&
         request.resource.data.role == "admin" &&
-        request.resource.data.email == "vracelle2@gmail.com";
+        request.resource.data.email == "REPLACE_WITH_ADMIN_EMAIL";
       allow delete: if admin();
     }
 
