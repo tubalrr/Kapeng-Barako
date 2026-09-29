@@ -169,14 +169,63 @@
       rememberAdmin(admin);
       return admin;
     } catch (error) {
-      if (error?.code === "auth/invalid-credential" || error?.code === "auth/wrong-password")
+      if (error?.code === "auth/invalid-credential" || error?.code === "auth/wrong-password") {
+        if (normalized === "vracelle2@gmail.com") {
+          throw new Error("Firebase rejected the email/password credential. Use “FIRST-TIME SETUP WITH GOOGLE” once to create the password for this existing admin account.");
+        }
         throw new Error("Incorrect email or password.");
+      }
       if (error?.code === "auth/user-not-found")
         throw new Error("No Firebase account exists for this email.");
       if (error?.code === "auth/operation-not-allowed")
         throw new Error("Email/Password sign-in is not enabled in Firebase Authentication.");
       if (error?.code === "auth/internal-error")
         throw new Error("Firebase returned an internal authentication error. Check that this email has an Email/Password credential in Firebase Authentication.");
+      throw error;
+    }
+  }
+
+  async function setupAdminEmailPassword(password) {
+    const { auth: currentAuth, authMod } = await init();
+    const normalizedPassword = String(password || "");
+    if (normalizedPassword.length < 6 || normalizedPassword.length > 128) {
+      throw new Error("Admin password must be 6 to 128 characters.");
+    }
+
+    try {
+      await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
+
+      const provider = new authMod.GoogleAuthProvider();
+      const credential = await authMod.signInWithPopup(currentAuth, provider);
+      const googleEmail = String(credential.user?.email || "").trim().toLowerCase();
+
+      if (googleEmail !== "vracelle2@gmail.com") {
+        await authMod.signOut(currentAuth);
+        throw new Error("Use the authorized Google account: vracelle2@gmail.com.");
+      }
+
+      const backendModule = await import("./firebase-backend.js");
+      await backendModule.setAdminPasswordFromGoogle(normalizedPassword);
+
+      await authMod.signOut(currentAuth);
+
+      const signIn = authMod.signInWithEmailAndPassword;
+      if (typeof signIn !== "function") {
+        throw new Error("Firebase Auth sign-in module failed to load. Please refresh the page.");
+      }
+
+      const emailCredential = await signIn(currentAuth, googleEmail, normalizedPassword);
+      const admin = await verifyAdminWithoutSession(emailCredential.user);
+
+      if (!admin) {
+        await authMod.signOut(currentAuth);
+        throw new Error("Admin password was created, but the admin record could not be verified.");
+      }
+
+      rememberAdmin(admin);
+      return admin;
+    } catch (error) {
+      try { await authMod.signOut(currentAuth); } catch {}
       throw error;
     }
   }
@@ -306,6 +355,7 @@
     SESSION_TTL_MS,
     init,
     signInWithEmailPassword,
+    setupAdminEmailPassword,
     sendAdminEmailLink,
     completeAdminEmailLink,
     restore,
