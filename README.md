@@ -56,8 +56,6 @@ The browser-side storage keys below are the current documented registry. These k
 | `kb_inventory_history` | Inventory change history | Admin |
 | `kb_notification_read` | Admin notification read-state | Admin |
 | `kb_demo_customer_v1` | Demo/test customer data flag/state | Customer demo |
-| `kb_demo_admin_data` | Demo/test admin data | Admin demo |
-| `kb_demo_admin_session` | Demo admin session | Admin demo |
 | `kb_admin_session` | Current browser admin session metadata | Admin authentication |
 | `kb_checkout_default` | Customer's selected default checkout address | Customer account |
 | `kb_pending_order_id` | Pending order reference during checkout recovery | Storefront |
@@ -180,7 +178,6 @@ The following structure reflects the current repository layout:
 - Default checkout address
 - Customer order history
 - Order tracking/status display
-- Demo/test account for UI testing
 
 ### Admin console
 
@@ -349,17 +346,6 @@ The repository's `firebase.json` currently configures:
 
 Typical Firebase deployment commands are documented in `docs/FIREBASE_SETUP.md`.
 
-## Demo / test data isolation
-
-Demo data is isolated from buyer data.
-
-- Admin **DEMO MODE** reads and writes its seeded records through the demo session store in `sessionStorage`.
-- Demo orders, customers, products, and promo records use the demo namespace and are not merged into the buyer's live Firestore order stream.
-- Live Firestore orders are explicitly ignored while **DEMO MODE** is active.
-- Demo customer-account data uses `kb_demo_customer_v1` and is separate from authenticated customer records.
-- Demo records are labeled as **DEMO / TEST DATA** in the UI/documentation and must never be presented as real customer, sales, or business records.
-- Exiting demo mode does not copy demo records into the buyer's local or Firestore data.
-
 ## Contact information
 
 Contact details are buyer-configured and are not pre-filled with fake business information.
@@ -379,12 +365,6 @@ The template does **not** claim to have real customers, real customer reviews, r
 - The storefront does not inject fake customer reviews. Reviews are shown only when they are explicitly marked verified and published by the Admin workflow.
 - Production customer counts, sales, revenue, and order history must come from actual configured backend records.
 - Do not use demo names, demo orders, demo reviews, or demo metrics as testimonials or evidence of real store activity.
-
-## Demo/template data
-
-Demo data exists for UI testing and must be treated as test data.
-
-Do not present demo customer identities, demo orders, demo products, demo credentials, or demo payment references as real customer/business records.
 
 ## Production-readiness disclaimer
 
