@@ -554,6 +554,9 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
   }
 
   window.KBAdminOrders = () => orders();
+  window.KBAdminCore = {
+    refreshOverview: () => renderOverview()
+  };
 
   function orderTime(value) {
     if (value && typeof value.toDate === "function") return value.toDate().getTime();
@@ -1345,31 +1348,9 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
   }
 
   function updateSnapshot(){
-    const os=orders(), ps=products(), today=todayStart(), week=weekStart();
-    const todaySales=os.filter(o=>{const t=orderTime(o.createdAt);return Number.isFinite(t)&&t>=today}).reduce((s,o)=>s+Number(o.total||0),0);
-    const weekSales=os.filter(o=>{const t=orderTime(o.createdAt);return Number.isFinite(t)&&t>=week}).reduce((s,o)=>s+Number(o.total||0),0);
-    const count=(status)=>os.filter(o=>orderStatus(o)===status).length;
-    const set=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
-    set("extraTodaySales",money(todaySales));
-    set("extraWeekSales",money(weekSales));
-    set("extraCustomers",customers().length);
-    set("extraPending",count("pending"));
-    set("extraReady",os.filter(o=>["ready","ready to ship","in transit","dispatched","processing/roasting"].includes(orderStatus(o))).length);
-    set("extraDelivered",count("delivered"));
-    set("extraCancelled",count("cancelled"));
-
-    const source=document.getElementById("orderFlowSource");
-    if(source){
-      if(demoStore()){
-        source.innerHTML='Demo session <code>kb_demo_admin_data</code>';
-      }else if(typeof firestoreOrdersReady!=="undefined" && firestoreOrdersReady){
-        source.textContent="Live from Firestore";
-      }else{
-        source.innerHTML='Browser cache <code>kb_orders</code>';
-      }
-    }
-    const btn=document.getElementById("extraAlertSound");
-    if(btn)btn.textContent=localStorage.getItem(SOUND_KEY)==="1"?"Alert Sound: ON":"Enable Alert Sound";
+    // Canonical Overview renderer owns the shared Operations Snapshot and Order Flow metrics.
+    // Never write the same metric IDs from a second data-source implementation.
+    window.KBAdminCore?.refreshOverview?.();
   }
 
   function renderExtraProducts(){
