@@ -545,6 +545,11 @@ if (new URLSearchParams(window.location.search).get("preview") === "1") {
   window.location.replace("./preview.html?v=kb-admin-preview-2");
 }
 </script>
-<script src="../../js/admin.js?v=kb-admin-runtime-20260929-8"></script>
+<script>
+if (new URLSearchParams(window.location.search).get("preview") === "1") {
+  window.location.replace("./preview.html?v=kb-admin-preview-3");
+}
+</script>
+<script src="../../js/admin.js?v=kb-admin-runtime-20260929-9"></script>
 </body>
 </html>
