@@ -32,11 +32,13 @@ GCash is a **pending-verification workflow** in the current implementation; it i
 
 Legacy browser data can be migrated with the protected migration callables after an authorized admin signs in. Browser localStorage is not a central database, so migration must be run from a browser that still contains the legacy records.
 
-## Firebase onboarding
+## Firebase onboarding — buyer must use their own project
 
-Follow [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) before testing live authentication or backend features.
+**Important for buyers:** this template intentionally ships with Firebase placeholders. You must create and use **your own Firebase project** before enabling live authentication, orders, inventory, checkout, or Admin features. Do not reuse the seller's Firebase project, admin UID, email, or credentials.
 
-Never commit a Firebase Admin SDK service-account JSON or private key. The website only needs the Firebase Web App config values in `js/firebase-config.js`.
+Step-by-step setup is in [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md).
+
+`js/firebase-config.js` must be filled with the Web App configuration from your own Firebase project. Never commit a Firebase Admin SDK service-account JSON, private key, or backend credential.
 
 ## Deployment
 
