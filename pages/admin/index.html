@@ -1790,8 +1790,8 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
     const link=document.getElementById("extraAdsLink").value.trim();
     const active=document.getElementById("extraAdsActive").checked;
 
-    if(link&&!/^https?:\\/\\//i.test(link)){toastExtra("Use a valid http:// or https:// advertisement link.");return}
-    if(image&&!/^https?:\\/\\//i.test(image)){toastExtra("Use a valid http:// or https:// image URL.");return}
+    if(link&&!/^https?:\/\//i.test(link)){toastExtra("Use a valid http:// or https:// advertisement link.");return}
+    if(image&&!/^https?:\/\//i.test(image)){toastExtra("Use a valid http:// or https:// image URL.");return}
 
     const data={title,image,copy,link,active};
     write(ADS_KEY,data);
