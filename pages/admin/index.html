@@ -544,32 +544,23 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         snapshot => {
           if (demoStore()) return;
 
-          const current = products();
-          const byId = new Map(current.map(product => [String(product.id), product]));
-          let changed = false;
-
-          snapshot.docs.forEach(docSnap => {
+          const remoteProducts = snapshot.docs.map(docSnap => {
             const remote = docSnap.data() || {};
-            const id = String(docSnap.id);
-            const stock = Math.max(0, Number(remote.stock || 0));
-            const price = Math.max(0, Number(remote.price || 0));
-            const existing = byId.get(id);
-
-            if (existing) {
-              if (Number(existing.stock || 0) !== stock || Number(existing.price || 0) !== price) {
-                existing.stock = stock;
-                existing.price = price;
-                changed = true;
-              }
-            } else {
-              byId.set(id, { id, ...remote, stock, price });
-              changed = true;
-            }
+            return {
+              ...remote,
+              id: String(docSnap.id),
+              stock: Math.max(0, Number(remote.stock || 0)),
+              price: Math.max(0, Number(remote.price || 0))
+            };
           });
+          const current = products();
+          const currentSignature = JSON.stringify(current.map(p => ({...p})));
+          const remoteSignature = JSON.stringify(remoteProducts.map(p => ({...p})));
+          if (currentSignature === remoteSignature) return;
 
-          if (!changed) return;
-
-          write(PRODUCT_KEY, [...byId.values()]);
+          // Firestore is the canonical catalog when configured: do not retain
+          // local-only/deleted products in the admin inventory.
+          write(PRODUCT_KEY, remoteProducts);
           renderAll();
           try {
             const ch = "BroadcastChannel" in window ? new BroadcastChannel("kapeng-barako-catalog") : null;
