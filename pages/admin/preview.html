@@ -556,12 +556,118 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
     button.addEventListener("click", () => button.closest("dialog")?.close());
   });
 
+  const readProducts = () => {
+    try {
+      const raw = localStorage.getItem("kb_rebuild_products");
+      const data = raw === null ? [] : JSON.parse(raw);
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const writeProducts = (products) => {
+    try {
+      localStorage.setItem("kb_rebuild_products", JSON.stringify(products));
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const safe = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[ch]));
+
+  const toast = (message) => {
+    const node = $("#adminExtraToast");
+    if (!node) return;
+    node.textContent = message;
+    node.classList.add("show");
+    clearTimeout(window.__kbPreviewToast);
+    window.__kbPreviewToast = setTimeout(() => node.classList.remove("show"), 2400);
+  };
+
+  const renderProducts = () => {
+    const root = $("#extraProducts");
+    if (!root) return;
+    const products = readProducts();
+    root.innerHTML = products.length
+      ? products.map((product) =>
+          '<article class="extra-product-card">' +
+          (product.image ? '<img class="extra-product-photo" src="' + safe(product.image) + '" alt="Product photo">' : '') +
+          '<div class="extra-product-top"><div><div class="kicker">' + safe(product.size || "PRODUCT") +
+          '</div><h3>' + safe(product.name || "Product") + '</h3><span class="extra-id">' +
+          safe(product.id || "—") + '</span></div><span class="badge">' +
+          Number(product.stock || 0) + ' IN STOCK</span></div>' +
+          '</article>'
+        ).join("")
+      : '<div class="empty">No local preview products yet. Use “+ Add Product” to test the form.</div>';
+  };
+
   const addProduct = $("#extraAddProduct");
   addProduct?.addEventListener("click", () => $("#extraProductDialog")?.showModal());
+
+  $("#extraProductForm")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const name = $("#extraProductName")?.value.trim() || "";
+    const size = $("#extraProductSize")?.value.trim() || "";
+    const price = Number($("#extraProductPrice")?.value || 0);
+    const stock = Number($("#extraProductStock")?.value || 0);
+    const image = $("#extraProductImage")?.value.trim() || "";
+    const badge = $("#extraProductBadge")?.value.trim() || "NEW";
+    const roast = $("#extraProductRoast")?.value || "Medium";
+    const grind = $("#extraProductGrind")?.value || "Whole";
+    const note = $("#extraProductNote")?.value.trim() || "";
+    const origin = $("#extraProductOrigin")?.value.trim() || "";
+    const roastDate = $("#extraProductRoastDate")?.value || "";
+    const roastLevel = $("#extraProductRoastLevel")?.value.trim() || "";
+    const netWeight = $("#extraProductNetWeight")?.value.trim() || size;
+    const batch = $("#extraProductBatch")?.value.trim() || "";
+    const process = $("#extraProductProcess")?.value.trim() || "";
+    const featured = Boolean($("#extraProductFeatured")?.checked);
+
+    if (!name || !size) {
+      toast("Product name and size are required.");
+      return;
+    }
+    if (!Number.isFinite(price) || price < 0 || !Number.isFinite(stock) || stock < 0 || !Number.isInteger(stock)) {
+      toast("Enter a valid price and whole-number stock.");
+      return;
+    }
+    if (image && !image.toLowerCase().startsWith("http://") && !image.toLowerCase().startsWith("https://") && !image.startsWith("images/")) {
+      toast("Use an image URL or images/ path.");
+      return;
+    }
+
+    const previous = readProducts();
+    let id = ("KB-" + size).toUpperCase().replace(/[^A-Z0-9]/g, "") || ("KB-" + Date.now());
+    while (previous.some((product) => String(product.id) === id)) {
+      id = id + "-" + Date.now().toString(36).toUpperCase();
+    }
+
+    const next = previous.map((product) => featured ? {...product, featured:false} : product);
+    next.push({
+      id,name,size,price,stock,badge,roast,grind,note,image,origin,roastDate,
+      roastLevel,netWeight,batch,process,tastingNotes:note,featured
+    });
+
+    if (!writeProducts(next)) {
+      toast("Could not save preview product in this browser.");
+      return;
+    }
+
+    $("#extraProductDialog")?.close();
+    $("#extraProductForm")?.reset();
+    renderProducts();
+    toast(name + " added to Preview. Local browser only.");
+  });
 
   const addReview = $("#extraAddReview");
   addReview?.addEventListener("click", () => $("#extraReviewDialog")?.showModal());
 
+  renderProducts();
   showView("overview");
 })();
 </script>
