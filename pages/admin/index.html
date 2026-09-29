@@ -1008,9 +1008,16 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   const weekStart=()=>{const d=new Date();const monday=((d.getDay()+6)%7);return new Date(d.getFullYear(),d.getMonth(),d.getDate()-monday).getTime()};
   const orderStatus=(o)=>String(o?.status||"Pending").toLowerCase();
 
-  function notifyStorefront(){
-    try{localStorage.setItem("kb_admin_catalog_updated",String(Date.now()));localStorage.removeItem("kb_admin_catalog_updated")}catch{}
-    try{const ch="BroadcastChannel" in window?new BroadcastChannel("kapeng-barako-catalog"):null;ch?.postMessage({type:"products-updated",at:Date.now()});setTimeout(()=>ch?.close(),50)}catch{}
+  function notifyStorefront(type="products-updated"){
+    try{
+      localStorage.setItem("kb_admin_catalog_updated",String(Date.now()));
+      localStorage.removeItem("kb_admin_catalog_updated");
+    }catch{}
+    try{
+      const ch="BroadcastChannel" in window?new BroadcastChannel("kapeng-barako-catalog"):null;
+      ch?.postMessage({type,at:Date.now()});
+      setTimeout(()=>ch?.close(),50);
+    }catch{}
   }
 
   function updateSnapshot(){
@@ -1209,10 +1216,23 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     root.innerHTML=Array.from({length:6},(_,i)=>{const g=list[i]||{slot:i+1,title:"",image:"",alt:""};return '<article class="extra-gallery-card"><div class="extra-gallery-top"><div><div class="kicker">PHOTO '+String(i+1).padStart(2,"0")+'</div><h3>'+esc(g.title||"Gallery Slot")+'</h3></div></div><div class="extra-preview">'+(g.image?'<img src="'+esc(g.image)+'" alt="'+esc(g.alt||"")+'">':'<span>PHOTO '+String(i+1).padStart(2,"0")+'</span>')+'</div><div class="extra-fields"><div class="extra-field"><label>Title</label><input data-g-title="'+i+'" value="'+esc(g.title||"")+'" placeholder="Roasted Liberica"></div><div class="extra-field"><label>Image URL</label><input data-g-image="'+i+'" value="'+esc(g.image||"")+'" placeholder="https://..."></div><div class="extra-field"><label>Alt text</label><input data-g-alt="'+i+'" value="'+esc(g.alt||"")+'" placeholder="Describe the real photo"></div></div><div class="extra-actions"><button class="ghost-btn" type="button" data-g-save="'+i+'">Save Photo</button></div></article>'}).join("");
   }
   function saveGallery(index){
-    const list=read(GALLERY_KEY,[]);const gallery=Array.isArray(list)?list:Array.from({length:6},(_,i)=>({slot:i+1,title:"",image:"",alt:""}));
-    const image=document.querySelector('[data-g-image="'+index+'"]')?.value.trim()||"",title=document.querySelector('[data-g-title="'+index+'"]')?.value.trim()||"",alt=document.querySelector('[data-g-alt="'+index+'"]')?.value.trim()||title;
+    const current=read(GALLERY_KEY,[]);
+    const source=Array.isArray(current)?current:[];
+    const gallery=Array.from({length:6},(_,i)=>{
+      const item=source[i];
+      return item&&typeof item==="object"
+        ? {slot:i+1,title:String(item.title||""),image:String(item.image||""),alt:String(item.alt||"")}
+        : {slot:i+1,title:"",image:"",alt:""};
+    });
+    const image=document.querySelector('[data-g-image="'+index+'"]')?.value.trim()||"";
+    const title=document.querySelector('[data-g-title="'+index+'"]')?.value.trim()||"";
+    const alt=document.querySelector('[data-g-alt="'+index+'"]')?.value.trim()||title;
     if(image&&!/^https?:\/\//i.test(image)&&!/^images\//i.test(image)){toastExtra("Use an image URL or images/ path.");return}
-    gallery[index]={slot:index+1,title,image,alt};write(GALLERY_KEY,gallery);toastExtra("Gallery photo "+(index+1)+" saved.");renderGallery();
+    gallery[index]={slot:index+1,title,image,alt};
+    write(GALLERY_KEY,gallery);
+    notifyStorefront("gallery-updated");
+    toastExtra("Gallery photo "+(index+1)+" saved.");
+    renderGallery();
   }
 
   function renderAds(){
