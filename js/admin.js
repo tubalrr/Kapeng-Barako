@@ -231,12 +231,14 @@
 
   async function syncProductCatalogToFirestore(nextProducts, previousProducts = []) {
     try {
+      // Check the local Firebase Web App configuration BEFORE loading any
+      // external Firebase SDK module. This keeps Add Product functional even
+      // when the template has not been connected to a Firebase project yet.
+      const config = await import("../../js/firebase-config.js");
+      if (!config.isFirebaseConfigured) return false;
+
       if (!firestoreDb) {
-        const [{ getApps, getApp, initializeApp }, config] = await Promise.all([
-          import("https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"),
-          import("../../js/firebase-config.js")
-        ]);
-        if (!config.isFirebaseConfigured) throw new Error("Firebase backend is not configured.");
+        const { getApps, getApp, initializeApp } = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js");
         const app = getApps().length ? getApp() : initializeApp(config.firebaseConfig);
         const firestore = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js");
         firestoreDb = firestore.getFirestore(app);
@@ -272,7 +274,9 @@
     } catch (error) {
       console.error("[Kapeng Barako] product catalog Firestore sync failed", error);
       toastExtra("Saved locally, but Firebase catalog sync failed.");
+      return false;
     }
+    return true;
   }
 
   function productStock(id, value) {
@@ -916,11 +920,22 @@
     next.push({id,name,size,price,stock,badge,roast,grind,note,image,origin,roastDate,roastLevel,netWeight,batch,process,tastingNotes:note,featured});
     write(PRODUCT_KEY,next);
     notifyStorefront();
-    await syncProductCatalogToFirestore(next, previous);
+
+    // Update the Admin UI immediately. Firebase synchronization is a secondary
+    // backend step and must never block the local product-creation workflow.
+    document.getElementById("extraProductDialog")?.close();
+    document.getElementById("extraProductForm")?.reset();
+    renderExtraProducts();
+    updateSnapshot();
+    toastExtra(name+" added.");
+
     log("product", name + " added to catalog", {productId:id,action:"add",price,stock});
     if (stock > 0) log("inventory", name + " stock initialized at " + stock + " packs", {productId:id,newStock:stock});
-    document.getElementById("extraProductDialog")?.close();document.getElementById("extraProductForm")?.reset();
-    toastExtra(name+" added.");renderExtraProducts();updateSnapshot();
+
+    void syncProductCatalogToFirestore(next, previous).catch(error=>{
+      console.error("[Kapeng Barako] background product catalog sync failed",error);
+      toastExtra("Product added locally, but Firebase catalog sync failed.");
+    });
   }
 
   function reviewList(){
