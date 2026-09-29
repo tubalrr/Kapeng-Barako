@@ -479,6 +479,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   const $$ = (s) => [...document.querySelectorAll(s)];
 
   const demoStore = () => window.KBAdminAuth?.readDemoData?.() || null;
+  const isDemoMode = () => Boolean(demoStore());
+
   const persistDemoStore = (data) => {
     try {
       const key = window.KBAdminAuth?.DEMO_DATA_KEY;
@@ -524,6 +526,11 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function orders() {
+    // DEMO / TEST DATA is isolated from live Firestore records.
+    if (demoStore()) {
+      const demoOrders = read(ORDER_KEY, []);
+      return Array.isArray(demoOrders) ? demoOrders : [];
+    }
     if (firestoreOrdersReady) return firestoreOrders;
     const list = read(ORDER_KEY, []);
     return Array.isArray(list) ? list : [];
@@ -601,6 +608,14 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       firestoreOrdersUnsubscribe = firestore.onSnapshot(
         firestore.query(firestore.collection(firestoreDb, "orders"), firestore.orderBy("createdAt", "desc")),
         snapshot => {
+          // Never expose live Firestore orders inside DEMO / TEST DATA mode.
+          if (demoStore()) {
+            firestoreOrders = [];
+            firestoreOrdersReady = false;
+            renderAll();
+            return;
+          }
+
           firestoreOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), source: "firestore" }));
           firestoreOrdersReady = true;
 
