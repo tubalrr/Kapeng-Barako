@@ -16,9 +16,10 @@
 
   function clearLegacySessions() {
     try {
+      // Legacy Firebase/local admin keys can be removed during Firebase init.
+      // Demo Mode is a separate session contract and must never be cleared here.
       localStorage.removeItem("kb_admin");
       localStorage.removeItem("kb_admin_firebase");
-      sessionStorage.removeItem(DEMO_SESSION_KEY);
     } catch {}
   }
 
