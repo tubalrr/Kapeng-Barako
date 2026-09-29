@@ -958,14 +958,14 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const map = new Map();
     orders().forEach(o => {
       const key = (customerEmail(o) || customerName(o)).toLowerCase();
-      if(!map.has(key)) map.set(key,{name:customerName(o),email:customerEmail(o),phone:String(o?.customer?.phone || o?.phone || ""),orders:0,spend:0});
+      if(!map.has(key)) map.set(key,{name:customerName(o),email:customerEmail(o),phone:String(o?.customer?.phone || o?.phone || ""),orders:0,spend:0,sourceOrder:o});
       const c = map.get(key);
       c.orders += 1; c.spend += Number(o.total || 0);
     });
     const list=[...map.values()].sort((a,b)=>b.spend-a.spend);
     if(!list.length){$("#customersTable").innerHTML='<div class="empty">No customers found in kb_orders.</div>';return;}
-    $("#customersTable").innerHTML='<table><thead><tr><th>Customer</th><th>Phone</th><th>Email</th><th>Orders</th><th>Total Spend</th></tr></thead><tbody>'+
-      list.map(c=>'<tr><td><strong>'+esc(c.name)+'</strong></td><td>'+esc(c.phone || "—")+'</td><td>'+esc(c.email || "—")+'</td><td>'+c.orders+'</td><td><strong>'+money(c.spend)+'</strong></td></tr>').join("")+
+    $("#customersTable").innerHTML='<table><thead><tr><th>Customer</th><th>Phone</th><th>Email</th><th>Orders</th><th>Total Spend</th><th>Details</th></tr></thead><tbody>'+
+      list.map(c=>'<tr><td><strong>'+esc(c.name)+'</strong></td><td>'+esc(c.phone || "—")+'</td><td>'+esc(c.email || "—")+'</td><td>'+c.orders+'</td><td><strong>'+money(c.spend)+'</strong></td><td><button class="track-btn" type="button" data-customer-profile="'+esc(customerKey(c.sourceOrder || {}))+'">View</button></td></tr>').join("")+
       '</tbody></table>';
   }
 
@@ -2166,20 +2166,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       host.id = "customerProfileHost";
       table.parentElement?.insertAdjacentElement("afterend",host);
     }
-    const rows = table.querySelectorAll("tbody tr");
-    const list = customerList();
-    rows.forEach((row,index) => {
-      const cell = row.lastElementChild;
-      const order = list[index];
-      if (!cell || !order || cell.querySelector("[data-customer-profile]")) return;
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "track-btn";
-      button.dataset.customerProfile = customerKey(order);
-      button.textContent = "View";
-      cell.appendChild(button);
-
-    });
   }
 
   function captureInventoryChanges() {
