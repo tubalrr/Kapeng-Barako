@@ -230,5 +230,4 @@ Create or migrate the product documents in the buyer's Firestore project before 
 [ ] Tested admin login
 [ ] Tested catalog/checkout
 [ ] Verified Firestore data
-]
 ```
