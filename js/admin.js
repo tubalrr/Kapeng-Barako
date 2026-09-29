@@ -58,7 +58,8 @@
 
   window.KBAdminOrders = () => orders();
   window.KBAdminCore = {
-    refreshOverview: () => renderOverview()
+    refreshOverview: () => renderOverview(),
+    syncProductCatalog: (...args) => syncProductCatalogToFirestore(...args)
   };
 
   function orderTime(value) {
@@ -751,6 +752,10 @@
   const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
   const products=()=>{const x=read(PRODUCT_KEY,[]);return Array.isArray(x)?x:[]};
   const orders=()=>{const source=typeof window.KBAdminOrders==="function"?window.KBAdminOrders():read("kb_orders",[]);return Array.isArray(source)?source:[]};
+  const syncProducts=(...args)=>{
+    const fn=window.KBAdminCore?.syncProductCatalog;
+    return typeof fn==="function"?Promise.resolve(fn(...args)):Promise.resolve(false);
+  };
   const customers=()=>{
     const m=new Map();
     orders().forEach(o=>{
@@ -880,7 +885,7 @@
 
     write(PRODUCT_KEY,next);
     notifyStorefront();
-    await syncProductCatalogToFirestore(next, previous);
+    await syncProducts(next, previous);
     const changedFields = ["name","size","price","image","origin","roastDate","roastLevel","netWeight","batch","process","tastingNotes","roast","grind","featured"]
       .filter(field => JSON.stringify(previousProduct?.[field]) !== JSON.stringify(next[idx]?.[field]));
     if (Number(previousProduct?.stock || 0) !== Number(next[idx]?.stock || 0)) {
@@ -900,7 +905,7 @@
     const next=list.filter(p=>String(p.id)!==String(id));
     write(PRODUCT_KEY,next);
     notifyStorefront();
-    await syncProductCatalogToFirestore(next,list);
+    await syncProducts(next,list);
     log("product", (product.name || id) + " deleted from catalog", {productId:id,action:"delete"});
     toastExtra((product.name||id)+" deleted.");
     renderExtraProducts();
@@ -932,7 +937,7 @@
     log("product", name + " added to catalog", {productId:id,action:"add",price,stock});
     if (stock > 0) log("inventory", name + " stock initialized at " + stock + " packs", {productId:id,newStock:stock});
 
-    void syncProductCatalogToFirestore(next, previous).catch(error=>{
+    void syncProducts(next, previous).catch(error=>{
       console.error("[Kapeng Barako] background product catalog sync failed",error);
       toastExtra("Product added locally, but Firebase catalog sync failed.");
     });
