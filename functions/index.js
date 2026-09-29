@@ -268,7 +268,17 @@ exports.createOrder = onCall({ cors: ["https://tubalrr.github.io"] }, async requ
     };
 
     tx.set(orderRef, order);
-    return { id: orderRef.id, total, paymentStatus, reused: false };
+    return {
+      id: orderRef.id,
+      subtotal,
+      shippingFee: shipping,
+      discount,
+      total,
+      paymentStatus,
+      status: "Pending",
+      reused: false,
+      order
+    };
   });
 
   return result;
