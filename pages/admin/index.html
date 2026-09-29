@@ -347,16 +347,17 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         </section>
 
         <section id="view-ads" class="view">
-          <div class="hero"><div><div class="kicker">ADVERTISEMENT</div><h1>Ads</h1><p>Configure the storefront advertisement container and preview.</p></div><div class="hero-actions"><button id="extraSaveAds" class="primary-btn" type="button">Save Ad</button><button id="extraClearAds" class="ghost-btn" type="button">Clear</button></div></div>
+          <div class="hero"><div><div class="kicker">ADVERTISEMENT</div><h1>Ads</h1><p>Control the exact title, image, copy, and destination link shown in the storefront ad slot.</p></div><div class="hero-actions"><button id="extraSaveAds" class="primary-btn" type="button">Save Ad</button><button id="extraClearAds" class="ghost-btn" type="button">Clear</button></div></div>
           <section class="admin-extra-card">
             <div class="extra-form-grid">
-              <div class="extra-field"><label for="extraAdsLink">Advertisement Link</label><input id="extraAdsLink" type="url" placeholder="https://example.com/ad"></div>
-              <div class="extra-field"><label for="extraAdsLabel">Ad Label</label><input id="extraAdsLabel" placeholder="Sponsored"></div>
-              <div class="extra-field full"><label for="extraAdsImage">Image URL</label><input id="extraAdsImage" type="url" placeholder="https://example.com/ad.jpg"></div>
+              <div class="extra-field"><label for="extraAdsTitle">Title</label><input id="extraAdsTitle" placeholder="Fresh Barako Bundle"></div>
+              <div class="extra-field"><label for="extraAdsLink">Link</label><input id="extraAdsLink" type="url" placeholder="https://example.com/offer"></div>
+              <div class="extra-field full"><label for="extraAdsImage">Image</label><input id="extraAdsImage" type="url" placeholder="https://example.com/ad.jpg"></div>
+              <div class="extra-field full"><label for="extraAdsCopy">Copy</label><textarea id="extraAdsCopy" rows="4" placeholder="A short message or offer description."></textarea></div>
             </div>
-            <div class="extra-preview" id="extraAdsPreview"><span>No ad configured</span></div>
+            <div class="extra-preview ads-preview" id="extraAdsPreview"><span>No ad configured</span></div>
             <div class="extra-actions"><a id="extraAdsOpen" class="extra-link" href="#" target="_blank" rel="noopener noreferrer" hidden>OPEN AD LINK ↗</a></div>
-            <div class="extra-note">No live AdSense code is added here. The saved values remain local to this browser until a backend/content system is connected.</div>
+            <div class="extra-note">When all ad fields are empty, the storefront advertisement section is hidden. No fake or default ad content is injected.</div>
           </section>
         </section>
 
@@ -1537,20 +1538,67 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   function renderAds(){
-    const data=read(ADS_KEY,{link:"",image:"",label:""}),ads=data&&typeof data==="object"&&!Array.isArray(data)?data:{link:"",image:"",label:""};
-    const link=String(ads.link||"").trim(), image=String(ads.image||"").trim(), label=String(ads.label||"Sponsored").trim()||"Sponsored";
-    const li=document.getElementById("extraAdsLink"), im=document.getElementById("extraAdsImage"), la=document.getElementById("extraAdsLabel"), pv=document.getElementById("extraAdsPreview"), op=document.getElementById("extraAdsOpen");
-    if(li)li.value=link;if(im)im.value=image;if(la)la.value=ads.label||"";
-    if(pv)pv.innerHTML=image?'<img src="'+esc(image)+'" alt="Advertisement preview">':(link?'<span>'+esc(label)+'</span>':'<span>No ad configured</span>');
-    if(op){op.hidden=!link;op.href=link||"#"}
+    const raw=read(ADS_KEY,{});
+    const ads=raw&&typeof raw==="object"&&!Array.isArray(raw)?raw:{};
+    const title=String(ads.title||ads.label||"").trim();
+    const image=String(ads.image||"").trim();
+    const copy=String(ads.copy||"").trim();
+    const link=String(ads.link||"").trim();
+    const hasAd=Boolean(title||image||copy||link);
+
+    const titleInput=document.getElementById("extraAdsTitle");
+    const imageInput=document.getElementById("extraAdsImage");
+    const copyInput=document.getElementById("extraAdsCopy");
+    const linkInput=document.getElementById("extraAdsLink");
+    const pv=document.getElementById("extraAdsPreview");
+    const op=document.getElementById("extraAdsOpen");
+
+    if(titleInput)titleInput.value=title;
+    if(imageInput)imageInput.value=image;
+    if(copyInput)copyInput.value=copy;
+    if(linkInput)linkInput.value=link;
+
+    if(pv){
+      if(!hasAd){
+        pv.innerHTML='<span>No ad configured</span>';
+      }else{
+        pv.innerHTML=
+          (image?'<img class="ads-preview-image" src="'+esc(image)+'" alt="'+esc(title||"Advertisement")+' preview">':'')+
+          (title?'<strong>'+esc(title)+'</strong>':'')+
+          (copy?'<p>'+esc(copy)+'</p>':'')+
+          (link?'<span class="extra-link">↗ '+esc(link)+'</span>':'');
+      }
+      pv.classList.toggle("is-empty",!hasAd);
+    }
+    if(op){
+      op.hidden=!link;
+      op.href=link||"#";
+      op.setAttribute("aria-label",link?"Open advertisement link":"Advertisement link not configured");
+    }
   }
+
   function saveAds(){
-    const link=document.getElementById("extraAdsLink").value.trim(), image=document.getElementById("extraAdsImage").value.trim(), label=document.getElementById("extraAdsLabel").value.trim()||"Sponsored";
-    if(link&&!/^https?:\/\//i.test(link)){toastExtra("Use a valid http:// or https:// advertisement link.");return}
-    if(image&&!/^https?:\/\//i.test(image)){toastExtra("Use a valid http:// or https:// image URL.");return}
-    write(ADS_KEY,{link,image,label});toastExtra(link?"Advertisement saved.":"Advertisement cleared.");renderAds();
+    const title=document.getElementById("extraAdsTitle").value.trim();
+    const image=document.getElementById("extraAdsImage").value.trim();
+    const copy=document.getElementById("extraAdsCopy").value.trim();
+    const link=document.getElementById("extraAdsLink").value.trim();
+
+    if(link&&!/^https?:\\/\\//i.test(link)){toastExtra("Use a valid http:// or https:// advertisement link.");return}
+    if(image&&!/^https?:\\/\\//i.test(image)){toastExtra("Use a valid http:// or https:// image URL.");return}
+
+    const data={title,image,copy,link};
+    write(ADS_KEY,data);
+    notifyStorefront("ads-updated");
+    toastExtra(title||image||copy||link?"Advertisement saved.":"Advertisement cleared.");
+    renderAds();
   }
-  function clearAds(){localStorage.removeItem(ADS_KEY);toastExtra("Advertisement cleared.");renderAds()}
+
+  function clearAds(){
+    write(ADS_KEY,{title:"",image:"",copy:"",link:""});
+    notifyStorefront("ads-updated");
+    toastExtra("Advertisement cleared.");
+    renderAds();
+  }
 
   function toastExtra(msg){
     const t=document.getElementById("adminExtraToast");if(!t)return;
