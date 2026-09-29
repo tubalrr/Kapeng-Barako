@@ -20,21 +20,16 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
 
-  const previewRequested = new URLSearchParams(window.location.search).get("preview") === "1";
-  let previewMode = false;
-  const isPreviewMode = () => previewMode;
-
-  const storage = () => previewMode ? sessionStorage : localStorage;
   const read = (key, fallback) => {
     try {
-      const raw = storage().getItem(key);
+      const raw = localStorage.getItem(key);
       return raw === null ? fallback : JSON.parse(raw);
     } catch {
       return fallback;
     }
   };
   const write = (key, value) => {
-    storage().setItem(key, JSON.stringify(value));
+    localStorage.setItem(key, JSON.stringify(value));
   };
   const money = (n) => "₱" + Number(n || 0).toLocaleString("en-PH", {maximumFractionDigits:2});
   const esc = (v) => String(v ?? "").replace(/[&<>"\']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\'":"&#39;" }[c]));
@@ -181,7 +176,6 @@
   }
 
   async function updateFirestoreOrder(id, fields) {
-    if (isPreviewMode()) throw new Error("Admin UI Preview is read-only for live Firebase data.");
     if (!firestoreDb) throw new Error("Firestore admin data is not ready.");
     const [{ doc, updateDoc, serverTimestamp }] = await Promise.all([
       import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js")
@@ -236,7 +230,6 @@
   }
 
   async function syncProductCatalogToFirestore(nextProducts, previousProducts = []) {
-    if (isPreviewMode()) return;
     try {
       if (!firestoreDb) {
         const [{ getApps, getApp, initializeApp }, config] = await Promise.all([
@@ -711,45 +704,25 @@
     $("#loginScreen").classList.remove("hidden");
     $("#adminApp").classList.add("hidden");
     try {
-      if (previewRequested) {
-        const config = await import("../../js/firebase-config.js");
-        if (!config.isFirebaseConfigured) {
-          previewMode = true;
-          window.KBAdminPreview = true;
-          $("#loginScreen").classList.add("hidden");
-          $("#adminApp").classList.remove("hidden");
-          $("#adminEmail").textContent = "UI PREVIEW";
-          const modeBadge = $("#adminModeBadge");
-          if (modeBadge) {
-            modeBadge.textContent = "PREVIEW";
-            modeBadge.classList.add("low");
-          }
-          const flowSource = $("#orderFlowSource");
-          if (flowSource) flowSource.textContent = "UI Preview — Firebase not configured";
-          const kicker = $("#dashboardKicker");
-          const desc = $("#dashboardDescription");
-          if (kicker) kicker.textContent = "ADMIN UI PREVIEW";
-          if (desc) desc.textContent = "UI-only preview. No Firebase authentication, live data, or Firebase writes are active.";
-          renderAll();
-          return;
-        }
-      }
-
       const admin = await window.KBAdminAuth.requireAdmin();
       if (!admin) {
         location.replace("./login.html?reason=login");
         return;
       }
+
       $("#loginScreen").classList.add("hidden");
       $("#adminApp").classList.remove("hidden");
       $("#adminEmail").textContent = admin.email || "ADMIN";
+
       const modeBadge = $("#adminModeBadge");
       if (modeBadge) {
         modeBadge.textContent = "ADMIN";
         modeBadge.classList.remove("low");
       }
+
       const flowSource = $("#orderFlowSource");
       if (flowSource) flowSource.textContent = "Connecting to Firestore…";
+
       renderAll();
       initAdminFirestoreOrders();
       initAdminFirestoreProducts();
@@ -767,9 +740,8 @@
 (() => {
   "use strict";
   const PRODUCT_KEY="kb_rebuild_products", PROMO_KEY="kb_promos", SETTINGS_KEY="kb_settings", CMS_KEY="kb_cms", GALLERY_KEY="kb_gallery", ADS_KEY="kb_ads", SOUND_KEY="kb_low_stock_sound";
-  const storage=()=>previewMode?sessionStorage:localStorage;
-  const read=(key,fallback)=>{try{const raw=storage().getItem(key);return raw===null?fallback:JSON.parse(raw)}catch{return fallback}};
-  const write=(key,value)=>{try{storage().setItem(key,JSON.stringify(value))}catch{}};
+  const read=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw===null?fallback:JSON.parse(raw)}catch{return fallback}};
+  const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
   const esc=(v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money=(n)=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
   const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
@@ -1418,10 +1390,9 @@
     HISTORY:"kb_inventory_history",
     READ:"kb_notification_read"
   };
-  const storage = () => previewMode ? sessionStorage : localStorage;
   const read = (key, fallback) => {
     try {
-      const raw = storage().getItem(key);
+      const raw = localStorage.getItem(key);
       return raw === null ? fallback : JSON.parse(raw);
     } catch {
       return fallback;
@@ -1429,7 +1400,7 @@
   };
   const write = (key, value) => {
     try {
-      storage().setItem(key, JSON.stringify(value));
+      localStorage.setItem(key, JSON.stringify(value));
     } catch {}
   };
   const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
