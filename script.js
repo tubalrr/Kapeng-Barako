@@ -123,8 +123,42 @@
     return backend.createCentralOrder(payload);
   }
 
-  let cart = read(CART_KEY, []);
-  if (!Array.isArray(cart)) cart = [];
+  function normalizeCart() {
+    const products = getProducts();
+    const source = read(CART_KEY, []);
+    const incoming = Array.isArray(source) ? source : [];
+    const next = [];
+
+    for (const item of incoming) {
+      if (!item || item.id == null) continue;
+
+      const product = products.find(p => String(p.id) === String(item.id));
+      if (!product) continue;
+
+      const stock = Math.max(0, Number(product.stock || 0));
+      if (stock <= 0) continue;
+
+      const qty = Math.min(
+        stock,
+        Math.max(1, Number(item.qty || 1))
+      );
+
+      next.push({
+        ...item,
+        id: product.id,
+        name: product.name,
+        size: product.size,
+        price: Number(product.price || 0),
+        qty
+      });
+    }
+
+    const changed = JSON.stringify(incoming) !== JSON.stringify(next);
+    if (changed) write(CART_KEY, next);
+    return next;
+  }
+
+  let cart = normalizeCart();
 
   let brewSeconds = 180;
   let brewTimer = null;
@@ -190,6 +224,8 @@
   function renderCart() {
     const products = getProducts();
     let cartChanged = false;
+
+    cart = normalizeCart();
 
     cart = cart.filter(item => {
       const product = products.find(p => String(p.id) === String(item.id));
@@ -759,8 +795,12 @@
   }
 
   function changeQuantity(index, delta) {
+    cart = normalizeCart();
     const item = cart[index];
-    if (!item) return;
+    if (!item) {
+      renderCart();
+      return;
+    }
 
     const product = getProducts().find(
       productItem => String(productItem.id) === String(item.id)
@@ -1839,14 +1879,32 @@
   }
 
   function setupStorageSync() {
-    window.addEventListener("focus", () => { renderProducts(); renderCart(); });
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) { renderProducts(); renderCart(); } });
+    const refreshCartFromStorage = () => {
+      cart = normalizeCart();
+      renderCart();
+    };
+
+    window.addEventListener("focus", () => {
+      renderProducts();
+      refreshCartFromStorage();
+    });
+
+    window.addEventListener("pageshow", () => {
+      renderProducts();
+      refreshCartFromStorage();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        renderProducts();
+        refreshCartFromStorage();
+      }
+    });
     window.addEventListener("storage", event => {
       if (!event.key) return;
 
       if ([CART_KEY, ORDER_KEY, PRODUCT_KEY, GALLERY_KEY, REVIEWS_KEY, CMS_KEY, ADS_KEY, "kb_settings"].includes(event.key)) {
-        cart = read(CART_KEY, []);
-        if (!Array.isArray(cart)) cart = [];
+        cart = normalizeCart();
         renderProducts();
         renderGallery();
         renderFeaturedProduct();
