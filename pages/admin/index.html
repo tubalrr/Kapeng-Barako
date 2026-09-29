@@ -597,6 +597,32 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       ...fields,
       updatedAt: serverTimestamp()
     });
+
+    // Update the shared kb_orders cache immediately; Firestore snapshot will
+    // reconcile it with the backend and push the same state to customer views.
+    if (!demoStore()) {
+      const cached = read(ORDER_KEY, []);
+      const list = Array.isArray(cached) ? cached : [];
+      const index = list.findIndex(order => String(order?.id) === String(id));
+      if (index >= 0) {
+        list[index] = {
+          ...list[index],
+          ...fields,
+          updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem(ORDER_KEY, JSON.stringify(list));
+      }
+    }
+
+    const localIndex = firestoreOrders.findIndex(order => String(order?.id) === String(id));
+    if (localIndex >= 0) {
+      firestoreOrders[localIndex] = {
+        ...firestoreOrders[localIndex],
+        ...fields,
+        updatedAt: new Date()
+      };
+    }
+    renderAll();
   }
 
   function customerName(o) {
