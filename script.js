@@ -1261,7 +1261,7 @@
         status: serverOrder?.status || result?.status || "Pending",
         statusUpdatedAt: serverOrder?.statusUpdatedAt?.toDate ? serverOrder.statusUpdatedAt.toDate().toISOString() : (serverOrder?.statusUpdatedAt || now),
         route: {
-          origin: "Kapeng Barako, Quezon City, Metro Manila, Philippines",
+          origin: String(read("kb_settings", {})?.location || "").trim() || "Store origin not configured",
           waypoint: getRouteWaypoint(address),
           destination: address
         },
@@ -1455,10 +1455,14 @@
       getRouteWaypoint(address)
     ).trim();
 
-    const origin = String(
-      order.route?.origin ||
-      "Kapeng Barako, Quezon City, Metro Manila, Philippines"
-    ).trim();
+    const storedOrigin = String(order.route?.origin || "").trim();
+    const configuredOrigin = String(read("kb_settings", {})?.location || "").trim();
+    const origin = (
+      storedOrigin &&
+      !/^Kapeng Barako, Quezon City, Metro Manila, Philippines$/i.test(storedOrigin)
+        ? storedOrigin
+        : configuredOrigin
+    ) || "Store origin not configured";
 
     const directionsUrl =
       "https://www.google.com/maps/dir/?api=1" +
