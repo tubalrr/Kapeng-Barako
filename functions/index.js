@@ -129,8 +129,17 @@ exports.createOrder = onCall({ cors: ["https://tubalrr.github.io"] }, async requ
   if (!address) throw new HttpsError("invalid-argument", "Delivery address is required.");
   if (!paymentMethod) throw new HttpsError("invalid-argument", "Payment method is required.");
 
+  const normalizedPayment = paymentMethod.toLowerCase();
+  if (!["gcash", "cash on delivery (cod)", "bank transfer"].includes(normalizedPayment)) {
+    throw new HttpsError("invalid-argument", "Invalid payment method.");
+  }
+
+  if (normalizedPayment === "gcash" && !gcashRef) {
+    throw new HttpsError("invalid-argument", "GCash reference number is required.");
+  }
+
   const paymentStatus =
-    paymentMethod.toLowerCase() === "gcash"
+    normalizedPayment === "gcash"
       ? "pending_verification"
       : "unpaid";
 
@@ -158,8 +167,15 @@ exports.createOrder = onCall({ cors: ["https://tubalrr.github.io"] }, async requ
       return {
         id: existing.id,
         total: Number(previous.total || 0),
+        subtotal: Number(previous.subtotal || 0),
+        shippingFee: Number(previous.shippingFee || 0),
+        discount: Number(previous.discount || 0),
         paymentStatus: String(previous.paymentStatus || ""),
-        reused: true
+        status: String(previous.status || "Pending"),
+        createdAt: previous.createdAt || null,
+        updatedAt: previous.updatedAt || null,
+        reused: true,
+        order: previous
       };
     }
 
