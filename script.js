@@ -110,6 +110,9 @@
         if(event.data?.type==="gallery-updated"){
           renderGallery();
         }
+        if(event.data?.type==="reviews-updated"){
+          renderReviews();
+        }
       });
     }
   }catch{}
@@ -476,7 +479,9 @@
     const root = $("#reviewsList");
     if (!section || !root) return;
     const saved = read(REVIEWS_KEY, []);
-    const reviews = Array.isArray(saved) ? saved.filter(review => review && review.verified === true && review.published !== false) : [];
+    const reviews = Array.isArray(saved)
+      ? saved.filter(review => review && review.verified === true && review.published === true)
+      : [];
     section.hidden = reviews.length === 0;
     root.innerHTML = reviews.map(review => {
       const rating = Math.max(1, Math.min(5, Number(review.rating || 5)));
