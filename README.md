@@ -34,6 +34,67 @@ This repository is intended as a **website/template that the buyer configures an
 - `docs/FIREBASE_SETUP.md` — buyer Firebase installation and deployment guide
 - `docs/QA_CHECKLIST.md` — desktop, mobile, authentication, backend, and release QA checklist
 
+## Folder structure
+
+The following structure reflects the current repository layout:
+
+```
+/
+├── index.html
+├── style.css
+├── script.js
+├── images/
+├── css/
+│   ├── account.css
+│   └── admin-login.css
+├── js/
+│   ├── account.js
+│   ├── admin-auth.js
+│   ├── firebase-backend.js
+│   └── firebase-config.js
+├── pages/
+│   ├── account.html
+│   └── admin/
+│       ├── index.html
+│       └── login.html
+├── functions/
+│   ├── index.js
+│   └── package.json
+├── docs/
+│   ├── FIREBASE_SETUP.md
+│   └── QA_CHECKLIST.md
+├── firestore.rules
+├── firestore.indexes.json
+├── firebase.json
+└── README.md
+```
+
+### What each part does
+
+- **`index.html`** — main customer storefront page.
+- **`style.css`** — global/main storefront styling.
+- **`script.js`** — storefront behavior including catalog rendering, cart, checkout, promos, gallery, reviews, contact/social content, ads, and browser-side synchronization.
+- **`images/`** — storefront image assets such as product/gallery artwork and the site favicon.
+- **`css/`** — page-specific stylesheets:
+  - **`account.css`** — customer account UI styling.
+  - **`admin-login.css`** — admin login UI styling.
+- **`js/`** — browser-side JavaScript modules:
+  - **`account.js`** — customer authentication, profile, addresses, and order tracking.
+  - **`admin-auth.js`** — Admin Console authentication and authorization guard.
+  - **`firebase-backend.js`** — frontend integration with Firebase backend operations.
+  - **`firebase-config.js`** — buyer's Firebase Web App configuration placeholder.
+- **`pages/account.html`** — customer account/login interface.
+- **`pages/admin/index.html`** — Admin Console interface and management logic.
+- **`pages/admin/login.html`** — dedicated Admin login page.
+- **`functions/index.js`** — server-side Firebase Cloud Functions.
+- **`functions/package.json`** — Cloud Functions package/dependency configuration.
+- **`docs/FIREBASE_SETUP.md`** — Firebase installation, configuration, and deployment instructions.
+- **`docs/QA_CHECKLIST.md`** — browser, authentication, backend, and release testing checklist.
+- **`firestore.rules`** — Firestore access-control rules.
+- **`firestore.indexes.json`** — Firestore query indexes.
+- **`firebase.json`** — Firebase CLI configuration for Functions and Firestore.
+- **`README.md`** — project overview, architecture, limitations, setup, and deployment documentation.
+
 ## Main features
 
 ### Storefront
