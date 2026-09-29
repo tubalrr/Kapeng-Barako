@@ -1151,16 +1151,17 @@
       order.address || order.customer?.address || ""
     ).trim();
 
-    const steps = [
-      "Pending",
-      "Verified Payment",
-      "Processing/Roasting",
-      "Ready to Ship",
-      "Dispatched",
-      "Delivered"
-    ];
-
-    const normalizedStatus = String(order.status || "Pending") === "Ready" ? "Ready to Ship" : String(order.status || "Pending");
+    // Customer-facing fulfillment has exactly three statuses.
+    // Legacy/internal values are normalized into this final public flow:
+    // Pending → Ready → Delivered.
+    const steps = ["Pending", "Ready", "Delivered"];
+    const rawStatus = String(order.status || "Pending").trim().toLowerCase();
+    const normalizedStatus =
+      rawStatus === "delivered"
+        ? "Delivered"
+        : ["ready","ready to ship","processing/roasting","dispatched","in transit"].includes(rawStatus)
+          ? "Ready"
+          : "Pending";
     let active = steps.indexOf(normalizedStatus);
     if (active < 0) active = 0;
 
