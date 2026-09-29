@@ -280,18 +280,16 @@
       const credential = await signIn(currentAuth, normalized, password);
 
       // Bootstrap the authenticated admin UID on the trusted backend.
-      // This avoids circular Firestore client permissions during first-time setup.
-      if (normalized === "vracelle2@gmail.com") {
-        try {
-          const backendModule = await import("./firebase-backend.js");
-          await backendModule.bootstrapAdminFromEmail();
-        } catch (bootstrapError) {
-          await authMod.signOut(currentAuth);
-          const code = bootstrapError?.code ? ` [${bootstrapError.code}]` : "";
-          throw new Error(
-            (bootstrapError?.message || "Admin identity bootstrap failed.") + code
-          );
-        }
+      // The backend allowlist decides which buyer-owned admin email may be promoted.
+      try {
+        const backendModule = await import("./firebase-backend.js");
+        await backendModule.bootstrapAdminFromEmail();
+      } catch (bootstrapError) {
+        await authMod.signOut(currentAuth);
+        const code = bootstrapError?.code ? ` [${bootstrapError.code}]` : "";
+        throw new Error(
+          (bootstrapError?.message || "Admin identity bootstrap failed.") + code
+        );
       }
 
       const admin = await verifyAdminWithoutSession(credential.user);
@@ -304,9 +302,6 @@
       return admin;
     } catch (error) {
       if (error?.code === "auth/invalid-credential" || error?.code === "auth/wrong-password") {
-        if (normalized === "vracelle2@gmail.com") {
-          throw new Error("Firebase rejected the email/password credential. Use “FIRST-TIME SETUP WITH GOOGLE” once to create the password for this existing admin account.");
-        }
         throw new Error("Incorrect email or password.");
       }
       if (error?.code === "auth/user-not-found")
@@ -332,11 +327,6 @@
       const provider = new authMod.GoogleAuthProvider();
       const credential = await authMod.signInWithPopup(currentAuth, provider);
       const googleEmail = String(credential.user?.email || "").trim().toLowerCase();
-
-      if (googleEmail !== "vracelle2@gmail.com") {
-        await authMod.signOut(currentAuth);
-        throw new Error("Use the authorized Google account: vracelle2@gmail.com.");
-      }
 
       const backendModule = await import("./firebase-backend.js");
       await backendModule.setAdminPasswordFromGoogle(normalizedPassword);
