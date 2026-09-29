@@ -452,7 +452,9 @@
         const { auth: currentAuth, authMod } = await init();
         await authMod.signOut(currentAuth);
       } catch {}
-      return null;
+      const error = new Error("Your Admin session could not be verified. Please sign in again.");
+      error.code = "ADMIN_SESSION_INVALID";
+      throw error;
     }
 
     const admin = await verifyAdmin(user);
@@ -460,7 +462,9 @@
       const { auth: currentAuth, authMod } = await init();
       await authMod.signOut(currentAuth);
       rememberAdmin(null);
-      return null;
+      const error = new Error("Firebase authenticated this account, but it is not an active Kapeng Barako admin.");
+      error.code = "ADMIN_NOT_AUTHORIZED";
+      throw error;
     }
 
     return admin;
