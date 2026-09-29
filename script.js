@@ -385,9 +385,15 @@
       const hasImage = Boolean(String(item.image || "").trim());
       figure.classList.toggle("is-empty", !hasImage);
       if (image) {
-        image.src = hasImage ? item.image : "";
-        image.alt = item.alt || item.title || "Gallery image";
-        image.hidden = !hasImage;
+        if (hasImage) {
+          image.src = String(item.image).trim();
+          image.alt = item.alt || item.title || "Gallery image";
+          image.hidden = false;
+        } else {
+          image.removeAttribute("src");
+          image.removeAttribute("alt");
+          image.hidden = true;
+        }
       }
       if (caption) {
         caption.textContent = String(index + 1).padStart(2, "0") + (item.title ? " · " + String(item.title).toUpperCase() : "");
