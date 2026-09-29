@@ -2417,23 +2417,50 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     return '"' + String(value ?? "").replace(/"/g,'""') + '"';
   }
 
+  function csvAddress(order) {
+    const value = order?.address ?? order?.customer?.address ?? "";
+    if (value && typeof value === "object") {
+      return [
+        value.name,
+        value.line1 || value.address,
+        value.barangay,
+        value.city,
+        value.province,
+        value.postalCode || value.zip,
+        value.country
+      ].filter(Boolean).join(", ");
+    }
+    return String(value || "");
+  }
+
+  function csvItems(order) {
+    const items = Array.isArray(order?.items) ? order.items : [];
+    return items.map(item => {
+      const name = item?.name || item?.productName || item?.title || item?.productId || "Product";
+      const size = item?.size ? " (" + item.size + ")" : "";
+      const qty = Math.max(1, Number(item?.qty || item?.quantity || 1));
+      return name + size + " x" + qty;
+    }).join("; ");
+  }
+
   function exportOrdersCsv() {
     const rows = [[
       "Order ID","Date","Customer","Email","Phone","Address","Items","Total","Payment","GCash Ref","Status"
     ]];
     orders().forEach(order => {
+      const timestamp = orderTime(order?.createdAt);
       rows.push([
-        order.id || "",
-        order.createdAt ? new Date(orderTime(order.createdAt)).toISOString() : "",
+        order?.id || order?.orderId || "",
+        timestamp ? new Date(timestamp).toISOString() : "",
         customerName(order),
-        order.customer?.email || order.email || "",
-        order.customer?.phone || order.phone || "",
-        order.customer?.address || order.address || "",
-        Array.isArray(order.items) ? order.items.reduce((sum,item) => sum + Number(item.qty || 1),0) : 0,
-        Number(order.total || 0),
-        order.payment || "",
-        order.gcashRef || order.gcashReference || "",
-        order.status || "Pending"
+        customerEmail(order),
+        order?.customer?.phone || order?.phone || "",
+        csvAddress(order),
+        csvItems(order),
+        Number.isFinite(Number(order?.total)) ? Number(order.total).toFixed(2) : "0.00",
+        order?.payment || order?.paymentMethod || "",
+        gcashRef(order),
+        order?.status || "Pending"
       ]);
     });
     const csv = "\ufeff" + rows.map(row => row.map(csvCell).join(",")).join("\n");
