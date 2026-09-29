@@ -139,9 +139,27 @@
 
     try {
       await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
-      const credential = await authMod.signInWithEmailAndPassword(currentAuth, normalized, password);
+      const signIn = authMod && authMod.signInWithEmailAndPassword;
+      if (typeof signIn !== "function") {
+        throw new Error("Firebase Auth sign-in module failed to load. Please refresh the page.");
+      }
+      const credential = await signIn(currentAuth, normalized, password);
 
-      // The email/password account may have a different Firebase UID from the\n      // original Google admin account. Bootstrap the explicitly allowlisted admin\n      // email server-side so /admins/{uid} follows the authenticated UID.\n      if (normalized === "vracelle2@gmail.com") {\n        try {\n          const backendModule = await import("./firebase-backend.js");\n          await backendModule.bootstrapAdminFromEmail();\n        } catch (bootstrapError) {\n          await authMod.signOut(currentAuth);\n          throw new Error(bootstrapError?.message || "Admin identity bootstrap failed.");\n        }\n      }\n\n      const admin = await verifyAdminWithoutSession(credential.user);\n      if (!admin) {
+      // The email/password account may have a different Firebase UID from the
+      // original Google admin account. Bootstrap the explicitly allowlisted admin
+      // email server-side so /admins/{uid} follows the authenticated UID.
+      if (normalized === "vracelle2@gmail.com") {
+        try {
+          const backendModule = await import("./firebase-backend.js");
+          await backendModule.bootstrapAdminFromEmail();
+        } catch (bootstrapError) {
+          await authMod.signOut(currentAuth);
+          throw new Error(bootstrapError?.message || "Admin identity bootstrap failed.");
+        }
+      }
+
+      const admin = await verifyAdminWithoutSession(credential.user);
+      if (!admin) {
         await authMod.signOut(currentAuth);
         throw new Error("This Firebase email account is authenticated, but its UID is not the active Kapeng Barako admin UID. Use the existing authorized admin account.");
       }
