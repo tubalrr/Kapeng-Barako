@@ -29,9 +29,19 @@ export function getBackendFunctions() {
   return functionsInstance;
 }
 
-export async function createCentralOrder(payload) {
+export async function waitForBackendAuth() {
   if (!backendReady()) throw new Error("Firebase backend is not configured.");
-  const user = getBackendAuth()?.currentUser;
+  const currentAuth = getBackendAuth();
+
+  if (typeof currentAuth?.authStateReady === "function") {
+    await currentAuth.authStateReady();
+  }
+
+  return currentAuth?.currentUser || null;
+}
+
+export async function createCentralOrder(payload) {
+  const user = await waitForBackendAuth();
   if (!user) throw new Error("Please sign in to your customer account before placing an online order.");
   const fn = httpsCallable(getBackendFunctions(), "createOrder");
   const result = await fn(payload);
