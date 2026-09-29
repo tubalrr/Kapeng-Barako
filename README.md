@@ -34,7 +34,9 @@ The included demo admin account is for template/demo use only and must not be tr
 
 When the Firebase backend is configured, checkout is intended to submit through the `createOrder` Cloud Function. The function calculates totals from Firestore catalog/settings and reserves stock inside a Firestore transaction.
 
-GCash is a **pending-verification workflow** in the current implementation; it is not a live payment gateway or automatic GCash verification.
+GCash reference collection is for order recording. Actual payment verification requires a real payment gateway or manual admin verification.
+
+The Admin Console may record a GCash reference and a payment-review status, but the presence of a reference number does **not** prove that payment was completed or verified.
 
 Legacy browser data can be migrated with the protected migration callables after an authorized admin signs in. Browser localStorage is not a central database, so migration must be run from a browser that still contains the legacy records.
 
