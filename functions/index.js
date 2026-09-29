@@ -18,6 +18,21 @@ function clean(value, max = 1000) {
   return String(value ?? "").trim().slice(0, max);
 }
 
+function clientOrderSnapshot(order) {
+  if (!order || typeof order !== "object") return null;
+  const normalizeDate = value => {
+    if (value && typeof value.toDate === "function") return value.toDate().toISOString();
+    if (value && typeof value.toISOString === "function") return value.toISOString();
+    return value || null;
+  };
+  return {
+    ...order,
+    createdAt: normalizeDate(order.createdAt),
+    updatedAt: normalizeDate(order.updatedAt),
+    statusUpdatedAt: normalizeDate(order.statusUpdatedAt)
+  };
+}
+
 function normalizeItems(items) {
   if (!Array.isArray(items) || !items.length) {
     throw new HttpsError("invalid-argument", "Cart is empty.");
@@ -189,7 +204,7 @@ exports.createOrder = onCall({ cors: ["https://tubalrr.github.io"] }, async requ
         createdAt: previous.createdAt || null,
         updatedAt: previous.updatedAt || null,
         reused: true,
-        order: previous
+        order: clientOrderSnapshot(previous)
       };
     }
 
@@ -291,7 +306,7 @@ exports.createOrder = onCall({ cors: ["https://tubalrr.github.io"] }, async requ
       paymentStatus,
       status: "Pending",
       reused: false,
-      order
+      order: clientOrderSnapshot(order)
     };
   });
 
