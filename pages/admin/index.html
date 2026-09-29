@@ -770,7 +770,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const queue = os.filter(o => normalizeStatus(o.status) !== "Delivered").sort((a,b) => orderTime(a.createdAt) - orderTime(b.createdAt)).slice(0,8);
     $("#queue").innerHTML = queue.length ? queue.map(o =>
       '<div class="queue-row"><div><strong>'+esc(o.id || "—")+'</strong><small>'+esc(customerName(o))+'</small></div><div><span class="badge '+statusClass(o.status)+'">'+esc(normalizeStatus(o.status))+'</span><small>'+money(o.total)+'</small></div></div>'
-    ).join("") : '<div class="empty">No pending orders.</div>';
+    ).join("") : '<div class="empty"><strong style="display:block;color:var(--text);font-size:11px;margin-bottom:5px">No orders yet</strong><span>Your order queue is clear.</span></div>';
 
     drawSalesChart(os);
   }
@@ -803,6 +803,18 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 
     const max = Math.max(...values, 1);
     const left = 18, right = width - 12, top = 20, bottom = height - 34;
+
+    if (!os.length) {
+      ctx.fillStyle = "#9A8A73";
+      ctx.font = "600 11px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("No sales yet", width / 2, height / 2 - 4);
+      ctx.font = "9px Inter, sans-serif";
+      ctx.fillStyle = "#6f5c43";
+      ctx.fillText("Sales activity will appear here.", width / 2, height / 2 + 16);
+      $("#chartNote").textContent = "₱0 / 7d";
+      return;
+    }
     ctx.strokeStyle = "#2A2116"; ctx.lineWidth = 1;
     for(let i=0;i<4;i++){
       const y=top+(bottom-top)*(i/3);
