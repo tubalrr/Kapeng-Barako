@@ -19,30 +19,82 @@ const DEMO_KEY="kb_demo_customer_v1";
 const ORDER_KEY="kb_orders";
 let ordersUnsubscribe=null;
 
+const DEMO_LABEL="TEST / DEMO ACCOUNT";
+
 function demoDefaults(){
   return {
-    profile:{fullName:"Alex Morgan",email:"demo@kapengbarako.com",phone:"+63 917 555 0148",provider:"demo",photoURL:""},
-    orders:[{id:"KB-DEMO-001",status:"In Transit",total:1120,createdAt:"2026-09-26T09:20:00+08:00",items:[
-      {name:"Barako 500g",weight:"500g",qty:1,price:620},
-      {name:"Barako 250g",weight:"250g",qty:1,price:350}
-    ]}],
-    addresses:[{id:"demo-home",label:"Home",recipient:"Alex Morgan",phone:"+63 917 555 0148",address:"Demo Address, Quezon City, Metro Manila, Philippines",isDefault:true}],
-    wishlist:[{id:"demo-wish-1",name:"Barako 1kg",weight:"1kg",grind:"Whole"}]
+    demoNotice:true,
+    profile:{fullName:DEMO_LABEL,email:"",phone:"",provider:"demo",photoURL:""},
+    orders:[{id:"KB-DEMO-001",status:"In Transit",total:1120,createdAt:"2026-09-26T09:20:00+08:00",
+      demo:true,customer:{name:DEMO_LABEL},
+      items:[
+        {name:"Demo Barako 500g",weight:"500g",qty:1,price:620,demo:true},
+        {name:"Demo Barako 250g",weight:"250g",qty:1,price:350,demo:true}
+      ]}],
+    addresses:[{id:"demo-home",label:"DEMO",recipient:DEMO_LABEL,phone:"",address:"DEMO DATA — not a real address",isDefault:true,demo:true}],
+    wishlist:[{id:"demo-wish-1",name:"Demo Barako 1kg",weight:"1kg",grind:"Whole",demo:true}]
   };
 }
 function getDemoData(){
+  const defaults=demoDefaults();
   try{
     const saved=JSON.parse(localStorage.getItem(DEMO_KEY)||"null");
-    return saved&&saved.profile?saved:demoDefaults();
-  }catch{return demoDefaults()}
+    if(!saved||typeof saved!=="object") return defaults;
+    return {
+      ...defaults,
+      ...saved,
+      demoNotice:true,
+      profile:{
+        ...defaults.profile,
+        ...(saved.profile&&typeof saved.profile==="object"?saved.profile:{}),
+        fullName:DEMO_LABEL,
+        email:"",
+        phone:"",
+        provider:"demo",
+        photoURL:""
+      },
+      orders:(Array.isArray(saved.orders)?saved.orders:defaults.orders).map(order=>({
+        ...(order&&typeof order==="object"?order:{}),
+        demo:true,
+        customer:{...(order?.customer&&typeof order.customer==="object"?order.customer:{}),name:DEMO_LABEL}
+      })),
+      addresses:(Array.isArray(saved.addresses)?saved.addresses:defaults.addresses).map(address=>({
+        ...(address&&typeof address==="object"?address:{}),
+        demo:true,
+        recipient:DEMO_LABEL,
+        phone:"",
+        address:"DEMO DATA — not a real address"
+      })),
+      wishlist:(Array.isArray(saved.wishlist)?saved.wishlist:defaults.wishlist).map(item=>({
+        ...(item&&typeof item==="object"?item:{}),
+        demo:true,
+        name:String(item?.name||"Demo Product").startsWith("Demo ") ? String(item.name) : "Demo "+String(item?.name||"Product")
+      }))
+    };
+  }catch{return defaults}
 }
 function saveDemoData(){localStorage.setItem(DEMO_KEY,JSON.stringify({profile:state.profile,orders:state.orders,addresses:state.addresses,wishlist:state.wishlist}))}
 function isDemoAccount(){return Boolean(state.user?.isDemo)}
 function startDemoAccount(){
   const data=getDemoData();
   state.demoActive=true;
-  state.user={uid:"demo_customer",displayName:data.profile?.fullName||"Alex Morgan",email:data.profile?.email||"demo@kapengbarako.com",phoneNumber:data.profile?.phone||"+63 917 555 0148",photoURL:data.profile?.photoURL||"",emailVerified:true,isDemo:true,providerData:[{providerId:"demo"}],metadata:{creationTime:"2026-09-01T08:00:00+08:00"}};
-  state.profile=data.profile||{};state.orders=data.orders||[];state.addresses=normalizeAddresses(data.addresses||[]);saveCheckoutDefault(defaultAddress());state.wishlist=data.wishlist||[];state.tab="overview";
+  state.user={
+    uid:"demo_customer",
+    displayName:DEMO_LABEL,
+    email:"",
+    phoneNumber:"",
+    photoURL:"",
+    emailVerified:true,
+    isDemo:true,
+    providerData:[{providerId:"demo"}],
+    metadata:{creationTime:"2026-09-01T08:00:00+08:00"}
+  };
+  state.profile={...data.profile,fullName:DEMO_LABEL,email:"",phone:"",provider:"demo",photoURL:""};
+  state.orders=Array.isArray(data.orders)?data.orders:[];
+  state.addresses=normalizeAddresses(Array.isArray(data.addresses)?data.addresses:[]);
+  state.wishlist=Array.isArray(data.wishlist)?data.wishlist:[];
+  saveCheckoutDefault(defaultAddress());
+  state.tab="overview";
   renderDashboard();
 }
 function deleteDemoAccount(){
@@ -50,7 +102,6 @@ function deleteDemoAccount(){
   if(!confirm("Remove the demo customer account and all demo data from this browser?"))return;
   localStorage.removeItem(DEMO_KEY);state.user=null;state.profile=null;state.orders=[];state.addresses=[];state.wishlist=[];state.demoActive=false;state.mode="login";renderAuth();
 }
-
 function normalizeAddresses(list){
   const addresses=Array.isArray(list)?list.map(a=>({...a,isDefault:Boolean(a.isDefault)})):[];
   if(addresses.length&&!addresses.some(a=>a.isDefault))addresses[0].isDefault=true;
@@ -150,7 +201,7 @@ function renderAuth(){
 <p class="sub">${login?"Sign in to manage your Kapeng Barako orders.":"Use your real contact details for delivery and account recovery."}</p>
 <div id="auth-msg"></div>
 <button class="google-btn" id="google-btn" type="button"><span class="google-mark">G</span> Continue with Google</button>
-<div class="demo-box"><div><strong>TEST / DEMO ACCOUNT</strong><span>For testing My Orders and Track My Order. This data is local test data only.</span></div><button class="account-btn gold demo-btn" id="demo-btn" type="button">OPEN TEST ACCOUNT</button></div>
+<div class="demo-box"><div><strong>TEST / DEMO ACCOUNT</strong><span>DEMO DATA ONLY — not a real customer. Used for UI and order-flow testing.</span></div><button class="account-btn gold demo-btn" id="demo-btn" type="button">OPEN TEST ACCOUNT</button></div>
 <div class="divider">Continue with your real account</div>
 <form class="auth-form" id="auth-form">
 ${login?"":`<div class="field"><label>Full Name</label><input name="name" autocomplete="name" required></div>
@@ -341,7 +392,7 @@ function dashboard(){
   const p=state.profile||{};
   const delivered=state.orders.filter(o=>String(o.status).toLowerCase()==="delivered").length;
   return `
-<div class="account-hero"><div><div class="account-eyebrow">MY ACCOUNT</div><h1>Hello, ${esc((p.fullName||"Coffee lover").split(" ")[0])}.</h1><p>Manage your profile, orders, addresses, and favorite coffee in one place.</p></div><a class="account-btn gold" href="../index.html#products">Shop Coffee →</a></div>
+<div class="account-hero"><div><div class="account-eyebrow">${state.demoActive?"TEST / DEMO ACCOUNT":"MY ACCOUNT"}</div><h1>${state.demoActive?DEMO_LABEL:"Hello, "+esc((p.fullName||"Coffee lover").split(" ")[0])+"."}</h1><p>${state.demoActive?"DEMO DATA ONLY — this is not a real customer account.":"Manage your profile, orders, addresses, and favorite coffee in one place."}</p></div><a class="account-btn gold" href="../index.html#products">Shop Coffee →</a></div>
 <div class="account-grid">
 <aside class="account-sidebar">
 <button class="account-tab ${state.tab==="overview"?"active":""}" data-tab="overview">Overview</button>
@@ -436,12 +487,12 @@ function profileView(){
  return `
 <div class="panel-head"><div><h2>My Profile</h2><p>Your personal customer profile is private to your signed-in account.</p></div></div>
 <div class="profile-summary">
-  ${avatarMarkup(name,state.user?.photoURL||"", "profile-avatar large")}
-  <div class="profile-summary-copy"><strong>${esc(name)}</strong><span>${esc(email)}</span><div class="profile-badges"><span>${verified?"Verified email":"Email verification status unavailable"}</span><span>${esc(provider)}</span></div></div>
+  ${avatarMarkup(state.demoActive?DEMO_LABEL:name,state.user?.photoURL||"", "profile-avatar large")}
+  <div class="profile-summary-copy"><strong>${esc(state.demoActive?DEMO_LABEL:name)}</strong><span>${state.demoActive?"Demo data only":esc(email)}</span><div class="profile-badges"><span>${state.demoActive?"TEST / DEMO":(verified?"Verified email":"Email verification status unavailable")}</span><span>${state.demoActive?"Local test data":esc(provider)}</span></div></div>
 </div>
 <div class="profile-meta">
-  <div><span>Customer</span><strong>${esc(name)}</strong></div>
-  <div><span>Member since</span><strong>${esc(joined)}</strong></div>
+  <div><span>Customer</span><strong>${esc(state.demoActive?DEMO_LABEL:name)}</strong></div>
+  <div><span>Member since</span><strong>${state.demoActive?"Demo data":esc(joined)}</strong></div>
 </div>
 <form id="profile-form" class="profile-form">
   <div class="form-grid">
