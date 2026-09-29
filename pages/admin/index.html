@@ -1489,7 +1489,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       body:document.getElementById("extraContentBody").value.trim()
     }};
     write(CMS_KEY,cms);
-    toastExtra("Announcement content saved.");
+    notifyStorefront("announcement-updated");
+    toastExtra(cms.announcement.title||cms.announcement.body?"Announcement content saved.":"Announcement cleared.");
+    loadContent();
   }
 
   function loadContact(){
