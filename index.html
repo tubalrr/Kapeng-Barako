@@ -1003,19 +1003,29 @@
             return active?.dataset.value || active?.textContent.trim() || "";
           }
 
+          function isBundleProduct(product) {
+            return Boolean(
+              product &&
+              (
+                product.isBundle === true ||
+                product.bundle === true ||
+                String(product.type || "").toLowerCase() === "bundle" ||
+                /bundle/i.test(String(product.id || "")) ||
+                /bundle/i.test(String(product.name || ""))
+              )
+            );
+          }
+
+          function getBundleProduct() {
+            return getProducts().filter(Boolean).find(isBundleProduct) || null;
+          }
+
           function updateBundleCard() {
             const card = document.getElementById("kb-starter-bundle");
             if (!card) return;
 
-            const products = getProducts().filter(Boolean);
-            const primary = products[0];
-            const secondary = products[1];
-
-            const primaryStock = Math.max(0, Number(primary?.stock || 0));
-            const secondaryStock = Math.max(0, Number(secondary?.stock || 0));
-            const available = Math.min(primaryStock, secondaryStock);
-            const basePrice = Number(primary?.price || 0) + Number(secondary?.price || 0);
-            const bundlePrice = Math.max(0, basePrice - 100);
+            const bundleProduct = getBundleProduct();
+            const stockCount = Math.max(0, Number(bundleProduct?.stock || 0));
 
             const title = card.querySelector(".kb-bundle-copy h3");
             const copy = card.querySelector(".kb-bundle-copy p");
@@ -1028,14 +1038,14 @@
             const note = card.querySelector(".kb-bundle-roast-note");
             const button = card.querySelector(".kb-bundle-add");
 
-            if (!primary || !secondary || available <= 0) {
-              if (title) title.textContent = "Starter bundle";
-              if (copy) copy.textContent = products.length < 2
-                ? "Add at least two products in Admin before this bundle becomes available."
-                : "This bundle is unavailable until both catalog products are in stock.";
+            card.hidden = !bundleProduct;
+
+            if (!bundleProduct) {
+              if (title) title.textContent = "Starter bundle unavailable";
+              if (copy) copy.textContent = "Create a bundle product in Admin Products first.";
               if (stock) {
                 stock.className = "kb-bundle-stock low";
-                stock.innerHTML = '<span class="kb-bundle-stock-dot"></span><span>SOLD OUT</span>';
+                stock.innerHTML = "<span>NOT IN CATALOG</span>";
               }
               if (priceStrong) priceStrong.textContent = "—";
               if (priceDel) priceDel.textContent = "";
@@ -1044,24 +1054,38 @@
               return;
             }
 
-            if (title) title.textContent = (primary.name || "Product") + " + " + (secondary.name || "Product");
-            if (copy) copy.textContent = "One " + (primary.size || "pack") + " + one " + (secondary.size || "pack") + " from the live catalog.";
-            if (priceStrong) priceStrong.textContent = money(bundlePrice);
-            if (priceDel) priceDel.textContent = money(basePrice);
-            if (savePill) savePill.textContent = "Save ₱100";
-            if (items[0]) items[0].textContent = primary.size || "—";
-            if (items[1]) items[1].textContent = secondary.size || "—";
-            if (itemLabels[0]) itemLabels[0].textContent = (primary.name || "Product") + " · " + (primary.size || "");
-            if (itemLabels[1]) itemLabels[1].textContent = (secondary.name || "Product") + " · " + (secondary.size || "");
+            const sizeParts = String(bundleProduct.size || bundleProduct.netWeight || "")
+              .split("+")
+              .map(value => value.trim())
+              .filter(Boolean);
+
+            if (title) title.textContent = bundleProduct.name || "Bundle";
+            if (copy) copy.textContent = bundleProduct.note || "Bundle product from the live catalog.";
+            if (priceStrong) priceStrong.textContent = money(bundleProduct.price);
+            if (priceDel) priceDel.textContent = bundleProduct.compareAtPrice ? money(bundleProduct.compareAtPrice) : "";
+            if (savePill) savePill.textContent = bundleProduct.badge || "";
+            if (items[0]) items[0].textContent = sizeParts[0] || bundleProduct.size || "—";
+            if (items[1]) items[1].textContent = sizeParts[1] || "";
+            if (itemLabels[0]) itemLabels[0].textContent = bundleProduct.name || "Bundle";
+            if (itemLabels[1]) itemLabels[1].textContent = bundleProduct.size || "";
 
             if (stock) {
-              stock.className = "kb-bundle-stock" + (available <= 5 ? " low" : "");
+              stock.className = "kb-bundle-stock" + (stockCount <= 5 ? " low" : "");
               stock.innerHTML =
-                (available <= 5 ? '<span class="kb-bundle-stock-dot"></span>' : "") +
-                "<span>" + available + " bundle set" + (available === 1 ? "" : "s") + " available</span>";
+                (stockCount <= 5 && stockCount > 0 ? '<span class="kb-bundle-stock-dot"></span>' : "") +
+                "<span>" + (stockCount > 0
+                  ? stockCount + " pack" + (stockCount === 1 ? "" : "s") + " available"
+                  : "SOLD OUT") + "</span>";
             }
-            if (note) note.textContent = available <= 3 ? "Roast tomorrow 6AM" : "";
-            if (button) { button.disabled = false; button.textContent = "ADD BUNDLE TO CART →"; }
+            if (note && bundleProduct.stock > 0 && bundleProduct.stock <= 3) {
+              note.textContent = "Roast tomorrow 6AM";
+            } else if (note) {
+              note.textContent = "";
+            }
+            if (button) {
+              button.disabled = stockCount <= 0;
+              button.textContent = stockCount <= 0 ? "SOLD OUT" : "ADD BUNDLE TO CART →";
+            }
           }
 
           function ensureBundleCard() {
@@ -1117,43 +1141,44 @@
             });
 
             card.querySelector(".kb-bundle-add")?.addEventListener("click", () => {
-              const products = getProducts().filter(Boolean);
-              const primary = products[0];
-              const secondary = products[1];
-
-              if (!primary || !secondary ||
-                  Number(primary.stock || 0) < 1 ||
-                  Number(secondary.stock || 0) < 1) {
+              const bundleProduct = getBundleProduct();
+              if (!bundleProduct || Number(bundleProduct.stock || 0) < 1) {
                 updateBundleCard();
                 return;
               }
 
-              const roast = selectedBundle("[data-bundle-roast]") || "Medium";
-              const grind = selectedBundle("[data-bundle-grind]") || "Whole";
-              const bundleId = "BARAKO-STARTER-" + Date.now().toString(36).toUpperCase();
+              const roast = selectedBundle("[data-bundle-roast]") || bundleProduct.roast || "Medium";
+              const grind = selectedBundle("[data-bundle-grind]") || bundleProduct.grind || "Whole";
               const cart = getCart();
+              const existing = cart.find(item =>
+                String(item.id) === String(bundleProduct.id) &&
+                item.roast === roast &&
+                item.grind === grind &&
+                !item.bundleId
+              );
 
-              cart.push({
-                id: primary.id,
-                name: primary.name || "Product",
-                size: primary.size || "",
-                price: Number(primary.price || 0),
-                roast,
-                grind,
-                qty: 1,
-                bundleId
-              });
+              const nextQuantity = Number(existing?.qty || 0) + 1;
+              if (nextQuantity > Number(bundleProduct.stock || 0)) {
+                updateBundleCard();
+                return;
+              }
 
-              cart.push({
-                id: secondary.id,
-                name: secondary.name || "Product",
-                size: secondary.size || "",
-                price: Number(secondary.price || 0),
-                roast,
-                grind,
-                qty: 1,
-                bundleId
-              });
+              if (existing) {
+                existing.qty = nextQuantity;
+                existing.name = bundleProduct.name || existing.name || "";
+                existing.size = bundleProduct.size || existing.size || "";
+                existing.price = Number(bundleProduct.price || 0);
+              } else {
+                cart.push({
+                  id: bundleProduct.id,
+                  name: bundleProduct.name || "",
+                  size: bundleProduct.size || "",
+                  price: Number(bundleProduct.price || 0),
+                  roast,
+                  grind,
+                  qty: 1
+                });
+              }
 
               localStorage.setItem(CART_KEY,JSON.stringify(cart));
               updateHeaderCount();
