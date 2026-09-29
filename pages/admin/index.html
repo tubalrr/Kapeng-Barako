@@ -697,6 +697,43 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     return items.reduce((sum, item) => sum + Number(item?.qty || 1), 0);
   }
 
+  async function syncProductCatalogToFirestore(nextProducts, previousProducts = []) {
+    if (demoStore() || !firestoreDb) return;
+
+    try {
+      const firestore = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js");
+      const batch = firestore.writeBatch(firestoreDb);
+      const nextById = new Map(nextProducts.map(product => [String(product.id), product]));
+      const previous = Array.isArray(previousProducts) ? previousProducts : [];
+
+      previous.forEach(product => {
+        if (!nextById.has(String(product.id))) {
+          batch.delete(firestore.doc(firestoreDb, "products", String(product.id)));
+        }
+      });
+
+      nextProducts.forEach(product => {
+        if (!product?.id) return;
+        batch.set(
+          firestore.doc(firestoreDb, "products", String(product.id)),
+          {
+            ...product,
+            id: String(product.id),
+            price: Math.max(0, Number(product.price || 0)),
+            stock: Math.max(0, Number(product.stock || 0)),
+            updatedAt: firestore.serverTimestamp()
+          },
+          { merge: true }
+        );
+      });
+
+      await batch.commit();
+    } catch (error) {
+      console.error("[Kapeng Barako] product catalog Firestore sync failed", error);
+      toastExtra("Saved locally, but Firebase catalog sync failed.");
+    }
+  }
+
   function productStock(id, value) {
     const list = products();
     return list.map(p => String(p.id) === String(id) ? {...p, stock:Number(value)} : p);
@@ -981,8 +1018,13 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     e.preventDefault();
     const value = Number($("#stockInput").value);
     if(!editingProductId || !Number.isInteger(value) || value < 0) return;
-    write(PRODUCT_KEY, productStock(editingProductId,value));
-    closeStock();renderAll();
+    const current=products();
+    const next=productStock(editingProductId,value);
+    write(PRODUCT_KEY,next);
+    notifyStorefront();
+    await syncProductCatalogToFirestore(next,current);
+    closeStock();
+    renderAll();
   });
   $("#closeStock").addEventListener("click",closeStock);
   $("#cancelStock").addEventListener("click",closeStock);
@@ -1157,6 +1199,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         (photo?'<img class="extra-product-photo" src="'+esc(photo)+'" alt="'+esc(p.name||"Product")+' product photo">':'')+
         '<div class="extra-product-top"><div><div class="kicker">'+esc(p.size||"PRODUCT")+'</div><h3>'+esc(p.name||"Product")+'</h3><span class="extra-id">'+esc(p.id||"—")+'</span></div><span class="badge '+(stock<=5?"low":"")+'">'+(featured?"FEATURED · ":"")+(stock<=5?"LOW STOCK":"IN STOCK")+'</span></div>'+
         '<div class="extra-fields">'+
+          '<div class="extra-field full"><label>Name</label><input value="'+esc(p.name||"")+'" data-x-name="'+esc(p.id)+'"></div>'+
+          '<div class="extra-field"><label>Size</label><input value="'+esc(p.size||"")+'" data-x-size="'+esc(p.id)+'"></div>'+
           '<div class="extra-field"><label>Price (₱)</label><input type="number" min="0" step="1" value="'+Number(p.price||0)+'" data-x-price="'+esc(p.id)+'"></div>'+
           '<div class="extra-field"><label>Stock (packs)</label><input type="number" min="0" step="1" value="'+stock+'" data-x-stock="'+esc(p.id)+'"></div>'+
           '<div class="extra-field"><label>Roast</label><select data-x-roast="'+esc(p.id)+'"><option>Light</option><option>Medium</option><option>Dark</option></select></div>'+
@@ -1186,6 +1230,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   function saveExtraProduct(id){
     const list=products(), idx=list.findIndex(p=>String(p.id)===String(id));if(idx<0)return;
     const q=selector=>document.querySelector(selector);
+    const name=q('[data-x-name="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
+    const size=q('[data-x-size="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
     const price=Number(q('[data-x-price="'+CSS.escape(String(id))+'"]')?.value);
     const stock=Number(q('[data-x-stock="'+CSS.escape(String(id))+'"]')?.value);
     const roast=q('[data-x-roast="'+CSS.escape(String(id))+'"]')?.value||"Medium";
@@ -1199,17 +1245,40 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const process=q('[data-x-process="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
     const tastingNotes=q('[data-x-notes="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
     const featured=Boolean(q('[data-x-featured="'+CSS.escape(String(id))+'"]')?.checked);
+    if(!name||!size){toastExtra("Product name and size are required.");return}
     if(image&&!/^https?:\/\//i.test(image)&&!/^images\//i.test(image)){toastExtra("Use an image URL or images/ path.");return}
     if(!Number.isFinite(price)||price<0||!Number.isFinite(stock)||stock<0||!Number.isInteger(stock)){toastExtra("Enter a valid non-negative price and whole-number stock.");return}
-    const next=list.map(p=>p.featured===true?{...p,featured:false}:p);
-    next[idx]={...next[idx],price,stock,roast,grind,image,origin,roastDate,roastLevel,netWeight,batch,process,tastingNotes,note:tastingNotes||next[idx].note||""};
-    write(PRODUCT_KEY,next);notifyStorefront();toastExtra((next[idx].name||id)+" updated.");renderExtraProducts();updateSnapshot();
+
+    const previous=list.map(product=>({...product}));
+    const next=list.map(p=>{
+      if(featured && p.featured===true && String(p.id)!==String(id)) return {...p,featured:false};
+      return p;
+    });
+    next[idx]={
+      ...next[idx],
+      name,size,price,stock,roast,grind,image,origin,roastDate,roastLevel,
+      netWeight,batch,process,tastingNotes,note:tastingNotes||""
+    };
+    if(featured) next[idx].featured=true;
+
+    write(PRODUCT_KEY,next);
+    notifyStorefront();
+    await syncProductCatalogToFirestore(next, previous);
+    toastExtra((next[idx].name||id)+" updated.");
+    renderExtraProducts();
+    updateSnapshot();
   }
 
   function deleteExtraProduct(id){
     const list=products(), product=list.find(p=>String(p.id)===String(id));if(!product)return;
     if(!confirm("Delete "+(product.name||id)+" from the catalog?"))return;
-    const next=list.filter(p=>String(p.id)!==String(id));write(PRODUCT_KEY,next);notifyStorefront();toastExtra((product.name||id)+" deleted.");renderExtraProducts();updateSnapshot();
+    const next=list.filter(p=>String(p.id)!==String(id));
+    write(PRODUCT_KEY,next);
+    notifyStorefront();
+    await syncProductCatalogToFirestore(next,list);
+    toastExtra((product.name||id)+" deleted.");
+    renderExtraProducts();
+    updateSnapshot();
   }
 
   function addExtraProduct(){
@@ -1220,9 +1289,12 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     if(image&&!/^https?:\/\//i.test(image)&&!/^images\//i.test(image)){toastExtra("Use an image URL or images/ path.");return}
     let id=("KB-"+size).toUpperCase().replace(/[^A-Z0-9]/g,"")||("KB-"+Date.now());
     while(products().some(p=>String(p.id)===id))id=id+"-"+Date.now().toString(36).toUpperCase();
-    const next=products().map(p=>featured?{...p,featured:false}:p);
+    const previous=products().map(product=>({...product}));
+    const next=previous.map(p=>featured?{...p,featured:false}:p);
     next.push({id,name,size,price,stock,badge,roast,grind,note,image,origin,roastDate,roastLevel,netWeight,batch,process,tastingNotes:note,featured});
-    write(PRODUCT_KEY,next);notifyStorefront();
+    write(PRODUCT_KEY,next);
+    notifyStorefront();
+    await syncProductCatalogToFirestore(next, previous);
     document.getElementById("extraProductDialog")?.close();document.getElementById("extraProductForm")?.reset();
     toastExtra(name+" added.");renderExtraProducts();updateSnapshot();
   }
