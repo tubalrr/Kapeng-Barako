@@ -35,6 +35,20 @@ Run this checklist on the deployed GitHub Pages site after Firebase configuratio
 - [ ] Modals fit the viewport.
 - [ ] No persistent horizontal scrollbar.
 
+## Customer account authentication
+- [ ] Login — valid credentials: verified customer can sign in and reaches My Account.
+- [ ] Signup — new account: new email/password account is created, profile is saved, and verification email is sent.
+- [ ] Wrong password: valid email + wrong password stays on Login and shows a generic credential error.
+- [ ] Wrong email: valid-format unknown email stays on Login and shows a generic credential error.
+- [ ] Email verification: unverified password user cannot enter My Account; login triggers a fresh verification email and keeps the user signed out until verified.
+- [ ] Forgot password — existing email: reset request shows a non-enumerating success message.
+- [ ] Forgot password — unknown email: UI shows the same non-enumerating success message rather than confirming whether an account exists.
+- [ ] Google sign-in: enabled Google provider signs the customer in and creates/updates the customer profile.
+- [ ] Google popup states: cancelled, blocked, duplicate-request, disabled-provider, and different-credential errors show readable messages.
+- [ ] Logout: Logout signs out Firebase Auth and returns to the Login screen.
+- [ ] Session persistence: after a successful verified login, refreshing the page keeps the customer signed in; closing and reopening the browser keeps the customer signed in when Firebase local persistence is available.
+- [ ] Unverified session guard: a password-authenticated user with emailVerified=false is signed out instead of seeing private account data.
+- [ ] Firebase placeholder state: with REPLACE_WITH_ config values, customer auth is disabled with a clear setup message; demo account remains available for UI testing.
 ## Backend smoke test
 - [ ] Firebase Auth login succeeds.
 - [ ] `admins/{uid}` authorization is enforced.
