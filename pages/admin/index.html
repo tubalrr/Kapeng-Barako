@@ -1380,6 +1380,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         const published=r.published===true;
         const order=reviewOrder(r.orderId);
         const actionButtons=
+          '<button class="ghost-btn review-action-btn" type="button" data-x-review-edit="'+i+'">Edit</button>'+
           (!verified?'<button class="ghost-btn review-action-btn" type="button" data-x-review-verify="'+i+'">Verify</button>':'')+
           (verified&&!published?'<button class="primary-btn review-action-btn" type="button" data-x-review-publish="'+i+'">Publish</button>':'')+
           (published?'<button class="ghost-btn review-action-btn" type="button" data-x-review-unpublish="'+i+'">Unpublish</button>':'')+
@@ -1398,15 +1399,61 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       '</tbody></table>';
   }
 
+  function openReviewEditor(index){
+    const list=reviewList();
+    const review=list[index];
+    const dialog=document.getElementById("extraReviewDialog");
+    if(!review||!dialog)return;
+    document.getElementById("extraReviewName").value=review.name||"";
+    document.getElementById("extraReviewRating").value=String(review.rating||5);
+    document.getElementById("extraReviewOrder").value=review.orderId||"";
+    document.getElementById("extraReviewText").value=review.text||"";
+    dialog.setAttribute("data-edit-index",String(index));
+    dialog.querySelector(".kicker").textContent="EDIT CUSTOMER REVIEW";
+    dialog.querySelector(".modal-head h3").textContent="Edit Review";
+    dialog.querySelector("button[type=\"submit\"]").textContent="Save Changes";
+    dialog.showModal();
+  }
+
+  function resetReviewEditor(){
+    const dialog=document.getElementById("extraReviewDialog");
+    dialog?.removeAttribute("data-edit-index");
+    document.getElementById("extraReviewForm")?.reset();
+    if(dialog){
+      dialog.querySelector(".kicker").textContent="CUSTOMER REVIEW";
+      dialog.querySelector(".modal-head h3").textContent="Add Review";
+      dialog.querySelector("button[type=\"submit\"]").textContent="Save Review";
+    }
+  }
+
   function addExtraReview(){
     const name=document.getElementById("extraReviewName")?.value.trim()||"";
     const rating=Number(document.getElementById("extraReviewRating")?.value||5);
     const textValue=document.getElementById("extraReviewText")?.value.trim()||"";
     const orderId=document.getElementById("extraReviewOrder")?.value.trim().replace(/^#/,"").toUpperCase()||"";
+    const dialog=document.getElementById("extraReviewDialog");
     if(!name||!textValue){toastExtra("Customer name and review text are required.");return}
     if(!Number.isInteger(rating)||rating<1||rating>5){toastExtra("Rating must be between 1 and 5.");return}
 
     const list=reviewList();
+    const editIndex=Number(dialog?.getAttribute("data-edit-index"));
+    if(Number.isInteger(editIndex)&&editIndex>=0&&editIndex<list.length){
+      const current=list[editIndex];
+      const orderChanged=String(current.orderId||"").toUpperCase()!==orderId;
+      list[editIndex]={
+        ...current,
+        name,rating,text:textValue,orderId,
+        ...(orderChanged?{verified:false,published:false,verifiedAt:null,verifiedOrderId:null}:{})
+      };
+      write("kb_reviews",list);
+      notifyStorefront("reviews-updated");
+      dialog?.close();
+      resetReviewEditor();
+      toastExtra(orderChanged?"Review updated. Order changed, so verification was reset.":"Review updated.");
+      renderExtraReviews();
+      return;
+    }
+
     list.unshift({
       id:"R-"+Date.now().toString(36).toUpperCase(),
       name,rating,text:textValue,orderId,
@@ -1417,8 +1464,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     });
     write("kb_reviews",list);
     notifyStorefront("reviews-updated");
-    document.getElementById("extraReviewDialog")?.close();
-    document.getElementById("extraReviewForm")?.reset();
+    dialog?.close();
+    resetReviewEditor();
     toastExtra("Review added as Unverified + Unpublished.");
     renderExtraReviews();
   }
@@ -1707,9 +1754,9 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     document.getElementById("extraSaveContact")?.addEventListener("click",saveContact);
     document.getElementById("extraSaveAds")?.addEventListener("click",saveAds);
     document.getElementById("extraClearAds")?.addEventListener("click",clearAds);
-    document.getElementById("extraAddReview")?.addEventListener("click",()=>document.getElementById("extraReviewDialog")?.showModal());
+    document.getElementById("extraAddReview")?.addEventListener("click",()=>{resetReviewEditor();document.getElementById("extraReviewDialog")?.showModal()});
     document.getElementById("extraReviewForm")?.addEventListener("submit",e=>{e.preventDefault();addExtraReview()});
-    document.querySelectorAll("[data-extra-review-close]").forEach(b=>b.addEventListener("click",()=>document.getElementById("extraReviewDialog")?.close()));
+    document.querySelectorAll("[data-extra-review-close]").forEach(b=>b.addEventListener("click",()=>{document.getElementById("extraReviewDialog")?.close();resetReviewEditor()}));
     document.getElementById("extraAlertSound")?.addEventListener("click",()=>{
       const enabled=localStorage.getItem(SOUND_KEY)==="1";
       localStorage.setItem(SOUND_KEY,enabled?"0":"1");updateSnapshot();
@@ -1725,6 +1772,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
       if(save)saveExtraProduct(save.dataset.xSave); else if(del)deleteExtraProduct(del.dataset.xDelete);
     });
     document.getElementById("extraReviews")?.addEventListener("click",event=>{
+      const edit=event.target.closest("[data-x-review-edit]");
+      if(edit){openReviewEditor(Number(edit.dataset.xReviewEdit));return}
       const verify=event.target.closest("[data-x-review-verify]");
       if(verify){verifyExtraReview(Number(verify.dataset.xReviewVerify));return}
       const publish=event.target.closest("[data-x-review-publish]");
