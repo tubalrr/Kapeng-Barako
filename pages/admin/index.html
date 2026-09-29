@@ -291,7 +291,6 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
                 <article class="extra-status"><span>Pending</span><strong id="extraPending">0</strong></article>
                 <article class="extra-status"><span>Ready</span><strong id="extraReady">0</strong></article>
                 <article class="extra-status"><span>Delivered</span><strong id="extraDelivered">0</strong></article>
-                <article class="extra-status"><span>Cancelled</span><strong id="extraCancelled">0</strong></article>
               </div>
             </section>
           </div>
@@ -494,10 +493,12 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   };
   const money = (n) => "₱" + Number(n || 0).toLocaleString("en-PH", {maximumFractionDigits:2});
   const esc = (v) => String(v ?? "").replace(/[&<>"\']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\'":"&#39;" }[c]));
+  // Canonical public fulfillment statuses for the entire template.
+  const ORDER_STATUSES = ["Pending", "Ready", "Delivered"];
   const normalizeStatus = (s) => {
-    const v = String(s || "Pending").toLowerCase();
+    const v = String(s || "Pending").trim().toLowerCase();
     if (v === "delivered") return "Delivered";
-    if (v === "ready" || v === "ready to ship" || v === "processing/roasting" || v === "dispatched" || v === "in transit") return "Ready";
+    if (["ready","ready to ship","processing/roasting","dispatched","in transit"].includes(v)) return "Ready";
     return "Pending";
   };
   const statusClass = (s) => normalizeStatus(s).toLowerCase();
