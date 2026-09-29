@@ -341,6 +341,15 @@ The repository's `firebase.json` currently configures:
 
 Typical Firebase deployment commands are documented in `docs/FIREBASE_SETUP.md`.
 
+## Contact information
+
+Contact details are buyer-configured and are not pre-filled with fake business information.
+
+- Business address/location, phone number, business email, and social media URLs remain empty until the store owner supplies them.
+- Admin Contact Manager placeholders are explicitly labeled **Example only** and are not published automatically.
+- Do not publish template/demo contact details as if they belong to the buyer's business.
+- Storefront contact and social sections stay hidden when no real values have been configured.
+
 ## Customer data and demo claims
 
 The template does **not** claim to have real customers, real customer reviews, real sales history, or a seller-operated customer database.
