@@ -116,6 +116,9 @@
         if(event.data?.type==="ads-updated"){
           renderAdvertisement();
         }
+        if(event.data?.type==="contact-updated"){
+          renderContactInfo();
+        }
         if(event.data?.type==="announcement-updated"){
           renderAnnouncement();
         }
@@ -315,32 +318,75 @@
   }
 
   function renderContactInfo() {
-    const settings = {
-      businessName: "", email: "", phone: "", location: "", facebook: "", messenger: "", hours: "",
-      ...(read("kb_settings", {}) || {})
-    };
-    const block = $("#footerContactBlock");
-    const business = $("[data-kb-business-name]");
-    const email = $("[data-kb-email]");
-    const phone = $("[data-kb-phone]");
-    const location = $("[data-kb-location]");
-    const hours = $("[data-kb-hours]");
-    const emailLink = $("[data-kb-email-link]");
-    const phoneLink = $("[data-kb-phone-link]");
-    const facebook = $("[data-kb-facebook]");
-    const messenger = $("[data-kb-messenger]");
-    if (business) { business.textContent = settings.businessName || ""; business.hidden = !settings.businessName; }
-    if (emailLink) { emailLink.hidden = !settings.email; emailLink.href = settings.email ? "mailto:" + settings.email : "pages/contact.html"; }
-    if (email) email.textContent = settings.email || "";
-    if (phoneLink) { phoneLink.hidden = !settings.phone; phoneLink.href = settings.phone ? "tel:" + settings.phone.replace(/[^+\d]/g, "") : "pages/contact.html"; }
-    if (phone) phone.textContent = settings.phone || "";
-    if (location) { location.textContent = settings.location || ""; location.hidden = !settings.location; }
-    if (hours) { hours.textContent = settings.hours || ""; hours.hidden = !settings.hours; }
-    if (facebook) { facebook.hidden = !settings.facebook; facebook.href = settings.facebook || "#"; }
-    if (messenger) { messenger.hidden = !settings.messenger; messenger.href = settings.messenger || "#"; }
-    if (block) block.hidden = !(settings.businessName || settings.email || settings.phone || settings.location || settings.hours || settings.facebook || settings.messenger);
+    const raw = read("kb_settings", {});
+    const settings = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+    const value = key => String(settings[key] || "").trim();
+
+    const businessName = value("businessName");
+    const emailValue = value("email");
+    const phoneValue = value("phone");
+    const locationValue = value("location");
+    const hoursValue = value("hours");
+    const facebookValue = value("facebook");
+    const messengerValue = value("messenger");
+
+    $$("[data-kb-business-name]").forEach(el => {
+      el.textContent = businessName;
+      el.hidden = !businessName;
+    });
+    $$("[data-kb-email]").forEach(el => {
+      el.textContent = emailValue;
+    });
+    $$("[data-kb-phone]").forEach(el => {
+      el.textContent = phoneValue;
+    });
+    $$("[data-kb-location]").forEach(el => {
+      el.textContent = locationValue;
+      el.hidden = !locationValue;
+    });
+    $$("[data-kb-hours]").forEach(el => {
+      el.textContent = hoursValue;
+      el.hidden = !hoursValue;
+    });
+    $$("[data-kb-email-link]").forEach(el => {
+      el.hidden = !emailValue;
+      el.href = emailValue ? "mailto:" + emailValue : "pages/contact.html";
+    });
+    $$("[data-kb-phone-link]").forEach(el => {
+      el.hidden = !phoneValue;
+      el.href = phoneValue ? "tel:" + phoneValue.replace(/[^+\d]/g, "") : "pages/contact.html";
+    });
+    $$("[data-kb-facebook]").forEach(el => {
+      el.hidden = !facebookValue;
+      el.href = facebookValue || "#";
+    });
+    $$("[data-kb-messenger]").forEach(el => {
+      el.hidden = !messengerValue;
+      el.href = messengerValue || "#";
+    });
+
+    const contactBlock = $("#footerContactBlock");
+    if (contactBlock) {
+      contactBlock.hidden = !(
+        businessName ||
+        emailValue ||
+        phoneValue ||
+        locationValue ||
+        hoursValue ||
+        facebookValue ||
+        messengerValue
+      );
+    }
+
+    const socialBlock = $("#footerSocialBlock");
+    if (socialBlock) {
+      socialBlock.hidden = !(facebookValue || messengerValue);
+    }
+
     const copyrightLocation = $("#footerCopyrightLocation");
-    if (copyrightLocation) copyrightLocation.textContent = settings.location ? " — " + settings.location : "";
+    if (copyrightLocation) {
+      copyrightLocation.textContent = locationValue ? " — " + locationValue : "";
+    }
   }
 
   function renderAdvertisement() {
