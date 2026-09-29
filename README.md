@@ -6,8 +6,6 @@ This repository is intended as a **website/template that the buyer configures an
 
 ## Current repository structure
 
-The README is kept aligned with the current repository. Older references such as `css/home.css`, `js/storefront.js`, `css/admin.css`, and `js/admin.js` are not part of the current implementation.
-
 ### Frontend
 
 - `index.html` — main customer storefront
