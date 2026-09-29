@@ -116,6 +116,9 @@
         if(event.data?.type==="ads-updated"){
           renderAdvertisement();
         }
+        if(event.data?.type==="announcement-updated"){
+          renderAnnouncement();
+        }
       });
     }
   }catch{}
