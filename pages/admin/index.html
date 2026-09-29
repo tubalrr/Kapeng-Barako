@@ -811,8 +811,14 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
   function renderOperationsSnapshot(os, ps) {
     const ordersList = Array.isArray(os) ? os : [];
     const productsList = Array.isArray(ps) ? ps : [];
-    const today = todayStart();
-    const week = weekStart();
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const mondayOffset = (now.getDay() + 6) % 7;
+    const week = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - mondayOffset
+    ).getTime();
 
     const todaySales = ordersList
       .filter(order => {
