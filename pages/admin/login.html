@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const admin = await window.KBAdminAuth.restore();
     if (admin) {
-      location.replace("./index.html");
+      location.replace("./index.html?v=kb-admin-console-20260929-3");
       return;
     }
   } catch (error) {
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.KBAdminAuth.DEMO_EMAIL,
         window.KBAdminAuth.DEMO_PASSWORD
       );
-      location.replace("./index.html?demo=1");
+      location.replace("./index.html?demo=1&v=kb-admin-console-20260929-3");
     } catch (error) {
       err.textContent = error?.message || "Could not enter demo mode.";
       demoBtn.disabled = false;
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     googleSetupBtn.textContent = "CONNECTING GOOGLE…";
     try {
       await window.KBAdminAuth.setupAdminEmailPassword(password);
-      location.replace("./index.html");
+      location.replace("./index.html?v=kb-admin-console-20260929-3");
     } catch (error) {
       console.error("[Kapeng Barako] admin Google password setup failed", error);
       err.textContent = error?.message || "Could not complete the admin password setup.";
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     btn.textContent = "SIGNING IN…";
     try {
       await window.KBAdminAuth.signInWithEmailPassword(emailInput.value, passwordInput.value);
-      location.replace("./index.html");
+      location.replace("./index.html?v=kb-admin-console-20260929-3");
     } catch (error) {
       console.error("[Kapeng Barako] admin email/password login failed", error);
       err.textContent = error?.message || "Could not sign in.";
