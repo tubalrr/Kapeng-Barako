@@ -40,6 +40,18 @@ The Admin Console may record a GCash reference and a payment-review status, but 
 
 Legacy browser data can be migrated with the protected migration callables after an authorized admin signs in. Browser localStorage is not a central database, so migration must be run from a browser that still contains the legacy records.
 
+## Local storage limitation
+
+Some template features use browser localStorage for local/demo records, cached data, and browser-side workflows. **localStorage is browser-specific and is not a shared database.**
+
+This means:
+
+- **Browser A ≠ Browser B** — records stored in one browser are not automatically available in another browser.
+- **Device A ≠ Device B** — local records do not automatically sync between devices.
+- **Clearing browser data can remove records** — clearing site data, browser storage, or using browser cleanup tools can delete local records.
+- Local browser data should not be treated as a guaranteed backup or as the canonical source for production business records.
+- Use the configured Firebase/Firestore backend for data that must be shared or persisted centrally, and use the backup/export features for supported local records.
+
 ## Firebase onboarding — buyer must use their own project
 
 **Important for buyers:** this template intentionally ships with Firebase placeholders. You must create and use **your own Firebase project** before enabling live authentication, orders, inventory, checkout, or Admin features. Do not reuse the seller's Firebase project, admin UID, email, or credentials.
