@@ -849,14 +849,13 @@
 
       panel.appendChild(box);
 
+      const form = $("#checkoutFormInline");
       const savedAddress = read("kb_checkout_default", null);
-      if (savedAddress && typeof savedAddress === "object") {
+      if (form && savedAddress && typeof savedAddress === "object") {
         if (form.elements.name && savedAddress.recipient) form.elements.name.value = savedAddress.recipient;
         if (form.elements.phone && savedAddress.phone) form.elements.phone.value = savedAddress.phone;
         if (form.elements.address && savedAddress.address) form.elements.address.value = savedAddress.address;
       }
-
-      const form = $("#checkoutFormInline");
 
       const refresh = () => {
         if (!form) return;
