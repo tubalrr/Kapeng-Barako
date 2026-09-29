@@ -7,6 +7,7 @@
   const DEMO_SESSION_KEY = "kb_demo_admin_session";
   const DEMO_EMAIL = "demo@kapengbarako.local";
   const DEMO_PASSWORD = "demo123456";
+  const DEMO_DATA_KEY = "kb_demo_admin_data";
 
   let firebase = null;
   let auth = null;
@@ -86,8 +87,89 @@
     }
   }
 
+  function getDemoSeed() {
+    const now = Date.now();
+    const ago = days => new Date(now - days * 86400000).toISOString();
+    return {
+      kb_rebuild_products: [
+        {
+          id: "BARAKO-STRONG-250G", name: "Barako Strong", size: "250g",
+          price: 350, stock: 7, badge: "DARK ROAST", roast: "Dark", grind: "Whole",
+          image: "", origin: "Batangas", roastDate: "2026-09-28",
+          roastLevel: "Dark", netWeight: "250g", batch: "DEMO-01",
+          process: "Natural", tastingNotes: "Bold, smoky, full-bodied", featured: false
+        },
+        {
+          id: "BARAKO-CLASSIC-500G", name: "Barako Classic", size: "500g",
+          price: 620, stock: 12, badge: "BESTSELLER", roast: "Medium", grind: "Whole",
+          image: "", origin: "Batangas", roastDate: "2026-09-28",
+          roastLevel: "Medium", netWeight: "500g", batch: "DEMO-02",
+          process: "Natural", tastingNotes: "Rich, chocolatey, aromatic", featured: true
+        },
+        {
+          id: "BARAKO-STARTER-BUNDLE", name: "Barako Starter Bundle", size: "250g + 500g",
+          price: 870, stock: 4, badge: "SAVE ₱100", roast: "Medium", grind: "Whole",
+          image: "", origin: "Batangas", roastDate: "2026-09-28",
+          roastLevel: "Medium", netWeight: "750g", batch: "DEMO-03",
+          process: "Natural", tastingNotes: "Everyday Barako set", featured: false
+        }
+      ],
+      kb_orders: [
+        {
+          id: "DEMO-1001", customerUid: "demo-customer-1",
+          customer: {uid:"demo-customer-1",name:"Mia Santos",email:"mia.demo@example.com",phone:"09000000001"},
+          items:[{id:"BARAKO-CLASSIC-500G",productId:"BARAKO-CLASSIC-500G",name:"Barako Classic",size:"500g",price:620,qty:1,roast:"Medium",grind:"Whole"}],
+          subtotal:620,shippingFee:0,discount:0,total:620,address:"Lipa City, Batangas",
+          payment:"gcash",paymentMethod:"GCash",gcashRef:"DEMO-GCASH-1001",
+          paymentStatus:"Verified",status:"Pending",createdAt:ago(0.4)
+        },
+        {
+          id: "DEMO-1002", customerUid: "demo-customer-2",
+          customer: {uid:"demo-customer-2",name:"Carlo Reyes",email:"carlo.demo@example.com",phone:"09000000002"},
+          items:[{id:"BARAKO-STRONG-250G",productId:"BARAKO-STRONG-250G",name:"Barako Strong",size:"250g",price:350,qty:2,roast:"Dark",grind:"Whole"}],
+          subtotal:700,shippingFee:0,discount:0,total:700,address:"Batangas City, Batangas",
+          payment:"cod",paymentMethod:"COD",gcashRef:"",paymentStatus:"unpaid",status:"Ready",createdAt:ago(1.8)
+        },
+        {
+          id: "DEMO-1003", customerUid: "demo-customer-1",
+          customer: {uid:"demo-customer-1",name:"Mia Santos",email:"mia.demo@example.com",phone:"09000000001"},
+          items:[{id:"BARAKO-STARTER-BUNDLE",productId:"BARAKO-STARTER-BUNDLE",name:"Barako Starter Bundle",size:"250g + 500g",price:870,qty:1,roast:"Medium",grind:"Whole"}],
+          subtotal:870,shippingFee:0,discount:0,total:870,address:"Lipa City, Batangas",
+          payment:"gcash",paymentMethod:"GCash",gcashRef:"DEMO-GCASH-1003",
+          paymentStatus:"Verified",status:"Delivered",createdAt:ago(3.2)
+        },
+        {
+          id: "DEMO-1004", customerUid: "demo-customer-3",
+          customer: {uid:"demo-customer-3",name:"Jessa Lim",email:"jessa.demo@example.com",phone:"09000000003"},
+          items:[{id:"BARAKO-STRONG-250G",productId:"BARAKO-STRONG-250G",name:"Barako Strong",size:"250g",price:350,qty:1,roast:"Dark",grind:"Whole"}],
+          subtotal:350,shippingFee:220,discount:0,total:570,address:"Davao City, Davao",
+          payment:"cod",paymentMethod:"COD",gcashRef:"",paymentStatus:"unpaid",status:"Delivered",createdAt:ago(5.1)
+        }
+      ],
+      kb_promos: [
+        {id:"P-DEMO10",name:"Demo 10",code:"DEMO10",type:"percent",value:10,minPacks:2,active:true}
+      ],
+      kb_reviews: [],
+      kb_settings: {
+        lowStock:5,
+        storeStatus:"open",
+        deliveryFee:220,
+        freeDelivery:0,
+        roastSchedule:"Tue & Fri",
+        hours:"Mon–Sat · 8:00 AM–5:00 PM"
+      },
+      kb_cms: {},
+      kb_gallery: [],
+      kb_ads: {},
+      kb_activity_log: [],
+      kb_inventory_history: [],
+      kb_notification_read: []
+    };
+  }
+
   function rememberDemoAdmin() {
     try {
+      sessionStorage.setItem(DEMO_DATA_KEY, JSON.stringify(getDemoSeed()));
       sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify({
         uid: "demo-admin",
         email: DEMO_EMAIL,
@@ -97,6 +179,16 @@
         expiresAt: Date.now() + SESSION_TTL_MS
       }));
     } catch {}
+  }
+
+  function readDemoData() {
+    try {
+      const raw = sessionStorage.getItem(DEMO_DATA_KEY);
+      const data = raw ? JSON.parse(raw) : null;
+      return data && typeof data === "object" ? data : null;
+    } catch {
+      return null;
+    }
   }
 
   function readDemoSession() {
@@ -389,6 +481,7 @@
   async function logout() {
     try {
       sessionStorage.removeItem(DEMO_SESSION_KEY);
+      sessionStorage.removeItem(DEMO_DATA_KEY);
       const { auth: currentAuth, authMod } = await init();
       await authMod.signOut(currentAuth);
     } finally {
@@ -402,6 +495,8 @@
     DEMO_SESSION_KEY,
     DEMO_EMAIL,
     DEMO_PASSWORD,
+    DEMO_DATA_KEY,
+    readDemoData,
     init,
     signInWithEmailPassword,
     setupAdminEmailPassword,
