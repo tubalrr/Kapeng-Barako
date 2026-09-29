@@ -805,9 +805,9 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
     ).join("") : '<div class="empty"><strong style="display:block;color:var(--text);font-size:11px;margin-bottom:5px">No orders yet</strong><span>Your order queue is clear.</span></div>';
 
     drawSalesChart(os);
-    // Keep every Overview metric block synchronized with the same order source.
-    // This prevents the secondary Operations Snapshot from showing stale zero values.
-    updateSnapshot();
+    // The secondary dashboard is maintained by admin-extra-script.
+    // Refresh it through its explicit public hook after the primary overview renders.
+    window.KBAdminExtra?.refresh?.();
   }
 
   function drawSalesChart(os) {
@@ -1848,7 +1848,18 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
   }
 
   function init(){
-    window.KBAdminExtra={views:["products","promos","content","gallery","ads","contact","reviews","analytics","notifications"],openView:openExtraView};
+    window.KBAdminExtra={
+      views:["products","promos","content","gallery","ads","contact","reviews","analytics","notifications"],
+      openView:openExtraView,
+      refresh:()=>{
+        updateSnapshot();
+        renderExtraProducts();
+        renderExtraReviews();
+        renderPromos();
+        renderGallery();
+        renderAds();
+      }
+    };
     bindDialogs();
     document.getElementById("extraProducts")?.addEventListener("click",event=>{
       const save=event.target.closest("[data-x-save]"),del=event.target.closest("[data-x-delete]");
