@@ -23,6 +23,7 @@ function clientOrderSnapshot(order) {
   const normalizeDate = value => {
     if (value && typeof value.toDate === "function") return value.toDate().toISOString();
     if (value && typeof value.toISOString === "function") return value.toISOString();
+    if (value && typeof value === "object") return null;
     return value || null;
   };
   return {
