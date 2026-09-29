@@ -114,6 +114,7 @@
   }catch{}
 
   let centralOrderModulePromise = null;
+  let isPlacingOrder = false;
 
   async function createBackendOrder(payload) {
     centralOrderModulePromise ||= import("./js/firebase-backend.js?v=kb-auth-ready-1");
@@ -939,6 +940,8 @@
   async function placeOrder(event) {
     event.preventDefault();
 
+    if (isPlacingOrder) return;
+
     if (!cart.length) {
       toast("Your cart is empty.");
       return;
@@ -961,10 +964,17 @@
       return;
     }
 
+    if (!["GCash","Cash on Delivery (COD)","Bank Transfer"].includes(payment)) {
+      toast("Please select a valid payment method.");
+      return;
+    }
+
     if (payment === "GCash" && !gcashRef) {
       toast("Please enter your GCash Ref Number.");
       return;
     }
+
+    if (!form.reportValidity()) return;
 
     const liveProducts = getProducts();
     const shortage = cart.find(item => {
@@ -987,8 +997,14 @@
       submit.textContent = "PLACING ORDER…";
     }
 
-    const clientOrderId = "KB-" + Date.now().toString(36).toUpperCase() + "-" +
-      Math.random().toString(36).slice(2, 7).toUpperCase();
+    isPlacingOrder = true;
+
+    let clientOrderId = String(form.dataset.clientOrderId || "").trim();
+    if (!clientOrderId) {
+      clientOrderId = "KB-" + Date.now().toString(36).toUpperCase() + "-" +
+        Math.random().toString(36).slice(2, 7).toUpperCase();
+      form.dataset.clientOrderId = clientOrderId;
+    }
 
     try {
       const result = await createBackendOrder({
@@ -1007,25 +1023,32 @@
         }))
       });
 
-      const serverTotal = Number(result?.total || 0);
       const now = new Date().toISOString();
+      const serverOrder = result?.order && typeof result.order === "object" ? result.order : null;
+      const serverSubtotal = Number(result?.subtotal ?? serverOrder?.subtotal ?? cartTotal());
+      const serverShipping = Number(result?.shippingFee ?? serverOrder?.shippingFee ?? shippingFee(address));
+      const serverDiscount = Number(result?.discount ?? serverOrder?.discount ?? promoDiscount(voucher, serverSubtotal));
+      const serverTotal = Number(result?.total ?? serverOrder?.total ?? Math.max(0, serverSubtotal + serverShipping - serverDiscount));
 
       // Local state is only a UI cache/pointer. Firestore is the order source of truth.
       const localPreview = {
-        id: result?.id || clientOrderId,
-        createdAt: now,
-        customer: { name, phone, email, address },
-        payment,
-        gcashRef,
-        paymentStatus: payment === "GCash" ? "Pending Review" : "Not Required",
-        fulfillment,
-        voucher,
-        subtotal: cartTotal(),
-        shippingFee: shippingFee(address),
-        discount: promoDiscount(voucher, cartTotal()),
+        ...(serverOrder || {}),
+        id: result?.id || serverOrder?.id || clientOrderId,
+        createdAt: serverOrder?.createdAt?.toDate ? serverOrder.createdAt.toDate().toISOString() : (serverOrder?.createdAt || now),
+        updatedAt: serverOrder?.updatedAt?.toDate ? serverOrder.updatedAt.toDate().toISOString() : (serverOrder?.updatedAt || now),
+        customer: serverOrder?.customer || { name, phone, email, address },
+        payment: serverOrder?.payment || payment,
+        paymentMethod: serverOrder?.paymentMethod || payment,
+        gcashRef: serverOrder?.gcashRef || gcashRef,
+        paymentStatus: serverOrder?.paymentStatus || (payment === "GCash" ? "pending_verification" : "unpaid"),
+        fulfillment: serverOrder?.fulfillment || fulfillment,
+        voucher: serverOrder?.voucher || voucher,
+        subtotal: serverSubtotal,
+        shippingFee: serverShipping,
+        discount: serverDiscount,
         total: serverTotal,
-        status: "Pending",
-        statusUpdatedAt: now,
+        status: serverOrder?.status || result?.status || "Pending",
+        statusUpdatedAt: serverOrder?.statusUpdatedAt?.toDate ? serverOrder.statusUpdatedAt.toDate().toISOString() : (serverOrder?.statusUpdatedAt || now),
         route: {
           origin: "Kapeng Barako, Quezon City, Metro Manila, Philippines",
           waypoint: getRouteWaypoint(address),
@@ -1044,21 +1067,23 @@
         })
       };
 
-      const updatedProducts = liveProducts.map(product => {
-        const line = localPreview.items.find(
-          item => String(item.id) === String(product.id)
-        );
-        if (!line) return product;
-        return {
-          ...product,
-          stock: Math.max(
-            0,
-            Number(product.stock || 0) - Number(line.qty || 0)
-          )
-        };
-      });
+      if (!result?.reused) {
+        const updatedProducts = liveProducts.map(product => {
+          const line = localPreview.items.find(
+            item => String(item.id) === String(product.id)
+          );
+          if (!line) return product;
+          return {
+            ...product,
+            stock: Math.max(
+              0,
+              Number(product.stock || 0) - Number(line.qty || 0)
+            )
+          };
+        });
+        write(PRODUCT_KEY, updatedProducts);
+      }
 
-      write(PRODUCT_KEY, updatedProducts);
       upsertOrderCache(localPreview);
       write("kb_last_order", localPreview);
 
@@ -1092,6 +1117,7 @@
         toast(message || "Order could not be placed. Please try again.");
       }
     } finally {
+      isPlacingOrder = false;
       if (submit) {
         submit.disabled = false;
         submit.textContent = "PLACE ORDER →";
