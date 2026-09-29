@@ -805,9 +805,74 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
     ).join("") : '<div class="empty"><strong style="display:block;color:var(--text);font-size:11px;margin-bottom:5px">No orders yet</strong><span>Your order queue is clear.</span></div>';
 
     drawSalesChart(os);
-    // The secondary dashboard is maintained by admin-extra-script.
-    // Refresh it through its explicit public hook after the primary overview renders.
-    window.KBAdminExtra?.refresh?.();
+    renderOperationsSnapshot(os, ps);
+  }
+
+  function renderOperationsSnapshot(os, ps) {
+    const ordersList = Array.isArray(os) ? os : [];
+    const productsList = Array.isArray(ps) ? ps : [];
+    const today = todayStart();
+    const week = weekStart();
+
+    const todaySales = ordersList
+      .filter(order => {
+        const time = orderTime(order?.createdAt);
+        return Number.isFinite(time) && time >= today;
+      })
+      .reduce((sum, order) => sum + Number(order?.total || 0), 0);
+
+    const weekSales = ordersList
+      .filter(order => {
+        const time = orderTime(order?.createdAt);
+        return Number.isFinite(time) && time >= week;
+      })
+      .reduce((sum, order) => sum + Number(order?.total || 0), 0);
+
+    const customerKeys = new Set();
+    ordersList.forEach(order => {
+      const key = String(
+        order?.customerUid ||
+        order?.customer?.uid ||
+        order?.customer?.email ||
+        order?.email ||
+        order?.customer?.phone ||
+        order?.phone ||
+        order?.customer?.name ||
+        order?.customerName ||
+        ""
+      ).trim().toLowerCase();
+      if (key) customerKeys.add(key);
+    });
+
+    const countStatus = status =>
+      ordersList.filter(order => normalizeStatus(order?.status) === status).length;
+
+    const readyCount = ordersList.filter(order =>
+      ["Ready", "Dispatched", "In Transit", "Processing/Roasting"].includes(normalizeStatus(order?.status))
+    ).length;
+
+    const set = (id, value) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
+    };
+
+    set("extraTodaySales", money(todaySales));
+    set("extraWeekSales", money(weekSales));
+    set("extraCustomers", customerKeys.size);
+    set("extraPending", countStatus("Pending"));
+    set("extraReady", readyCount);
+    set("extraDelivered", countStatus("Delivered"));
+
+    const source = document.getElementById("orderFlowSource");
+    if (source) {
+      if (demoStore()) {
+        source.innerHTML = 'Demo session <code>kb_demo_admin_data</code>';
+      } else if (firestoreOrdersReady) {
+        source.textContent = "Live from Firestore";
+      } else {
+        source.innerHTML = 'Browser cache <code>kb_orders</code>';
+      }
+    }
   }
 
   function drawSalesChart(os) {
@@ -1246,7 +1311,7 @@ button:disabled,[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
   const money=(n)=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
   const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
   const products=()=>{const x=read(PRODUCT_KEY,[]);return Array.isArray(x)?x:[]};
-  const orders=()=>{const x=window.KBAdminOrders?window.KBAdminOrders():read("kb_orders",[]);return Array.isArray(x)?x:[]};
+  const orders=()=>{const source=typeof window.KBAdminOrders==="function"?window.KBAdminOrders():read("kb_orders",[]);return Array.isArray(source)?source:[]};
   const customers=()=>{
     const m=new Map();
     orders().forEach(o=>{
