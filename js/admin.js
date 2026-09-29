@@ -18,7 +18,7 @@
   let firestoreOrdersUnsubscribe = null;
   let firestoreProductsUnsubscribe = null;
   const $ = (s) => document.querySelector(s);
-  const $ = (s) => [...document.querySelectorAll(s)];
+  const $$ = (s) => [...document.querySelectorAll(s)];
 
   const previewRequested = new URLSearchParams(window.location.search).get("preview") === "1";
   let previewMode = false;
