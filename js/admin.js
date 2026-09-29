@@ -1341,14 +1341,31 @@
   }
 
   function bindDialogs(){
-    document.getElementById("extraAddProduct")?.addEventListener("click",()=>document.getElementById("extraProductDialog")?.showModal());
-    document.getElementById("extraProductForm")?.addEventListener("submit",e=>{
-      e.preventDefault();
-      addExtraProduct().catch(error=>{
+    document.getElementById("extraAddProduct")?.addEventListener("click",()=>{
+      const dialog=document.getElementById("extraProductDialog");
+      if(!dialog)return;
+      if(dialog.open)return;
+      try{
+        if(typeof dialog.showModal==="function")dialog.showModal();
+        else dialog.setAttribute("open","");
+      }catch(error){
+        console.error("[Kapeng Barako] Add Product dialog open failed",error);
+        dialog.setAttribute("open","");
+      }
+      document.getElementById("extraProductName")?.focus();
+    });
+
+    const runAddProduct=()=>{
+      void addExtraProduct().catch(error=>{
         console.error("[Kapeng Barako] add product failed",error);
         toastExtra(error?.message || "Could not add product.");
       });
+    };
+    document.getElementById("extraProductForm")?.addEventListener("submit",event=>{
+      event.preventDefault();
+      runAddProduct();
     });
+    document.getElementById("saveExtraProduct")?.addEventListener("click",runAddProduct);
     document.querySelectorAll("[data-extra-dialog-close]").forEach(b=>b.addEventListener("click",()=>document.getElementById("extraProductDialog")?.close()));
     document.getElementById("extraAddPromo")?.addEventListener("click",addExtraPromo);
     document.getElementById("extraPromoForm")?.addEventListener("submit",e=>{e.preventDefault();saveExtraPromo()});
