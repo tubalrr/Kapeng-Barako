@@ -116,7 +116,7 @@
   let centralOrderModulePromise = null;
 
   async function createBackendOrder(payload) {
-    centralOrderModulePromise ||= import("./js/firebase-backend.js");
+    centralOrderModulePromise ||= import("./js/firebase-backend.js?v=kb-auth-ready-1");
     const backend = await centralOrderModulePromise;
     return backend.createCentralOrder(payload);
   }
@@ -1075,8 +1075,15 @@
     } catch (error) {
       console.error("[Kapeng Barako] checkout failed", error);
       const message = String(error?.message || "");
+
       if (/sign in|authenticated|customer account/i.test(message)) {
-        toast("Please sign in to your customer account before checkout.");
+        toast("Please sign in to your customer account first.");
+        try {
+          localStorage.setItem("kb_checkout_return", "1");
+        } catch {}
+        window.setTimeout(() => {
+          window.location.href = "pages/account.html";
+        }, 650);
       } else if (/insufficient stock|no longer available/i.test(message)) {
         toast("Stock changed. Please review your cart.");
         renderProducts();
