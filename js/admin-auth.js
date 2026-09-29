@@ -132,7 +132,7 @@
   }
 
   async function signInWithEmailPassword(email, password) {
-    const { auth: currentAuth, authMod } = await init();
+    const { auth: currentAuth, authMod, db: currentDb, firestoreMod } = await init();
     const normalized = String(email || "").trim().toLowerCase();
     if (!normalized) throw new Error("Enter your admin email.");
     if (!password) throw new Error("Enter your admin password.");
@@ -141,7 +141,7 @@
       await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
       const credential = await authMod.signInWithEmailAndPassword(currentAuth, normalized, password);
 
-      const adminRef = firestoreMod.doc(db, "admins", credential.user.uid);
+      const adminRef = firestoreMod.doc(currentDb, "admins", credential.user.uid);
       await firestoreMod.setDoc(adminRef, {
         active: true,
         role: "admin",
