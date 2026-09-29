@@ -500,12 +500,11 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   const money = (n) => "₱" + Number(n || 0).toLocaleString("en-PH", {maximumFractionDigits:2});
   const esc = (v) => String(v ?? "").replace(/[&<>"\']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\'":"&#39;" }[c]));
   // Canonical public fulfillment statuses for the entire template.
-  const ORDER_STATUSES = ["Pending", "Ready", "Delivered"];
+  const ORDER_STATUSES = ["Pending", "Processing/Roasting", "Ready", "Dispatched", "In Transit", "Delivered"];
   const normalizeStatus = (s) => {
     const v = String(s || "Pending").trim().toLowerCase();
-    if (v === "delivered") return "Delivered";
-    if (["ready","ready to ship","processing/roasting","dispatched","in transit"].includes(v)) return "Ready";
-    return "Pending";
+    const map = {"pending":"Pending","processing":"Processing/Roasting","processing/roasting":"Processing/Roasting","ready":"Ready","ready to ship":"Ready","dispatched":"Dispatched","in transit":"In Transit","delivered":"Delivered"};
+    return map[v] || "Pending";
   };
   const statusClass = (s) => normalizeStatus(s).toLowerCase();
 
@@ -853,7 +852,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
           '<td>'+esc(new Date(orderTime(o.createdAt) || Date.now()).toLocaleString("en-PH",{dateStyle:"medium",timeStyle:"short"}))+'</td>'+
           '<td>'+itemsCount(o)+'</td>'+
           '<td><strong>'+money(o.total)+'</strong></td>'+
-          '<td><select class="status-select" data-status-id="'+esc(o.id)+'"><option value="Pending">Pending</option><option value="Ready">Ready</option><option value="Delivered">Delivered</option></select></td>'+
+          '<td><select class="status-select" data-status-id="'+esc(o.id)+'"><option value="Pending">Pending</option><option value="Processing/Roasting">Processing/Roasting</option><option value="Ready">Ready</option><option value="Dispatched">Dispatched</option><option value="In Transit">In Transit</option><option value="Delivered">Delivered</option></select></td>'+
           '<td><strong class="gcash-ref '+(isGcash&&!ref?"gcash-missing":"")+'">'+esc(isGcash?(ref||"MISSING"):(ref||"—"))+'</strong></td>'+
           '<td>'+(
             isGcash
