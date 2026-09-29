@@ -235,15 +235,6 @@ function writeOrderCache(orders){
   }catch{}
 }
 
-function getCachedCustomerOrders(email){
-  try{
-    const list=JSON.parse(localStorage.getItem(ORDER_KEY)||"[]");
-    const wanted=String(email||"").trim().toLowerCase();
-    if(!Array.isArray(list)||!wanted)return [];
-    return list.filter(order=>String(order?.customer?.email||"").trim().toLowerCase()===wanted);
-  }catch{return []}
-}
-
 async function loadAccount(){
   if(isDemoAccount()){
     if(ordersUnsubscribe){ordersUnsubscribe();ordersUnsubscribe=null;}
