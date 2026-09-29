@@ -761,6 +761,27 @@
   const weekStart=()=>{const d=new Date();const monday=((d.getDay()+6)%7);return new Date(d.getFullYear(),d.getMonth(),d.getDate()-monday).getTime()};
   const orderStatus=(o)=>String(o?.status||"Pending").toLowerCase();
 
+  // Product/Content/Review runtime needs its own scoped activity writer.
+  // The previous implementation called log() from a different IIFE, causing
+  // Add Product to throw after saving and before closing the dialog.
+  const log=(type,message,meta={})=>{
+    try{
+      const raw=localStorage.getItem("kb_activity_log");
+      const parsed=raw?JSON.parse(raw):[];
+      const list=Array.isArray(parsed)?parsed:[];
+      list.unshift({
+        id:"A-"+Date.now().toString(36).toUpperCase()+"-"+Math.random().toString(36).slice(2,7),
+        type,
+        message,
+        meta,
+        at:new Date().toISOString()
+      });
+      localStorage.setItem("kb_activity_log",JSON.stringify(list.slice(0,300)));
+    }catch(error){
+      console.warn("[Kapeng Barako] activity log write failed",error);
+    }
+  };
+
   function notifyStorefront(type="products-updated"){
     try{
       localStorage.setItem("kb_admin_catalog_updated",String(Date.now()));
@@ -1301,7 +1322,13 @@
 
   function bindDialogs(){
     document.getElementById("extraAddProduct")?.addEventListener("click",()=>document.getElementById("extraProductDialog")?.showModal());
-    document.getElementById("extraProductForm")?.addEventListener("submit",e=>{e.preventDefault();addExtraProduct()});
+    document.getElementById("extraProductForm")?.addEventListener("submit",e=>{
+      e.preventDefault();
+      addExtraProduct().catch(error=>{
+        console.error("[Kapeng Barako] add product failed",error);
+        toastExtra(error?.message || "Could not add product.");
+      });
+    });
     document.querySelectorAll("[data-extra-dialog-close]").forEach(b=>b.addEventListener("click",()=>document.getElementById("extraProductDialog")?.close()));
     document.getElementById("extraAddPromo")?.addEventListener("click",addExtraPromo);
     document.getElementById("extraPromoForm")?.addEventListener("submit",e=>{e.preventDefault();saveExtraPromo()});
