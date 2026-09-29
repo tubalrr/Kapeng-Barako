@@ -49,6 +49,8 @@ Run this checklist on the deployed GitHub Pages site after Firebase configuratio
 - [ ] Session persistence: after a successful verified login, refreshing the page keeps the customer signed in; closing and reopening the browser keeps the customer signed in when Firebase local persistence is available.
 - [ ] Unverified session guard: a password-authenticated user with emailVerified=false is signed out instead of seeing private account data.
 - [ ] Firebase placeholder state: with REPLACE_WITH_ config values, customer auth is disabled with a clear setup message; demo account remains available for UI testing.
+- [ ] Demo account is labeled exactly **TEST / DEMO ACCOUNT**; no personal-looking demo identity is presented as a real customer.
+- [ ] Demo orders, addresses, wishlist items and profile are visibly marked as demo/test data.
 ## Backend smoke test
 - [ ] Firebase Auth login succeeds.
 - [ ] `admins/{uid}` authorization is enforced.
