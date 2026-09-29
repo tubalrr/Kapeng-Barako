@@ -112,8 +112,11 @@ function defaultAddress(){
   return normalizeAddresses(state.addresses).find(a=>a.isDefault)||null;
 }
 function saveCheckoutDefault(a){
-  if(!a)return;
   try{
+    if(!a){
+      localStorage.removeItem("kb_checkout_default");
+      return;
+    }
     localStorage.setItem("kb_checkout_default",JSON.stringify({
       recipient:a.recipient||state.profile?.fullName||"",
       phone:a.phone||state.profile?.phone||"",
@@ -367,6 +370,9 @@ async function loadAccount(){
     });
   writeOrderCache(state.orders);
   state.addresses=normalizeAddresses(addrSnap.docs.map(d=>({id:d.id,...d.data()})));
+  // Keep checkout synchronized with the authenticated customer's current default.
+  // If the account has no saved addresses, clear any stale browser checkout address.
+  saveCheckoutDefault(defaultAddress());
   state.wishlist=wishSnap.docs.map(d=>({id:d.id,...d.data()}));
 
   // Live order source: Admin status changes are pushed here immediately.
