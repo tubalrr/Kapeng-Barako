@@ -588,7 +588,7 @@
         product.process ? "Process: " + product.process : "",
         product.tastingNotes ? product.tastingNotes : ""
       ].filter(Boolean);
-      meta.innerHTML = details.slice(0,5).map(value => "<span>" + esc(value) + "</span>").join("");
+      meta.innerHTML = details.map(value => "<span>" + esc(value) + "</span>").join("");
       meta.hidden = details.length === 0;
     }
 
