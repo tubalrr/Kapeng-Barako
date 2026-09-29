@@ -508,6 +508,26 @@
     const card = $(".featured-card");
     if (!card) return;
     card.hidden = !product;
+
+    // The storefront must remain stable when Admin has not published any products yet.
+    // Do not dereference an empty catalog just because the featured-card markup exists.
+    if (!product) {
+      const name = $("#featuredProductName");
+      const meta = $("#featuredProductMeta");
+      const price = $("#featuredProductPrice");
+      const image = $("#featuredProductImage");
+      const fallback = $("#featuredProductFallback");
+      if (name) name.textContent = "";
+      if (meta) meta.textContent = "Catalog details will appear here when a product is published.";
+      if (price) price.textContent = "";
+      if (image) {
+        image.removeAttribute("src");
+        image.hidden = true;
+      }
+      if (fallback) fallback.hidden = false;
+      return;
+    }
+
     const name = $("#featuredProductName");
     const meta = $("#featuredProductMeta");
     const price = $("#featuredProductPrice");
