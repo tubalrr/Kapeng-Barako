@@ -320,36 +320,36 @@ function deliveredCount(){return state.orders.filter(o=>String(o.status).toLower
 
 function ordersView(){
  if(!state.orders.length)return `<div class="panel-head"><div><h2>My Orders</h2><p>Your verified account orders will appear here.</p></div></div><div class="empty-state">No orders yet.<br><a class="account-btn gold" href="../index.html#products" style="display:inline-flex;margin-top:12px">Shop Coffee</a></div>`;
- return `<div class="panel-head"><div><h2>My Orders</h2><p>Order history and current delivery status.</p></div><button class="account-btn primary" type="button" data-show-track>Track my order</button></div><div class="order-list">${state.orders.map(order=>`<article class="order-card"><div class="order-top"><div><div class="order-id">#${esc(order.id)}</div><div class="order-meta">${formatDate(order.createdAt)}</div></div><span class="status ${String(order.status||"Pending").toLowerCase()}">${esc(order.status||"Pending")}</span></div><div class="order-items">${(order.items||[]).map(i=>`<div class="order-item"><span>${esc(i.name)} · ${esc(i.size||i.weight||"")} × ${Number(i.qty||1)}</span><strong>${money(Number(i.price||0)*Number(i.qty||1))}</strong></div>`).join("")}</div><div class="order-total"><span>Total</span><span>${money(order.total)}</span></div><div class="card-actions"><button class="small-btn track-order-btn" type="button" data-track-order="${esc(order.id)}">Track Order →</button></div></article>`).join("")}</div>`;
+ return `<div class="panel-head"><div><h2>My Orders</h2><p>Order history and current delivery status.</p></div><button class="account-btn primary" type="button" data-show-track>Track my order</button></div><div class="order-list">${state.orders.map(order=>`<article class="order-card"><div class="order-top"><div><div class="order-id">#${esc(order.id)}</div><div class="order-meta">${formatDate(order.createdAt)}</div></div><span class="status ${normalizeOrderStatus(order.status).toLowerCase()}">${normalizeOrderStatus(order.status)}</span></div><div class="order-items">${(order.items||[]).map(i=>`<div class="order-item"><span>${esc(i.name)} · ${esc(i.size||i.weight||"")} × ${Number(i.qty||1)}</span><strong>${money(Number(i.price||0)*Number(i.qty||1))}</strong></div>`).join("")}</div><div class="order-total"><span>Total</span><span>${money(order.total)}</span></div><div class="card-actions"><button class="small-btn track-order-btn" type="button" data-track-order="${esc(order.id)}">Track Order →</button></div></article>`).join("")}</div>`;
+}
+
+function normalizeOrderStatus(status){
+ const raw=String(status||"Pending").trim().toLowerCase();
+ if(raw==="delivered") return "Delivered";
+ if(["ready","ready to ship","processing/roasting","dispatched","in transit"].includes(raw)) return "Ready";
+ return "Pending";
 }
 
 function trackingStage(order){
- const raw=String(order?.status||"Pending");
- const current=raw==="Ready"?"Ready to Ship":raw;
- const currentKey=current.toLowerCase();
+ const current=normalizeOrderStatus(order?.status);
  const stages=[
    ["Pending","Order received"],
-   ["Verified Payment","Payment verified"],
-   ["Processing/Roasting","Roasting & preparation"],
-   ["Ready to Ship","Ready for dispatch"],
-   ["Dispatched","In transit"],
+   ["Ready","Ready for dispatch"],
    ["Delivered","Delivered"]
  ];
- if(currentKey==="cancelled") return {cancelled:true,stages};
- const currentIndex=stages.findIndex(([status])=>status.toLowerCase()===currentKey);
- return {cancelled:false,stages,currentIndex};
+ const currentIndex=stages.findIndex(([status])=>status===current);
+ return {stages,currentIndex};
 }
 
 function trackCard(order){
  const t=trackingStage(order);
+ const publicStatus=normalizeOrderStatus(order?.status);
  return `<article class="track-card">
-   <div class="track-card-head"><div><span class="track-label">ORDER</span><strong>#${esc(order.id)}</strong><span class="order-meta">Placed ${formatDate(order.createdAt)}</span></div><span class="status ${String(order.status||"Pending").toLowerCase()}">${esc(order.status||"Pending")}</span></div>
-   ${t.cancelled
-     ? '<div class="track-cancelled">This order is cancelled.</div>'
-     : '<div class="track-line">'+t.stages.map(([status,label],i)=>{
-         const done=t.currentIndex>=i;
-         return '<div class="track-step '+(done?"done":"")+' '+(t.currentIndex===i?"current":"")+'"><span class="track-dot"></span><div><strong>'+esc(label)+'</strong><small>'+esc(status)+(t.currentIndex===i?' · Current':'')+'</small></div></div>';
-       }).join("")+'</div>'}
+   <div class="track-card-head"><div><span class="track-label">ORDER</span><strong>#${esc(order.id)}</strong><span class="order-meta">Placed ${formatDate(order.createdAt)}</span></div><span class="status ${publicStatus.toLowerCase()}">${publicStatus}</span></div>
+   <div class="track-line">${t.stages.map(([status,label],i)=>{
+     const done=t.currentIndex>=i;
+     return '<div class="track-step '+(done?"done":"")+' '+(t.currentIndex===i?"current":"")+'"><span class="track-dot"></span><div><strong>'+esc(label)+'</strong><small>'+esc(status)+(t.currentIndex===i?' · Current':'')+'</small></div></div>';
+   }).join("")}</div>
    <div class="track-summary"><span>Order total</span><strong>${money(order.total)}</strong></div>
  </article>`;
 }
