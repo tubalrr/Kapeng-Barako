@@ -772,7 +772,9 @@
       const reason =
         error?.code === "FIREBASE_NOT_CONFIGURED" ? "setup" :
         error?.code === "AUTH_TIMEOUT" ? "timeout" :
-        "expired";
+        error?.code === "ADMIN_NOT_AUTHORIZED" ? "unauthorized" :
+        error?.code === "ADMIN_SESSION_INVALID" ? "session-invalid" :
+        "login";
       location.replace("./login.html?reason="+encodeURIComponent(reason));
     }
   })();
