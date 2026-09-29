@@ -466,15 +466,32 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
 
+  const demoStore = () => window.KBAdminAuth?.readDemoData?.() || null;
+  const persistDemoStore = (data) => {
+    try {
+      const key = window.KBAdminAuth?.DEMO_DATA_KEY;
+      if (key) sessionStorage.setItem(key, JSON.stringify(data));
+    } catch {}
+  };
   const read = (key, fallback) => {
     try {
+      const demo = demoStore();
+      if (demo && Object.prototype.hasOwnProperty.call(demo, key)) return demo[key];
       const raw = localStorage.getItem(key);
       return raw === null ? fallback : JSON.parse(raw);
     } catch {
       return fallback;
     }
   };
-  const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+  const write = (key, value) => {
+    const demo = demoStore();
+    if (demo) {
+      demo[key] = value;
+      persistDemoStore(demo);
+      return;
+    }
+    localStorage.setItem(key, JSON.stringify(value));
+  };
   const money = (n) => "₱" + Number(n || 0).toLocaleString("en-PH", {maximumFractionDigits:2});
   const esc = (v) => String(v ?? "").replace(/[&<>"\']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\'":"&#39;" }[c]));
   const normalizeStatus = (s) => {
@@ -954,8 +971,10 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
 (() => {
   "use strict";
   const PRODUCT_KEY="kb_rebuild_products", PROMO_KEY="kb_promos", SETTINGS_KEY="kb_settings", CMS_KEY="kb_cms", GALLERY_KEY="kb_gallery", ADS_KEY="kb_ads", SOUND_KEY="kb_low_stock_sound";
-  const read=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw===null?fallback:JSON.parse(raw)}catch{return fallback}};
-  const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch{}};
+  const demoStore=()=>window.KBAdminAuth?.readDemoData?.()||null;
+  const persistDemoStore=data=>{try{const key=window.KBAdminAuth?.DEMO_DATA_KEY;if(key)sessionStorage.setItem(key,JSON.stringify(data))}catch{}};
+  const read=(key,fallback)=>{try{const demo=demoStore();if(demo&&Object.prototype.hasOwnProperty.call(demo,key))return demo[key];const raw=localStorage.getItem(key);return raw===null?fallback:JSON.parse(raw)}catch{return fallback}};
+  const write=(key,value)=>{try{const demo=demoStore();if(demo){demo[key]=value;persistDemoStore(demo);return}localStorage.setItem(key,JSON.stringify(value))}catch{}};
   const esc=(v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const money=(n)=>"₱"+Number(n||0).toLocaleString("en-PH",{maximumFractionDigits:2});
   const orderTime=(value)=>value&&typeof value.toDate==="function"?value.toDate().getTime():new Date(value||0).getTime();
@@ -1285,8 +1304,17 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     READ:"kb_notification_read",
     DEMO:"kb_demo_customer_v1"
   };
+  const demoStore = () => window.KBAdminAuth?.readDemoData?.() || null;
+  const persistDemoStore = data => {
+    try {
+      const key = window.KBAdminAuth?.DEMO_DATA_KEY;
+      if (key) sessionStorage.setItem(key, JSON.stringify(data));
+    } catch {}
+  };
   const read = (key, fallback) => {
     try {
+      const demo = demoStore();
+      if (demo && Object.prototype.hasOwnProperty.call(demo, key)) return demo[key];
       const raw = localStorage.getItem(key);
       return raw === null ? fallback : JSON.parse(raw);
     } catch {
@@ -1294,7 +1322,15 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     }
   };
   const write = (key, value) => {
-    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    try {
+      const demo = demoStore();
+      if (demo) {
+        demo[key] = value;
+        persistDemoStore(demo);
+        return;
+      }
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {}
   };
   const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
