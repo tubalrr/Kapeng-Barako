@@ -15,6 +15,7 @@
   const SHIPPING_KEY = "kb_shipping_rule";
   const PROMO_KEY = "kb_promos";
   const ADS_KEY = "kb_ads";
+  const PENDING_ORDER_KEY = "kb_pending_order_id";
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -926,6 +927,8 @@
       form?.addEventListener("input", refresh);
 
       $("#cancelCheckout")?.addEventListener("click", () => {
+        try { sessionStorage.removeItem(PENDING_ORDER_KEY); } catch {}
+        delete form.dataset.clientOrderId;
         box.remove();
         if ($("#checkoutButton")) $("#checkoutButton").hidden = false;
       });
@@ -1001,9 +1004,13 @@
 
     let clientOrderId = String(form.dataset.clientOrderId || "").trim();
     if (!clientOrderId) {
+      try { clientOrderId = String(sessionStorage.getItem(PENDING_ORDER_KEY) || "").trim(); } catch {}
+    }
+    if (!clientOrderId) {
       clientOrderId = "KB-" + Date.now().toString(36).toUpperCase() + "-" +
         Math.random().toString(36).slice(2, 7).toUpperCase();
       form.dataset.clientOrderId = clientOrderId;
+      try { sessionStorage.setItem(PENDING_ORDER_KEY, clientOrderId); } catch {}
     }
 
     try {
@@ -1090,6 +1097,7 @@
       cart = [];
       write(CART_KEY, cart);
 
+      try { sessionStorage.removeItem(PENDING_ORDER_KEY); } catch {}
       $(".checkout-inline")?.remove();
       if ($("#checkoutButton")) $("#checkoutButton").hidden = false;
 
