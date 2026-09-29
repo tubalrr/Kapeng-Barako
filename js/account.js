@@ -235,7 +235,6 @@ function writeOrderCache(orders){
   }catch{}
 }
 
-function getLocalCustomerOrders(email){
 function getCachedCustomerOrders(email){
   try{
     const list=JSON.parse(localStorage.getItem(ORDER_KEY)||"[]");
