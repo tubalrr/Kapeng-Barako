@@ -251,21 +251,31 @@ async function loadAccount(){
   const uid=state.user.uid;
   const [profileSnap,ordersSnap,addrSnap,wishSnap]=await Promise.all([
     getDoc(doc(db,"users",uid)),
-    getDocs(query(collection(db,"orders"),where("customerUid","==",uid),orderBy("createdAt","desc"))),
+    getDocs(query(collection(db,"orders"),where("customerUid","==",uid))),
     getDocs(collection(db,"users",uid,"addresses")).catch(()=>({docs:[]})),
     getDocs(collection(db,"users",uid,"wishlist")).catch(()=>({docs:[]}))
   ]);
   state.profile=profileSnap.exists()?profileSnap.data():{fullName:state.user.displayName||"",email:state.user.email||"",phone:state.user.phoneNumber||"",provider:state.user.providerData?.[0]?.providerId||""};
-  state.orders=ordersSnap.docs.map(d=>({id:d.id,...d.data(),source:"firestore"}));
+  state.orders=ordersSnap.docs.map(d=>({id:d.id,...d.data(),source:"firestore"}))
+    .sort((a,b)=>{
+      const ta=a.createdAt?.toDate?a.createdAt.toDate().getTime():new Date(a.createdAt||0).getTime();
+      const tb=b.createdAt?.toDate?b.createdAt.toDate().getTime():new Date(b.createdAt||0).getTime();
+      return tb-ta;
+    });
   writeOrderCache(state.orders);
   state.addresses=normalizeAddresses(addrSnap.docs.map(d=>({id:d.id,...d.data()})));
   state.wishlist=wishSnap.docs.map(d=>({id:d.id,...d.data()}));
 
   // Live order source: Admin status changes are pushed here immediately.
   ordersUnsubscribe=onSnapshot(
-    query(collection(db,"orders"),where("customerUid","==",uid),orderBy("createdAt","desc")),
+    query(collection(db,"orders"),where("customerUid","==",uid)),
     snapshot=>{
-      state.orders=snapshot.docs.map(d=>({id:d.id,...d.data(),source:"firestore"}));
+      state.orders=snapshot.docs.map(d=>({id:d.id,...d.data(),source:"firestore"}))
+        .sort((a,b)=>{
+          const ta=a.createdAt?.toDate?a.createdAt.toDate().getTime():new Date(a.createdAt||0).getTime();
+          const tb=b.createdAt?.toDate?b.createdAt.toDate().getTime():new Date(b.createdAt||0).getTime();
+          return tb-ta;
+        });
       writeOrderCache(state.orders);
       renderDashboard();
     },
