@@ -1842,3 +1842,38 @@ section,
     bottom:75px;
   }
 }
+
+.catalog-empty{
+  grid-column:1/-1;
+  display:grid;
+  place-items:center;
+  min-height:260px;
+  padding:48px 24px;
+  border:1px solid var(--kb-border,#2A2116);
+  border-radius:20px;
+  background:#221A0E;
+  text-align:center;
+}
+.catalog-empty span{
+  color:var(--kb-gold,#C8A951);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+.catalog-empty h3{
+  margin:10px 0 8px;
+  color:var(--kb-text,#F5E9D3);
+  font:600 32px/1.1 Georgia,serif;
+}
+.catalog-empty p{
+  margin:0;
+  max-width:420px;
+  color:var(--kb-muted,#B8A998);
+  font-size:11px;
+  line-height:1.6;
+}
+#openCart:disabled,#heroCartButton:disabled,#subscriptionProduct:disabled,#subscriptionSave:disabled{
+  opacity:.48;
+  cursor:not-allowed;
+}
