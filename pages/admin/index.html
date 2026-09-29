@@ -445,6 +445,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   <form id="stockForm" class="modal">
     <div class="modal-head"><div><div class="kicker">INVENTORY EDIT</div><h3 id="stockTitle">Edit stock</h3></div><button id="closeStock" class="close" type="button">×</button></div>
     <div class="field"><label for="stockInput">Stock (packs)</label><input id="stockInput" type="number" min="0" step="1" required></div>
+    <div class="field"><label for="priceInput">Price (₱)</label><input id="priceInput" type="number" min="0" step="0.01" required></div>
     <div class="form-actions"><button id="cancelStock" class="ghost-btn" type="button">Cancel</button><button class="primary-btn" type="submit">Save Stock</button></div>
   </form>
 </div>
@@ -551,15 +552,17 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
             const remote = docSnap.data() || {};
             const id = String(docSnap.id);
             const stock = Math.max(0, Number(remote.stock || 0));
+            const price = Math.max(0, Number(remote.price || 0));
             const existing = byId.get(id);
 
             if (existing) {
-              if (Number(existing.stock || 0) !== stock) {
+              if (Number(existing.stock || 0) !== stock || Number(existing.price || 0) !== price) {
                 existing.stock = stock;
+                existing.price = price;
                 changed = true;
               }
             } else {
-              byId.set(id, { id, ...remote, stock });
+              byId.set(id, { id, ...remote, stock, price });
               changed = true;
             }
           });
@@ -949,7 +952,8 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     if(!ps.length){root.innerHTML='<div class="card"><div class="empty">No product records found in kb_rebuild_products.</div></div>';return;}
     root.innerHTML = ps.map(p => {
       const stock = Number(p.stock || 0);
-      return '<article class="inventory-card"><div class="inventory-top"><div><div class="kicker">'+esc(p.size || "PRODUCT")+'</div><h3>'+esc(p.name || "Product")+'</h3><span class="inventory-id">'+esc(p.id || "—")+'</span></div><span class="badge '+(stock<=5?"low":"")+'">'+(stock<=5?"LOW STOCK":"IN STOCK")+'</span></div><div class="stock-value '+(stock<=5?"stock-low":"")+'">'+stock+' packs</div><button class="primary-btn" type="button" data-edit-stock="'+esc(p.id)+'">Edit Stock</button></article>';
+      const soldOut = stock === 0;
+      return '<article class="inventory-card"><div class="inventory-top"><div><div class="kicker">'+esc(p.size || "PRODUCT")+'</div><h3>'+esc(p.name || "Product")+'</h3><span class="inventory-id">'+esc(p.id || "—")+'</span></div><span class="badge '+(soldOut?"low":stock<=5?"low":"")+'">'+(soldOut?"SOLD OUT":stock<=5?"LOW STOCK":"IN STOCK")+'</span></div><div class="stock-value '+(stock<=5?"stock-low":"")+'">'+stock+' packs</div><div class="muted">Price: <strong style="color:var(--text)">'+money(p.price)+'</strong></div><button class="primary-btn" type="button" data-edit-stock="'+esc(p.id)+'">Edit Stock & Price</button></article>';
     }).join("");
 
   }
@@ -975,6 +979,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     editingProductId = id;
     $("#stockTitle").textContent = "Edit " + (p.name || p.id);
     $("#stockInput").value = Number(p.stock || 0);
+    $("#priceInput").value = Number(p.price || 0);
     $("#stockModal").classList.remove("hidden");
     $("#stockInput").focus();
   }
@@ -1049,15 +1054,39 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     if(button) openStock(button.dataset.editStock);
   });
 
-  $("#stockForm").addEventListener("submit", e => {
+  $("#stockForm").addEventListener("submit", async e => {
     e.preventDefault();
-    const value = Number($("#stockInput").value);
-    if(!editingProductId || !Number.isInteger(value) || value < 0) return;
-    const current=products();
-    const next=productStock(editingProductId,value);
+    const stock = Number($("#stockInput").value);
+    const price = Number($("#priceInput").value);
+    if(!editingProductId || !Number.isInteger(stock) || stock < 0 || !Number.isFinite(price) || price < 0) return;
+    const current = products();
+    const before = current.find(p => String(p.id) === String(editingProductId));
+    const next = current.map(p => String(p.id) === String(editingProductId)
+      ? {...p, stock, price}
+      : p);
     write(PRODUCT_KEY,next);
+    const history = read(K.HISTORY,[]);
+    const historyList = Array.isArray(history) ? history : [];
+    if (before && (Number(before.stock || 0) !== stock || Number(before.price || 0) !== price)) {
+      historyList.unshift({
+        productId:String(editingProductId),
+        productName:before.name || editingProductId,
+        previousStock:Number(before.stock || 0),
+        newStock:stock,
+        previousPrice:Number(before.price || 0),
+        newPrice:price,
+        action:"Inventory updated",
+        at:new Date().toISOString()
+      });
+      write(K.HISTORY,historyList.slice(0,200));
+    }
     notifyStorefront();
-    await syncProductCatalogToFirestore(next,current);
+    try {
+      await syncProductCatalogToFirestore(next,current);
+      toast("Inventory saved.");
+    } catch (error) {
+      toast("Saved locally, but Firebase sync failed.");
+    }
     closeStock();
     renderAll();
   });
