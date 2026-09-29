@@ -1500,19 +1500,52 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     const count=document.getElementById("extraPromoCount");if(count)count.textContent=promos.length+" promo"+(promos.length===1?"":"s");
     if(!promos.length){root.innerHTML='<div class="empty">No promo codes yet.</div>';return}
     root.innerHTML='<table><thead><tr><th>Name</th><th>Code</th><th>Rule</th><th>Status</th><th></th></tr></thead><tbody>'+
-      promos.map((p,i)=>'<tr><td><strong>'+esc(p.name||"Promo")+'</strong></td><td><strong>'+esc(p.code||"—")+'</strong></td><td>'+esc(p.type==="percent"?Number(p.value||0)+"% off":money(p.value)+" off")+' · min '+Number(p.minPacks||0)+' packs</td><td><span class="badge '+(p.active===false?"low":"")+'">'+(p.active===false?"OFF":"ACTIVE")+'</span></td><td><button class="danger-btn" type="button" data-x-promo-delete="'+i+'">Delete</button></td></tr>').join("")+
+      promos.map((p,i)=>'<tr><td><strong>'+esc(p.name||"Promo")+'</strong></td><td><strong>'+esc(p.code||"—")+'</strong></td><td>'+esc(p.type==="percent"?Number(p.value||0)+"% off":money(p.value)+" off")+' · min '+Number(p.minPacks||0)+' packs</td><td><span class="badge '+(p.active===false?"low":"")+'">'+(p.active===false?"OFF":"ACTIVE")+'</span></td><td><button class="ghost-btn" type="button" data-x-promo-toggle="'+i+'">'+(p.active===false?"Activate":"Deactivate")+'</button> <button class="ghost-btn" type="button" data-x-promo-edit="'+i+'">Edit</button> <button class="danger-btn" type="button" data-x-promo-delete="'+i+'">Delete</button></td></tr>').join("")+
       '</tbody></table>';
   }
 
-  function addExtraPromo(){
+  function openPromoEditor(index){
+    const list=read(PROMO_KEY,[]);const promos=Array.isArray(list)?list:[];const p=promos[index];if(!p)return;
+    const name=document.getElementById("extraPromoName"),code=document.getElementById("extraPromoCode"),type=document.getElementById("extraPromoType"),value=document.getElementById("extraPromoValue"),min=document.getElementById("extraPromoMin"),active=document.getElementById("extraPromoActive");
+    if(!name||!code||!type||!value||!min||!active)return;
+    name.value=p.name||"";code.value=p.code||"";type.value=p.type==="fixed"?"fixed":"percent";value.value=Number(p.value||0);min.value=Number(p.minPacks||0);active.checked=p.active!==false;
+    document.getElementById("extraPromoDialog")?.showModal();
+    document.getElementById("extraPromoDialog")?.setAttribute("data-edit-index",String(index));
+  }
+
+  function saveExtraPromo(){
     const name=document.getElementById("extraPromoName")?.value.trim()||"", code=(document.getElementById("extraPromoCode")?.value.trim()||"").toUpperCase(), type=document.getElementById("extraPromoType")?.value||"percent", value=Number(document.getElementById("extraPromoValue")?.value||0), minPacks=Number(document.getElementById("extraPromoMin")?.value||0), active=document.getElementById("extraPromoActive")?.checked!==false;
-    if(!name||!code){toastExtra("Promo name and code are required.");return}
-    if(!Number.isFinite(value)||value<0||!Number.isFinite(minPacks)||minPacks<0){toastExtra("Enter valid promo values.");return}
-    const current=read(PROMO_KEY,[]);const next=Array.isArray(current)?current:[];
-    if(next.some(p=>String(p.code||"").toUpperCase()===code)){toastExtra("That promo code already exists.");return}
-    next.push({id:"P-"+Date.now(),name,code,type,value,minPacks,active});write(PROMO_KEY,next);
-    document.getElementById("extraPromoDialog")?.close();document.getElementById("extraPromoForm")?.reset();document.getElementById("extraPromoActive").checked=true;
-    toastExtra(code+" saved.");renderPromos();
+    if(!name||!code){toastExtra("Promo name and code are required.");return false}
+    if(!/^[A-Z0-9_-]+$/.test(code)){toastExtra("Use letters, numbers, hyphen, or underscore for the code.");return false}
+    if(!Number.isFinite(value)||value<=0||!Number.isFinite(minPacks)||minPacks<0||!Number.isInteger(minPacks)){toastExtra("Enter valid promo values.");return false}
+    if(type==="percent"&&value>100){toastExtra("Percent discount cannot exceed 100%.");return false}
+    const current=read(PROMO_KEY,[]);const next=Array.isArray(current)?current.slice():[];
+    const dialog=document.getElementById("extraPromoDialog");const editIndex=Number(dialog?.getAttribute("data-edit-index"));
+    const duplicate=next.some((p,i)=>i!==editIndex&&String(p.code||"").toUpperCase()===code);
+    if(duplicate){toastExtra("That promo code already exists.");return false}
+    const item={id:editIndex>=0&&next[editIndex]?.id?next[editIndex].id:"P-"+Date.now(),name,code,type,value,minPacks,active};
+    if(editIndex>=0&&editIndex<next.length)next[editIndex]=item;else next.push(item);
+    write(PROMO_KEY,next);dialog?.removeAttribute("data-edit-index");dialog?.close();
+    document.getElementById("extraPromoForm")?.reset();document.getElementById("extraPromoActive").checked=true;
+    toastExtra(code+" saved.");renderPromos();return true;
+  }
+
+  function toggleExtraPromo(index){
+    const list=read(PROMO_KEY,[]);const next=Array.isArray(list)?list.slice():[];if(!next[index])return;
+    next[index]={...next[index],active:next[index].active===false};write(PROMO_KEY,next);notifyStorefront("promos-updated");renderPromos();
+    toastExtra(next[index].active?"Promo activated.":"Promo deactivated.");
+  }
+
+  function deleteExtraPromo(index){
+    const list=read(PROMO_KEY,[]);const next=Array.isArray(list)?list.slice():[];const p=next[index];if(!p)return;
+    if(!confirm("Delete promo "+(p.code||"")+"?"))return;
+    next.splice(index,1);write(PROMO_KEY,next);notifyStorefront("promos-updated");renderPromos();toastExtra((p.code||"Promo")+" deleted.");
+  }
+
+  function addExtraPromo(){
+    const dialog=document.getElementById("extraPromoDialog");dialog?.removeAttribute("data-edit-index");
+    document.getElementById("extraPromoForm")?.reset();document.getElementById("extraPromoActive").checked=true;
+    dialog?.showModal();
   }
 
   function loadContent(){
