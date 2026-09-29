@@ -544,6 +544,35 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
         snapshot => {
           firestoreOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), source: "firestore" }));
           firestoreOrdersReady = true;
+
+          // Keep kb_orders as the shared browser order cache while Firestore remains
+          // the live backend. Merge by order ID so customer/admin pages never create
+          // duplicate order records.
+          if (!demoStore()) {
+            const current = read(ORDER_KEY, []);
+            const map = new Map(
+              (Array.isArray(current) ? current : [])
+                .filter(order => order?.id)
+                .map(order => [String(order.id), order])
+            );
+            firestoreOrders.forEach(order => {
+              const normalized = {
+                ...order,
+                createdAt: order.createdAt?.toDate ? order.createdAt.toDate().toISOString() : order.createdAt,
+                updatedAt: order.updatedAt?.toDate ? order.updatedAt.toDate().toISOString() : order.updatedAt,
+                statusUpdatedAt: order.statusUpdatedAt?.toDate ? order.statusUpdatedAt.toDate().toISOString() : order.statusUpdatedAt
+              };
+              map.set(String(order.id), normalized);
+            });
+            localStorage.setItem(ORDER_KEY, JSON.stringify([...map.values()].sort((a,b) => orderTime(b.createdAt)-orderTime(a.createdAt)).slice(0,500)));
+          }
+
+          try {
+            const ch = "BroadcastChannel" in window ? new BroadcastChannel("kapeng-barako-orders") : null;
+            ch?.postMessage({type:"orders-updated",at:Date.now()});
+            setTimeout(() => ch?.close(), 50);
+          } catch {}
+
           renderAll();
           if (window.KBAdminExtra?.refresh) window.KBAdminExtra.refresh();
         },
