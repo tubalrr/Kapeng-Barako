@@ -1,14 +1,15 @@
-// Firebase client configuration for Kapeng Barako Customer Accounts.
-// This is the Firebase Web App config for project: kapengbarako-f8cb3.
+// Firebase client configuration for buyer-owned Customer Accounts.
+// IMPORTANT: This template intentionally ships with placeholders.
+// The buyer must create their own Firebase project and replace every value below.
 // Do not put Firebase Admin SDK/service-account credentials in this file.
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyDGdzGnOvzDCkTxQ24l7jF5ROdy9UZDX90",
-  authDomain: "kapengbarako-f8cb3.firebaseapp.com",
-  projectId: "kapengbarako-f8cb3",
-  storageBucket: "kapengbarako-f8cb3.firebasestorage.app",
-  messagingSenderId: "348195577467",
-  appId: "1:348195577467:web:4454e05ea170f666f70cde"
+  apiKey: "REPLACE_WITH_FIREBASE_API_KEY",
+  authDomain: "REPLACE_WITH_FIREBASE_AUTH_DOMAIN",
+  projectId: "REPLACE_WITH_FIREBASE_PROJECT_ID",
+  storageBucket: "REPLACE_WITH_FIREBASE_STORAGE_BUCKET",
+  messagingSenderId: "REPLACE_WITH_FIREBASE_MESSAGING_SENDER_ID",
+  appId: "REPLACE_WITH_FIREBASE_APP_ID"
 };
 
 export const isFirebaseConfigured =
