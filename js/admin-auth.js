@@ -141,18 +141,13 @@
       await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
       const credential = await authMod.signInWithEmailAndPassword(currentAuth, normalized, password);
 
-      const adminRef = firestoreMod.doc(currentDb, "admins", credential.user.uid);
-      await firestoreMod.setDoc(adminRef, {
-        active: true,
-        role: "admin",
-        email: normalized,
-        updatedAt: new Date()
-      }, { merge: true });
-
+      // The authorized admin document already exists for the approved admin UID.
+      // Do not write to Firestore from the login page; the existing document is
+      // the source of truth for Admin Console authorization.
       const admin = await verifyAdminWithoutSession(credential.user);
       if (!admin) {
         await authMod.signOut(currentAuth);
-        throw new Error("This email is not authorized for the Kapeng Barako Admin Console.");
+        throw new Error("This Firebase email account is authenticated, but its UID is not the active Kapeng Barako admin UID. Use the existing authorized admin account.");
       }
 
       rememberAdmin(admin);
