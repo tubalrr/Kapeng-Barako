@@ -117,6 +117,33 @@ function authScreen(){return `
 function renderAuth(){
   appRoot.innerHTML=authScreen();
   const card=document.querySelector("#auth-card");
+  if(!isFirebaseConfigured){
+    card.innerHTML =
+      '<div class="setup-state">' +
+        '<div class="setup-icon" aria-hidden="true">FB</div>' +
+        '<span class="account-eyebrow">CUSTOMER ACCOUNTS</span>' +
+        '<h2>Firebase is not configured.</h2>' +
+        '<p class="setup-lead">Add your Firebase Web App configuration to enable customer accounts.</p>' +
+        '<div class="setup-note">' +
+          '<strong>Template setup required</strong>' +
+          '<p>This template intentionally ships without a seller-owned Firebase project.</p>' +
+          '<p>Open <code>js/firebase-config.js</code> and replace the <code>REPLACE_WITH_...</code> values using your own Firebase project.</p>' +
+        '</div>' +
+        '<div class="setup-steps">' +
+          '<div><span>01</span><strong>Create your own Firebase project</strong></div>' +
+          '<div><span>02</span><strong>Add a Firebase Web App</strong></div>' +
+          '<div><span>03</span><strong>Configure Auth + Firestore + Functions</strong></div>' +
+          '<div><span>04</span><strong>Follow <code>docs/FIREBASE_SETUP.md</code></strong></div>' +
+        '</div>' +
+        '<div class="setup-actions">' +
+          '<button class="account-btn gold" id="demo-btn" type="button">OPEN TEST ACCOUNT</button>' +
+          '<a class="account-btn" href="../index.html">Back to Storefront</a>' +
+        '</div>' +
+        '<p class="setup-footnote">Live Login, Signup, Google Sign-in, Forgot Password and order history will activate after Firebase is configured.</p>' +
+      '</div>';
+    document.querySelector("#demo-btn").onclick=startDemoAccount;
+    return;
+  }
   const login=state.mode==="login";
   card.innerHTML=`
 <h2>${login?"Welcome back":"Create your account"}</h2>
