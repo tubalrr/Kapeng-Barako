@@ -279,23 +279,28 @@
       }
       const credential = await signIn(currentAuth, normalized, password);
 
-      // Bootstrap the authenticated admin UID on the trusted backend.
-      // The backend allowlist decides which buyer-owned admin email may be promoted.
-      try {
-        const backendModule = await import("./firebase-backend.js");
-        await backendModule.bootstrapAdminFromEmail();
-      } catch (bootstrapError) {
-        await authMod.signOut(currentAuth);
-        const code = bootstrapError?.code ? ` [${bootstrapError.code}]` : "";
-        throw new Error(
-          (bootstrapError?.message || "Admin identity bootstrap failed.") + code
-        );
+      // Existing active admin records do not need a bootstrap call on every login.
+      // Verify the authenticated UID first. Bootstrap is only needed for first-time
+      // admin activation when the UID has no active /admins/{uid} record yet.
+      let admin = await verifyAdminWithoutSession(credential.user);
+
+      if (!admin) {
+        try {
+          const backendModule = await import("./firebase-backend.js");
+          await backendModule.bootstrapAdminFromEmail();
+          admin = await verifyAdminWithoutSession(credential.user);
+        } catch (bootstrapError) {
+          await authMod.signOut(currentAuth);
+          const code = bootstrapError?.code ? ` [${bootstrapError.code}]` : "";
+          throw new Error(
+            (bootstrapError?.message || "Admin identity bootstrap failed.") + code
+          );
+        }
       }
 
-      const admin = await verifyAdminWithoutSession(credential.user);
       if (!admin) {
         await authMod.signOut(currentAuth);
-        throw new Error("This Firebase email account is authenticated, but its UID is not the active Kapeng Barako admin UID. Use the existing authorized admin account.");
+        throw new Error("This Firebase email account is authenticated, but its UID is not an active Kapeng Barako admin. Create/activate the matching /admins/{uid} record for the authorized admin account.");
       }
 
       rememberAdmin(admin);
@@ -394,22 +399,24 @@
     const credential = await authMod.signInWithEmailLink(currentAuth, email, window.location.href);
     try { localStorage.removeItem("kb_admin_email_for_signin"); } catch {}
 
-    // The email-link credential may have created a new Firebase UID when
-    // the old admin account was originally created with Google. Bootstrap
-    // the verified allowlisted admin identity server-side before checking
-    // the UID-based Firestore admin record.
-    try {
-      const backendModule = await import("./firebase-backend.js");
-      await backendModule.bootstrapAdminFromEmail();
-    } catch (error) {
-      await authMod.signOut(currentAuth);
-      throw new Error(error?.message || "Admin identity verification failed.");
+    // Prefer the existing active UID record. Only first-time activation needs
+    // the trusted backend bootstrap step.
+    let admin = await verifyAdminWithoutSession(credential.user);
+
+    if (!admin) {
+      try {
+        const backendModule = await import("./firebase-backend.js");
+        await backendModule.bootstrapAdminFromEmail();
+        admin = await verifyAdminWithoutSession(credential.user);
+      } catch (error) {
+        await authMod.signOut(currentAuth);
+        throw new Error(error?.message || "Admin identity verification failed.");
+      }
     }
 
-    const admin = await verifyAdminWithoutSession(credential.user);
     if (!admin) {
       await authMod.signOut(currentAuth);
-      throw new Error("This email is not authorized for the Kapeng Barako Admin Console.");
+      throw new Error("This email is not an active Kapeng Barako admin account.");
     }
 
     rememberAdmin(admin);
