@@ -95,21 +95,21 @@
         {
           id: "BARAKO-STRONG-250G", name: "Barako Strong", size: "250g",
           price: 350, stock: 7, badge: "DARK ROAST", roast: "Dark", grind: "Whole",
-          image: "", origin: "Batangas", roastDate: "2026-09-28",
+          image: "", origin: "DEMO ORIGIN", roastDate: "2026-09-28",
           roastLevel: "Dark", netWeight: "250g", batch: "DEMO-01",
           process: "Natural", tastingNotes: "Bold, smoky, full-bodied", featured: false
         },
         {
           id: "BARAKO-CLASSIC-500G", name: "Barako Classic", size: "500g",
           price: 620, stock: 12, badge: "BESTSELLER", roast: "Medium", grind: "Whole",
-          image: "", origin: "Batangas", roastDate: "2026-09-28",
+          image: "", origin: "DEMO ORIGIN", roastDate: "2026-09-28",
           roastLevel: "Medium", netWeight: "500g", batch: "DEMO-02",
           process: "Natural", tastingNotes: "Rich, chocolatey, aromatic", featured: true
         },
         {
           id: "BARAKO-STARTER-BUNDLE", name: "Barako Starter Bundle", size: "250g + 500g",
           price: 870, stock: 4, badge: "SAVE ₱100", roast: "Medium", grind: "Whole", bundle: true,
-          image: "", origin: "Batangas", roastDate: "2026-09-28",
+          image: "", origin: "DEMO ORIGIN", roastDate: "2026-09-28",
           roastLevel: "Medium", netWeight: "750g", batch: "DEMO-03",
           process: "Natural", tastingNotes: "Everyday Barako set", featured: false
         }
@@ -119,7 +119,7 @@
           id: "DEMO-1001", customerUid: "demo-customer-1",
           customer: {uid:"demo-customer-1",name:"TEST CUSTOMER 01",email:"test-customer-01@example.invalid",phone:"00000000001"},
           items:[{id:"BARAKO-CLASSIC-500G",productId:"BARAKO-CLASSIC-500G",name:"Barako Classic",size:"500g",price:620,qty:1,roast:"Medium",grind:"Whole"}],
-          subtotal:620,shippingFee:0,discount:0,total:620,address:"Lipa City, Batangas",
+          subtotal:620,shippingFee:0,discount:0,total:620,address:"DEMO DATA — not a real address",
           payment:"gcash",paymentMethod:"GCash",gcashRef:"DEMO-GCASH-1001",
           paymentStatus:"pending_verification",status:"Pending",createdAt:ago(0.4)
         },
@@ -127,14 +127,14 @@
           id: "DEMO-1002", customerUid: "demo-customer-2",
           customer: {uid:"demo-customer-2",name:"TEST CUSTOMER 02",email:"test-customer-02@example.invalid",phone:"00000000002"},
           items:[{id:"BARAKO-STRONG-250G",productId:"BARAKO-STRONG-250G",name:"Barako Strong",size:"250g",price:350,qty:2,roast:"Dark",grind:"Whole"}],
-          subtotal:700,shippingFee:0,discount:0,total:700,address:"Batangas City, Batangas",
+          subtotal:700,shippingFee:0,discount:0,total:700,address:"DEMO DATA — not a real address",
           payment:"cod",paymentMethod:"COD",gcashRef:"",paymentStatus:"unpaid",status:"Ready",createdAt:ago(1.8)
         },
         {
           id: "DEMO-1003", customerUid: "demo-customer-1",
           customer: {uid:"demo-customer-1",name:"TEST CUSTOMER 01",email:"test-customer-01@example.invalid",phone:"00000000001"},
           items:[{id:"BARAKO-STARTER-BUNDLE",productId:"BARAKO-STARTER-BUNDLE",name:"Barako Starter Bundle",size:"250g + 500g",price:870,qty:1,roast:"Medium",grind:"Whole"}],
-          subtotal:870,shippingFee:0,discount:0,total:870,address:"Lipa City, Batangas",
+          subtotal:870,shippingFee:0,discount:0,total:870,address:"DEMO DATA — not a real address",
           payment:"gcash",paymentMethod:"GCash",gcashRef:"DEMO-GCASH-1003",
           paymentStatus:"pending_verification",status:"Delivered",createdAt:ago(3.2)
         },
@@ -142,7 +142,7 @@
           id: "DEMO-1004", customerUid: "demo-customer-3",
           customer: {uid:"demo-customer-3",name:"TEST CUSTOMER 03",email:"test-customer-03@example.invalid",phone:"00000000003"},
           items:[{id:"BARAKO-STRONG-250G",productId:"BARAKO-STRONG-250G",name:"Barako Strong",size:"250g",price:350,qty:1,roast:"Dark",grind:"Whole"}],
-          subtotal:350,shippingFee:220,discount:0,total:570,address:"Davao City, Davao",
+          subtotal:350,shippingFee:220,discount:0,total:570,address:"DEMO DATA — not a real address",
           payment:"cod",paymentMethod:"COD",gcashRef:"",paymentStatus:"unpaid",status:"Delivered",createdAt:ago(5.1)
         }
       ],
