@@ -1497,10 +1497,20 @@
           const checkoutButton = sticky.querySelector(".kb-sticky-cart-checkout");
 
           const CART_KEY = "kb_cart";
+          const PRODUCTS_KEY = "kb_rebuild_products";
 
           const readCart = () => {
             try {
               const value = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+              return Array.isArray(value) ? value : [];
+            } catch {
+              return [];
+            }
+          };
+
+          const readProducts = () => {
+            try {
+              const value = JSON.parse(localStorage.getItem(PRODUCTS_KEY) || "[]");
               return Array.isArray(value) ? value : [];
             } catch {
               return [];
@@ -1527,14 +1537,27 @@
               return;
             }
 
+            const products = readProducts();
             const item = cart[cart.length - 1];
-            const qty = Math.max(1, Number(item.qty ?? item.quantity ?? 1));
-            const name = String(item.name || "Barako Coffee").trim();
-            const size = String(item.size || "").trim();
-            const label = size ? name + " " + size : name;
-            const total = Number(item.price || 0) * qty;
+            const product = products.find(p => String(p.id) === String(item.id));
 
-            itemEl.textContent = label;
+            // Cart display always resolves name/size/price from kb_rebuild_products.
+            // Never show stale cart metadata or a hardcoded product fallback.
+            if (!product || Number(product.stock || 0) <= 0) {
+              sticky.classList.remove("is-visible");
+              return;
+            }
+
+            const qty = Math.min(
+              Math.max(1, Number(item.qty ?? item.quantity ?? 1)),
+              Number(product.stock || 0)
+            );
+            const name = String(product.name || "").trim();
+            const size = String(product.size || "").trim();
+            const label = size ? name + " " + size : name;
+            const total = Number(product.price || 0) * qty;
+
+            itemEl.textContent = label || "Product";
             priceEl.textContent = formatMoney(total) + (qty > 1 ? " × " + qty : "");
 
             if (window.scrollY > 180) {
