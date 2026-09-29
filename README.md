@@ -92,6 +92,8 @@ If a key is replaced, document the replacement and migration/cleanup behavior ra
 
 ## Folder structure
 
+The Admin Console runtime is consolidated in **`js/admin.js`** so the dashboard no longer relies on multiple inline Admin script blocks.
+
 The following structure reflects the current repository layout:
 
 ```
@@ -106,6 +108,7 @@ The following structure reflects the current repository layout:
 ├── js/
 │   ├── account.js
 │   ├── admin-auth.js
+│   ├── admin.js
 │   ├── firebase-backend.js
 │   └── firebase-config.js
 ├── pages/
