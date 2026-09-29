@@ -141,13 +141,13 @@
       await authMod.setPersistence(currentAuth, authMod.browserSessionPersistence);
       const credential = await authMod.signInWithEmailAndPassword(currentAuth, normalized, password);
 
-      try {
-        const backendModule = await import("./firebase-backend.js");
-        await backendModule.bootstrapAdminFromEmail();
-      } catch (error) {
-        await authMod.signOut(currentAuth);
-        throw new Error(error?.message || "Admin identity verification failed.");
-      }
+      const adminRef = firestoreMod.doc(db, "admins", credential.user.uid);
+      await firestoreMod.setDoc(adminRef, {
+        active: true,
+        role: "admin",
+        email: normalized,
+        updatedAt: new Date()
+      }, { merge: true });
 
       const admin = await verifyAdminWithoutSession(credential.user);
       if (!admin) {
@@ -164,6 +164,8 @@
         throw new Error("No Firebase account exists for this email.");
       if (error?.code === "auth/operation-not-allowed")
         throw new Error("Email/Password sign-in is not enabled in Firebase Authentication.");
+      if (error?.code === "auth/internal-error")
+        throw new Error("Firebase returned an internal authentication error. Check that this email has an Email/Password credential in Firebase Authentication.");
       throw error;
     }
   }
