@@ -132,30 +132,11 @@
   }
 
   function cartTotal() {
-    const baseTotal = cart.reduce(
+    return cart.reduce(
       (total, item) =>
         total + Number(item.price || 0) * Math.max(0, Number(item.qty || 0)),
       0
     );
-
-    const bundleIds = new Set(
-      cart
-        .filter(item => item.bundleId)
-        .map(item => String(item.bundleId))
-    );
-
-    let bundleDiscount = 0;
-
-    // Bundle membership is the source of truth; no legacy product IDs.
-    bundleIds.forEach(bundleId => {
-      const bundleLines = cart.filter(
-        item => String(item.bundleId || "") === bundleId &&
-          Number(item.qty || 0) > 0
-      );
-      if (bundleLines.length >= 2) bundleDiscount += 100;
-    });
-
-    return Math.max(0, baseTotal - bundleDiscount);
   }
 
   function updateCartCounters() {
@@ -372,7 +353,7 @@
     const price = $("#featuredProductPrice");
     const image = $("#featuredProductImage");
     const fallback = $("#featuredProductFallback");
-    if (name) name.textContent = product.name || "Featured product";
+    if (name) name.textContent = product.name || "";
     const metaParts = [product.roastLevel || product.roast, product.size || product.netWeight].filter(Boolean);
     if (meta) meta.textContent = metaParts.join(" • ") || "Catalog details";
     if (price) price.textContent = money(product.price);
@@ -505,8 +486,8 @@
       if (content && titleLine) content.insertBefore(meta, titleLine.nextSibling);
     }
 
-    if (name) name.textContent = product.name || "Barako Coffee";
-    if (note) note.textContent = product.note || "Fresh Kapeng Barako.";
+    if (name) name.textContent = product.name || "";
+    if (note) note.textContent = product.note || "";
     if (badge) badge.textContent = product.badge || "NEW";
     if (size) size.textContent = product.size || "";
     if (price) price.textContent = money(product.price);
