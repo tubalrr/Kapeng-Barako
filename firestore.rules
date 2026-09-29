@@ -72,14 +72,17 @@ service cloud.firestore {
     }
 
     match /admins/{adminId} {
+      // The single authorized admin email may create or activate only its own
+      // admin document. This avoids the circular "admin must already be admin"
+      // problem during first-time Email/Password admin setup.
       allow read: if (signedIn() && request.auth.uid == adminId) || admin();
-      allow create: if signedIn() &&
+      allow create, update: if signedIn() &&
         request.auth.uid == adminId &&
         request.auth.token.email == "vracelle2@gmail.com" &&
         request.resource.data.active == true &&
         request.resource.data.role == "admin" &&
         request.resource.data.email == "vracelle2@gmail.com";
-      allow update, delete: if admin();
+      allow delete: if admin();
     }
 
     match /{document=**} {
