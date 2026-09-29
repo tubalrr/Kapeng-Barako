@@ -5,7 +5,7 @@
 <title>Kapeng Barako — Admin Login</title>
 <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg">
 <link rel="stylesheet" href="../../css/admin-login.css?v=kb-rebuild-3">
-<script src="../../js/admin-auth.js?v=kb-firebase-auth-10" defer></script>
+<script src="../../js/admin-auth.js?v=kb-firebase-auth-11" defer></script>
 </head>
 <body>
 <main class="login-shell">
@@ -52,6 +52,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   const err = document.querySelector("#login-error");
   const googleSetupBtn = document.querySelector("#google-admin-setup");
   const demoBtn = document.querySelector("#demo-admin-login");
+
+  const reasonMessages = {
+    expired: "Your Admin session expired. Sign in again.",
+    "session-invalid": "The previous Admin session could not be verified. Sign in again.",
+    unauthorized: "Firebase authenticated this account, but it is not an active Kapeng Barako Admin.",
+    setup: "Firebase is not configured for this template. Configure the buyer-owned Firebase project before live Admin Login.",
+    timeout: "Firebase Authentication timed out. Check the Firebase project and Authorized Domains.",
+    login: "Admin sign-in could not be completed. Check the Firebase account and Admin authorization."
+  };
+  const reason = new URLSearchParams(window.location.search).get("reason");
+  if (reason && reasonMessages[reason]) {
+    err.textContent = reasonMessages[reason];
+  }
 
   try {
     const admin = await window.KBAdminAuth.restore();
