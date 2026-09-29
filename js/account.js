@@ -3,7 +3,7 @@ import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   GoogleAuthProvider, signInWithPopup, sendEmailVerification,
   sendPasswordResetEmail, signOut, onAuthStateChanged,
-  updateProfile, reload
+  updateProfile, reload, setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, collection,
@@ -150,20 +150,34 @@ function friendlyError(e){
   const code=e?.code||"";
   const map={
     "auth/invalid-credential":"Email or password is incorrect.",
+    "auth/wrong-password":"Email or password is incorrect.",
+    "auth/user-not-found":"Email or password is incorrect.",
     "auth/invalid-email":"Please enter a valid email address.",
     "auth/email-already-in-use":"This email already has an account.",
     "auth/weak-password":"Use a stronger password with at least 8 characters.",
     "auth/popup-closed-by-user":"Google sign-in was cancelled.",
+    "auth/cancelled-popup-request":"Google sign-in is already in progress.",
+    "auth/popup-blocked":"Your browser blocked the Google sign-in popup.",
+    "auth/account-exists-with-different-credential":"An account already exists with a different sign-in method. Log in with that method first.",
+    "auth/operation-not-allowed":"This sign-in method is not enabled in the buyer's Firebase project.",
+    "auth/unauthorized-domain":"This website domain is not authorized in the buyer's Firebase project.",
+    "auth/requires-recent-login":"Please sign in again and retry.",
     "auth/too-many-requests":"Too many attempts. Please wait and try again.",
     "auth/network-request-failed":"Network error. Check your connection and try again."
   };
   return map[code]||e?.message||"Something went wrong. Please try again.";
 }
 
+async function persistCustomerAuth(){
+  if(!auth) return;
+  await setPersistence(auth,browserLocalPersistence);
+}
+
 async function loginWithEmail(e){
   e.preventDefault();if(!isFirebaseConfigured){msg("Firebase is not configured yet. Add your Firebase Web App config in js/firebase-config.js.","error");return}
   const fd=new FormData(e.currentTarget);state.loading=true;msg("Signing you in…");
   try{
+    await persistCustomerAuth();
     const cred=await signInWithEmailAndPassword(auth,String(fd.get("email")).trim(),String(fd.get("password")));
     await reload(cred.user);
     if(!cred.user.emailVerified){await sendEmailVerification(cred.user);await signOut(auth);msg("Please verify your email first. A fresh verification email was sent.","error");return}
@@ -177,6 +191,7 @@ async function signup(e){
   if(!fd.get("terms")){msg("You must agree to the terms and conditions.","error");return}
   state.loading=true;msg("Creating your account…");
   try{
+    await persistCustomerAuth();
     const cred=await createUserWithEmailAndPassword(auth,String(fd.get("email")).trim(),String(fd.get("password")));
     await updateProfile(cred.user,{displayName:String(fd.get("name")).trim()});
     await setDoc(doc(db,"users",cred.user.uid),{
@@ -193,6 +208,7 @@ async function signup(e){
 async function googleLogin(){
   if(!isFirebaseConfigured){msg("Firebase is not configured yet. Add your Firebase Web App config in js/firebase-config.js.","error");return}
   try{
+    await persistCustomerAuth();
     const cred=await signInWithPopup(auth,new GoogleAuthProvider());
     const existing=await getDoc(doc(db,"users",cred.user.uid));
     await setDoc(doc(db,"users",cred.user.uid),{
@@ -207,8 +223,17 @@ async function forgotPassword(){
   const email=prompt("Enter the email address for your account:");
   if(!email)return;
   if(!isFirebaseConfigured){msg("Firebase is not configured yet.","error");return}
-  try{await sendPasswordResetEmail(auth,email.trim());msg("If an account exists for that email, a password reset message was sent.","success")}
-  catch(err){msg(friendlyError(err),"error")}
+  try{
+    await persistCustomerAuth();
+    await sendPasswordResetEmail(auth,email.trim());
+    msg("If an account exists for that email, a password reset message was sent.","success");
+  }catch(err){
+    if(err?.code==="auth/user-not-found"){
+      msg("If an account exists for that email, a password reset message was sent.","success");
+    }else{
+      msg(friendlyError(err),"error");
+    }
+  }
 }
 
 function writeOrderCache(orders){
