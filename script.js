@@ -132,11 +132,12 @@
   }
 
   function cartTotal() {
-    return cart.reduce(
-      (total, item) =>
-        total + Number(item.price || 0) * Math.max(0, Number(item.qty || 0)),
-      0
-    );
+    const products = getProducts();
+    return cart.reduce((total, item) => {
+      const product = products.find(candidate => String(candidate.id) === String(item.id));
+      if (!product) return total;
+      return total + Number(product.price || 0) * Math.max(0, Number(item.qty || 0));
+    }, 0);
   }
 
   function updateCartCounters() {
@@ -983,7 +984,17 @@
           waypoint: getRouteWaypoint(address),
           destination: address
         },
-        items: cart.map(item => ({ ...item }))
+        items: cart.map(item => {
+          const product = liveProducts.find(
+            liveItem => String(liveItem.id) === String(item.id)
+          );
+          return {
+            ...item,
+            name: product?.name || "",
+            size: product?.size || "",
+            price: Number(product?.price || 0)
+          };
+        })
       };
 
       const updatedProducts = liveProducts.map(product => {
