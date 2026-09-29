@@ -1282,7 +1282,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     });
   }
 
-  function saveExtraProduct(id){
+  async function saveExtraProduct(id){
     const list=products(), idx=list.findIndex(p=>String(p.id)===String(id));if(idx<0)return;
     const q=selector=>document.querySelector(selector);
     const name=q('[data-x-name="'+CSS.escape(String(id))+'"]')?.value.trim()||"";
@@ -1324,7 +1324,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     updateSnapshot();
   }
 
-  function deleteExtraProduct(id){
+  async function deleteExtraProduct(id){
     const list=products(), product=list.find(p=>String(p.id)===String(id));if(!product)return;
     if(!confirm("Delete "+(product.name||id)+" from the catalog?"))return;
     const next=list.filter(p=>String(p.id)!==String(id));
@@ -1336,7 +1336,7 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
     updateSnapshot();
   }
 
-  function addExtraProduct(){
+  async function addExtraProduct(){
     const val=id=>document.getElementById(id);
     const name=val("extraProductName")?.value.trim()||"", size=val("extraProductSize")?.value.trim()||"", price=Number(val("extraProductPrice")?.value||0), stock=Number(val("extraProductStock")?.value||0), badge=val("extraProductBadge")?.value.trim()||"NEW", roast=val("extraProductRoast")?.value||"Medium", grind=val("extraProductGrind")?.value||"Whole", note=val("extraProductNote")?.value.trim()||"", image=val("extraProductImage")?.value.trim()||"", origin=val("extraProductOrigin")?.value.trim()||"", roastDate=val("extraProductRoastDate")?.value||"", roastLevel=val("extraProductRoastLevel")?.value.trim()||"", netWeight=val("extraProductNetWeight")?.value.trim()||size, batch=val("extraProductBatch")?.value.trim()||"", process=val("extraProductProcess")?.value.trim()||"", featured=Boolean(val("extraProductFeatured")?.checked);
     if(!name||!size){toastExtra("Product name and size are required.");return}
