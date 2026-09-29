@@ -698,9 +698,20 @@ tbody tr:hover{background:rgba(255,255,255,.018)}
   }
 
   async function syncProductCatalogToFirestore(nextProducts, previousProducts = []) {
-    if (demoStore() || !firestoreDb) return;
+    if (demoStore()) return;
 
     try {
+      if (!firestoreDb) {
+        const [{ getApps, getApp, initializeApp }, config] = await Promise.all([
+          import("https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"),
+          import("../../js/firebase-config.js")
+        ]);
+        if (!config.isFirebaseConfigured) throw new Error("Firebase backend is not configured.");
+        const app = getApps().length ? getApp() : initializeApp(config.firebaseConfig);
+        const firestore = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js");
+        firestoreDb = firestore.getFirestore(app);
+      }
+
       const firestore = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js");
       const batch = firestore.writeBatch(firestoreDb);
       const nextById = new Map(nextProducts.map(product => [String(product.id), product]));
